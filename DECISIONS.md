@@ -338,3 +338,19 @@ End to end (40 test households, unweighted, experiments/analyze_language.py): mi
 reader commits, typed 0%, plain LLM 8.9%, structured 3.7%; loss differences vs typed answers are
 within noise at this size (structured +$93 [-697, +743]). Survey-weighted means were dominated by one
 household carrying 16% of the weight, so this comparison is reported unweighted.
+
+## D24. The volunteered-facts advantage is not robust (2026-11-22)
+
+experiments/run_opener_robust.py, 300 test households, engine minus fair tree at k = 3, 5, 9 under
+other opener assumptions: one volunteered fact; two facts from only the most natural openers (state,
+household size, children, 65+, married, rent/own); three facts that may be misreported. No
+interval excludes zero (e.g. natural openers: +$19, -$200, +$149). The D22 advantage appeared when
+three facts were drawn from a pool that includes income and disability, two of the most informative
+facts; with natural openers it disappears. The intervals are wide, so this does not show the
+advantage is zero, but it cannot be claimed as a property of the engine.
+
+Corrected conclusion: the engine reaches an 18-question form's decision quality with about 8
+questions, and a well-built precomputed tree does as well in almost every setting tested. What the
+engine adds over a tree is flexibility, not accuracy: any question budget or question cost without
+regrowing, facts accepted in any order, evidence that can be uncertain, an honest estimate of its
+own remaining error, and a hand-off signal. README and WRITEUP were corrected to say so.

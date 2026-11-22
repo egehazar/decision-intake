@@ -54,11 +54,13 @@ household per year: a missed programme at its value, a wrong recommendation at $
 - **Fewer questions, same quality.** With clean answers the engine stops after 8.2 questions instead
   of 18; the difference in loss is +$67 [-363, +496], indistinguishable from zero. It expected $1,329
   of mistakes per household and made $1,250.
-- **Where it beats a precomputed tree: facts said up front.** A greedy tree on the same loss, deciding
-  with the same calibrated model, matches the engine when it is asked questions on a blank form, with
-  clean or messy answers. When the person volunteers three facts first, the engine is ahead by
-  $376-$1,072 per household at 3, 5 and 9 questions (all intervals below zero): it re-plans around
-  what it was told, while a tree can only skip along its branches.
+- **A well-built tree does as well.** A greedy tree on the same loss, deciding with the same calibrated
+  model, matches the engine at every question budget with clean or messy answers. In one test, with
+  three facts volunteered from a pool including income and disability, the engine was ahead by
+  $376-$1,072 per household; with more natural openers (state, household size, children) that edge
+  was not significant (DECISIONS D24). What the engine adds over a tree is flexibility, not accuracy:
+  any budget or question cost without regrowing, facts in any order, uncertain evidence, and an honest
+  estimate of its own remaining error.
 - **It beats fixed forms** (a fixed set chosen for each question budget) with clean answers at 5-9
   questions, and with realistic answers at 7 and 9.
 - **Hand-off.** The 10% of households it is least sure about carry 22-31% of all mistake cost.

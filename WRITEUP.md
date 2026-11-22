@@ -87,8 +87,15 @@ computed in advance. Where the engine pulls ahead is when the person has already
 | 5 questions | -$524 [-996, -123] |
 | 9 questions | -$376 [-769, -62] |
 
-A precomputed tree can only skip along its own branches; the engine re-plans around whatever it has been
-told. That, not cleverer questions on a blank form, is what it adds. My prediction (D6) was
+That looked like the engine's real advantage: a precomputed tree can only skip along its own branches,
+while the engine re-plans around whatever it has been told. **It did not hold up.** With other opener
+assumptions (one fact; two facts from the most natural openers such as state, household size and
+children; three facts that may be misreported), on 300 test households, no difference was significant
+(natural openers: +$19, -$200, +$149 at 3, 5 and 9 questions). The edge above came from openers that
+could include income and disability, two of the most informative facts. So the honest conclusion is that
+a well-built tree matches the engine's decisions. What the engine adds is flexibility: it takes any
+question budget or question cost without regrowing anything, accepts facts in any order and evidence
+that is uncertain, and says how much error it expects to make, which is what the hand-off uses. My prediction (D6) was
 that the engine would gain most when answers are messy; on this test it is the reverse: with
 misreports and "don't know", its edge over a fixed form is not significant. The fixed order's own
 curve is uneven (5 to 9 questions barely help it, 12 helps a lot), so part of the clean-answer margin
