@@ -457,3 +457,58 @@ of the engine, using about 11 questions to the engine's 8.
 Conclusion: the engine's measured edge is getting to the same place with fewer questions and no
 tree-building choices to tune. It is not a large accuracy gap over a well-built tree, and on this
 task it is not flexibility (D25). A precomputed tree is also about 80 times faster per question.
+
+## D28. v2: a neural outcome model, and its pre-registered confirmation (2026-11-22, 21:36 UTC, before any test run)
+
+Where the mistakes come from: even with all 18 answers, the linear outcome model (D13) left about
+$1,200-1,500 of mistakes per household, most of them Medicaid and ACA-credit calls. The rules nest
+deeper than the hand-listed interactions (income against household size against state; employer
+coverage against income), so the outcome model is the ceiling every question policy works against.
+
+v2 (src/decisionintake/neural.py): a wide-and-deep network in plain numpy. The wide part is the
+same hand-listed indicator terms as the linear model; the deep part is two ReLU layers (512, 256) on
+the one-hot answers, shared by all ten programmes, with an eligibility head and a dollars head.
+Dropout 0.4, decoupled weight decay 0.3, Adam with a cosine schedule, early stopping on a held-out
+10% of source households inside the training data, then out-of-fold Platt scaling folded into the
+last layer (as D15). It trains in about 3 minutes on the CPU, against 5 for the linear model.
+
+Validation only (test untouched):
+- Model alone, all answers known, 5,867 validation households (experiments/outcome_v2.py and a
+  settings sweep): decision loss $1,510 linear -> $1,166-1,263 across the regularised settings; the
+  setting above was picked on log loss (1.449 -> 1.268), the less noisy measure. Bigger networks
+  without regularisation overfit badly (log loss up to 12); those runs are why it is regularised.
+- Engine, 400 validation households, $15 per question (experiments/val_v2.py, results/val_v2_400_analysis.txt):
+
+| user | policy | linear: questions / loss / total | neural: questions / loss / total | neural minus linear, total [95% CI] |
+|---|---|---|---|---|
+| clean | engine | 8.0 / $1,328 / $1,448 | 7.7 / $827 / $943 | -$505 [-917, -176] |
+| clean | all 18 | 18 / $1,236 / $1,506 | 18 / $785 / $1,055 | -$450 [-816, -173] |
+| realistic | engine | 7.9 / $1,658 / $1,776 | 7.7 / $1,284 / $1,399 | -$377 [-744, -55] |
+| realistic | all 18 | 16 / $1,447 / $1,687 | 16 / $997 / $1,237 | -$450 [-822, -152] |
+
+Frozen now for the test run (experiments/run_v2.py): the model settings above, trained on train +
+validation; engine unchanged (support floor 10, $1,000 per wrong recommendation, own stopping at $15
+a question, pair look-ahead); every other setting as in D16/D25.
+
+Pre-registered confirmation:
+- Households: 2,000 test households no earlier run touched (the test split minus the 1,200 of D21-D24,
+  the 600 of D25 and the 300 of D27), drawn with seed 2029.
+- Users: clean answers (primary), and realistic ones (2 volunteered facts, misreports, 10% don't
+  know; secondary, reported in full).
+- Metric: decision loss + $15 per question asked, $/household/year, survey-weighted, paired bootstrap
+  95% CI (4,000 resamples); Holm correction over the four primary comparisons.
+- Primary comparisons (clean answers), v2 engine minus:
+  - P1 the v1 engine (linear model), same stopping rule;
+  - P2 the v1 full questionnaire (all 18 questions, linear model);
+  - P3 the strongest tree found so far: falls back to broader data, minimum leaf 100, cost-sensitive,
+    pair look-ahead, deciding with the same v2 model as the engine (D27's best);
+  - P4 the best fixed 8-question form (beam search on the training population), deciding with v2.
+- Secondary: v2 engine minus v2 full questionnaire; minus the D25 tree on v2; v2 minus v1 with all
+  18 answers; the same comparisons for realistic users; precision of the "likely" tier (recommended
+  at 50% or more) and of "worth checking"; the engine's own estimate of its mistakes against the
+  realised ones; the share of mistake cost carried by the 10% and 20% of households it is least
+  sure about.
+- Reading, fixed now: P1 and P2 below zero after Holm = v2 is a real improvement and beats the old
+  full form with fewer than half the questions. P3/P4 below zero = it beats the strongest baselines;
+  intervals spanning zero are reported as "no conclusive difference", whichever side the point
+  estimate falls on. Everything is reported whatever it shows.

@@ -1,0 +1,16 @@
+done in 450s
+400 validation households, $/household/year; total = loss + $15 per question
+  clean     engine   linear   q  8.03  loss   1328  total   1448  claimed   1402  wrong recs  43%  found  82%
+  clean     engine   neural   q  7.73  loss    827  total    943  claimed   1150  wrong recs  40%  found  87%
+  clean     ask_all  linear   q 18.00  loss   1236  total   1506  claimed   1344  wrong recs  42%  found  83%
+  clean     ask_all  neural   q 18.00  loss    785  total   1055  claimed   1122  wrong recs  39%  found  89%
+  clean engine: neural minus linear total   -505 [  -917,   -176]
+  clean ask_all: neural minus linear total   -450 [  -816,   -173]
+  realistic engine   linear   q  7.88  loss   1658  total   1776  claimed   1614  wrong recs  50%  found  79%
+  realistic engine   neural   q  7.71  loss   1284  total   1399  claimed   1384  wrong recs  45%  found  84%
+  realistic ask_all  linear   q 16.00  loss   1447  total   1687  claimed   1446  wrong recs  48%  found  80%
+  realistic ask_all  neural   q 16.00  loss    997  total   1237  claimed   1256  wrong recs  45%  found  84%
+  realistic engine: neural minus linear total   -377 [  -744,    -55]
+  realistic ask_all: neural minus linear total   -450 [  -822,   -152]
+
+[exited with code 0]

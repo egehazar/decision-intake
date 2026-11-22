@@ -42,3 +42,25 @@ def smoothed(pop, idx, key):
     with open(path + ".pkl", "wb") as f:
         pickle.dump((model.B, model.R), f)
     return sm, model
+
+
+def smoothed_neural(pop, idx, key, **cfg):
+    """As smoothed(), with the wide-and-deep outcome model (decisionintake.neural); cached in
+    data/cache/neural_<key>.npz. cfg are NeuralOutcome settings and are part of the cache key."""
+    from decisionintake.neural import NeuralOutcome, smooth_neural
+
+    tag = "_".join(f"{k}{v}" for k, v in sorted(cfg.items())).replace(" ", "").replace(",", "x")
+    path = f"data/cache/neural_{key}_{tag}.npz"
+    sub = pop.subset(idx)
+    names = ["W1", "b1", "W2", "b2", "W3", "Ww", "scale"]
+    if os.path.exists(path):
+        z = np.load(path)
+        if len(z["p"]) == len(sub):
+            sub.p_eligible, sub.value_if_eligible = z["p"], z["v"]
+            model = NeuralOutcome(features, n_features, **cfg)
+            for k in names:
+                setattr(model, k, z[k])
+            return sub, model
+    sm, model = smooth_neural(sub, features, n_features, **cfg)
+    np.savez_compressed(path, p=sm.p_eligible, v=sm.value_if_eligible, **{k: getattr(model, k) for k in names})
+    return sm, model
