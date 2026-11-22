@@ -1,0 +1,8 @@
+
+llm_hard: n=120  commits 0.742  accuracy when committing 0.865  confidently wrong 0.100  log loss 1.827
+
+structured: n=120  commits 0.708  accuracy when committing 0.941  confidently wrong 0.008  log loss 0.617
+
+dm: n=120  commits 1.000  accuracy when committing 0.783  confidently wrong 0.000  log loss 1.060
+
+combined: n=120  commits 1.000  accuracy when committing 0.817  confidently wrong 0.025  log loss 0.625

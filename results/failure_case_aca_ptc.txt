@@ -1,0 +1,15 @@
+aca_ptc: 134 of 189 recommendations wrong (engine, $15 a question, clean answers, 600 households)
+
+test household 35; truth: eligible=False, value $0
+  before any question                      p= 0.12  worth $  9,652 if eligible  pays above p=0.09  -> RECOMMEND
+  children = 1                             p= 0.16  worth $  9,161 if eligible  pays above p=0.10  -> RECOMMEND
+  earned_income = $80,000 to $100,000      p= 0.27  worth $  8,053 if eligible  pays above p=0.11  -> RECOMMEND
+  state = CA                               p= 0.17  worth $  7,709 if eligible  pays above p=0.11  -> RECOMMEND
+  married = yes                            p= 0.18  worth $  9,484 if eligible  pays above p=0.10  -> RECOMMEND
+  child_under5 = no                        p= 0.16  worth $  9,496 if eligible  pays above p=0.10  -> RECOMMEND
+  household_size = 3                       p= 0.17  worth $  9,368 if eligible  pays above p=0.10  -> RECOMMEND
+  employer_insurance = no                  p= 0.34  worth $  9,916 if eligible  pays above p=0.09  -> RECOMMEND
+  social_security = none                   p= 0.35  worth $ 10,090 if eligible  pays above p=0.09  -> RECOMMEND
+  other_income = none                      p= 0.36  worth $  9,843 if eligible  pays above p=0.09  -> RECOMMEND
+
+unasked: infant_or_pregnant = no, senior = no, disabled = no, self_employed = no, housing_cost = $2,000 to $3,000, tenure = rent, childcare = none, assets = under $2,000, college = no

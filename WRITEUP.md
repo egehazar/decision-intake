@@ -5,6 +5,16 @@
 
 AI agents (Claude, with reviews by GPT and Fable) did the hands-on work; Ege Hazar directed it.
 
+**In brief.** DecisionIntake decides what an AI assistant should ask next, how far to trust each
+answer, and when to stop or hand off to a person. On 600 unseen synthetic households with
+PolicyEngine's benefit rules, it asked about 8 questions instead of 18 with no statistically
+conclusive difference in mistakes. Each stronger baseline narrowed its edge: a decision tree that
+falls back to broader data when a branch runs thin comes within noise of it, though with about 11
+questions. Run-time flexibility (facts in any order, refused questions, unequal costs) did not
+show up in the numbers. With 4B models on a CPU, answers were read best when the language model
+filled typed slots and code did the arithmetic; a calibrated decision model added nothing that
+survived a fresh test. Most of what follows is about what broke and which early wins did not hold.
+
 ## The problem
 
 An assistant helping someone find public benefits has to decide, turn by turn, what to ask. A form asks
@@ -81,7 +91,8 @@ them with stronger ones.
 **A fair tree changes the story, and sharpens it** (secondary experiment, run after the freeze at GPT's
 request). The frozen tree decided with its own leaves; a tree that decides with the same calibrated
 belief as the engine, and only differs in how it picks questions, matches the engine on clean answers
-and on realistic answers at every question budget (no interval excludes zero). That was the prediction
+and on realistic answers at every question budget (no interval excludes zero; the tree often used
+fewer questions than its budget, which turned out to matter, see below). That was the prediction
 written down before any result: on a fixed form, a greedy tree on the same loss *is* the same rule,
 computed in advance. Where the engine pulls ahead is when the person has already volunteered facts:
 
@@ -100,7 +111,7 @@ could include income and disability, two of the most informative facts. So a wel
 well as the engine in every setting tested so far. What the engine might add is flexibility: it takes
 any question budget or question cost without regrowing anything, accepts facts in any order and
 evidence that is uncertain, and estimates its own remaining risk, which the hand-off uses. Whether that
-flexibility is worth anything in numbers is tested in the next section. My prediction (D6) was
+flexibility is worth anything in numbers is tested below. My prediction (D6) was
 that the engine would gain most when answers are messy; on this test it is the reverse: with
 misreports and "don't know", its edge over a fixed form is not significant. The fixed order's own
 curve is uneven (5 to 9 questions barely help it, 12 helps a lot), so part of the clean-answer margin
@@ -110,6 +121,42 @@ may come from a weak single order; per-budget fixed sets are tested as a seconda
 22-31% of all mistake cost to that person, two to three times what a random 10% would. The engine's
 estimate of its own remaining loss correlates 0.35 with what it actually loses: useful for triage, not
 a guarantee.
+
+## Does the flexibility pay? (pre-registered, D25)
+
+If a good tree matches the engine, the engine's case rests on adapting at run time: facts arriving in
+any order, questions people won't answer, questions that cost more than others. Before running
+anything I wrote down the test: 600 test households no earlier run had touched, both policies
+deciding for themselves when to stop at $15 a question, scored on mistakes plus the questions paid
+for, under four changes the tree wasn't built for.
+
+| conditions | engine | tree | engine minus tree [95% CI] |
+|---|---|---|---|
+| plain intake | $1,459 (8.0 questions) | $2,166 (7.5) | -$707 [-1,252, -233] |
+| 0-3 facts volunteered first | $1,472 | $2,126 | -$655 [-1,220, -193] |
+| two questions refused | $1,488 | $2,129 | -$642 [-1,113, -303] |
+| sensitive questions cost 3x, easy ones half | $1,465 | $2,234 | -$769 [-1,313, -297] |
+| all three at once | $1,461 | $2,098 | -$637 [-1,097, -281] |
+
+The rule I wrote down said a significant win in the last row means flexibility pays. That rule was
+badly written. The engine is just as far ahead in the first row, where nothing changes, so the gap
+says nothing about adapting. Measured as what the question actually asks, how much the gap grows
+when conditions change, every change is within noise (between -$62 and +$70). **Flexibility is not
+shown on this task.** Regrowing the tree for the new costs changed nothing either.
+
+**Why the tree fell behind (not pre-registered, 300 more untouched households).** 79% of the tree's
+intakes ended because its branch held fewer than 60 training households, not because no question
+was worth asking. A tree splits its data, and after about seven questions there is too little left to
+choose the next question from. The fair tree of the previous section had the same problem: given 9
+or 12 questions, it asked 6.9 and 7.0. The engine never splits its data, it reweights all of it and
+lets the outcome model fill in, so it keeps finding questions worth asking. A tree that falls back to
+broader data when a branch runs thin, with a larger minimum branch size, comes within noise of the
+engine (engine ahead by $170 [-505, +113]) but needs about 11 questions to the engine's 8. Its
+settings were picked after seeing these households (two tried, both reported).
+
+So the engine's measured edge over a tree is modest: it gets to the same place with fewer questions
+and without tree-building choices to tune. A precomputed tree is about 80 times faster per question
+(0.3 ms against 24 ms on this CPU).
 
 ## The language layer
 
@@ -139,9 +186,12 @@ Three things came out of this:
 - **The decision model earns its place only where it is good.** On yes/no and category questions the
   language model's pick reads better (log loss 0.35 vs 0.41, decision model calibrated by cross-fitting),
   so handing those to the decision model would be worse. On amounts the calibrated decision model
-  roughly ties the structured reading, and multiplying the two as independent evidence beats either
-  (0.785 vs 0.84 and 0.86, cross-fitted). Confirmation on a fresh set of 120 amount answers, with the
-  combination frozen beforehand: *pending*.
+  roughly ties the structured reading, and multiplying the two as independent evidence beat either
+  (0.785 vs 0.84 and 0.86, cross-fitted on 76 answers). **It did not replicate.** On 120 fresh amount
+  answers, with the combination frozen beforehand, the structured reader alone scored 0.617 and the
+  combination 0.625, with three times the confident mistakes (2.5% vs 0.8%). So the decision model
+  adds nothing measurable anywhere in this system, and the recommended reader is the structured one.
+  Its lead over the plain pick on amounts did replicate (0.62 vs 1.83, 10% confidently wrong).
 
 In full interviews (40 held-out households answering in sentences), the structured reader misread
 3.7% of the answers it committed to, against 8.9% for the plain pick. At 40 households the effect on
@@ -162,6 +212,13 @@ exact pipeline.
 - About 45% of the engine's recommendations are for programmes the household can't get. That follows
   from the objective (missing a $10,000 programme costs ten times a wrong recommendation, so it is
   recommended at a 9% chance) and is why recommendations should be shown with their probability.
+  `experiments/failure_case.py` traces one: a married couple in California with one child, earning
+  $80-100k, no employer insurance. After nine questions the belief gives the ACA premium credit a 36%
+  chance; worth about $10,000 a year when it applies, it pays to recommend above 9%, so the engine
+  recommends it, and PolicyEngine says the household gets nothing. 134 of the engine's 189 ACA
+  recommendations on the test set were wrong this way, and 27 of 31 for CHIP
+  (`results/failure_case_*.txt`). Per-programme operating points, chosen on validation, are the fix
+  a real screener would need.
 - No immigration question, by design; it changes Medicaid, CHIP and ACA eligibility, so it remains an
   unasked source of error.
 - The answers in the language test are generated from templates, which are cleaner than real speech.

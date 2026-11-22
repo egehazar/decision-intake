@@ -1,0 +1,12 @@
+done in 319s
+POST HOC, 300 further fresh test households, plain intakes, survey-weighted $/household/year
+  engine         questions  8.13  loss   1274  loss+questions   1396
+  tree           questions  6.91  loss   1989  loss+questions   2093  stopped: no_gain 21%, small 79%
+  tree_nolook    questions  6.50  loss   1999  loss+questions   2096  stopped: no_gain 37%, small 63%
+  tree_leaf10    questions  6.90  loss   2148  loss+questions   2251  stopped: no_gain 29%, small 71%
+  engine_k8      questions  7.85  loss   1429  loss+questions   1546
+  fair_tree_k8   questions  6.50  loss   1868  loss+questions   1965  stopped: budget 40%, no_gain 11%, small 49%
+  engine minus tree             -697 [ -1192,   -285]
+  engine minus tree_nolook      -701 [ -1183,   -290]
+  engine minus tree_leaf10      -856 [ -1719,   -252]
+  engine_k8 minus fair_tree_k8     -439 [  -925,     38]

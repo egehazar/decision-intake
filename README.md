@@ -58,15 +58,22 @@ household per year: a missed programme at its value, a wrong recommendation at $
   the two apart, which is not the same as showing they're equal: the interval allows the engine to be
   up to $496 a household worse. On average it expected $1,329 of mistakes per household and made
   $1,250.
-- **A well-built tree does as well.** A greedy tree on the same loss, deciding with the same calibrated
-  model, matches the engine at every question budget with clean or messy answers. In one test, with
-  three facts volunteered from a pool including income and disability, the engine was ahead by
-  $376-$1,072 per household; with more natural openers (state, household size, children) that edge
-  was not significant (DECISIONS D24). What the engine can add over a tree is flexibility, not
-  accuracy: any budget or question cost without regrowing, facts in any order, uncertain evidence,
-  and an estimate of its own remaining risk.
+- **A well-built tree comes close.** A greedy tree on the same loss, deciding with the same calibrated
+  model, showed no significant difference from the engine at any question budget with clean or messy
+  answers. In one test, with three facts volunteered from a pool including income and disability,
+  the engine was ahead by $376-$1,072 per household; with more natural openers (state, household
+  size, children) that edge was not significant (DECISIONS D24).
+- **Flexibility did not show in the numbers** (pre-registered, D25). With facts volunteered in any
+  order, refused questions and unequal question costs, the engine's edge over a tree didn't grow.
+  When both decide for themselves when to stop, the engine is about $700 a household ahead, but that
+  is because a tree runs out of training households after about seven questions; a tree that falls
+  back to broader data comes within noise (D27), using about 11 questions to the engine's 8.
 - **It beats fixed forms** (a fixed set chosen for each question budget) with clean answers at 5-9
   questions, and with realistic answers at 7 and 9.
+- **The decision model didn't earn its place.** Reading free-text answers with 4B models, an LLM
+  filling typed slots with code doing the arithmetic beat both a plain LLM pick and a calibrated
+  decision model; an early edge for the decision model on amounts did not replicate on fresh
+  answers (D26).
 - **Hand-off.** The 10% of households it is least sure about carry 22-31% of all mistake cost.
 - **Not yet a screener people should rely on.** About 45% of recommendations are for programmes the
   household can't get, almost all Medicaid and the ACA credit, where the dollar-weighted objective
@@ -78,17 +85,34 @@ household per year: a missed programme at its value, a wrong recommendation at $
 ```bash
 # 1. environment (Python 3.13)
 py -m uv venv --python 3.13 .venv
-py -m uv pip install --python .venv/Scripts/python.exe policyengine-us tables h5py pytest -e .
+py -m uv pip install --python .venv/Scripts/python.exe policyengine-us==2.152.15 tables h5py pytest -e .
 
 # 2. data: Populace national build populace-us-2024-spm-20260915 (827 MB, sha256 6496cc43...aee84)
 #    into data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)
 bash adapters/benefits/build_all.sh 30 5
 
-# 3. tests, tuning (validation split only), the final comparison (test split)
+# 3. tests, tuning (validation split only)
 .venv/Scripts/python.exe -m pytest -q
 .venv/Scripts/python.exe experiments/tune.py 400 10
-.venv/Scripts/python.exe experiments/run_core.py 2000 10
+
+# 4. held-out results (test split; WORKERS = parallel processes, about 1 GB of RAM each)
+.venv/Scripts/python.exe experiments/run_final.py 600 WORKERS        # D21 -> results/final_600.jsonl
+.venv/Scripts/python.exe experiments/analyze_final.py results/final_600.jsonl
+.venv/Scripts/python.exe experiments/run_secondary.py 600 WORKERS    # D22 fair tree, per-budget fixed sets
+.venv/Scripts/python.exe experiments/run_opener_robust.py 300 WORKERS  # D24
+.venv/Scripts/python.exe experiments/run_adapt.py 600 WORKERS        # D25, pre-registered
+.venv/Scripts/python.exe experiments/adapt_did.py 600                # D25, change in the gap
+.venv/Scripts/python.exe experiments/diag_adapt.py 300 WORKERS       # D27, post hoc
+.venv/Scripts/python.exe experiments/diag_adapt2.py 300 WORKERS      # D27, post hoc
+.venv/Scripts/python.exe experiments/failure_case.py aca_ptc
+
+# 5. language layer: needs local llama.cpp servers (instruct model on :9996, decision model on :9995)
+.venv/Scripts/python.exe experiments/read_eval.py eval 240 llm_hard llm_selfconf structured dm   # D23
+.venv/Scripts/python.exe experiments/read_eval.py amounts 120 llm_hard structured dm combined    # D26
 ```
+
+Seeds are fixed in every script, so a rerun gives the same households and draws. Tested with
+Python 3.13, numpy 2.5.5, policyengine-us 2.152.15 on a 12-core CPU without a GPU.
 
 On Windows, PolicyEngine's longest file path exceeds the 260-character limit unless the package sits
 under a short prefix; the build script points `PYTHONPATH` at such a copy (D11).

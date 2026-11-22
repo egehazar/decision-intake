@@ -1,0 +1,36 @@
+24/288 chunks, 142s
+48/288 chunks, 251s
+72/288 chunks, 409s
+96/288 chunks, 571s
+120/288 chunks, 765s
+144/288 chunks, 887s
+168/288 chunks, 1011s
+192/288 chunks, 1123s
+216/288 chunks, 1294s
+240/288 chunks, 1415s
+264/288 chunks, 1515s
+288/288 chunks, 1635s
+done in 1635s
+600 fresh test households, survey-weighted, $/household/year (loss + question costs paid)
+scenario policy         questions    loss   paid   total  ms/turn
+S0       engine              8.04    1338    121    1459     23.4
+S0       tree                7.48    2053    112    2166      0.3
+S1       engine              7.10    1365    107    1472     25.0
+S1       tree                6.79    2025    102    2126      0.3
+S2       engine              9.86    1340    148    1488     27.3
+S2       tree                8.05    2009    121    2129      0.1
+S3       engine              7.67    1299    166    1465     21.4
+S3       tree                7.48    2053    180    2234      0.0
+S3       tree_regrown        7.26    2058    168    2227      0.3
+S4       engine              8.41    1276    185    1461     24.0
+S4       tree                7.28    1926    173    2098      0.1
+S4       tree_regrown        7.14    1894    166    2059      0.3
+
+engine minus tree, total cost [95% CI]   (negative = engine cheaper)
+  S0 vs tree             -707 [ -1252,   -233]
+  S1 vs tree             -655 [ -1220,   -193]
+  S2 vs tree             -642 [ -1113,   -303]
+  S3 vs tree             -769 [ -1313,   -297]
+  S3 vs tree_regrown     -762 [ -1284,   -338]
+  S4 vs tree             -637 [ -1097,   -281]
+  S4 vs tree_regrown     -598 [ -1059,   -244]

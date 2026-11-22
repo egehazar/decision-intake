@@ -98,7 +98,11 @@ def run(policy, i, scenario, m):
         if hasattr(policy, "after_answer"):
             policy.after_answer(s, j)
     rec = np.asarray(policy.final_recommend(s), bool)
-    return {"q": n, "paid": round(paid, 2), "rec": rec.astype(int).tolist(), "ms": round(1000 * t_choose / max(n, 1), 1)}
+    out = {"q": n, "paid": round(paid, 2), "rec": rec.astype(int).tolist(), "ms": round(1000 * t_choose / max(n, 1), 1)}
+    if isinstance(policy, GreedyTree):  # why the tree stopped
+        node = policy._node(s.policy_state["path"])
+        out["stop"] = ("budget" if n >= policy.budget else "small" if node["n"] < 2 * policy.min_leaf else "no_gain")
+    return out
 
 
 def work(job):

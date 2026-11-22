@@ -396,3 +396,64 @@ here before any result is seen. Script: experiments/run_adapt.py.
   is reported whatever it shows.
 - Not tested: a budget cut mid-session. Both policies choose greedily one question at a time, so a
   cut truncates both the same way; the equal-budget comparisons (D22) already cover it.
+
+## D25 result. Flexibility does not show; a level gap does (2026-11-22)
+
+results/adapt_600.jsonl (600 fresh test households, $/household/year, loss + question costs):
+
+| scenario | engine | tree | engine minus tree [95% CI] | minus regrown tree |
+|---|---|---|---|---|
+| S0 plain | $1,459 (8.0 q) | $2,166 (7.5 q) | -$707 [-1,252, -233] | |
+| S1 volunteered | $1,472 | $2,126 | -$655 [-1,220, -193] | |
+| S2 refusals | $1,488 | $2,129 | -$642 [-1,113, -303] | |
+| S3 unequal costs | $1,465 | $2,234 | -$769 [-1,313, -297] | -$762 [-1,284, -338] |
+| S4 all three | $1,461 | $2,098 | -$637 [-1,097, -281] | -$598 [-1,059, -244] |
+
+Read literally, the rule written in advance says outcome A ("flexibility pays"). That rule was badly
+written: it compared levels, and the engine is just as far ahead in S0, where nothing changes. The
+question GPT asked is whether the gap GROWS when conditions change. Post hoc, paired on the same
+households (experiments/adapt_did.py): change in the gap relative to S0 is +$52 (S1), +$65 (S2),
+-$62 [-144, +17] (S3), +$70 (S4), every interval including zero. So: flexibility is not shown on
+this task (outcome C in spirit). Neither policy is hurt much by the changes. Regrowing the tree for
+the new costs changes nothing. The level gap is a separate finding, examined in D27.
+Speed: the engine takes about 24 ms to choose a question on this CPU; the tree's lookup is ~0.3 ms.
+
+## D26. The decision model's edge on amounts did not replicate (2026-11-22)
+
+Confirmation of the combination frozen in D23 (structured^0.4 x decision model^0.6 on amounts), 120
+fresh amount answers (results_read_amounts.log): structured reader log loss 0.617, confidently wrong
+0.8%; combined 0.625, confidently wrong 2.5%; decision model alone 1.06; plain LLM pick 1.83 (10%
+confidently wrong). The cross-fitted 0.785 vs 0.86 on 76 answers was noise. The decision model adds
+nothing measurable anywhere in this system, so it is dropped from the recommended design: the reader
+is the structured one (the LLM fills typed slots, code does the arithmetic). The structured reader's
+lead over a plain LLM pick on amounts did replicate (0.62 vs 1.83).
+
+## D27. Post hoc: why the tree fell behind, and a tree that doesn't (2026-11-22)
+
+Not pre-registered. On 300 further fresh test households, plain intakes (experiments/diag_adapt.py,
+diag_adapt2.py; results/diag_adapt*_300.jsonl), $/household/year, loss + question costs:
+
+| policy | questions | total | engine minus it [95% CI] |
+|---|---|---|---|
+| engine, own stopping at $15 | 8.1 | $1,396 | |
+| D25 tree (min leaf 30) | 6.9 | $2,093 | -$697 [-1,192, -285] |
+| same, min leaf 10 | 6.9 | $2,251 | -$856 [-1,719, -252] |
+| tree that falls back to broader data, min leaf 30 | 9.8 | $1,809 | -$414 [-829, -104] |
+| tree that falls back to broader data, min leaf 100 | 10.9 | $1,566 | -$170 [-505, +113] |
+| at exactly 8 questions: engine vs fallback tree | 7.9 / 7.6 | | -$215 [-689, +230] |
+
+Why the D25 tree lost: 79% of its intakes ended because its branch held fewer than 60 training
+households, not because no question was worth asking. A tree splits its data; after about seven
+questions there is too little left to choose the next question from. The same happened in D22: the
+fair tree given 9 or 12 questions asked 6.9 and 7.0 on average. The engine never splits its data (it
+reweights all of it, keeps at least ten households' worth of support, and lets the outcome model
+fill in), so it keeps finding questions worth asking.
+
+GreedyTree.deep_backoff fixes that: an answer that would leave too few training households doesn't
+narrow the tree's household set (the session's belief still uses it). With a larger minimum leaf
+(100; two values tried, both reported, chosen after seeing test results) the tree comes within noise
+of the engine, using about 11 questions to the engine's 8.
+
+Conclusion: the engine's measured edge is getting to the same place with fewer questions and no
+tree-building choices to tune. It is not a large accuracy gap over a well-built tree, and on this
+task it is not flexibility (D25). A precomputed tree is also about 80 times faster per question.

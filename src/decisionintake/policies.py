@@ -200,6 +200,10 @@ class GreedyTree(Policy):
     # unknown_backoff: an answer with no evidence (refused, "don't know") doesn't narrow the branch;
     # the tree carries on from the same households instead of guessing the commonest branch.
     unknown_backoff: bool = False
+    # deep_backoff: an answer that would leave fewer than 2 * min_leaf training households doesn't
+    # narrow the tree's household set (the session's belief still uses it), so the tree never runs
+    # out of data to choose its next question from; it stops only when no question is worth its cost.
+    deep_backoff: bool = False
     name: str = "tree"
     _cache: dict = field(default_factory=dict, repr=False)
 
@@ -213,7 +217,10 @@ class GreedyTree(Policy):
         mask = np.ones(len(self.train), dtype=bool)
         for j, b in path:
             if b is not None:  # None: asked, but its branch was too rare to narrow on
-                mask &= self.train.answers[:, j] == b
+                narrowed = mask & (self.train.answers[:, j] == b)
+                if self.deep_backoff and narrowed.sum() < 2 * self.min_leaf:
+                    continue
+                mask = narrowed
         idx = np.flatnonzero(mask)
         w = self.w[idx]
         ls, lr = self.l_skip[idx], self.l_rec[idx]

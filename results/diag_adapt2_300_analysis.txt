@@ -1,0 +1,12 @@
+done in 131s
+POST HOC, the same 300 fresh test households as diag_adapt, plain intakes
+  engine             questions  8.13  loss   1274  loss+questions   1396
+  tree               questions  6.91  loss   1989  loss+questions   2093  stopped: no_gain 21%, small 79%
+  deep_tree          questions  9.76  loss   1663  loss+questions   1809  stopped: no_gain 100%
+  deep_tree_leaf100  questions 10.93  loss   1402  loss+questions   1566  stopped: no_gain 100%
+  deep_tree_k8       questions  7.57  loss   1643  loss+questions   1757  stopped: budget 82%, no_gain 18%
+  engine_k8          questions  7.85  loss   1429  loss+questions   1546
+  fair_tree_k8       questions  6.50  loss   1868  loss+questions   1965  stopped: budget 40%, no_gain 11%, small 49%
+  engine minus deep_tree            -414 [  -829,   -104]
+  engine minus deep_tree_leaf100    -170 [  -505,    113]
+  engine_k8 minus deep_tree_k8         -215 [  -689,    230]

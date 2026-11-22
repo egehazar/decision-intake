@@ -1,0 +1,13 @@
+chip: 27 of 31 recommendations wrong (engine, $15 a question, clean answers, 600 households)
+
+test household 30; truth: eligible=False, value $0
+  before any question                      p= 0.02  worth $  4,758 if eligible  pays above p=0.17  -> skip
+  children = 2                             p= 0.06  worth $  5,221 if eligible  pays above p=0.16  -> skip
+  earned_income = $80,000 to $100,000      p= 0.15  worth $  5,473 if eligible  pays above p=0.15  -> skip
+  state = NM                               p= 0.10  worth $  6,155 if eligible  pays above p=0.14  -> skip
+  child_under5 = no                        p= 0.10  worth $  6,352 if eligible  pays above p=0.14  -> skip
+  household_size = 6                       p= 0.15  worth $  9,220 if eligible  pays above p=0.10  -> RECOMMEND
+  married = yes                            p= 0.11  worth $  9,608 if eligible  pays above p=0.09  -> RECOMMEND
+  other_income = $5,000 to $15,000         p= 0.18  worth $ 10,317 if eligible  pays above p=0.09  -> RECOMMEND
+
+unasked: infant_or_pregnant = no, senior = no, disabled = no, self_employed = yes, social_security = none, housing_cost = none, tenure = own, childcare = none, employer_insurance = no, assets = $5,000 to $20,000, college = yes
