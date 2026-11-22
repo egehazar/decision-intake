@@ -358,3 +358,41 @@ own remaining error, and a hand-off signal. README and WRITEUP were corrected to
   log loss 0.93 vs 1.00 per option, 72.9% top-option accuracy; better than asking per option, still
   far behind the structured reader (0.51). Asking ordered questions as thresholds helps a classifier
   a little; doing the arithmetic in code helps a lot more.
+
+## D25. Pre-registered: does the engine's flexibility matter in numbers? (2026-11-22, before any run)
+
+GPT's round-3 review: a good tree matches the engine on a plain intake, so the engine's case rests
+on adapting at run time to conditions the tree wasn't built for. Test that, with everything fixed
+here before any result is seen. Script: experiments/run_adapt.py.
+
+- Households: 600 test households never used in any earlier run (test split minus the first 1,200
+  of the fixed order every earlier run drew from), chosen with seed 2027.
+- Base question cost $15 (the demo's setting). Every policy stops on its own when no question is
+  worth its cost; at most 18 questions. Loss settings frozen as before ($1,000 per wrong
+  recommendation, floor 10).
+- Policies:
+  - engine: unchanged, reads each question's cost at run time.
+  - tree: a cost-sensitive greedy tree grown once at the uniform $15 cost; same loss, same pair
+    look-ahead, rare-branch backoff, final decisions from the same calibrated belief as the
+    engine (so only the choice of questions differs). A question that gets no answer (refused)
+    doesn't narrow its branch: the tree carries on from that node's households.
+  - tree_regrown: the same tree regrown with the scenario's question costs (only where costs change).
+- Scenarios, drawn per household from a seeded generator, identical for every policy:
+  - S0 plain: nothing volunteered, every question answered, equal costs.
+  - S1 volunteered: 0-3 facts (equally likely) volunteered before any question, drawn uniformly from
+    all 18 questions, answered exactly.
+  - S2 refusals: 2 questions drawn uniformly from the 18 are refused; asking one still costs a
+    question and gives no evidence.
+  - S3 unequal costs: x3 for earnings, self-employment, other income, Social Security, savings,
+    disability, pregnancy/infant (sensitive or slow to answer); x0.5 for state, household size,
+    children, 65+, married, rent/own; x1 the rest.
+  - S4 all of S1-S3 together. PRIMARY.
+- Metric: realised loss plus the question costs actually paid, $/household/year, survey-weighted,
+  paired bootstrap 95% CI (2,000 resamples). Also mean questions and loss alone.
+- Comparisons: engine minus tree in S0-S4; engine minus tree_regrown in S3 and S4.
+- Reading, fixed now: engine below the tree in S4 with the CI below zero = flexibility pays (A);
+  engine level with the regrown tree but below the original = it saves rebuilding trees (B);
+  level with the original tree everywhere = flexibility not shown on this task (C). Every scenario
+  is reported whatever it shows.
+- Not tested: a budget cut mid-session. Both policies choose greedily one question at a time, so a
+  cut truncates both the same way; the equal-budget comparisons (D22) already cover it.
