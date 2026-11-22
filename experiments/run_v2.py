@@ -111,6 +111,8 @@ def analyse(path, idx):
     test = G["test"]
     miss, fr = G["loss"].realised(test)
     runs = load(path)
+    want = set(idx.tolist())
+    runs = {k: v for k, v in runs.items() if want <= set(v)}  # only policies finished on every household
     w = test.weight[idx] / test.weight[idx].sum()
     boots = np.random.default_rng(5).choice(len(idx), size=(4000, len(idx)))
     el = test.eligible[idx]
@@ -126,6 +128,15 @@ def analyse(path, idx):
         bs = np.array([np.average(d[b], weights=w[b]) for b in boots])
         p = min(1.0, 2 * min((bs <= 0).mean(), (bs >= 0).mean()))
         return w @ d, np.percentile(bs, 2.5), np.percentile(bs, 97.5), p
+
+    # robustness (GPT round 4): resample whole source households, since 82 of them give two test records
+    _, cl = np.unique(test.group[idx], return_inverse=True)
+    cboots = np.random.default_rng(6).integers(0, cl.max() + 1, size=(4000, cl.max() + 1))
+
+    def ci_cluster(d):
+        wd, ww = np.bincount(cl, weights=w * d), np.bincount(cl, weights=w)
+        bs = wd[cboots].sum(1) / ww[cboots].sum(1)
+        return np.percentile(bs, 2.5), np.percentile(bs, 97.5)
 
     print(f"{len(idx)} fresh test households (seed 2029), survey-weighted $/household/year; "
           f"total = decision loss + ${QCOST:.0f} per question")
@@ -176,14 +187,16 @@ def analyse(path, idx):
             _, lb, qb, _ = cols((*b, u))
             est, lo, hi, p = ci((la + QCOST * qa) - (lb + QCOST * qb))
             dl, llo, lhi, _ = ci(la - lb)
-            res.append((name, est, lo, hi, p, dl, llo, lhi))
+            clo, chi = ci_cluster((la + QCOST * qa) - (lb + QCOST * qb))
+            res.append((name, est, lo, hi, p, dl, llo, lhi, clo, chi))
         prim = sorted([r for r in res if r[0].startswith("P")], key=lambda r: r[4])
         holm = {}
         for rank, r in enumerate(prim):
             holm[r[0]] = min(1.0, max([holm.get(x[0], 0) for x in prim[:rank]] + [r[4] * (len(prim) - rank)]))
-        for name, est, lo, hi, p, dl, llo, lhi in res:
+        for name, est, lo, hi, p, dl, llo, lhi, clo, chi in res:
             tag = f"Holm p {holm[name]:.3f}" if name in holm else f"p {p:.3f}"
-            print(f"  {name:<42} total {est:6.0f} [{lo:6.0f}, {hi:6.0f}]  {tag:<14} loss only {dl:6.0f} [{llo:6.0f}, {lhi:6.0f}]")
+            print(f"  {name:<42} total {est:6.0f} [{lo:6.0f}, {hi:6.0f}]  {tag:<14} loss only {dl:6.0f} [{llo:6.0f}, {lhi:6.0f}]"
+                  f"  by source household [{clo:6.0f}, {chi:6.0f}]")
 
 
 def main():
@@ -199,11 +212,14 @@ def main():
         for line in open(path):
             r = json.loads(line)
             done.add((r["model"], r["policy"], r["user"], r["i"]))
+    # primary comparisons (clean answers) first, then the secondary ones, so the primaries finish early
+    primary = [("neural", "engine"), ("linear", "engine"), ("linear", "ask_all"), ("neural", "deep_tree"), ("neural", "fixed8")]
+    order = [(m, k, "clean") for m, k in primary] + [(m, k, "clean") for m, k in POLICIES if (m, k) not in primary]
+    order += [(m, k, "realistic") for m, k in POLICIES]
     jobs = []
-    for m, k in POLICIES:
-        for u in USERS:
-            rows = [i for i in idx.tolist() if (m, k, u, i) not in done]
-            jobs += [(m, k, u, np.array(ch)) for ch in np.array_split(rows, max(1, len(rows) // 20)) if len(ch)]
+    for m, k, u in order:
+        rows = [i for i in idx.tolist() if (m, k, u, i) not in done]
+        jobs += [(m, k, u, np.array(ch)) for ch in np.array_split(rows, max(1, len(rows) // 20)) if len(ch)]
     print(f"{len(done)} interviews already done, {sum(len(j[3]) for j in jobs)} to run", flush=True)
     t0 = time.time()
     with Pool(workers, initializer=init) as pool, open(path, "a") as f:

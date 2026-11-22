@@ -1,0 +1,16 @@
+PARTIAL: the run was stopped by the system (low memory) after P1 and P2 finished; P3, P4 and the secondary comparisons are not yet run.
+2000 fresh test households (seed 2029), survey-weighted $/household/year; total = decision loss + $15 per question
+user      model   policy     questions    loss   total  claimed  found wrong recs s/interview
+clean     neural  engine          8.44    1017    1144     1208    85%        43%        1.24
+clean     linear  engine          8.49    1297    1424     1411    81%        46%        0.70
+clean     linear  ask_all        18.00    1356    1626     1399    82%        46%        0.36
+
+Descriptive (v2 engine): verdict tiers, self-assessment, hand-off
+  clean     neural   'likely' tier: 2022 recs, 78% eligible, finds 67% of eligible programmes | 'worth checking': 1442 recs, 28% eligible | claimed/actual loss 1.19 | top 10% least sure carry 27% of mistake cost, top 20% 45%
+  clean     linear   'likely' tier: 1950 recs, 77% eligible, finds 64% of eligible programmes | 'worth checking': 1545 recs, 26% eligible | claimed/actual loss 1.09 | top 10% least sure carry 19% of mistake cost, top 20% 44%
+
+clean: difference in total cost [95% CI] (negative = first is cheaper), Holm over P1-P4
+  P1 v2 engine vs v1 engine                  total   -281 [  -437,   -142]  Holm p 0.000   loss only   -280 [  -437,   -140]  by source household [  -441,   -138]
+  P2 v2 engine vs v1 full questionnaire      total   -483 [  -667,   -317]  Holm p 0.000   loss only   -339 [  -523,   -173]  by source household [  -669,   -318]
+
+realistic: difference in total cost [95% CI] (negative = first is cheaper), Holm over P1-P4

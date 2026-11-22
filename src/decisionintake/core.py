@@ -194,6 +194,7 @@ class Session:
                 cache = (self.pop, *self.outcome.predict(self.pop, self.pop.answers))
                 self.outcome._initial = cache
             p, v = cache[1].copy(), cache[2].copy()
+            self.h_now = self.pop.answers.astype(np.uint8)  # the inputs each record is scored on
         else:
             p, v = self.p_now, self.v_now
             live = np.flatnonzero(self.w > 1e-9 * self.w.max())
@@ -203,7 +204,12 @@ class Session:
                     continue  # "don't know": the record keeps its own answer
                 own_ok = ev[h[:, j]] >= 0.5 * ev.max()  # the record's own answer fits the evidence
                 h[:, j] = np.where(own_ok, h[:, j], int(np.argmax(ev)))
-            p[live], v[live] = self.outcome.predict(self.pop, h)
+            # Only records whose inputs changed need scoring again; the rest keep identical scores.
+            changed = (h != self.h_now[live]).any(1)
+            rows = live[changed]
+            if len(rows):
+                p[rows], v[rows] = self.outcome.predict(self.pop, h[changed])
+                self.h_now[rows] = h[changed]
         self.p_now, self.v_now = p, v
         self.l_skip = p * np.maximum(v, self.loss.miss_floor[None, :])
         self.l_rec = (1.0 - p) * self.loss.false_rec_cost[None, :]

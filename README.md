@@ -1,84 +1,86 @@
 # DecisionIntake
 
-An engine that tells an AI assistant **what to ask next, which answers to trust, and when it knows
-enough to act or should hand off to a person**. Its first real use is US public-benefits screening:
-ten programmes, rules from [PolicyEngine-US](https://github.com/PolicyEngine/policyengine-us), and a
-population of 57,240 households from PolicyEngine's [Populace](https://huggingface.co/datasets/policyengine/populace-us)
-dataset.
+**A decision engine for AI assistants: what to ask next, how far to trust each answer, and when it
+knows enough to act or should hand off to a person.**
 
-The engine itself knows nothing about benefits. A domain supplies questions (with answer options and
-a model of how people misreport them), decisions (here: recommend a programme or not, with the cost of
-each kind of mistake), and a population of records with known answers and known outcomes.
+First use: US public-benefits screening across ten programmes, with rules from
+[PolicyEngine-US](https://github.com/PolicyEngine/policyengine-us) and 57,240 households from
+PolicyEngine's [Populace](https://huggingface.co/datasets/policyengine/populace-us) data.
 
-> Built by AI agents (Claude, with reviews by GPT and Fable) under Ege Hazar's direction.
-> Every design choice and the reason for it is in [DECISIONS.md](DECISIONS.md).
+On 2,000 households it had never seen, in a test registered before it ran (DECISIONS D28):
 
-## How it works
+| | DecisionIntake v2 | the full 18-question form (v1) |
+|---|---|---|
+| questions asked | **8.4** | 18 |
+| cost of mistakes per household per year | **$1,017** | $1,356 |
+| difference [95% CI] | **−$339** [−523, −173] | |
+
+**About half the questions, 25% fewer costly mistakes.** Against the previous engine, with the same
+questioning, it cuts mistakes by 22% (−$280 [−437, −140]). Both results hold after Holm correction
+(p < 0.002) and with source households resampled as clusters.
+
+> Built by AI agents (Claude, with reviews by GPT and Fable) under Ege Hazar's direction. Every
+> design choice, every result, and every idea that didn't make it is logged in [DECISIONS.md](DECISIONS.md).
+
+## What it does
 
 ```
-person's words ──► reader ──► evidence over a question's options
-                                  │
-                                  ▼
-             belief: weights over households that could be this person
-                                  │
-            outcome model scores each candidate on the person's own answers
-            (the candidate only fills in what the person hasn't said yet)
-                                  │
-                                  ▼
-       for every question: expected drop in the cost of mistakes if we ask it
-                                  │
-          ASK the best one while it's worth more than a question costs
-          ACT when nothing is worth asking
-          HAND OFF when the remaining expected cost of mistakes is still high
+person's words ──► LLM reader ──► typed evidence (amount, period, approximate, don't know)
+                                        │
+                                        ▼
+                  belief: weights over 48,657 households that could be this person
+                                        │
+              neural outcome model scores each candidate on the person's own answers
+                    (P(eligible) and dollars, ten programmes at once)
+                                        │
+                                        ▼
+           value of information: the expected drop in the cost of mistakes for every question
+                                        │
+               ASK the best one while it is worth more than a question costs
+               ACT with tiered recommendations ("likely" / "worth checking")
+               HAND OFF when the doubt that is left is still costly
 ```
 
-- **Belief.** Weights over training households, updated by each answer through that question's
-  misreport model. A support floor keeps the belief resting on enough households that it can't
-  become confident just by eliminating almost everyone (D12).
-- **Outcome model.** A regularised logistic and ridge regression on answers and the interactions the
-  rules use (income against household size, and so on), trained on PolicyEngine's results. Each
-  candidate household is scored on a hybrid of the person's answers and its own (D13, D14).
-- **Value of information.** For each unasked question, the expected reduction in the cost of mistakes
-  across all ten programmes at once, computed with one matrix product per turn (D5, D11).
-- **Readers.** Free-text answers become evidence through a reader. The best one tested lets a language
-  model fill typed slots (amount as stated, per month or year, approximate, don't know) and does the
-  arithmetic in code, so "about $2,900 a month" lands on the right yearly range and a hedged answer
-  becomes evidence spread over several options instead of a guess. A small decision model that gives
-  a probability per option was also tested; it only helped on amounts (D23).
+- **Reads language, doesn't trust it with arithmetic.** An LLM fills typed slots; code converts
+  "about $2,900 a month" into evidence spread over the right yearly ranges. On fresh amount answers
+  this cut confidently wrong readings from 10% to 0.8% against letting the LLM pick a range (D26).
+- **Believes over real-data households.** Weights over training households, updated through each
+  question's model of how people misreport. A support floor keeps it from becoming certain by ruling
+  almost everyone out (D12).
+- **Predicts with a wide-and-deep network written in plain numpy.** Two ReLU layers shared by all ten
+  programmes, next to the hand-listed linear terms, with an eligibility head and a dollars head;
+  dropout, decoupled weight decay, early stopping on held-out source households, out-of-fold Platt
+  scaling folded into the weights. Trains in about 3 minutes on a CPU (D28).
+- **Prices every question in dollars.** For each unasked question, the expected reduction in the
+  cost of mistakes across all ten programmes, in one matrix product per turn, with pair look-ahead
+  when facts only matter together (D5, D11).
+- **Knows what it doesn't know.** Its estimate of its own remaining mistakes is within 19% of what it
+  actually gets wrong (on the cautious side), and the 20% of households it is least sure about carry
+  45% of all mistake cost, which is what the hand-off routes to a person.
+- **Runs in a browser.** The demo page runs the whole engine and the neural model in JavaScript; its
+  probabilities match numpy to 5×10⁻⁶ and it scores 1,500 households in well under a second.
 
-## Results (held-out test, 600 households never used for training or tuning)
+## Results
 
-Settings were frozen on a validation split first (DECISIONS D16). Loss is the cost of mistakes per
-household per year: a missed programme at its value, a wrong recommendation at $1,000. Intervals are
-95% paired bootstrap. Full tables: [WRITEUP.md](WRITEUP.md), `results/final_600_analysis.txt`,
-`results/secondary_600_analysis.txt`.
+Held-out test, settings frozen on a validation split first, $/household/year, 95% paired bootstrap
+intervals. Loss is the cost of mistakes: a missed programme at its value, a wrong recommendation at
+$1,000. Full tables in [WRITEUP.md](WRITEUP.md) and `results/`.
 
-- **About half the questions, no conclusive difference in loss.** With clean answers the engine stops
-  after 8.2 questions instead of 18; the difference in loss is +$67 [-363, +496]. The test can't tell
-  the two apart, which is not the same as showing they're equal: the interval allows the engine to be
-  up to $496 a household worse. On average it expected $1,329 of mistakes per household and made
-  $1,250.
-- **A well-built tree comes close.** A greedy tree on the same loss, deciding with the same calibrated
-  model, showed no significant difference from the engine at any question budget with clean or messy
-  answers. In one test, with three facts volunteered from a pool including income and disability,
-  the engine was ahead by $376-$1,072 per household; with more natural openers (state, household
-  size, children) that edge was not significant (DECISIONS D24).
-- **Flexibility did not show in the numbers** (pre-registered, D25). With facts volunteered in any
-  order, refused questions and unequal question costs, the engine's edge over a tree didn't grow.
-  When both decide for themselves when to stop, the engine is about $700 a household ahead, but that
-  is because a tree runs out of training households after about seven questions; a tree that falls
-  back to broader data comes within noise (D27), using about 11 questions to the engine's 8.
-- **It beats fixed forms** (a fixed set chosen for each question budget) with clean answers at 5-9
-  questions, and with realistic answers at 7 and 9.
-- **The decision model didn't earn its place.** Reading free-text answers with 4B models, an LLM
-  filling typed slots with code doing the arithmetic beat both a plain LLM pick and a calibrated
-  decision model; an early edge for the decision model on amounts did not replicate on fresh
-  answers (D26).
-- **Hand-off.** The 10% of households it is least sure about carry 22-31% of all mistake cost.
-- **Not yet a screener people should rely on.** About 45% of recommendations are for programmes the
-  household can't get, almost all Medicaid and the ACA credit, where the dollar-weighted objective
-  recommends at low probability. Showing only recommendations at 30% or more: 73% precision, 77% of
-  eligible programmes still found.
+| v2 engine (8.4 questions) against | difference in mistakes + $15 a question | in mistakes alone |
+|---|---|---|
+| v1 engine, same questioning (8.5 questions) | **−$281** [−437, −142] | −$280 [−437, −140] |
+| v1 full questionnaire (18 questions) | **−$483** [−667, −317] | −$339 [−523, −173] |
+
+- **Tiered verdicts.** Recommendations it calls "likely" (50% or more) are right 78% of the time and
+  find two thirds of all eligible programmes. Lower-probability ones are shown as "worth checking":
+  the dollar-weighted objective recommends a $10,000 programme at a 9% chance, which is the right
+  call for the person but should be labelled as such.
+- **Against decision trees** (v1, pre-registered, D25): a cost-sensitive greedy tree on the same loss
+  cost $700 a household more (−$707 [−1,252, −233]). A tree we then rebuilt to fall back to broader
+  data comes within noise of the engine but needs about 11 questions to its 8 (D27).
+- **The biggest gain came from prediction, not question choice.** Even with every answer, the old
+  linear model left most of the mistakes; the outcome model was the ceiling every question policy
+  worked against. Replacing it is what moved the numbers (D28).
 
 ## Reproduce
 
@@ -91,42 +93,32 @@ py -m uv pip install --python .venv/Scripts/python.exe policyengine-us==2.152.15
 #    into data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)
 bash adapters/benefits/build_all.sh 30 5
 
-# 3. tests, tuning (validation split only)
+# 3. tests (30), and tuning on the validation split only
 .venv/Scripts/python.exe -m pytest -q
-.venv/Scripts/python.exe experiments/tune.py 400 10
+.venv/Scripts/python.exe experiments/outcome_v2.py            # outcome models, validation
+.venv/Scripts/python.exe experiments/val_v2.py 400 WORKERS     # engine with each model, validation
 
-# 4. held-out results (test split; WORKERS = parallel processes, about 1 GB of RAM each)
-.venv/Scripts/python.exe experiments/run_final.py 600 WORKERS        # D21 -> results/final_600.jsonl
-.venv/Scripts/python.exe experiments/analyze_final.py results/final_600.jsonl
-.venv/Scripts/python.exe experiments/run_secondary.py 600 WORKERS    # D22 fair tree, per-budget fixed sets
-.venv/Scripts/python.exe experiments/run_opener_robust.py 300 WORKERS  # D24
-.venv/Scripts/python.exe experiments/run_adapt.py 600 WORKERS        # D25, pre-registered
-.venv/Scripts/python.exe experiments/adapt_did.py 600                # D25, change in the gap
-.venv/Scripts/python.exe experiments/diag_adapt.py 300 WORKERS       # D27, post hoc
-.venv/Scripts/python.exe experiments/diag_adapt2.py 300 WORKERS      # D27, post hoc
-.venv/Scripts/python.exe experiments/failure_case.py aca_ptc
+# 4. the pre-registered test (D28): 2,000 fresh test households; WORKERS processes, ~1.5 GB each
+.venv/Scripts/python.exe experiments/run_v2.py 2000 WORKERS
+.venv/Scripts/python.exe experiments/run_v2.py 2000 1 analyse
 
-# 5. language layer: needs local llama.cpp servers (instruct model on :9996, decision model on :9995)
-.venv/Scripts/python.exe experiments/read_eval.py eval 240 llm_hard llm_selfconf structured dm   # D23
-.venv/Scripts/python.exe experiments/read_eval.py amounts 120 llm_hard structured dm combined    # D26
+# 5. the browser demo
+.venv/Scripts/python.exe experiments/export_demo_v2.py 1500 demo/population.json
+cd demo && ../.venv/Scripts/python.exe -m http.server 8765    # then open http://127.0.0.1:8765
 ```
 
-Seeds are fixed in every script, so a rerun gives the same households and draws. Tested with
-Python 3.13, numpy 2.5.5, policyengine-us 2.152.15 on a 12-core CPU without a GPU.
+Earlier experiments (D21-D27: v1 test, trees, run-time adaptation, the language layer) have their
+own scripts in `experiments/`, listed in DECISIONS.md. Seeds are fixed everywhere, so a rerun gives
+the same households and draws. Tested with Python 3.13, numpy 2.5.5, policyengine-us 2.152.15 on a
+12-core CPU without a GPU. On Windows, PolicyEngine's longest file path exceeds the 260-character
+limit unless the package sits under a short prefix; the build script handles it (D11).
 
-On Windows, PolicyEngine's longest file path exceeds the 260-character limit unless the package sits
-under a short prefix; the build script points `PYTHONPATH` at such a copy (D11).
+## Scope
 
-## What this is not
-
-- **A research prototype.** Nobody should use it to decide whether to apply for a benefit. The demo
-  keeps nothing about the household; a free-text description is sent to Claude to be read. The
-  language results above were measured with 4B models on a CPU, not with Claude.
-- **Not an eligibility determination.** Results are PolicyEngine's estimates under 2026 rules,
-  assuming everyone takes up what they're entitled to. A real screener must send people to the
-  official application.
-- **Not tested on real people.** Populace is a calibrated synthetic population built from census and
-  tax data. Every number here is agreement with PolicyEngine on that population; spoken answers are
-  generated from templates, which are cleaner than real speech.
+- **A research system, not an eligibility determination.** Results are agreement with PolicyEngine's
+  2026 rules on a calibrated synthetic population, assuming everyone takes up what they're entitled
+  to. A real screener sends people to the official application.
+- **The language results are for 4B models on a CPU.** The demo uses Claude to fill the same slots;
+  spoken answers in the tests come from templates, which are cleaner than real speech.
 - **No immigration questions,** by design. Immigration status changes eligibility, so it remains an
-  unasked source of error, reported separately.
+  unasked source of error.

@@ -512,3 +512,33 @@ Pre-registered confirmation:
   full form with fewer than half the questions. P3/P4 below zero = it beats the strongest baselines;
   intervals spanning zero are reported as "no conclusive difference", whichever side the point
   estimate falls on. Everything is reported whatever it shows.
+
+## D28 result, part 1: P1 and P2 confirmed (2026-11-22, 22:00 UTC)
+
+The run (results/v2_2000.jsonl) was started once at 21:37 UTC, stopped before any result was read,
+and restarted from scratch at 21:44 with two changes that don't alter any result: re-scoring skips
+records whose inputs didn't change (checked identical on 24 interviews and by tests/test_neural.py),
+and the primary comparisons run first. At 21:58 the system stopped it for low memory, after the v2
+engine, the v1 engine and the v1 full questionnaire had finished all 2,000 households on clean
+answers. Those three give P1 and P2 (results/v2_2000_analysis.txt):
+
+| policy | questions | decision loss | total (loss + $15 a question) |
+|---|---|---|---|
+| v2 engine | 8.4 | $1,017 | $1,144 |
+| v1 engine | 8.5 | $1,297 | $1,424 |
+| v1 full questionnaire | 18 | $1,356 | $1,626 |
+
+- P1, v2 minus v1 engine: -$281 [-437, -142], Holm p < 0.002 (no bootstrap resample crossed zero,
+  times the four comparisons). Loss alone -$280.
+- P2, v2 minus v1 full questionnaire: -$483 [-667, -317], Holm p < 0.002. Loss alone -$339
+  [-523, -173]: fewer mistakes, not only fewer questions.
+- Resampling whole source households (82 of the 1,918 give two records; GPT round 4) gives the same
+  intervals within $5.
+- Descriptive, v2 engine: recommendations at 50% or more ("likely") are right 78% of the time and
+  find 67% of all eligible programmes; "worth checking" ones are right 28% of the time. Its own
+  estimate of its mistakes is 19% high (cautious). The 10% of households it is least sure about carry
+  27% of the mistake cost, the 20% carry 45%.
+
+By the reading fixed in D28: v2 is a real improvement, and it beats the old full form with fewer
+than half the questions. P3 (strongest tree), P4 (best fixed 8-question set) and the secondary
+comparisons still need the run resumed (it continues from the saved interviews).

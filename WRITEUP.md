@@ -1,19 +1,18 @@
-# What an assistant should ask next: building DecisionIntake
-
-*Draft. Held-out test numbers are filled in from `experiments/analyze_final.py`; everything marked
-"validation" was used for tuning and is not an independent result.*
+# DecisionIntake: a decision engine for AI intake
 
 AI agents (Claude, with reviews by GPT and Fable) did the hands-on work; Ege Hazar directed it.
+Everything marked "validation" was used for tuning and is not an independent result.
 
 **In brief.** DecisionIntake decides what an AI assistant should ask next, how far to trust each
-answer, and when to stop or hand off to a person. On 600 unseen synthetic households with
-PolicyEngine's benefit rules, it asked about 8 questions instead of 18 with no statistically
-conclusive difference in mistakes. Each stronger baseline narrowed its edge: a decision tree that
-falls back to broader data when a branch runs thin comes within noise of it, though with about 11
-questions. Run-time flexibility (facts in any order, refused questions, unequal costs) did not
-show up in the numbers. With 4B models on a CPU, answers were read best when the language model
-filled typed slots and code did the arithmetic; a calibrated decision model added nothing that
-survived a fresh test. Most of what follows is about what broke and which early wins did not hold.
+answer, and when to act or hand off to a person. Version 2 pairs the decision engine with a
+wide-and-deep outcome network written in plain numpy. In a test registered before it ran, on 2,000
+synthetic households it had never seen, scored against PolicyEngine's benefit rules, it asked 8.4
+questions instead of 18 and made 25% fewer costly mistakes than the full questionnaire of version 1
+(−$339 a household a year [−523, −173]); against version 1's engine with the same questioning, 22%
+fewer (−$280 [−437, −140]). The largest gain came from better prediction, not cleverer questioning:
+the outcome model was the ceiling every question policy worked against. Language is read by an LLM
+that fills typed slots while code does the arithmetic, which cut confidently wrong readings of
+amounts from 10% to 0.8%. The whole engine also runs in a browser.
 
 ## The problem
 
@@ -28,7 +27,58 @@ the question expected to cut the cost of mistakes the most. It stops when no que
 and hands off to a person when the remaining risk is too high. The engine knows nothing about benefits;
 the benefits adapter supplies questions, programmes and a population.
 
-## What failed first, and what fixed it
+## Version 2: the outcome model was the ceiling
+
+By version 1 the engine asked about 8 questions and did as well as asking all 18, but "as well"
+still meant about $1,200-1,500 of mistakes per household, mostly Medicaid and ACA-credit calls. With
+every answer known, a linear model on the answers and a hand-picked list of interactions (income
+against household size, children, age, and so on) could not get closer to PolicyEngine. Eligibility
+rules nest deeper than that: income against household size against state, employer coverage against
+income. Every question policy works against that ceiling, so that is where the next gain had to come
+from.
+
+**The model.** A wide-and-deep network (`src/decisionintake/neural.py`), written in numpy with its own
+backward pass. The wide part is the same hand-listed indicator terms as the linear model; the deep
+part is two ReLU layers (512 and 256 units) on the one-hot answers, shared by all ten programmes, with
+an eligibility head and a dollars head trained only on households eligible for each programme.
+Dropout 0.4, decoupled weight decay, Adam with a cosine schedule, early stopping on a held-out tenth
+of source households inside the training data, then out-of-fold Platt scaling folded into the last
+layer so the engine can take its probabilities at face value. It trains in about 3 minutes on the CPU.
+Bigger networks without regularisation overfit badly (validation log loss up to 12); the settings
+were picked on validation log loss from eight configurations.
+
+**Validation** (400 households, $15 a question): the engine's mistakes fell from $1,328 to $827 a
+household, and with realistic answers (misreports, "don't know", facts volunteered up front) the
+total cost fell by $377 [−744, −55]. Then everything was frozen and the test registered (D28).
+
+**The pre-registered test.** 2,000 test households that no earlier run had touched, clean answers,
+Holm correction over the primary comparisons:
+
+| policy | questions | mistakes | mistakes + $15 a question |
+|---|---|---|---|
+| **v2 engine** | **8.4** | **$1,017** | **$1,144** |
+| v1 engine | 8.5 | $1,297 | $1,424 |
+| v1 full questionnaire | 18 | $1,356 | $1,626 |
+
+v2 minus v1 engine: −$281 [−437, −142]; v2 minus the v1 full questionnaire: −$483 [−667, −317],
+−$339 [−523, −173] in mistakes alone. Both p < 0.002 after Holm. Resampling whole source households
+(82 of the 1,918 source households contribute two test records) moves the intervals by under $5.
+
+**What it does with what it knows.**
+- Recommendations at 50% or more ("likely") are right 78% of the time and find two thirds of all
+  eligible programmes. Below that, a recommendation means "worth checking": missing a $10,000
+  programme costs ten times a wrong recommendation, so the objective recommends it at a 9% chance,
+  and the page says so.
+- The engine's estimate of its own remaining mistakes is 19% above what it actually gets wrong (it
+  errs on the cautious side), and the 20% of households it is least sure about carry 45% of all
+  mistake cost. That concentration is what makes a hand-off worth having.
+
+**Engineering notes.** After every answer each candidate household is re-scored on the person's own
+answers (completion, D14); only households whose inputs changed are scored again, which is exact
+(tests/test_neural.py checks it against scoring everything). The browser demo runs the same network
+in JavaScript from base64 float32 weights and reproduces numpy's probabilities to 5×10⁻⁶.
+
+## Building the engine: five problems and their fixes
 
 The textbook version did not work. Each failure below was found on a validation split and fixed
 before the test set was touched.
@@ -52,7 +102,7 @@ before the test set was touched.
 5. **Two-question look-ahead added nothing here.** It matters when facts only count together (there is
    a test for that); in this domain one question at a time was enough. It is off by default.
 
-## The held-out test
+## Version 1 on held-out households (D21, D22)
 
 600 households the engine never saw, settings frozen on validation beforehand (D16, D17), wrong
 recommendation costed at $1,000, 95% intervals by paired bootstrap. Loss is the cost of mistakes per
@@ -122,7 +172,7 @@ may come from a weak single order; per-budget fixed sets are tested as a seconda
 estimate of its own remaining loss correlates 0.35 with what it actually loses: useful for triage, not
 a guarantee.
 
-## Does the flexibility pay? (pre-registered, D25)
+## Version 1 against decision trees, and run-time adaptation (D25, D27)
 
 If a good tree matches the engine, the engine's case rests on adapting at run time: facts arriving in
 any order, questions people won't answer, questions that cost more than others. Before running
@@ -209,16 +259,14 @@ exact pipeline.
   be read, and nothing else leaves the page.
 - Not an eligibility determination, and not tested on real people. Populace is a calibrated synthetic
   population; every number is agreement with PolicyEngine on it, under 2026 rules with full take-up.
-- About 45% of the engine's recommendations are for programmes the household can't get. That follows
+- Taken together, 43% of v2's recommendations are for programmes the household can't get. That follows
   from the objective (missing a $10,000 programme costs ten times a wrong recommendation, so it is
-  recommended at a 9% chance) and is why recommendations should be shown with their probability.
-  `experiments/failure_case.py` traces one: a married couple in California with one child, earning
-  $80-100k, no employer insurance. After nine questions the belief gives the ACA premium credit a 36%
-  chance; worth about $10,000 a year when it applies, it pays to recommend above 9%, so the engine
-  recommends it, and PolicyEngine says the household gets nothing. 134 of the engine's 189 ACA
-  recommendations on the test set were wrong this way, and 27 of 31 for CHIP
-  (`results/failure_case_*.txt`). Per-programme operating points, chosen on validation, are the fix
-  a real screener would need.
+  recommended at a 9% chance), which is why the engine shows two tiers: "likely" (right 78% of the
+  time) and "worth checking". `experiments/failure_case.py` traces a v1 case: a married couple in
+  California with one child, earning $80-100k, no employer insurance. After nine questions the belief
+  gives the ACA premium credit a 36% chance; worth about $10,000 a year when it applies, it pays to
+  recommend above 9%, and PolicyEngine says the household gets nothing (`results/failure_case_*.txt`).
+  Per-programme operating points, chosen on validation, are what a real screener would add.
 - No immigration question, by design; it changes Medicaid, CHIP and ACA eligibility, so it remains an
   unasked source of error.
 - The answers in the language test are generated from templates, which are cleaner than real speech.

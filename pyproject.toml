@@ -1,6 +1,6 @@
 [project]
 name = "decisionintake"
-version = "0.1.0"
+version = "0.2.0"
 description = "Tells an AI assistant what to ask next, which answers to trust, and when it knows enough to act or should hand off."
 requires-python = ">=3.11"
 dependencies = ["numpy>=1.26"]

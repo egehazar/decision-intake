@@ -1,265 +1,446 @@
 <title>DecisionIntake</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a working tool. Interview on the left, the engine's belief and reasoning on the right; one column on phones. */
+/* Identity: a decision instrument on warm paper. Serif headlines, a precise mono for every number,
+   one ink-blue accent for the engine, and three signal colours for its verdicts. */
 :root {
-  --bg: #f3f5f7;
-  --panel: #ffffff;
-  --ink: #18222e;
-  --muted: #5b6876;
-  --line: #d9dfe6;
-  --accent: #1f5fa8;
-  --accent-soft: #e3ecf7;
-  --yes: #2a7a4b;
-  --yes-soft: #e2f1e8;
-  --maybe: #9a6a10;
-  --maybe-soft: #f6ecd7;
-  --no: #8a95a1;
-  --font-display: "Public Sans", "Segoe UI", system-ui, sans-serif;
-  --font-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
-  --font-data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  --bg: #f6f4ef; --surface: #fffdf9; --surface-2: #efece4; --ink: #15171c; --ink-2: #474c56; --muted: #7a7f89;
+  --line: #e3dfd5; --grid: rgba(21, 23, 28, 0.045);
+  --accent: #2446c9; --accent-soft: #e6ebfb; --accent-ink: #ffffff;
+  --likely: #0d7a5c; --likely-soft: #e0f2eb; --check: #a86500; --check-soft: #f8ecd6; --handoff: #b03d5a; --handoff-soft: #f8e3e8;
+  --track: #e9e5dc; --shadow: 0 1px 2px rgba(20, 20, 30, .05), 0 8px 28px rgba(20, 20, 30, .06);
+  --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font-body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --font-data: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #11161c; --panel: #18202a; --ink: #e6ebf0; --muted: #9aa7b4; --line: #2a3542;
-    --accent: #7fb0ea; --accent-soft: #1c2d42; --yes: #6fcf97; --yes-soft: #17301f;
-    --maybe: #e0b45a; --maybe-soft: #33291a; --no: #6c7886; color-scheme: dark;
+    --bg: #0d0f13; --surface: #14171e; --surface-2: #1b1f28; --ink: #ecebe6; --ink-2: #b8bbc3; --muted: #858a95;
+    --line: #262a34; --grid: rgba(236, 235, 230, 0.035);
+    --accent: #8aa4ff; --accent-soft: #1b2340; --accent-ink: #0d0f13;
+    --likely: #45c79f; --likely-soft: #12291f; --check: #f0b24a; --check-soft: #2e2413; --handoff: #f2829a; --handoff-soft: #331a21;
+    --track: #232731; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px rgba(0, 0, 0, .25); color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #11161c; --panel: #18202a; --ink: #e6ebf0; --muted: #9aa7b4; --line: #2a3542;
-  --accent: #7fb0ea; --accent-soft: #1c2d42; --yes: #6fcf97; --yes-soft: #17301f;
-  --maybe: #e0b45a; --maybe-soft: #33291a; --no: #6c7886; color-scheme: dark;
+  --bg: #0d0f13; --surface: #14171e; --surface-2: #1b1f28; --ink: #ecebe6; --ink-2: #b8bbc3; --muted: #858a95;
+  --line: #262a34; --grid: rgba(236, 235, 230, 0.035);
+  --accent: #8aa4ff; --accent-soft: #1b2340; --accent-ink: #0d0f13;
+  --likely: #45c79f; --likely-soft: #12291f; --check: #f0b24a; --check-soft: #2e2413; --handoff: #f2829a; --handoff-soft: #331a21;
+  --track: #232731; --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 10px 30px rgba(0, 0, 0, .25); color-scheme: dark;
 }
 * { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
 body {
-  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 24px 48px;
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
 }
-.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 20px; }
-header { display: grid; gap: 6px; }
-h1 { font-family: var(--font-display); font-weight: 800; font-size: 1.9rem; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
-.lede { color: var(--muted); max-width: 68ch; margin: 0; }
-.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 20px; align-items: start; }
-@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
-.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
-.label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-h2 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; margin: 0; }
-.qtext { font-family: var(--font-display); font-size: 1.35rem; font-weight: 600; line-height: 1.3; text-wrap: balance; margin: 0; }
-.options { display: flex; flex-wrap: wrap; gap: 8px; }
-button {
-  font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
-  padding: 8px 12px; cursor: pointer; transition: border-color .12s, background .12s;
-}
-button:hover { border-color: var(--accent); }
-button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-button.primary { background: var(--accent); color: var(--panel); border-color: var(--accent); font-weight: 600; }
-button.ghost { color: var(--muted); }
-.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-textarea { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; resize: vertical; }
-select { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; max-width: 100%; }
-.why { font-size: 0.9rem; color: var(--muted); margin: 0; }
-.status { border-radius: 8px; padding: 12px 14px; background: var(--accent-soft); display: grid; gap: 4px; }
-.status.done { background: var(--yes-soft); }
-.status.handoff { background: var(--maybe-soft); }
-.status strong { font-family: var(--font-display); }
-.history { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-.history li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 0.9rem; }
-.history li:first-child { border-top: 0; }
-.history .ans { font-weight: 600; }
-.history .meta { grid-column: 1 / -1; color: var(--muted); font-size: 0.8rem; font-family: var(--font-data); }
+.band { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.inner { max-width: 1200px; margin: 0 auto; }
+a { color: var(--accent); }
 .num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
-.progs { display: grid; gap: 10px; }
-.prog { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr) 5.2rem; gap: 10px; align-items: center; }
-@media (max-width: 520px) { .prog { grid-template-columns: minmax(0, 1fr) 5.2rem; } .prog .bar { grid-column: 1 / -1; grid-row: 2; } }
-.pname { font-size: 0.9rem; font-weight: 500; }
-.bar { height: 10px; background: var(--bg); border-radius: 5px; overflow: hidden; border: 1px solid var(--line); }
-.bar > i { display: block; height: 100%; background: var(--no); }
-.prog.rec .bar > i { background: var(--yes); }
-.prog.maybe .bar > i { background: var(--maybe); }
-.pval { text-align: right; font-size: 0.82rem; }
-.chip { display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; padding: 1px 7px; border-radius: 999px; margin-left: 6px; vertical-align: 1px; }
-.chip.rec { background: var(--yes-soft); color: var(--yes); }
-.chip.maybe { background: var(--maybe-soft); color: var(--maybe); }
-.sub { font-size: 0.78rem; color: var(--muted); }
+.kicker { font-size: .72rem; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+
+/* top bar */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+.top .inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-block: 12px; flex-wrap: wrap; }
+.mark { display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -.01em; }
+.mark svg { width: 22px; height: 22px; }
+.nav { display: flex; gap: 18px; flex-wrap: wrap; font-size: .88rem; }
+.nav a { color: var(--ink-2); text-decoration: none; }
+.nav a:hover { color: var(--ink); }
+
+/* hero */
+.hero { background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px); background-size: 28px 28px; border-bottom: 1px solid var(--line); }
+.hero .inner { padding-block: 64px 56px; display: grid; gap: 28px; }
+.hero h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(2.6rem, 6.4vw, 5rem); line-height: 1.02; letter-spacing: -.015em; margin: 0; text-wrap: balance; max-width: 15ch; }
+.hero h1 em { font-style: italic; color: var(--accent); }
+.hero .lede { font-size: 1.12rem; color: var(--ink-2); max-width: 62ch; margin: 0; }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 900px) { .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 440px) { .stats { grid-template-columns: minmax(0, 1fr); } }
+.stat { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; display: grid; gap: 4px; box-shadow: var(--shadow); min-width: 0; }
+.stat .v { font-family: var(--font-display); font-size: 2.5rem; line-height: 1; letter-spacing: -.01em; }
+.stat .l { font-weight: 600; font-size: .92rem; }
+.stat .s { font-size: .8rem; color: var(--muted); }
+.ctas { display: flex; gap: 10px; flex-wrap: wrap; }
+
+button, .btn {
+  font: inherit; font-size: .92rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+  padding: 9px 14px; cursor: pointer; transition: border-color .15s, background .15s, transform .15s; text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
+}
+button:hover, .btn:hover { border-color: var(--accent); }
+button:active { transform: translateY(1px); }
+button:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary, .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+button.ghost { background: transparent; color: var(--ink-2); }
+select, textarea { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; max-width: 100%; }
+textarea { width: 100%; resize: vertical; }
+
+/* sections */
+section.sec .inner { padding-block: 56px; display: grid; gap: 24px; }
+.sechead { display: grid; gap: 8px; max-width: 70ch; }
+.sechead h2 { font-family: var(--font-display); font-weight: 400; font-size: clamp(1.9rem, 3.6vw, 2.7rem); line-height: 1.08; margin: 0; text-wrap: balance; letter-spacing: -.01em; }
+.sechead p { margin: 0; color: var(--ink-2); }
+
+/* cockpit */
+.cockpit { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 18px; align-items: start; }
+@media (max-width: 920px) { .cockpit { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow); min-width: 0; }
+.panel > .ph { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; padding: 14px 18px; border-bottom: 1px solid var(--line); }
+.panel > .pb { padding: 16px 18px; display: grid; gap: 14px; }
+.ph h3 { margin: 0; font-size: .95rem; font-weight: 600; }
+.ph .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.sub { font-size: .8rem; color: var(--muted); }
+
+.chat { display: grid; gap: 10px; max-height: 420px; overflow-y: auto; padding-right: 4px; scroll-behavior: smooth; }
+.msg { display: grid; gap: 3px; max-width: 88%; animation: rise .28s ease-out; }
+.msg .b { padding: 9px 13px; border-radius: 14px; font-size: .93rem; }
+.msg.q { justify-self: start; }
+.msg.q .b { background: var(--surface-2); border-top-left-radius: 4px; }
+.msg.a { justify-self: end; text-align: right; }
+.msg.a .b { background: var(--accent); color: var(--accent-ink); border-top-right-radius: 4px; font-weight: 500; }
+.msg.a.read .b { background: var(--accent-soft); color: var(--ink); }
+.msg .m { font-size: .74rem; color: var(--muted); font-family: var(--font-data); }
+.msg.sys { justify-self: center; max-width: 100%; }
+.msg.sys .b { background: transparent; border: 1px dashed var(--line); color: var(--ink-2); font-size: .84rem; text-align: center; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .msg { animation: none; } * { transition: none !important; } html { scroll-behavior: auto; } }
+
+.ask { border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 10px; background: var(--bg); }
+.ask .qtext { font-family: var(--font-display); font-size: 1.55rem; line-height: 1.2; margin: 0; text-wrap: balance; }
+.ask .why { font-size: .82rem; color: var(--ink-2); margin: 0; }
+.ask .why b { color: var(--accent); font-family: var(--font-data); font-weight: 500; }
+.opts { display: flex; flex-wrap: wrap; gap: 7px; }
+.opts button { padding: 7px 11px; font-size: .88rem; border-radius: 999px; }
+.opts button.truth { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.free { display: grid; gap: 8px; }
+.free .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.result { border-radius: 14px; padding: 14px 16px; display: grid; gap: 8px; }
+.result.done { background: var(--likely-soft); }
+.result.handoff { background: var(--handoff-soft); }
+.result h4 { margin: 0; font-family: var(--font-display); font-weight: 400; font-size: 1.45rem; }
+.result ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; font-size: .9rem; }
+.truth-list { display: grid; gap: 4px; font-size: .86rem; border-top: 1px dashed var(--line); padding-top: 8px; }
+
 .meters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 @media (max-width: 520px) { .meters { grid-template-columns: minmax(0, 1fr); } }
-.meter { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
-.meter .big { font-family: var(--font-data); font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+.meter { border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; display: grid; gap: 2px; min-width: 0; }
+.meter .big { font-family: var(--font-data); font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+.meter svg { width: 100%; height: 26px; display: block; }
+
+.progs { display: grid; gap: 9px; }
+.prog { display: grid; grid-template-columns: minmax(0, 12.5rem) minmax(0, 1fr) 3.2rem; gap: 12px; align-items: center; }
+@media (max-width: 560px) { .prog { grid-template-columns: minmax(0, 1fr) 3.2rem; } .prog .bar { grid-column: 1 / -1; grid-row: 2; } }
+.pname { font-size: .88rem; font-weight: 500; line-height: 1.3; }
+.pname .sub { display: block; font-family: var(--font-data); font-size: .72rem; }
+.bar { height: 8px; background: var(--track); border-radius: 4px; overflow: hidden; }
+.bar > i { display: block; height: 100%; width: 0; background: var(--muted); border-radius: 0 4px 4px 0; transition: width .45s cubic-bezier(.2, .7, .2, 1); }
+.prog.likely .bar > i { background: var(--likely); }
+.prog.check .bar > i { background: var(--check); }
+.pval { text-align: right; font-size: .82rem; }
+.chip { display: inline-block; font-size: .66rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; padding: 1px 7px; border-radius: 999px; margin-left: 6px; vertical-align: 1px; }
+.chip.likely { background: var(--likely-soft); color: var(--likely); }
+.chip.check { background: var(--check-soft); color: var(--check); }
+
+.voi { display: grid; gap: 7px; }
+.voirow { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 4.6rem; gap: 10px; align-items: center; font-size: .84rem; position: relative; }
+@media (max-width: 560px) { .voirow { grid-template-columns: minmax(0, 1fr) 4.6rem; } .voirow .vbar { grid-column: 1 / -1; grid-row: 2; } }
+.voirow .qn { color: var(--ink-2); line-height: 1.3; }
+.voirow.pick .qn { color: var(--ink); font-weight: 600; }
+.vbar { position: relative; height: 14px; }
+.vbar > i { position: absolute; left: 0; top: 3px; height: 8px; background: var(--muted); border-radius: 0 4px 4px 0; opacity: .55; transition: width .45s cubic-bezier(.2, .7, .2, 1); }
+.voirow.pick .vbar > i { background: var(--accent); opacity: 1; }
+.vbar > s { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--ink-2); text-decoration: none; }
+.voirow .vv { text-align: right; }
+
+/* how it works */
+.diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; overflow-x: auto; box-shadow: var(--shadow); }
+.diagram svg { display: block; min-width: 860px; width: 100%; height: auto; }
+.cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 980px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .cards { grid-template-columns: minmax(0, 1fr); } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.card .n { font-family: var(--font-data); font-size: .74rem; color: var(--accent); }
+.card h4 { margin: 0; font-size: 1rem; }
+.card p { margin: 0; font-size: .88rem; color: var(--ink-2); }
+
+/* evidence */
+.evgrid { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 920px) { .evgrid { grid-template-columns: minmax(0, 1fr); } }
+.chart { width: 100%; height: auto; display: block; overflow: visible; }
+.chart text { font-family: var(--font-body); fill: var(--ink-2); font-size: 12px; }
+.chart .t-num { font-family: var(--font-data); fill: var(--ink); font-size: 11.5px; }
+.chart .grid { stroke: var(--line); stroke-width: 1; }
+.chart .zero { stroke: var(--ink-2); stroke-width: 1; }
+.chart .ci { stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
+.chart .dot { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.chart .hit { fill: transparent; cursor: default; }
+.chart .barA { fill: var(--muted); }
+.chart .barB { fill: var(--accent); }
+.tip { position: fixed; z-index: 20; pointer-events: none; background: var(--ink); color: var(--bg); font-size: .8rem; padding: 6px 9px; border-radius: 8px; max-width: 280px; opacity: 0; transition: opacity .12s; }
+details.tbl { font-size: .84rem; }
+details.tbl summary { cursor: pointer; color: var(--ink-2); }
 .tablewrap { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+table { border-collapse: collapse; width: 100%; font-size: .84rem; margin-top: 8px; }
 th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
-th { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+th { font-size: .7rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
 td.r, th.r { text-align: right; }
-tr.pick td { background: var(--accent-soft); font-weight: 600; }
-.vol { display: grid; gap: 8px; }
-.vol .row select { flex: 1 1 14rem; min-width: 0; }
-.truth { border-top: 1px dashed var(--line); padding-top: 10px; display: grid; gap: 6px; font-size: 0.88rem; }
-footer { color: var(--muted); font-size: 0.82rem; max-width: 90ch; display: grid; gap: 6px; }
-footer p { margin: 0; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.note { font-size: .84rem; color: var(--ink-2); margin: 0; max-width: 75ch; }
+
+/* scope + footer */
+.scope { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 900px) { .scope { grid-template-columns: minmax(0, 1fr); } }
+footer .inner { padding-block: 28px 56px; display: grid; gap: 8px; color: var(--muted); font-size: .82rem; border-top: 1px solid var(--line); }
+footer p { margin: 0; max-width: 95ch; }
 </style>
 
-<div class="wrap">
-  <header>
-    <span class="label">DecisionIntake · benefits screening demo</span>
-    <h1>Which question should an assistant ask next?</h1>
-    <p class="lede">The engine keeps a belief over thousands of US households, asks the question expected to prevent the most costly mistakes across ten programmes at once, and stops when no question is worth asking. Every number below is computed live in this page.</p>
-  </header>
+<div class="top band"><div class="inner">
+  <div class="mark">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2.6" fill="var(--accent)"/><path d="M7.5 12 H11 M11 12 L16 6.5 M11 12 L16 17.5" stroke="var(--ink)" stroke-width="1.6" fill="none" stroke-linecap="round"/><circle cx="18.5" cy="6.5" r="2.2" fill="var(--likely)"/><circle cx="18.5" cy="17.5" r="2.2" fill="var(--check)"/></svg>
+    DecisionIntake
+  </div>
+  <nav class="nav" aria-label="Sections"><a href="#live">Live engine</a><a href="#how">How it works</a><a href="#evidence">Evidence</a><a href="#scope">Scope</a></nav>
+</div></div>
 
-  <div class="grid">
-    <section class="panel" aria-labelledby="interview-h">
-      <div class="row" style="justify-content: space-between;">
-        <h2 id="interview-h">Interview</h2>
+<section class="hero band"><div class="inner">
+  <span class="kicker">Decision theory × language models · US public benefits</span>
+  <h1>Half the questions. <em>Fewer mistakes.</em></h1>
+  <p class="lede">DecisionIntake tells an AI assistant what to ask next, how far to trust each answer, and when it knows enough to act or should hand off to a person. A language model reads what people say. A decision engine weighs every possible next question by the mistakes it would prevent across ten benefit programmes at once.</p>
+  <div class="stats" id="stats"></div>
+  <div class="ctas">
+    <button class="primary" type="button" id="play-hero">▶ Watch an interview</button>
+    <a class="btn" href="#live">Try it yourself</a>
+  </div>
+</div></section>
+
+<section class="sec band" id="live"><div class="inner">
+  <div class="sechead">
+    <span class="kicker">Live engine · runs entirely in this page</span>
+    <h2>Watch it decide, one question at a time.</h2>
+    <p>Pick an answer, describe your household in your own words, or play a real held-out household. On the right is everything the engine believes, recomputed after every answer: the chance of each programme, and how much each remaining question is worth.</p>
+  </div>
+  <div class="cockpit">
+    <div class="panel" aria-labelledby="iv-h">
+      <div class="ph">
+        <h3 id="iv-h">Interview</h3>
         <div class="row">
           <label class="sub" for="example">Answer as</label>
           <select id="example"><option value="">yourself</option></select>
-          <button class="ghost" id="restart" type="button">Start over</button>
+          <button type="button" id="play" title="Play this household's interview">▶ Play</button>
+          <button type="button" class="ghost" id="restart">Restart</button>
         </div>
       </div>
-
-      <div id="status" class="status" aria-live="polite"></div>
-
-      <div id="ask" class="vol">
-        <p class="qtext" id="qtext"></p>
-        <div class="options" id="options"></div>
-        <p class="why" id="qwhy"></p>
-      </div>
-
-      <div class="vol">
-        <div id="freebox" class="vol" hidden>
-          <label class="label" for="freetext">Or describe your household in your own words</label>
-          <textarea id="freetext" rows="3" placeholder="For example: I'm a single mom in Ohio with two kids, one is 3. I make about $2,400 a month and rent is $1,100."></textarea>
-          <div class="row"><button type="button" id="freego" class="primary">Read it</button><span class="sub" id="freestatus" aria-live="polite"></span></div>
-          <p class="sub">Claude reads your words into answers; the engine's own code does the arithmetic and decides what to ask next.</p>
+      <div class="pb">
+        <div class="chat" id="chat" aria-live="polite"></div>
+        <div class="ask" id="ask">
+          <p class="qtext" id="qtext"></p>
+          <p class="why" id="qwhy"></p>
+          <div class="opts" id="opts"></div>
         </div>
-        <span class="label">Or tell it one fact</span>
-        <div class="row">
-          <select id="volq" aria-label="Fact to volunteer"></select>
-          <select id="vola" aria-label="Your answer"></select>
-          <button type="button" id="volgo">Tell it</button>
+        <div class="result" id="result" hidden></div>
+        <div class="free" id="freebox" hidden>
+          <label class="kicker" for="freetext">Or say it in your own words</label>
+          <textarea id="freetext" rows="2" placeholder="I'm a single mom in Ohio with two kids, one is 3. I make about $2,400 a month and rent is $1,100."></textarea>
+          <div class="row"><button type="button" class="primary" id="freego">Read it</button><span class="sub" id="freestatus" aria-live="polite"></span></div>
+          <span class="sub">Claude turns your words into typed facts (an amount, its period, whether it was approximate). The engine's own code does the arithmetic and decides what to ask next.</span>
         </div>
       </div>
+    </div>
 
-      <div>
-        <span class="label">Answers so far</span>
-        <ol class="history" id="history"></ol>
-      </div>
-    </section>
-
-    <section class="panel" aria-labelledby="belief-h">
-      <h2 id="belief-h">What the engine believes</h2>
-      <div class="meters">
-        <div class="meter"><span class="label">Questions asked</span><span class="big" id="m-q">0</span></div>
-        <div class="meter"><span class="label">Expected cost of mistakes</span><span class="big" id="m-risk">$0</span><span class="sub">per year, if it stopped now</span></div>
-        <div class="meter"><span class="label">Similar households</span><span class="big" id="m-ess">0</span><span class="sub">effective sample behind the estimate</span></div>
-      </div>
-      <div class="progs" id="progs"></div>
-      <div id="truth" class="truth" hidden></div>
-      <div>
-        <span class="label">Why this question</span>
-        <div class="tablewrap">
-          <table>
-            <thead><tr><th>Question</th><th class="r">Expected saving</th><th class="r">Worth asking?</th></tr></thead>
-            <tbody id="voi"></tbody>
-          </table>
+    <div class="panel" aria-labelledby="bel-h">
+      <div class="ph"><h3 id="bel-h">What the engine believes</h3><span class="sub" id="engine-speed"></span></div>
+      <div class="pb">
+        <div class="meters">
+          <div class="meter"><span class="kicker">Questions asked</span><span class="big" id="m-q">0</span><span class="sub">of 18 on the full form</span></div>
+          <div class="meter"><span class="kicker">Expected cost of mistakes</span><span class="big" id="m-risk">$0</span><svg id="spark" viewBox="0 0 120 26" preserveAspectRatio="none" aria-hidden="true"></svg></div>
+          <div class="meter"><span class="kicker">Similar households</span><span class="big" id="m-ess">0</span><span class="sub">behind the estimate</span></div>
         </div>
-        <p class="sub" id="voinote"></p>
+        <div>
+          <span class="kicker">Ten programmes · chance of eligibility</span>
+          <div class="progs" id="progs" style="margin-top:8px"></div>
+        </div>
+        <div>
+          <span class="kicker">What each next question is worth · $ of mistakes prevented a year</span>
+          <div class="voi" id="voi" style="margin-top:8px"></div>
+          <p class="sub" id="voinote" style="margin:8px 0 0"></p>
+        </div>
       </div>
-    </section>
+    </div>
   </div>
+</div></section>
 
-  <footer>
-    <p>Rules: PolicyEngine-US, 2026 rules, everyone assumed to take up what they're entitled to. Households: a resampled slice of PolicyEngine's Populace 2024, a calibrated synthetic population built from census and tax data, not real people. Each household's chance of eligibility comes from a model trained on PolicyEngine's results, scored on your answers where you've given them and on similar households' answers where you haven't. Amounts are estimates, not a determination of eligibility; a real screener must link to the official application.</p>
-    <p>A question is worth asking when the mistakes it is expected to prevent outweigh the cost of asking, here <span class="num" id="lamtxt"></span> a year per question. Missing a programme a household can get costs its value; recommending one it can't costs <span class="num" id="frtxt"></span>. Built by AI agents (Claude, reviewed by GPT and Fable) under Ege Hazar's direction.</p>
-  </footer>
-</div>
+<section class="sec band" id="how" style="background: var(--surface-2); border-block: 1px solid var(--line);"><div class="inner">
+  <div class="sechead">
+    <span class="kicker">How it works</span>
+    <h2>Language in, decisions out, and a number on every doubt.</h2>
+    <p>Each part does only what it is reliable at. The language model never does arithmetic and never decides; the decision engine never parses text.</p>
+  </div>
+  <div class="diagram" role="img" aria-label="Pipeline: a person's words go to the LLM reader, which emits typed evidence; the evidence updates a belief over 48,657 households; a neural outcome model scores each household on the person's answers; value of information prices every question; the engine asks, acts or hands off.">
+    <svg viewBox="0 0 1100 250" id="pipe"></svg>
+  </div>
+  <div class="cards">
+    <div class="card"><span class="n">01 · READ</span><h4>Typed slots, not guesses</h4><p>An LLM fills slots: the amount as stated, its period, whether it was approximate, or "don't know". Code converts "about $2,900 a month" into evidence spread over the right yearly ranges.</p></div>
+    <div class="card"><span class="n">02 · BELIEVE</span><h4>A belief over real households</h4><p>Weights over 48,657 households from PolicyEngine's Populace data, updated through each question's model of how people misreport. A support floor stops it from becoming certain by ruling almost everyone out.</p></div>
+    <div class="card"><span class="n">03 · PREDICT</span><h4>A neural outcome model</h4><p>A wide-and-deep network, written in plain numpy and calibrated out of fold, learns PolicyEngine's eligibility and dollar amounts for all ten programmes at once. Each candidate household is scored on the person's own answers.</p></div>
+    <div class="card"><span class="n">04 · DECIDE</span><h4>Value of information</h4><p>Every unasked question is priced by the expected drop in the cost of mistakes across all ten programmes, with one matrix product per turn. It asks while a question is worth its cost, then acts, or hands off when doubt stays high.</p></div>
+  </div>
+</div></section>
+
+<section class="sec band" id="evidence"><div class="inner">
+  <div class="sechead">
+    <span class="kicker">Evidence · pre-registered, held-out</span>
+    <h2 id="ev-title">Tested on households it had never seen.</h2>
+    <p id="ev-lede"></p>
+  </div>
+  <div class="stats" id="evstats"></div>
+  <div class="evgrid">
+    <div class="panel"><div class="ph"><h3>Total cost per household against each alternative</h3><span class="sub">decision loss + $15 a question · 95% CI</span></div>
+      <div class="pb"><svg class="chart" id="forest" role="img" aria-label="Difference in total cost per household, DecisionIntake minus each alternative, with 95% confidence intervals"></svg>
+        <p class="note" id="forest-note"></p>
+        <details class="tbl"><summary>Table view</summary><div class="tablewrap"><table id="forest-table"></table></div></details>
+      </div></div>
+    <div class="panel"><div class="ph"><h3>Reading people's answers</h3><span class="sub">4B models, fresh amount answers</span></div>
+      <div class="pb"><svg class="chart" id="readers" role="img" aria-label="Share of answers read confidently wrong by each reader"></svg>
+        <p class="note">Asking an LLM to pick a range directly gets one answer in ten confidently wrong. Letting it fill typed slots and doing the arithmetic in code cuts that by a factor of twelve, and the result replicated on fresh answers (D23, D26).</p>
+        <details class="tbl"><summary>Table view</summary><div class="tablewrap"><table id="readers-table"></table></div></details>
+      </div></div>
+  </div>
+</div></section>
+
+<section class="sec band" id="scope" style="border-top: 1px solid var(--line);"><div class="inner">
+  <div class="sechead"><span class="kicker">Scope</span><h2>What the numbers mean.</h2></div>
+  <div class="scope">
+    <div class="card"><h4>Rules and people</h4><p>Eligibility and amounts come from PolicyEngine-US under 2026 rules, assuming everyone takes up what they are entitled to. Households are Populace, a calibrated synthetic population built from census and tax data.</p></div>
+    <div class="card"><h4>A research system</h4><p>Not an eligibility determination: a real screener sends people to the official application. Immigration status is never asked, by design, and is reported as a source of error.</p></div>
+    <div class="card"><h4>How it was tested</h4><p>Settings frozen on a validation split, then scored once on fresh test households with paired bootstrap intervals. Every decision and every withdrawn result is logged in DECISIONS.md.</p></div>
+  </div>
+</div></section>
+
+<footer class="band"><div class="inner">
+  <p id="src"></p>
+  <p>A question is worth asking when the mistakes it is expected to prevent outweigh the cost of asking: <span class="num">$15</span> a year per question. Missing a programme a household can get costs its value; recommending one it can't costs <span class="num">$1,000</span>. Built by AI agents (Claude, reviewed by GPT and Fable) under Ege Hazar's direction.</p>
+</footer>
+<div class="tip" id="tip" role="tooltip"></div>
 
 <script>
-const LAMBDA = 15;          // dollars a year a question must be worth (the cost frozen for testing)
-const MIN_ESS = 10;         // support floor: the belief always rests on at least this many households
-const HANDOFF_RISK = 2500;  // stop with more expected loss than this, and it hands off to a person (illustrative)
-const N_PLAN = 1500;        // resampled households for pair look-ahead
+// ---------------------------------------------------------------- evidence (from results/v2_*.jsonl)
+const EVIDENCE = {
+  heroStats: [
+    { v: "8.4", l: "questions instead of 18", s: "on 2,000 households it had never seen" },
+    { v: "−25%", l: "costly mistakes vs the full form", s: "−$339 a household a year [−523, −173]" },
+    { v: "78%", l: "of “likely” verdicts are right", s: "and they find two thirds of eligible programmes" },
+    { v: "12×", l: "fewer confidently wrong readings", s: "the LLM fills typed slots, code does the maths" },
+  ],
+  evStats: [
+    { v: "−$483", l: "a household a year vs the v1 full form", s: "mistakes + $15 a question · Holm p < 0.002" },
+    { v: "−22%", l: "mistakes vs the v1 engine", s: "same questioning, better prediction" },
+    { v: "45%", l: "of mistake cost in the 20% it is least sure about", s: "what the hand-off routes to a person" },
+    { v: "1.19", l: "its own estimate ÷ its actual mistakes", s: "it errs on the cautious side" },
+  ],
+  lede: "A test registered before it ran: 2,000 synthetic households no earlier run had touched, scored against PolicyEngine's rules. Mistakes are priced in dollars a year: a missed programme at its value, a wrong recommendation at $1,000.",
+  forest: [
+    { name: "v1 engine", sub: "linear outcome model · 8.5 questions", est: -281, lo: -437, hi: -142, q: "8.5", p: "Holm p < 0.002" },
+    { name: "v1 full questionnaire", sub: "all 18 questions, linear model", est: -483, lo: -667, hi: -317, q: "18", p: "Holm p < 0.002" },
+  ],
+  forestNote: "DecisionIntake v2 asked 8.4 questions. Both differences hold after Holm correction and when whole source households are resampled. In mistakes alone, ignoring the cost of asking, v2 is $339 a household a year cheaper than the 18-question form.",
+  readers: [
+    { name: "LLM picks a range", wrong: 10.0, ll: 1.83 },
+    { name: "LLM fills typed slots, code does the arithmetic", wrong: 0.8, ll: 0.617 },
+  ],
+};
 
-let D, N, Q, P, ANS, LSKIP, LREC, VAL, PEL, BT, RT, INIT;
-let S; // session
+// ---------------------------------------------------------------- engine settings (frozen in D16/D25)
+const LAMBDA = 15, MIN_ESS = 10, HANDOFF_RISK = 2500, N_PLAN = 1500;
+let D, N, Q, P, OUT, ANS, LSKIP, LREC, VAL, PEL, INIT, QOFF, WW, W1, B1, W2, B2, W3, SCALE, H1, H2, TERMS;
+let S, PLAY = null;
+const $ = id => document.getElementById(id);
+const fmt$ = v => (v < 0 ? "−" : "") + "$" + Math.round(Math.abs(v)).toLocaleString("en-US");
 
-const fmt$ = v => (v < 0 ? "-" : "") + "$" + Math.round(Math.abs(v)).toLocaleString("en-US");
+function f32(b64) {
+  const bin = atob(b64), buf = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+  return new Float32Array(buf.buffer);
+}
 
 function setup(data) {
-  D = data; N = D.answers.length; Q = D.questions.length; P = D.programmes.length;
+  D = data; N = D.answers.length; Q = D.questions.length; P = D.programmes.length; OUT = 2 * P;
   ANS = new Uint8Array(N * Q); VAL = new Float64Array(N * P); PEL = new Float64Array(N * P);
   LSKIP = new Float64Array(N * P); LREC = new Float64Array(N * P);
   for (let i = 0; i < N; i++) for (let q = 0; q < Q; q++) ANS[i * Q + q] = D.answers[i][q];
-  BT = D.B; RT = D.R;
+  const M = D.model; TERMS = M.terms; H1 = M.H1; H2 = M.H2;
+  WW = f32(M.Ww); W1 = f32(M.W1); B1 = f32(M.b1); W2 = f32(M.W2); B2 = f32(M.b2); W3 = f32(M.W3); SCALE = M.scale;
+  QOFF = new Int32Array(Q); let o = 0; for (let q = 0; q < Q; q++) { QOFF[q] = o; o += D.questions[q].options.length; }
+  const t0 = performance.now();
   INIT = scoreAll(null);
-  document.getElementById("lamtxt").textContent = fmt$(LAMBDA);
-  document.getElementById("frtxt").textContent = fmt$(D.false_rec_cost[0]);
-  const ex = document.getElementById("example");
+  $("engine-speed").textContent = `${N.toLocaleString("en-US")} households scored in ${Math.round(performance.now() - t0)} ms`;
+  selfCheck();
   D.examples.forEach((e, k) => {
-    const o = document.createElement("option"); o.value = String(k);
+    const opt = document.createElement("option"); opt.value = String(k);
     const a = e.answers, qi = id => D.questions.findIndex(q => q.id === id);
-    o.textContent = `example ${k + 1}: ${D.questions[qi("state")].options[a[qi("state")]]}, ${D.questions[qi("household_size")].options[a[qi("household_size")]]} people`;
-    ex.appendChild(o);
+    opt.textContent = `household ${k + 1}: ${D.questions[qi("state")].options[a[qi("state")]]}, ${D.questions[qi("household_size")].options[a[qi("household_size")]]} ${a[qi("household_size")] === 0 ? "person" : "people"}`;
+    $("example").appendChild(opt);
   });
-  const vq = document.getElementById("volq");
-  D.questions.forEach((q, j) => { const o = document.createElement("option"); o.value = String(j); o.textContent = q.text; vq.appendChild(o); });
-  vq.addEventListener("change", fillVolAnswers); fillVolAnswers();
-  document.getElementById("volgo").addEventListener("click", () => {
-    const j = +vq.value, b = +document.getElementById("vola").value;
-    if (S.asked.has(j)) return;
-    answer(j, b, "told"); render();
-  });
-  document.getElementById("restart").addEventListener("click", start);
-  document.getElementById("freego").addEventListener("click", readFreeText);
-  ex.addEventListener("change", start);
+  $("restart").addEventListener("click", () => { stopPlay(); start(); });
+  $("example").addEventListener("change", () => { stopPlay(); start(); });
+  $("play").addEventListener("click", () => play(false));
+  $("play-hero").addEventListener("click", () => { $("live").scrollIntoView({ behavior: "smooth" }); play(true); });
+  $("freego").addEventListener("click", readFreeText);
+  $("src").textContent = "Data: " + D.source + ".";
   start();
 }
 
-function fillVolAnswers() {
-  const j = +document.getElementById("volq").value, va = document.getElementById("vola");
-  va.innerHTML = "";
-  D.questions[j].options.forEach((o, b) => { const e = document.createElement("option"); e.value = String(b); e.textContent = o; va.appendChild(e); });
+// Python reference rows: the page must reproduce the model's probabilities exactly (float32).
+function selfCheck() {
+  if (!D.check) return;
+  let worst = 0;
+  for (let r = 0; r < D.check.p.length; r++) {
+    const hyb = new Uint8Array(Q); for (let q = 0; q < Q; q++) hyb[q] = ANS[r * Q + q];
+    const [p] = forward(hyb);
+    for (let d = 0; d < P; d++) worst = Math.max(worst, Math.abs(p[d] - D.check.p[r][d]));
+  }
+  console.log(`[DecisionIntake] model self-check: max |p - python| = ${worst.toExponential(2)}`);
 }
 
-function start() {
-  S = { loglik: new Float64Array(N), w: new Float64Array(N).fill(1 / N), asked: new Map(), history: [], nAsked: 0, done: false };
-  PEL.set(INIT[0]); VAL.set(INIT[1]); LSKIP.set(INIT[2]); LREC.set(INIT[3]);
-  S.example = document.getElementById("example").value === "" ? null : D.examples[+document.getElementById("example").value];
-  render();
+// Wide-and-deep forward pass (decisionintake/neural.py), calibration folded into the weights.
+const OBUF = new Float32Array(32), HB1 = new Float32Array(1024), HB2 = new Float32Array(1024);
+function forward(hyb) {
+  OBUF.fill(0, 0, OUT);
+  for (const t of TERMS) {
+    let col = t.off; for (let k = 0; k < t.qs.length; k++) col += hyb[t.qs[k]] * t.strides[k];
+    const base = col * OUT; for (let k = 0; k < OUT; k++) OBUF[k] += WW[base + k];
+  }
+  for (let k = 0; k < H1; k++) HB1[k] = B1[k];
+  for (let q = 0; q < Q; q++) { const base = (QOFF[q] + hyb[q]) * H1; for (let k = 0; k < H1; k++) HB1[k] += W1[base + k]; }
+  for (let m = 0; m < H2; m++) HB2[m] = B2[m];
+  for (let k = 0; k < H1; k++) { const a = HB1[k]; if (a <= 0) continue; const base = k * H2; for (let m = 0; m < H2; m++) HB2[m] += a * W2[base + m]; }
+  for (let m = 0; m < H2; m++) { const a = HB2[m]; if (a <= 0) continue; const base = m * OUT; for (let k = 0; k < OUT; k++) OBUF[k] += a * W3[base + k]; }
+  const p = new Float64Array(P), v = new Float64Array(P);
+  for (let d = 0; d < P; d++) { p[d] = 1 / (1 + Math.exp(-OBUF[d])); v[d] = Math.max(OBUF[P + d] * SCALE[d], 0); }
+  return [p, v];
 }
-
-// Outcome model: score household i on its answers, except that answered questions take the
-// person's answer (unless the household's own answer fits the evidence just as well).
 function scoreOne(i, hyb) {
-  const terms = D.terms;
-  const logit = new Float64Array(P), dollars = new Float64Array(P);
-  for (const t of terms) {
-    let col = t.off;
-    for (let k = 0; k < t.qs.length; k++) col += hyb[t.qs[k]] * t.strides[k];
-    const b = BT[col], r = RT[col];
-    for (let d = 0; d < P; d++) { logit[d] += b[d]; dollars[d] += r[d]; }
-  }
+  const [p, v] = forward(hyb);
   for (let d = 0; d < P; d++) {
-    const p = 1 / (1 + Math.exp(-logit[d])), v = Math.max(dollars[d], 0);
-    PEL[i * P + d] = p; VAL[i * P + d] = v;
-    LSKIP[i * P + d] = p * Math.max(v, D.miss_floor[d]);
-    LREC[i * P + d] = (1 - p) * D.false_rec_cost[d];
+    PEL[i * P + d] = p[d]; VAL[i * P + d] = v[d];
+    LSKIP[i * P + d] = p[d] * Math.max(v[d], D.miss_floor[d]);
+    LREC[i * P + d] = (1 - p[d]) * D.false_rec_cost[d];
   }
 }
+// Completion: answered questions take the person's answer unless the household's own answer fits the evidence.
 function scoreAll(asked) {
   const hyb = new Uint8Array(Q);
   let mx = 0; if (asked) for (let i = 0; i < N; i++) if (S.w[i] > mx) mx = S.w[i];
   for (let i = 0; i < N; i++) {
-    if (asked && S.w[i] <= 1e-9 * mx) continue; // carries no weight: stale scores can't matter
+    if (asked && S.w[i] <= 1e-9 * mx) continue;
     for (let q = 0; q < Q; q++) hyb[q] = ANS[i * Q + q];
     if (asked) for (const [j, ev] of asked) {
       let mxe = -Infinity, mne = Infinity, arg = 0;
       for (let b = 0; b < ev.length; b++) { if (ev[b] > mxe) { mxe = ev[b]; arg = b; } if (ev[b] < mne) mne = ev[b]; }
-      if (mxe - mne <= 0) continue; // "I don't know": keep the household's own answer
-      if (ev[hyb[j]] < 0.5 * mxe) hyb[j] = arg; // the household's own answer doesn't fit what was said
+      if (mxe - mne <= 0) continue;
+      if (ev[hyb[j]] < 0.5 * mxe) hyb[j] = arg;
     }
     scoreOne(i, hyb);
   }
@@ -285,22 +466,23 @@ function reweight() {
   S.w = w; S.tau = tau;
 }
 
-// Evidence over a question's options: ev[b] = P(what was said | person would report option b).
 function observe(j, ev, source, label) {
-  const noise = D.questions[j].noise, B = ev.length; // noise[a][b] = P(report b | true a)
+  const noise = D.questions[j].noise;
+  const before = risk(S.w);
   const perTrue = noise.map(row => row.reduce((acc, v, b) => acc + v * ev[b], 0));
   for (let i = 0; i < N; i++) { const p = perTrue[ANS[i * Q + j]]; S.loglik[i] += p > 0 ? Math.log(p) : -Infinity; }
   const prev = S.asked.get(j);
   S.asked.set(j, prev ? prev.map((v, b) => v * ev[b]) : Array.from(ev));
   reweight();
   scoreAll(S.asked);
-  S.history.push({ j, label, source, risk: risk(S.w) });
+  const after = risk(S.w);
+  S.history.push({ j, label, source, before, after });
+  S.risks.push(after);
 }
 function answer(j, b, source) {
   const ev = D.questions[j].options.map((_, k) => (k === b ? 1 : 0));
   observe(j, ev, source, D.questions[j].options[b]);
 }
-// An amount interval, in the question's own unit, spread over its ranges by overlap (as in Python).
 function intervalEvidence(q, low, high) {
   const e = q.edges, B = q.options.length;
   if (high < low) [low, high] = [high, low];
@@ -341,7 +523,6 @@ function voiTable() {
 }
 
 function pairBest(cands) {
-  // systematic resample, then joint grouping of every pair
   const c = new Float64Array(N); let acc = 0; for (let i = 0; i < N; i++) { acc += S.w[i]; c[i] = acc; }
   const idx = new Int32Array(N_PLAN); let k = 0; const u0 = 0.5 / N_PLAN;
   for (let m = 0; m < N_PLAN; m++) { const u = u0 + m / N_PLAN; while (k < N - 1 && c[k] < u) k++; idx[m] = k; }
@@ -351,15 +532,15 @@ function pairBest(cands) {
   const now = rsT / N_PLAN;
   let best = null;
   for (let x = 0; x < cands.length; x++) for (let y = x + 1; y < cands.length; y++) {
-    const q1 = cands[x], q2 = cands[y], B1 = D.questions[q1].options.length, B2 = D.questions[q2].options.length;
-    const agg = new Float64Array(B1 * B2 * 2 * P);
-    for (const i of idx) { const cell = ANS[i * Q + q1] * B2 + ANS[i * Q + q2];
+    const q1 = cands[x], q2 = cands[y], Bq1 = D.questions[q1].options.length, Bq2 = D.questions[q2].options.length;
+    const agg = new Float64Array(Bq1 * Bq2 * 2 * P);
+    for (const i of idx) { const cell = ANS[i * Q + q1] * Bq2 + ANS[i * Q + q2];
       for (let d = 0; d < P; d++) { agg[(cell * 2) * P + d] += LSKIP[i * P + d]; agg[(cell * 2 + 1) * P + d] += LREC[i * P + d]; } }
     const M1 = D.questions[q1].noise, M2 = D.questions[q2].noise; let post = 0;
-    for (let b1 = 0; b1 < B1; b1++) for (let b2 = 0; b2 < B2; b2++) for (let d = 0; d < P; d++) {
+    for (let b1 = 0; b1 < Bq1; b1++) for (let b2 = 0; b2 < Bq2; b2++) for (let d = 0; d < P; d++) {
       let s = 0, r = 0;
-      for (let a1 = 0; a1 < B1; a1++) { const m1 = M1[a1][b1]; if (!m1) continue;
-        for (let a2 = 0; a2 < B2; a2++) { const m = m1 * M2[a2][b2]; if (!m) continue; const cell = a1 * B2 + a2;
+      for (let a1 = 0; a1 < Bq1; a1++) { const m1 = M1[a1][b1]; if (!m1) continue;
+        for (let a2 = 0; a2 < Bq2; a2++) { const m = m1 * M2[a2][b2]; if (!m) continue; const cell = a1 * Bq2 + a2;
           s += m * agg[(cell * 2) * P + d]; r += m * agg[(cell * 2 + 1) * P + d]; } }
       post += Math.min(s, r);
     }
@@ -395,109 +576,153 @@ function beliefs() {
   }
   return out;
 }
-
 function essNow() { let s = 0; for (let i = 0; i < N; i++) s += S.w[i] * S.w[i]; return 1 / s; }
+// The model's dollars for a programme can be tiny where eligibility is marginal; say so instead of "$0-$0".
+const range$ = b => (b.hi < 120 ? "a small amount a year" : `${fmt$(Math.max(b.lo, 0))}–${fmt$(b.hi)} a year`);
+const tier = b => (b.rec ? (b.p >= 0.5 ? "likely" : "check") : "");
+
+// ---------------------------------------------------------------- session + rendering
+function start() {
+  S = { loglik: new Float64Array(N), w: new Float64Array(N).fill(1 / N), asked: new Map(), history: [], done: false, risks: [] };
+  PEL.set(INIT[0]); VAL.set(INIT[1]); LSKIP.set(INIT[2]); LREC.set(INIT[3]);
+  S.risks.push(risk(S.w));
+  const ex = $("example").value;
+  S.example = ex === "" ? null : D.examples[+ex];
+  $("chat").innerHTML = "";
+  sys(S.example ? `Answering as held-out household ${+ex + 1}. Its true answers are outlined; PolicyEngine's verdict appears at the end.` : "Answer below, or describe your household in your own words.");
+  render();
+}
+
+function sys(text) { const d = document.createElement("div"); d.className = "msg sys"; d.innerHTML = `<div class="b"></div>`; d.firstChild.textContent = text; $("chat").appendChild(d); }
+function bubbleQ(text, meta) { const d = document.createElement("div"); d.className = "msg q"; d.innerHTML = `<div class="b"></div><div class="m"></div>`; d.children[0].textContent = text; d.children[1].textContent = meta; $("chat").appendChild(d); }
+function bubbleA(text, meta, read) { const d = document.createElement("div"); d.className = "msg a" + (read ? " read" : ""); d.innerHTML = `<div class="b"></div><div class="m"></div>`; d.children[0].textContent = text; d.children[1].textContent = meta; $("chat").appendChild(d); }
+function scrollChat() { const c = $("chat"); c.scrollTop = c.scrollHeight; }
+
+function respond(nq, b, label, dontKnow) {
+  const q = D.questions[nq.j];
+  bubbleQ(q.text, `worth ${fmt$(nq.v)} a year in prevented mistakes`);
+  if (dontKnow) observe(nq.j, q.options.map(() => 1), "asked", "I don't know");
+  else answer(nq.j, b, "asked");
+  const h = S.history[S.history.length - 1];
+  bubbleA(label, `expected mistakes ${fmt$(h.before)} → ${fmt$(h.after)}`, false);
+  render(); scrollChat();
+}
 
 function render() {
   const table = voiTable();
   const nq = S.done ? null : nextQuestion(table);
-  const r = risk(S.w), ess = essNow();
-  document.getElementById("m-q").textContent = String(S.history.filter(h => h.source === "asked").length);
-  document.getElementById("m-risk").textContent = fmt$(r);
-  document.getElementById("m-ess").textContent = Math.round(ess).toLocaleString("en-US");
+  S.next = nq;
+  const r = risk(S.w), ess = essNow(), asked = S.history.filter(h => h.source === "asked").length;
+  $("m-q").textContent = String(asked);
+  $("m-risk").textContent = fmt$(r);
+  $("m-ess").textContent = Math.round(ess).toLocaleString("en-US");
+  spark();
 
-  // status + current question
-  const st = document.getElementById("status"), ask = document.getElementById("ask");
+  const B = beliefs();
   if (!nq) {
-    S.done = true; ask.hidden = true;
-    if (r > HANDOFF_RISK) {
-      st.className = "status handoff";
-      st.innerHTML = `<strong>Hand off to a person.</strong><span>No remaining question is worth asking, but about ${fmt$(r)} a year of possible mistakes is left. A caseworker should check this household.</span>`;
-    } else {
-      st.className = "status done";
-      st.innerHTML = `<strong>Done after ${S.history.filter(h => h.source === "asked").length} questions.</strong><span>No remaining question is expected to prevent more than ${fmt$(LAMBDA)} a year of mistakes.</span>`;
+    S.done = true; $("ask").hidden = true;
+    const res = $("result"); res.hidden = false;
+    const recs = B.filter(b => b.rec).sort((a, b) => b.p - a.p);
+    const items = recs.map(b => `<li><strong>${D.programmes[b.d].label}</strong> · ${b.p >= 0.5 ? "likely" : "worth checking"} · <span class="num">${range$(b)}</span> if eligible</li>`).join("");
+    const hand = r > HANDOFF_RISK;
+    res.className = "result " + (hand ? "handoff" : "done");
+    res.innerHTML = `<span class="kicker">${hand ? "Hand off to a person" : "Done"}</span>
+      <h4>${hand ? `Still ${fmt$(r)} of possible mistakes. A caseworker should take it from here.` : `Done after ${asked} question${asked === 1 ? "" : "s"}.`}</h4>
+      <span class="sub">${hand ? "No remaining question is worth asking, but the doubt that is left is costly." : `No remaining question is expected to prevent more than ${fmt$(LAMBDA)} a year of mistakes.`}</span>
+      ${recs.length ? `<ul>${items}</ul>` : `<span>No programme is worth applying for on what it knows.</span>`}
+      <div id="truth"></div>`;
+    if (S.example) {
+      const lines = D.programmes.map((p, d) => {
+        const v = S.example.value[d], el = v >= 120, rec = B[d].rec;
+        if (!el && !rec) return null;
+        const verdict = el && rec ? "✓ found" : el ? "✗ missed" : "✗ recommended, not eligible";
+        return `<div><strong>${p.label}</strong>: ${el ? fmt$(v) + " a year" : "not eligible"} · <span class="sub">${verdict}</span></div>`;
+      }).filter(Boolean);
+      $("truth").className = "truth-list";
+      $("truth").innerHTML = `<span class="kicker">What PolicyEngine says for this household</span>` + (lines.length ? lines.join("") : `<div>Not eligible for any of the ten, and nothing was recommended. ✓</div>`);
     }
   } else {
-    ask.hidden = false; st.className = "status";
-    st.innerHTML = nq.reason === "pair"
-      ? `<strong>No single question pays on its own, but a pair does.</strong><span>Together with “${D.questions[nq.partner].text}”, this is expected to prevent ${fmt$(nq.v)} a year of mistakes.</span>`
-      : `<strong>Next: the question expected to prevent the most mistakes.</strong><span>About ${fmt$(nq.v)} a year, more than the ${fmt$(LAMBDA)} a question costs.</span>`;
+    $("ask").hidden = false; $("result").hidden = true;
     const q = D.questions[nq.j];
-    document.getElementById("qtext").textContent = q.text;
-    const opts = document.getElementById("options"); opts.innerHTML = "";
+    $("qtext").textContent = q.text;
+    $("qwhy").innerHTML = nq.reason === "pair"
+      ? `No single question pays alone, but with “${esc(D.questions[nq.partner].text)}” this pair is worth <b>${fmt$(nq.v)}</b> a year.`
+      : `Expected to prevent <b>${fmt$(nq.v)}</b> a year of mistakes, more than the ${fmt$(LAMBDA)} a question costs.`;
+    const opts = $("opts"); opts.innerHTML = "";
     const truth = S.example ? S.example.answers[nq.j] : null;
     q.options.forEach((o, b) => {
       const btn = document.createElement("button"); btn.type = "button"; btn.textContent = o;
-      if (truth === b) btn.className = "primary";
-      btn.addEventListener("click", () => { answer(nq.j, b, "asked"); render(); });
+      if (truth === b) btn.className = "truth";
+      btn.addEventListener("click", () => { stopPlay(); respond(nq, b, o, false); });
       opts.appendChild(btn);
     });
     const dk = document.createElement("button"); dk.type = "button"; dk.className = "ghost"; dk.textContent = "I don't know";
-    dk.addEventListener("click", () => { observe(nq.j, q.options.map(() => 1), "asked", "I don't know"); render(); });
+    dk.addEventListener("click", () => { stopPlay(); respond(nq, 0, "I don't know", true); });
     opts.appendChild(dk);
-    document.getElementById("qwhy").textContent = S.example ? "Answering as an example household: its true answer is highlighted." : "";
   }
 
-  // history
-  const hist = document.getElementById("history"); hist.innerHTML = "";
-  let prev = null;
-  S.history.forEach((h, k) => {
-    const li = document.createElement("li"); const q = D.questions[h.j];
-    const ans = h.label;
-    const before = k === 0 ? null : S.history[k - 1].risk;
-    li.innerHTML = `<span>${q.text}</span><span class="ans"></span><span class="meta"></span>`;
-    li.querySelector(".ans").textContent = ans;
-    li.querySelector(".meta").textContent = (h.source === "told" ? "volunteered · " : h.source === "read" ? "read from your words · " : "") + `expected cost of mistakes now ${fmt$(h.risk)}`;
-    hist.appendChild(li);
-  });
-  if (!S.history.length) { const li = document.createElement("li"); li.innerHTML = `<span class="sub">Nothing yet. Answer the question above, or tell it a fact first.</span>`; hist.appendChild(li); }
-
-  // programmes
-  const progs = document.getElementById("progs"); progs.innerHTML = "";
-  beliefs().forEach(b => {
-    const cls = b.rec ? (b.p > 0.75 ? "rec" : "maybe") : "";
-    const div = document.createElement("div"); div.className = "prog " + cls;
-    const chip = b.rec ? (b.p > 0.75 ? `<span class="chip rec">likely</span>` : `<span class="chip maybe">worth checking</span>`) : "";
-    div.innerHTML = `<div class="pname">${D.programmes[b.d].label}${chip}<div class="sub num">${b.p > 0.02 ? fmt$(b.lo) + "–" + fmt$(b.hi) + " a year if eligible" : "unlikely"}</div></div>
-      <div class="bar" role="img" aria-label="${Math.round(b.p * 100)} percent chance of eligibility"><i style="width:${(b.p * 100).toFixed(1)}%"></i></div>
+  const progs = $("progs"); progs.innerHTML = "";
+  B.forEach(b => {
+    const t = tier(b);
+    const div = document.createElement("div"); div.className = "prog " + t;
+    const chip = t ? `<span class="chip ${t}">${t === "likely" ? "likely" : "check"}</span>` : "";
+    div.innerHTML = `<div class="pname">${D.programmes[b.d].label}${chip}<span class="sub">${b.p > 0.02 ? range$(b) + " if eligible" : "unlikely"}</span></div>
+      <div class="bar" role="img" aria-label="${Math.round(b.p * 100)} percent chance of eligibility"><i></i></div>
       <div class="pval num">${Math.round(b.p * 100)}%</div>`;
     progs.appendChild(div);
+    requestAnimationFrame(() => { div.querySelector(".bar > i").style.width = (b.p * 100).toFixed(1) + "%"; });
   });
 
-  // truth for examples, once done
-  const tr = document.getElementById("truth");
-  if (S.done && S.example) {
-    tr.hidden = false;
-    const recs = beliefs();
-    const lines = D.programmes.map((p, d) => {
-      const v = S.example.value[d], el = v >= 120, rec = recs[d].rec;
-      if (!el && !rec) return null;
-      const verdict = el && rec ? "found" : el ? "missed" : "recommended, but not eligible";
-      return `<div><strong>${p.label}</strong>: ${el ? fmt$(v) + " a year" : "not eligible"} · <span class="sub">${verdict}</span></div>`;
-    }).filter(Boolean);
-    tr.innerHTML = `<span class="label">What PolicyEngine says for this household</span>` + (lines.length ? lines.join("") : `<div>Not eligible for any of the ten, and nothing was recommended.</div>`);
-  } else tr.hidden = true;
-
-  // VOI table
-  const tb = document.getElementById("voi"); tb.innerHTML = "";
-  table.slice(0, 6).forEach(row => {
-    const t = document.createElement("tr"); if (nq && row.j === nq.j) t.className = "pick";
-    t.innerHTML = `<td></td><td class="r num">${fmt$(row.v)}</td><td class="r">${row.v > LAMBDA ? "yes" : "no"}</td>`;
-    t.firstChild.textContent = D.questions[row.j].text;
-    tb.appendChild(t);
+  const voi = $("voi"); voi.innerHTML = "";
+  const top = table.slice(0, 6), vmax = Math.max(LAMBDA * 1.6, ...top.map(t => t.v));
+  top.forEach(row => {
+    const div = document.createElement("div"); div.className = "voirow" + (nq && row.j === nq.j ? " pick" : "");
+    div.innerHTML = `<span class="qn"></span><span class="vbar"><i></i><s style="left:${(LAMBDA / vmax * 100).toFixed(1)}%"></s></span><span class="vv num">${fmt$(row.v)}</span>`;
+    div.querySelector(".qn").textContent = D.questions[row.j].text;
+    voi.appendChild(div);
+    requestAnimationFrame(() => { div.querySelector(".vbar > i").style.width = (Math.max(row.v, 0) / vmax * 100).toFixed(1) + "%"; });
   });
-  document.getElementById("voinote").textContent = table.length
-    ? `Expected saving: how much the cost of mistakes is expected to drop once the answer is known, averaged over every answer the belief still allows. ${table.length > 6 ? (table.length - 6) + " more questions are worth less." : ""}`
+  $("voinote").textContent = table.length
+    ? `The thin line is the $${LAMBDA} a question costs. A question is asked only if it clears it${table.length > 6 ? `; ${table.length - 6} more are worth less` : ""}.`
     : "Every question has been answered.";
 }
 
+function spark() {
+  const r = S.risks, svg = $("spark");
+  if (r.length < 2) { svg.innerHTML = ""; return; }
+  const mx = Math.max(...r), mn = Math.min(...r, 0), W = 120, H = 26, x = i => (i / (r.length - 1)) * (W - 4) + 2, y = v => H - 3 - ((v - mn) / (mx - mn || 1)) * (H - 6);
+  const pts = r.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  svg.innerHTML = `<polyline points="${pts}" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;
+}
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+// ---------------------------------------------------------------- autoplay a held-out household
+function play(random) {
+  stopPlay();
+  if (random || $("example").value === "") $("example").value = String(Math.floor(Math.random() * D.examples.length));
+  start();
+  $("play").textContent = "■ Stop";
+  const step = () => {
+    if (!PLAY) return;
+    if (S.done || !S.next) { stopPlay(); return; }
+    const b = S.example.answers[S.next.j];
+    respond(S.next, b, D.questions[S.next.j].options[b], false);
+    PLAY = setTimeout(step, 1100);
+  };
+  PLAY = setTimeout(step, 700);
+  $("play").onclick = () => { if (PLAY) stopPlay(); else play(false); };
+}
+function stopPlay() { if (PLAY) clearTimeout(PLAY); PLAY = null; $("play").textContent = "▶ Play"; $("play").onclick = () => play(false); }
+
+// ---------------------------------------------------------------- free text, read by Claude into typed slots
 let SAMPLE = null;
 if (window.claude && window.claude.use) {
-  window.claude.use("sample").then(sm => { SAMPLE = sm; document.getElementById("freebox").hidden = !sm; }).catch(() => {});
+  window.claude.use("sample").then(sm => { SAMPLE = sm; $("freebox").hidden = !sm; }).catch(() => {});
 }
 async function readFreeText() {
-  const text = document.getElementById("freetext").value.trim(), st = document.getElementById("freestatus");
-  if (!text || !SAMPLE) return;
+  stopPlay();
+  const text = $("freetext").value.trim(), st = $("freestatus");
+  if (!text || !SAMPLE || S.done) return;
   const qs = D.questions.map(q => q.edges
     ? { id: q.id, question: q.text, kind: "amount", unit: q.per ? "per " + q.per : "total" }
     : { id: q.id, question: q.text, options: q.options });
@@ -513,6 +738,7 @@ async function readFreeText() {
     st.textContent = e && e.code === "not_granted" ? "Reading free text isn't available here. Use the questions instead." : "Couldn't read that. Try again, or answer the questions.";
     return;
   }
+  bubbleA(text, "read by Claude into typed facts", true);
   let n = 0;
   for (const f of (out && out.facts) || []) {
     const j = D.questions.findIndex(q => q.id === f.id);
@@ -524,21 +750,115 @@ async function readFreeText() {
       const factor = q.per ? (PER_YEAR[f.period] || PER_YEAR[q.per]) / PER_YEAR[q.per] : 1;
       lo *= factor; hi *= factor;
       if (f.approximate) { lo *= 0.85; hi *= 1.15; }
-      const ev = intervalEvidence(q, lo, hi);
-      const top = ev.indexOf(Math.max(...ev));
+      const ev = intervalEvidence(q, lo, hi), top = ev.indexOf(Math.max(...ev));
       observe(j, ev, "read", (f.approximate ? "about " : "") + q.options[top]);
     } else {
       const b = q.options.findIndex(o => o.toLowerCase() === String(f.option || "").toLowerCase());
       if (b < 0) continue;
       answer(j, b, "read");
     }
+    const h = S.history[S.history.length - 1];
+    sys(`${q.text} → ${h.label}`);
     n++;
   }
-  st.textContent = n ? `Read ${n} answer${n > 1 ? "s" : ""} from your words.` : "Nothing in that answered a question. Try adding details, or answer the questions.";
-  render();
+  st.textContent = n ? `Read ${n} fact${n > 1 ? "s" : ""} from your words.` : "Nothing in that answered a question. Add details, or answer the questions.";
+  render(); scrollChat();
 }
 
+// ---------------------------------------------------------------- static parts: stats, diagram, charts
+function stats(el, list) {
+  $(el).innerHTML = list.map(s => `<div class="stat"><span class="v">${s.v}</span><span class="l">${s.l}</span><span class="s">${s.s}</span></div>`).join("");
+}
+
+function diagram() {
+  const nodes = [
+    { x: 10, t: "Person's words", s: ["“about $2,900 a month,", "two kids, Ohio”"], k: "in" },
+    { x: 230, t: "LLM reader", s: ["fills typed slots:", "amount · period · approx."], k: "llm" },
+    { x: 450, t: "Belief", s: ["weights over 48,657", "real-data households"], k: "eng" },
+    { x: 670, t: "Neural outcome model", s: ["P(eligible), $ if eligible", "× 10 programmes"], k: "eng" },
+    { x: 890, t: "Value of information", s: ["prices every question", "in $ of mistakes"], k: "eng" },
+  ];
+  const fill = { in: "var(--surface-2)", llm: "var(--check-soft)", eng: "var(--accent-soft)" };
+  let g = `<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--ink-2)"/></marker></defs>`;
+  nodes.forEach((n, i) => {
+    g += `<rect x="${n.x}" y="40" width="200" height="96" rx="14" fill="${fill[n.k]}" stroke="var(--line)"/>`;
+    g += `<text x="${n.x + 16}" y="72" style="font: 600 15px var(--font-body); fill: var(--ink)">${n.t}</text>`;
+    n.s.forEach((s, k) => { g += `<text x="${n.x + 16}" y="${96 + k * 19}" style="font: 400 12.5px var(--font-body); fill: var(--ink-2)">${esc(s)}</text>`; });
+    if (i < nodes.length - 1) g += `<line x1="${n.x + 202}" y1="88" x2="${nodes[i + 1].x - 4}" y2="88" stroke="var(--ink-2)" stroke-width="1.5" marker-end="url(#ah)"/>`;
+  });
+  // outcomes of the decision step
+  const outs = [{ y: 172, t: "ASK the best question", c: "var(--accent)" }, { y: 198, t: "ACT: recommend, tiered", c: "var(--likely)" }, { y: 224, t: "HAND OFF if doubt is costly", c: "var(--handoff)" }];
+  g += `<line x1="906" y1="138" x2="906" y2="${outs[2].y - 4}" stroke="var(--ink-2)" stroke-width="1.2"/>`;
+  outs.forEach(o => {
+    g += `<line x1="906" y1="${o.y - 4}" x2="918" y2="${o.y - 4}" stroke="var(--ink-2)" stroke-width="1.2"/>`;
+    g += `<circle cx="925" cy="${o.y - 4}" r="4.5" fill="${o.c}"/><text x="936" y="${o.y}" style="font: 600 12px var(--font-body); fill: var(--ink)">${o.t}</text>`;
+  });
+  // loop back: the next answer
+  g += `<path d="M990 40 V18 H330 V36" fill="none" stroke="var(--accent)" stroke-width="1.5" stroke-dasharray="0" marker-end="url(#ah)"/>`;
+  g += `<text x="660" y="13" text-anchor="middle" style="font: 500 12px var(--font-body); fill: var(--accent)">ask → the next answer comes back through the reader</text>`;
+  g += `<text x="10" y="180" style="font: 400 12.5px var(--font-body); fill: var(--ink-2)">The LLM only reads. Every probability, every dollar and every stop decision is computed by code,</text>`;
+  g += `<text x="10" y="200" style="font: 400 12.5px var(--font-body); fill: var(--ink-2)">so each one can be checked, and the engine's own estimate of its remaining mistakes is a number you can audit.</text>`;
+  $("pipe").innerHTML = g;
+}
+
+const tip = $("tip");
+function hover(el, html) {
+  el.addEventListener("pointermove", e => { tip.innerHTML = html; tip.style.opacity = 1; tip.style.left = Math.min(e.clientX + 14, innerWidth - 300) + "px"; tip.style.top = (e.clientY + 14) + "px"; });
+  el.addEventListener("pointerleave", () => { tip.style.opacity = 0; });
+}
+
+function forest() {
+  const rows = EVIDENCE.forest, svg = $("forest");
+  if (!rows.length) { svg.setAttribute("viewBox", "0 0 600 40"); svg.innerHTML = `<text x="0" y="24">Results load with the confirmation run.</text>`; return; }
+  const W = 600, rowH = 46, top = 26, left = 230, right = 70, H = top + rows.length * rowH + 26;
+  const lo = Math.min(0, ...rows.map(r => r.lo)), hi = Math.max(0, ...rows.map(r => r.hi));
+  const pad = (hi - lo) * 0.08, a = lo - pad, b = hi + pad;
+  const x = v => left + (v - a) / (b - a) * (W - left - right);
+  const step = niceStep((b - a) / 4);
+  let g = "";
+  for (let t = Math.ceil(a / step) * step; t <= b; t += step) {
+    g += `<line class="grid" x1="${x(t)}" x2="${x(t)}" y1="${top - 8}" y2="${H - 22}"/><text x="${x(t)}" y="${H - 6}" text-anchor="middle" class="t-num" style="fill: var(--muted)">${t === 0 ? "0" : (t > 0 ? "+" : "−") + "$" + Math.abs(t).toLocaleString("en-US")}</text>`;
+  }
+  g += `<line class="zero" x1="${x(0)}" x2="${x(0)}" y1="${top - 8}" y2="${H - 22}"/>`;
+  g += `<text x="${x(a) + 2}" y="${top - 12}" style="font-size:11px; fill: var(--muted)">◀ DecisionIntake cheaper</text>`;
+  rows.forEach((r, i) => {
+    const cy = top + i * rowH + rowH / 2;
+    g += `<text x="0" y="${cy - 3}" style="font-weight:600; fill: var(--ink); font-size: 12.5px">${esc(r.name)}</text><text x="0" y="${cy + 13}" style="font-size: 11px; fill: var(--muted)">${esc(r.sub)}</text>`;
+    g += `<line class="ci" x1="${x(r.lo)}" x2="${x(r.hi)}" y1="${cy}" y2="${cy}"/><circle class="dot" cx="${x(r.est)}" cy="${cy}" r="5.5"/>`;
+    g += `<text class="t-num" x="${W - right + 8}" y="${cy + 4}">${r.est < 0 ? "−" : "+"}$${Math.abs(Math.round(r.est)).toLocaleString("en-US")}</text>`;
+    g += `<rect class="hit" data-i="${i}" x="0" y="${cy - rowH / 2}" width="${W}" height="${rowH}"/>`;
+  });
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.innerHTML = g;
+  svg.querySelectorAll(".hit").forEach(el => { const r = rows[+el.dataset.i]; hover(el, `<b>${esc(r.name)}</b><br>${fmtD(r.est)} a household a year<br>95% CI ${fmtD(r.lo)} to ${fmtD(r.hi)}${r.p ? `<br>${r.p}` : ""}`); });
+  $("forest-note").textContent = EVIDENCE.forestNote;
+  $("forest-table").innerHTML = `<tr><th>Compared with</th><th class="r">Difference</th><th class="r">95% CI</th><th class="r">Their questions</th></tr>` +
+    rows.map(r => `<tr><td>${esc(r.name)}</td><td class="r num">${fmtD(r.est)}</td><td class="r num">${fmtD(r.lo)} to ${fmtD(r.hi)}</td><td class="r num">${r.q}</td></tr>`).join("");
+}
+const fmtD = v => (v < 0 ? "−" : "+") + "$" + Math.abs(Math.round(v)).toLocaleString("en-US");
+function niceStep(raw) { const p = Math.pow(10, Math.floor(Math.log10(raw))); const m = raw / p; return (m < 1.5 ? 1 : m < 3.5 ? 2 : m < 7.5 ? 5 : 10) * p; }
+
+function readersChart() {
+  const rows = EVIDENCE.readers, svg = $("readers"), W = 420, rowH = 64, left = 0, H = rows.length * rowH + 10;
+  const mx = 12, x = v => (v / mx) * (W - 70);
+  let g = "";
+  rows.forEach((r, i) => {
+    const y = i * rowH + 4;
+    g += `<text x="0" y="${y + 14}" style="font-size: 12.5px; fill: var(--ink)">${esc(r.name)}</text>`;
+    g += `<rect class="${i === rows.length - 1 ? "barB" : "barA"}" x="${left}" y="${y + 24}" width="${Math.max(x(r.wrong), 4)}" height="18" rx="4"/>`;
+    g += `<text class="t-num" x="${Math.max(x(r.wrong), 4) + 8}" y="${y + 38}">${r.wrong}% confidently wrong</text>`;
+    g += `<rect class="hit" data-i="${i}" x="0" y="${y}" width="${W}" height="${rowH}"/>`;
+  });
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); svg.innerHTML = g;
+  svg.querySelectorAll(".hit").forEach(el => { const r = rows[+el.dataset.i]; hover(el, `<b>${esc(r.name)}</b><br>${r.wrong}% of answers read confidently wrong<br>log loss ${r.ll}`); });
+  $("readers-table").innerHTML = `<tr><th>Reader</th><th class="r">Confidently wrong</th><th class="r">Log loss</th></tr>` + rows.map(r => `<tr><td>${esc(r.name)}</td><td class="r num">${r.wrong}%</td><td class="r num">${r.ll}</td></tr>`).join("");
+}
+
+stats("stats", EVIDENCE.heroStats);
+stats("evstats", EVIDENCE.evStats);
+$("ev-lede").textContent = EVIDENCE.lede;
+diagram(); forest(); readersChart();
 fetch("population.json").then(r => r.json()).then(setup).catch(() => {
-  document.getElementById("status").innerHTML = "<strong>The household data didn't load.</strong><span>Reload the page to try again.</span>";
+  $("qtext").textContent = "The household data didn't load. Reload the page to try again.";
 });
 </script>
