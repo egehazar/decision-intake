@@ -4,3 +4,5 @@ __pycache__/
 data/raw/
 data/cache/
 install.log
+*.egg-info/
+results_*.log
