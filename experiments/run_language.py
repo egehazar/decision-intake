@@ -75,6 +75,15 @@ def main():
                 key = (name, q.id, utt)
                 with LOCK:
                     raw = cache.get(key)
+                    # same call as another reader's: structured asks the LLM what llm_hard asks on
+                    # non-amount questions; structured_dm asks Kev what dm asks, and extracts amount
+                    # slots exactly as structured does
+                    if raw is None and q.edges is None and name in ("structured", "structured_dm"):
+                        src = cache.get(("llm_hard" if name == "structured" else "dm", q.id, utt))
+                        if src is not None:
+                            raw = {"pick": src} if name == "structured" else {"p": src}
+                    if raw is None and q.edges is not None and name == "structured_dm":
+                        raw = cache.get(("structured", q.id, utt))
                 if raw is None:
                     raw = raw_reading(reader, q, utt)
                     with LOCK:

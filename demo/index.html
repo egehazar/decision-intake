@@ -58,6 +58,7 @@ button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); o
 button.primary { background: var(--accent); color: var(--panel); border-color: var(--accent); font-weight: 600; }
 button.ghost { color: var(--muted); }
 .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+textarea { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%; resize: vertical; }
 select { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; max-width: 100%; }
 .why { font-size: 0.9rem; color: var(--muted); margin: 0; }
 .status { border-radius: 8px; padding: 12px 14px; background: var(--accent-soft); display: grid; gap: 4px; }
@@ -128,7 +129,13 @@ footer p { margin: 0; }
       </div>
 
       <div class="vol">
-        <span class="label">Or tell it something first</span>
+        <div id="freebox" class="vol" hidden>
+          <label class="label" for="freetext">Or describe your household in your own words</label>
+          <textarea id="freetext" rows="3" placeholder="For example: I'm a single mom in Ohio with two kids, one is 3. I make about $2,400 a month and rent is $1,100."></textarea>
+          <div class="row"><button type="button" id="freego" class="primary">Read it</button><span class="sub" id="freestatus" aria-live="polite"></span></div>
+          <p class="sub">Claude reads your words into answers; the engine's own code does the arithmetic and decides what to ask next.</p>
+        </div>
+        <span class="label">Or tell it one fact</span>
         <div class="row">
           <select id="volq" aria-label="Fact to volunteer"></select>
           <select id="vola" aria-label="Your answer"></select>
@@ -206,6 +213,7 @@ function setup(data) {
     answer(j, b, "told"); render();
   });
   document.getElementById("restart").addEventListener("click", start);
+  document.getElementById("freego").addEventListener("click", readFreeText);
   ex.addEventListener("change", start);
   start();
 }
@@ -247,9 +255,11 @@ function scoreAll(asked) {
   for (let i = 0; i < N; i++) {
     if (asked && S.w[i] <= 1e-9 * mx) continue; // carries no weight: stale scores can't matter
     for (let q = 0; q < Q; q++) hyb[q] = ANS[i * Q + q];
-    if (asked) for (const [j, b] of asked) {
-      if (b < 0) continue; // "I don't know": keep the household's own answer
-      hyb[j] = b; // a crisp answer: only a household that gave the same answer keeps it, which is the same thing
+    if (asked) for (const [j, ev] of asked) {
+      let mxe = -Infinity, mne = Infinity, arg = 0;
+      for (let b = 0; b < ev.length; b++) { if (ev[b] > mxe) { mxe = ev[b]; arg = b; } if (ev[b] < mne) mne = ev[b]; }
+      if (mxe - mne <= 0) continue; // "I don't know": keep the household's own answer
+      if (ev[hyb[j]] < 0.5 * mxe) hyb[j] = arg; // the household's own answer doesn't fit what was said
     }
     scoreOne(i, hyb);
   }
@@ -275,14 +285,35 @@ function reweight() {
   S.w = w; S.tau = tau;
 }
 
-function answer(j, b, source) {
-  const noise = D.questions[j].noise; // noise[a][b] = P(report b | true a)
-  for (let i = 0; i < N; i++) { const p = noise[ANS[i * Q + j]][b]; S.loglik[i] += p > 0 ? Math.log(p) : -Infinity; }
-  S.asked.set(j, b);
+// Evidence over a question's options: ev[b] = P(what was said | person would report option b).
+function observe(j, ev, source, label) {
+  const noise = D.questions[j].noise, B = ev.length; // noise[a][b] = P(report b | true a)
+  const perTrue = noise.map(row => row.reduce((acc, v, b) => acc + v * ev[b], 0));
+  for (let i = 0; i < N; i++) { const p = perTrue[ANS[i * Q + j]]; S.loglik[i] += p > 0 ? Math.log(p) : -Infinity; }
+  const prev = S.asked.get(j);
+  S.asked.set(j, prev ? prev.map((v, b) => v * ev[b]) : Array.from(ev));
   reweight();
   scoreAll(S.asked);
-  S.history.push({ j, b, source, risk: risk(S.w) });
+  S.history.push({ j, label, source, risk: risk(S.w) });
 }
+function answer(j, b, source) {
+  const ev = D.questions[j].options.map((_, k) => (k === b ? 1 : 0));
+  observe(j, ev, source, D.questions[j].options[b]);
+}
+// An amount interval, in the question's own unit, spread over its ranges by overlap (as in Python).
+function intervalEvidence(q, low, high) {
+  const e = q.edges, B = q.options.length;
+  if (high < low) [low, high] = [high, low];
+  if (high - low < 1e-9) { low = low * 0.97; high = high * 1.03 + 1e-9; }
+  const ov = [];
+  for (let b = 0; b < B; b++) {
+    const lo = b === 0 ? -Infinity : e[b - 1], hi = b === B - 1 ? Infinity : e[b];
+    ov.push(Math.max(0, Math.min(hi, high) - Math.max(lo, low)));
+  }
+  const tot = ov.reduce((a, v) => a + v, 0);
+  return ov.map(v => 0.98 * (tot > 0 ? v / tot : 1 / B) + 0.02 / B);
+}
+const PER_YEAR = { year: 1, month: 12, week: 52, day: 260 };
 
 function sums(w) {
   const rs = new Float64Array(P), rr = new Float64Array(P);
@@ -402,7 +433,7 @@ function render() {
       opts.appendChild(btn);
     });
     const dk = document.createElement("button"); dk.type = "button"; dk.className = "ghost"; dk.textContent = "I don't know";
-    dk.addEventListener("click", () => { S.asked.set(nq.j, -1); S.history.push({ j: nq.j, b: -1, source: "asked", risk: risk(S.w) }); render(); });
+    dk.addEventListener("click", () => { observe(nq.j, q.options.map(() => 1), "asked", "I don't know"); render(); });
     opts.appendChild(dk);
     document.getElementById("qwhy").textContent = S.example ? "Answering as an example household: its true answer is highlighted." : "";
   }
@@ -412,11 +443,11 @@ function render() {
   let prev = null;
   S.history.forEach((h, k) => {
     const li = document.createElement("li"); const q = D.questions[h.j];
-    const ans = h.b < 0 ? "I don't know" : q.options[h.b];
+    const ans = h.label;
     const before = k === 0 ? null : S.history[k - 1].risk;
     li.innerHTML = `<span>${q.text}</span><span class="ans"></span><span class="meta"></span>`;
     li.querySelector(".ans").textContent = ans;
-    li.querySelector(".meta").textContent = (h.source === "told" ? "volunteered · " : "") + `expected cost of mistakes now ${fmt$(h.risk)}`;
+    li.querySelector(".meta").textContent = (h.source === "told" ? "volunteered · " : h.source === "read" ? "read from your words · " : "") + `expected cost of mistakes now ${fmt$(h.risk)}`;
     hist.appendChild(li);
   });
   if (!S.history.length) { const li = document.createElement("li"); li.innerHTML = `<span class="sub">Nothing yet. Answer the question above, or tell it a fact first.</span>`; hist.appendChild(li); }
@@ -458,6 +489,53 @@ function render() {
   document.getElementById("voinote").textContent = table.length
     ? `Expected saving: how much the cost of mistakes is expected to drop once the answer is known, averaged over every answer the belief still allows. ${table.length > 6 ? (table.length - 6) + " more questions are worth less." : ""}`
     : "Every question has been answered.";
+}
+
+let SAMPLE = null;
+if (window.claude && window.claude.use) {
+  window.claude.use("sample").then(sm => { SAMPLE = sm; document.getElementById("freebox").hidden = !sm; }).catch(() => {});
+}
+async function readFreeText() {
+  const text = document.getElementById("freetext").value.trim(), st = document.getElementById("freestatus");
+  if (!text || !SAMPLE) return;
+  const qs = D.questions.map(q => q.edges
+    ? { id: q.id, question: q.text, kind: "amount", unit: q.per ? "per " + q.per : "total" }
+    : { id: q.id, question: q.text, options: q.options });
+  const prompt = "A person described their household to a benefits intake assistant. Turn what they said into answers. " +
+    "Answer only questions the text states or clearly implies; leave out anything it doesn't say. Do no arithmetic: " +
+    "for amount questions give the amount exactly as stated, its period, and whether it was approximate.\n\n" +
+    "Questions:\n" + JSON.stringify(qs) + "\n\nWhat the person said:\n" + JSON.stringify(text) + "\n\n" +
+    'Reply with JSON only: {"facts": [{"id": "...", "option": "<exact option text>"} or ' +
+    '{"id": "...", "low": number, "high": number, "period": "year"|"month"|"week"|"none", "approximate": true|false}]}';
+  st.textContent = "Reading…";
+  let out;
+  try { out = await SAMPLE.json(prompt); } catch (e) {
+    st.textContent = e && e.code === "not_granted" ? "Reading free text isn't available here. Use the questions instead." : "Couldn't read that. Try again, or answer the questions.";
+    return;
+  }
+  let n = 0;
+  for (const f of (out && out.facts) || []) {
+    const j = D.questions.findIndex(q => q.id === f.id);
+    if (j < 0 || S.asked.has(j)) continue;
+    const q = D.questions[j];
+    if (q.edges) {
+      if (typeof f.low !== "number" && typeof f.high !== "number") continue;
+      let lo = typeof f.low === "number" ? f.low : f.high, hi = typeof f.high === "number" ? f.high : f.low;
+      const factor = q.per ? (PER_YEAR[f.period] || PER_YEAR[q.per]) / PER_YEAR[q.per] : 1;
+      lo *= factor; hi *= factor;
+      if (f.approximate) { lo *= 0.85; hi *= 1.15; }
+      const ev = intervalEvidence(q, lo, hi);
+      const top = ev.indexOf(Math.max(...ev));
+      observe(j, ev, "read", (f.approximate ? "about " : "") + q.options[top]);
+    } else {
+      const b = q.options.findIndex(o => o.toLowerCase() === String(f.option || "").toLowerCase());
+      if (b < 0) continue;
+      answer(j, b, "read");
+    }
+    n++;
+  }
+  st.textContent = n ? `Read ${n} answer${n > 1 ? "s" : ""} from your words.` : "Nothing in that answered a question. Try adding details, or answer the questions.";
+  render();
 }
 
 fetch("population.json").then(r => r.json()).then(setup).catch(() => {

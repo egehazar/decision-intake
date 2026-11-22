@@ -50,7 +50,8 @@ def main():
                   "take-up assumed; a calibrated synthetic population, not real people",
         "questions": [
             {"id": q.id, "text": q.text, "options": list(q.options),
-             "noise": np.round(q.report_matrix(), 4).tolist()}
+             "noise": np.round(q.report_matrix(), 4).tolist(),
+             "edges": list(q.edges) if q.edges is not None else None, "per": q.per}
             for q in pop.questions
         ],
         "programmes": [{"id": p, "label": LABELS[p]} for p in pop.decisions],
