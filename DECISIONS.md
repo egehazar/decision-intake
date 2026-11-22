@@ -354,3 +354,7 @@ questions, and a well-built precomputed tree does as well in almost every settin
 engine adds over a tree is flexibility, not accuracy: any question budget or question cost without
 regrowing, facts accepted in any order, evidence that can be uncertain, an honest estimate of its
 own remaining error, and a hand-off signal. README and WRITEUP were corrected to say so.
+- Decision model with the threshold chain on ordered questions ("is it this range or higher?"):
+  log loss 0.93 vs 1.00 per option, 72.9% top-option accuracy; better than asking per option, still
+  far behind the structured reader (0.51). Asking ordered questions as thresholds helps a classifier
+  a little; doing the arithmetic in code helps a lot more.
