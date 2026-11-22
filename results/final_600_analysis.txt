@@ -1,0 +1,92 @@
+test households scored: 600; wrong-recommendation cost $1000
+
+user      policy      k questions    loss  claimed  found  $found  wrong  loss, non-citizen hh
+clean     ask_all     0     18.00    1183     1343  0.846   0.931  0.457                  1577
+clean     engine      5      9.26    1273     1356  0.814   0.909  0.442                  1505
+clean     engine     15      8.21    1250     1329  0.815   0.913  0.443                  2661
+clean     engine     50      6.56    1332     1424  0.799   0.910  0.471                  2661
+clean     engine_k    3      3.00    2624     2356  0.707   0.805  0.644                  1000
+clean     engine_k    5      4.99    1403     1736  0.809   0.932  0.540                   599
+clean     engine_k    7      6.91    1473     1521  0.809   0.908  0.512                  1742
+clean     engine_k    9      8.97    1233     1414  0.809   0.923  0.466                  1718
+clean     engine_k   12     11.91    1205     1359  0.802   0.913  0.429                  2547
+clean     fixed_k     3      3.00    2518     2566  0.694   0.861  0.695                  1337
+clean     fixed_k     5      5.00    2076     1962  0.736   0.866  0.611                   948
+clean     fixed_k     7      7.00    2042     1926  0.770   0.868  0.597                  2463
+clean     fixed_k     9      9.00    2043     1808  0.775   0.858  0.579                  3333
+clean     fixed_k    12     12.00    1362     1488  0.798   0.916  0.497                  1806
+clean     tree_k      3      3.00    2581     2422  0.721   0.865  0.699                  1046
+clean     tree_k      5      4.54    1901     2105  0.795   0.903  0.612                  2501
+clean     tree_k      7      5.31    1785     1987  0.795   0.903  0.588                  1601
+clean     tree_k      9      5.35    1781     1983  0.795   0.903  0.587                  1601
+clean     tree_k     12      5.35    1781     1983  0.795   0.903  0.587                  1601
+opener    ask_all     0     15.00    1183     1343  0.846   0.931  0.457                  1577
+opener    engine      5      6.57    1007     1353  0.836   0.948  0.440                  1602
+opener    engine     15      5.58    1030     1348  0.836   0.948  0.449                  1602
+opener    engine     50      4.64    1011     1392  0.844   0.955  0.459                  1602
+opener    engine_k    3      2.97    1286     1737  0.850   0.945  0.522                   639
+opener    engine_k    5      4.98    1137     1533  0.820   0.947  0.489                   728
+opener    engine_k    7      6.96    1085     1417  0.820   0.941  0.457                   659
+opener    engine_k    9      8.86     916     1384  0.840   0.958  0.433                   731
+opener    engine_k   12     11.61    1040     1356  0.847   0.948  0.449                  1675
+opener    fixed_k     3      3.00    2034     1981  0.724   0.882  0.630                  1311
+opener    fixed_k     5      5.00    1709     1815  0.778   0.901  0.571                  1133
+opener    fixed_k     7      7.00    1388     1668  0.810   0.932  0.535                  1088
+opener    fixed_k     9      9.00    1364     1488  0.787   0.919  0.509                  1911
+opener    fixed_k    12     12.00    1187     1369  0.838   0.929  0.457                  1787
+opener    tree_k      3      2.13    2581     2159  0.721   0.865  0.699                  1046
+opener    tree_k      5      3.17    1901     1987  0.795   0.903  0.612                  2501
+opener    tree_k      7      3.83    1785     1859  0.795   0.903  0.588                  1601
+opener    tree_k      9      3.87    1781     1861  0.795   0.903  0.587                  1601
+opener    tree_k     12      3.87    1781     1861  0.795   0.903  0.587                  1601
+realistic ask_all     0     16.00    1674     1548  0.845   0.905  0.549                  3363
+realistic engine      5      9.00    1782     1638  0.803   0.886  0.554                  2187
+realistic engine     15      7.96    1870     1656  0.796   0.873  0.557                  3360
+realistic engine     50      6.44    1876     1676  0.777   0.871  0.560                  3006
+realistic engine_k    3      3.00    2493     2147  0.713   0.834  0.655                  3356
+realistic engine_k    5      4.97    2418     1882  0.688   0.829  0.642                  2257
+realistic engine_k    7      6.90    2024     1714  0.732   0.853  0.580                  3250
+realistic engine_k    9      8.91    1814     1658  0.784   0.879  0.556                  2101
+realistic engine_k   12     11.74    1883     1644  0.770   0.873  0.568                  2104
+realistic fixed_k     3      3.00    2633     2383  0.692   0.845  0.696                  1032
+realistic fixed_k     5      5.00    2531     2250  0.731   0.831  0.652                  1411
+realistic fixed_k     7      7.00    2469     2069  0.763   0.822  0.619                  3331
+realistic fixed_k     9      9.00    1808     1849  0.782   0.890  0.575                  3082
+realistic fixed_k    12     12.00    1616     1692  0.796   0.897  0.535                  2884
+realistic tree_k      3      2.49    3128     2605  0.629   0.792  0.730                  2106
+realistic tree_k      5      3.76    2514     2323  0.691   0.811  0.636                  2584
+realistic tree_k      7      4.43    2615     2231  0.681   0.795  0.636                  2680
+realistic tree_k      9      4.50    2611     2240  0.681   0.795  0.636                  2680
+realistic tree_k     12      4.50    2611     2240  0.681   0.795  0.636                  2680
+
+Paired loss differences, engine minus baseline, dollars per household per year (negative = engine better):
+  clean      k=3   vs fixed     106 [  -401,    845]   vs tree       43 [  -687,   1140]
+  clean      k=5   vs fixed    -674 [ -1380,   -166]   vs tree     -499 [  -939,    -20]
+  clean      k=7   vs fixed    -569 [ -1006,   -149]   vs tree     -312 [  -839,    228]
+  clean      k=9   vs fixed    -811 [ -1379,   -288]   vs tree     -549 [ -1040,    -43]
+  clean      k=12  vs fixed    -157 [  -607,    300]   vs tree     -577 [ -1071,    -83]
+  clean      engine at cost $50  asks  6.6: vs asking everything     149 [  -300,    630]
+  clean      engine at cost $15  asks  8.2: vs asking everything      67 [  -363,    496]
+  clean      engine at cost $5   asks  9.3: vs asking everything      90 [  -121,    447]
+  opener     k=3   vs fixed    -747 [ -1433,   -152]   vs tree    -1294 [ -1993,   -686]
+  opener     k=5   vs fixed    -572 [  -977,   -242]   vs tree     -764 [ -1202,   -322]
+  opener     k=7   vs fixed    -303 [  -833,    191]   vs tree     -700 [ -1200,   -210]
+  opener     k=9   vs fixed    -449 [  -837,   -162]   vs tree     -866 [ -1315,   -469]
+  opener     k=12  vs fixed    -147 [  -454,     27]   vs tree     -742 [ -1204,   -297]
+  opener     engine at cost $50  asks  4.6: vs asking everything    -172 [  -506,     61]
+  opener     engine at cost $15  asks  5.6: vs asking everything    -153 [  -472,     50]
+  opener     engine at cost $5   asks  6.6: vs asking everything    -176 [  -487,      4]
+  realistic  k=3   vs fixed    -139 [  -533,    293]   vs tree     -635 [ -1304,     55]
+  realistic  k=5   vs fixed    -113 [  -635,    476]   vs tree      -96 [  -976,    851]
+  realistic  k=7   vs fixed    -445 [ -1005,    111]   vs tree     -591 [ -1314,    165]
+  realistic  k=9   vs fixed       6 [  -436,    504]   vs tree     -798 [ -1551,    -40]
+  realistic  k=12  vs fixed     266 [  -146,    752]   vs tree     -729 [ -1526,     42]
+  realistic  engine at cost $50  asks  6.4: vs asking everything     202 [   -93,    548]
+  realistic  engine at cost $15  asks  8.0: vs asking everything     196 [   -85,    532]
+  realistic  engine at cost $5   asks  9.0: vs asking everything     108 [  -233,    477]
+
+Hand-off: hand the households the engine is least sure about (highest expected loss at stop) to a person.
+Share of all realised mistake cost those households account for (random would equal the share handed off):
+  clean      engine at cost $15: top 5% -> 0.12   top 10% -> 0.26   top 20% -> 0.38   (correlation claimed vs real 0.35)
+  opener     engine at cost $15: top 5% -> 0.15   top 10% -> 0.31   top 20% -> 0.46   (correlation claimed vs real 0.36)
+  realistic  engine at cost $15: top 5% -> 0.16   top 10% -> 0.22   top 20% -> 0.34   (correlation claimed vs real 0.35)

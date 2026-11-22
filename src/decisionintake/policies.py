@@ -148,6 +148,25 @@ class FixedOrder(Policy):
             rest.remove(j)
         return cls(order=chosen, budget=budget)
 
+    @classmethod
+    def fit_subset(cls, train: Population, loss, k: int, beam: int = 5):
+        """The best set of k questions for everyone, by beam search on the training population (rather
+        than the first k of one greedy order), asked in the order the search added them."""
+        l_skip, l_rec = loss.matrices(train)
+        w = train.weight / train.weight.sum()
+        frontier = [((), 0.0)]
+        for _ in range(k):
+            cand = {}
+            for chosen, _r in frontier:
+                for j in range(len(train.questions)):
+                    if j in chosen:
+                        continue
+                    key = tuple(sorted(chosen + (j,)))
+                    if key not in cand:
+                        cand[key] = (chosen + (j,), _grouped_risk(train, w, l_skip, l_rec, list(chosen) + [j]))
+            frontier = sorted(cand.values(), key=lambda c: c[1])[:beam]
+        return cls(order=list(frontier[0][0]), budget=k, name="fixed_set")
+
     def next_question(self, s, n_asked):
         if n_asked >= self.budget:
             return None
@@ -173,6 +192,11 @@ class GreedyTree(Policy):
     min_leaf: int = 30
     question_cost: float = 50.0
     lookahead: bool = True  # same pair look-ahead as the engine, so the comparison is fair
+    # decide_with_session: final decisions from the session's belief (same calibrated model and
+    # completion as the engine), so only question choice differs. backoff: a branch with fewer than
+    # min_leaf training households doesn't narrow the tree's household set (shared fallback).
+    decide_with_session: bool = False
+    backoff: bool = False
     name: str = "tree"
     _cache: dict = field(default_factory=dict, repr=False)
 
@@ -185,7 +209,8 @@ class GreedyTree(Policy):
             return self._cache[path]
         mask = np.ones(len(self.train), dtype=bool)
         for j, b in path:
-            mask &= self.train.answers[:, j] == b
+            if b is not None:  # None: asked, but its branch was too rare to narrow on
+                mask &= self.train.answers[:, j] == b
         idx = np.flatnonzero(mask)
         w = self.w[idx]
         ls, lr = self.l_skip[idx], self.l_rec[idx]
@@ -273,9 +298,11 @@ class GreedyTree(Policy):
             if j in s.asked:  # volunteered or already answered: follow it for free
                 b = self._branch(s, j, st["path"])
                 child = self._node(st["path"] + ((j, b),))
-                if child["n"] == 0:
-                    st["leaf"] = node
-                    return None
+                if child["n"] < (self.min_leaf if self.backoff else 1):
+                    if not self.backoff:
+                        st["leaf"] = node
+                        return None
+                    b = None
                 st["path"] = st["path"] + ((j, b),)
                 continue
             st["pending"] = j
@@ -287,11 +314,15 @@ class GreedyTree(Policy):
             return
         b = self._branch(s, j, st["path"])
         child = self._node(st["path"] + ((j, b),))
-        if child["n"] == 0:
-            st["dead_end"] = True
-            return
+        if child["n"] < (self.min_leaf if self.backoff else 1):
+            if not self.backoff:
+                st["dead_end"] = True
+                return
+            b = None
         st["path"] = st["path"] + ((j, b),)
 
     def final_recommend(self, s):
+        if self.decide_with_session:
+            return s.recommend_mask()
         st = s.policy_state
         return self._node(st["path"])["rec"]

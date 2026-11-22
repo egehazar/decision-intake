@@ -83,7 +83,11 @@ def work(job):
 def main():
     n, workers = int(sys.argv[1]), int(sys.argv[2])
     init()
-    sample = np.random.default_rng(2026).choice(len(G["test"]), size=min(n, len(G["test"])), replace=False)
+    # One fixed random order of test households; a run on n scores the first n of it. Results already
+    # computed for those households (same seeds, so identical) are reused from any earlier run.
+    order = np.random.default_rng(2026).choice(len(G["test"]), size=min(1200, len(G["test"])), replace=False)
+    sample = order[:n]
+    keep = set(sample.tolist())
     print(f"train {len(G['train'])}, test {len(G['test'])} (scoring {len(sample)}); "
           f"fixed order {[G['train'].questions[j].id for j in G['order'][:12]]}", flush=True)
     grid = []
@@ -91,15 +95,32 @@ def main():
         grid += [(kind, k, u) for kind in ["engine_k", "fixed_k", "tree_k"] for k in KS]
         grid += [("engine", lam, u) for lam in [50, 15, 5]]
         grid.append(("ask_all", 0, u))
-    jobs = [(*g, ch) for g in grid for ch in np.array_split(sample, workers * 2)]
     os.makedirs("results", exist_ok=True)
     path = f"results/final_{len(sample)}.jsonl"
+    have = {}
+    for old in sorted(set([path, "results/final_1200.jsonl"])):
+        if os.path.exists(old):
+            for line in open(old):
+                r = json.loads(line)
+                if r["i"] in keep:
+                    have[(r["policy"], r["k"], r["user"], r["i"])] = line.rstrip("\n") + "\n"
+    jobs = []
+    for g in grid:
+        rows = [i for i in sample.tolist() if (*g, i) not in have]
+        if rows:
+            jobs += [(*g, np.array(ch)) for ch in np.array_split(rows, max(1, len(rows) // 30)) if len(ch)]
+    print(f"reusing {len(have)} results; {sum(len(j[3]) for j in jobs)} interviews to run", flush=True)
     t0 = time.time()
     done = 0
-    with Pool(workers, initializer=init) as pool, open(path, "w") as f:
+    with open(path + ".tmp", "w") as f:
+        for line in have.values():
+            f.write(line)
+    os.replace(path + ".tmp", path)
+    with Pool(workers, initializer=init) as pool, open(path, "a") as f:
         for key, out in pool.imap_unordered(work, jobs):
             for r in out:
                 f.write(json.dumps({"policy": key[0], "k": key[1], "user": key[2], **r}) + "\n")
+            f.flush()
             done += 1
             if done % 20 == 0:
                 print(f"{done}/{len(jobs)} chunks, {time.time() - t0:.0f}s", flush=True)

@@ -25,25 +25,28 @@ import numpy as np
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "adapters"))
 sys.path.insert(0, os.path.dirname(__file__))
 
-from benefits.population import build, load_table  # noqa: E402
+from benefits.population import load_table  # noqa: E402
 from benefits.utterances import answer, styles_for  # noqa: E402
 from read_eval import CACHE, READERS, evidence_from_raw, load_cache, raw_reading  # noqa: E402
 
 from decisionintake import Session, VOIPolicy  # noqa: E402
-from decisionintake.simulate import split_by_group  # noqa: E402
 
 LOCK = threading.Lock()
 
 
 def main():
     n, lam, min_ess, names = int(sys.argv[1]), float(sys.argv[2]), float(sys.argv[3]), sys.argv[4:]
+    from common import smoothed, splits
+
+    from decisionintake import LossModel
+
     t = load_table()
     t["_other_income"] = np.maximum(t.market_income - t.earned_income - t.social_security, 0)
-    pop, loss, meta = build(t)
-    rest, test = split_by_group(pop, 0.15, seed=0)
-    train = pop.subset(rest)
-    rng = np.random.default_rng(11)
-    hh = rng.choice(test, size=n, replace=False)
+    pop, loss0, meta, tr, va, test = splits()
+    loss = LossModel(np.full(len(pop.decisions), 1000.0), loss0.miss_floor)  # frozen settings (D16)
+    train, outcome = smoothed(pop, np.sort(np.concatenate([tr, va])), "rest")
+    order = np.random.default_rng(2026).choice(len(test), size=min(1200, len(test)), replace=False)
+    hh = test[order[:n]]  # the first n households of the test run's own order
     cache = load_cache()
     os.makedirs("results", exist_ok=True)
     f = open(CACHE, "a", encoding="utf-8")
@@ -55,7 +58,7 @@ def main():
         return style, answer(q.id, t.iloc[int(i)], int(pop.answers[i, j]), style, r)
 
     def session(name, reader, i):
-        s = Session(train, loss, min_ess=min_ess)
+        s = Session(train, loss, min_ess=min_ess, outcome=outcome)
         pol = VOIPolicy(question_cost=lam)
         k = 0
         trace = []

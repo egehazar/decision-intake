@@ -129,7 +129,12 @@ def build(table: pd.DataFrame, poverty_question: bool = False) -> tuple[Populati
                      bucket(poverty_ratio(t), FPL_EDGES), adjacent_noise(len(FPL_EDGES) + 1, 0.10)))
     ordered = {"income_vs_poverty_line", "household_size", "children", "earned_income", "social_security", "other_income", "housing_cost",
                "childcare", "assets"}
-    questions = [Question(qid, text, opts, 1.0, noise, qid in ordered) for qid, text, opts, _, noise in spec]
+    amounts = {"earned_income": (income_edges, "year"), "social_security": (ss_edges, "year"),
+               "other_income": (other_edges, "year"), "housing_cost": (housing_edges, "month"),
+               "childcare": (care_edges, "year"), "assets": (asset_edges, None)}
+    questions = [Question(qid, text, opts, 1.0, noise, qid in ordered,
+                          tuple(amounts[qid][0]) if qid in amounts else None, amounts[qid][1] if qid in amounts else None)
+                 for qid, text, opts, _, noise in spec]
     answers = np.stack([np.asarray(col, dtype=int) for *_, col, _ in spec], axis=1)
     value = np.stack([t[f"v_{p}"].to_numpy(float) for p in PROGRAMMES], axis=1)
     value = np.where(value >= MIN_VALUE, value, 0.0)

@@ -172,3 +172,12 @@ def test_smoothing_scores_against_truth_and_keeps_probabilities_valid():
     s = Session(sm, loss, outcome=model)
     s.answer(0, 0)  # no kids: the child programme should be off for everyone
     assert s.p_now[s.w > 0, 0].max() < 0.2  # records the answer rules out keep stale scores; they carry no weight
+
+
+def test_fixed_subset_beam_and_fair_tree_run():
+    pop, loss = toy()
+    f = FixedOrder.fit_subset(pop, loss, k=2)
+    assert len(f.order) == 2 and 3 not in f.order  # never the irrelevant question
+    t = GreedyTree(train=pop, loss=loss, min_leaf=50, question_cost=1.0, decide_with_session=True, backoff=True)
+    o = run_one(t, pop, loss, pop.answers[5], UserModel(), np.random.default_rng(0))
+    assert o.n_questions >= 1 and o.recommend.shape == (3,)

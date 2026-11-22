@@ -135,7 +135,8 @@ def answer(qid: str, row, opt: int, style: str, rng) -> str:
         return str(rng.choice(DONT_KNOW))
     if qid == "state":
         i = STATES.index(int(row["state_fips"]))
-        return f"We're in {STATE_NAMES[i]}." if style != "exact" else f"{STATE_ABBR[i]}."
+        # (an abbreviation alone is ambiguous: "OK." reads as "okay")
+        return f"We're in {STATE_NAMES[i]}." if style != "exact" else f"{STATE_NAMES[i]}."
     if qid == "tenure":
         return ["We rent an apartment.", "We own our house.", "I live with my sister, I don't pay rent."][opt]
     if qid in ("children", "household_size"):

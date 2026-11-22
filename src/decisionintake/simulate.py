@@ -44,6 +44,7 @@ class Outcome:
     risk_at_stop: float
     ess_at_stop: float
     asked: list[str]
+    p_final: np.ndarray | None = None  # (D,) belief's probability of eligibility at the end
 
 
 def run_one(policy: Policy, train: Population, loss: LossModel, answers_row: np.ndarray, user: UserModel, rng,
@@ -69,7 +70,8 @@ def run_one(policy: Policy, train: Population, loss: LossModel, answers_row: np.
             s.answer(j, reported_option(rng, train.questions[j], int(answers_row[j]), user.misreport))
         if hasattr(policy, "after_answer"):
             policy.after_answer(s, j)
-    return Outcome(n, np.asarray(policy.final_recommend(s), bool), s.risk(), s.ess(), asked)
+    pe = s.p_now if s.p_now is not None else (train.p_eligible if train.p_eligible is not None else train.eligible)
+    return Outcome(n, np.asarray(policy.final_recommend(s), bool), s.risk(), s.ess(), asked, s.w @ pe)
 
 
 @dataclass

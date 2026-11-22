@@ -108,7 +108,9 @@ class LLMReader:
         want = '{"choice": N}' if self.mode == "hard" else '{"choice": N, "confidence": C}'
         prompt = (
             f"An intake assistant asked: {q.text}\nThe person answered: {utterance}\n\nOptions:\n{opts}\n\n"
-            f"Which option does the answer give? Use 0 if the answer doesn't say. "
+            # (a 0 sentinel collided with option 1 "no": "No, not us." came back as "not stated")
+            f"Which option number does the answer give? If the answer doesn't say (for example the person "
+            f"doesn't know), use null for the choice. "
             + ("Also give your confidence that the choice is right, from 0 to 100. " if self.mode == "selfconf" else "")
             + f"Reply with JSON only, like {want}."
         )
@@ -118,8 +120,9 @@ class LLMReader:
             "chat_template_kwargs": {"enable_thinking": False},
         })
         text = r["choices"][0]["message"]["content"]
-        m = re.search(r'"choice"\s*:\s*(\d+)', text)
-        c = re.search(r'"confidence"\s*:\s*(\d+(?:\.\d+)?)', text)
+        # numbers may come back quoted ({"choice": "1"}); missing that read every quoted answer as "not stated"
+        m = re.search(r'"choice"\s*:\s*"?(\d+)', text)
+        c = re.search(r'"confidence"\s*:\s*"?(\d+(?:\.\d+)?)', text)
         choice = int(m.group(1)) if m else 0
         conf = float(c.group(1)) / 100.0 if c else 1.0
         if not 1 <= choice <= len(q.options):
@@ -138,3 +141,93 @@ class LLMReader:
         v = np.full(b, (1.0 - conf) / max(b - 1, 1))
         v[choice] = conf
         return v
+
+
+PERIOD_PER_YEAR = {"year": 1.0, "month": 12.0, "week": 52.0, "day": 260.0}
+
+
+def interval_evidence(q: Question, low: float, high: float, floor: float = 0.02) -> np.ndarray:
+    """Spread an amount interval [low, high] (already in the question's own unit) over the question's
+    ranges, in proportion to how much of the interval each range covers. A point becomes a small
+    interval so it can straddle a boundary."""
+    edges = np.asarray(q.edges, float)
+    lo_b = np.concatenate([[-np.inf], edges])
+    hi_b = np.concatenate([edges, [np.inf]])
+    low, high = min(low, high), max(low, high)
+    if high - low < 1e-9:
+        low, high = low * 0.97, high * 1.03 + 1e-9
+    overlap = np.clip(np.minimum(hi_b, high) - np.maximum(lo_b, low), 0, None)
+    ev = overlap / overlap.sum() if overlap.sum() > 0 else np.ones(len(q.options)) / len(q.options)
+    return (1 - floor) * ev + floor / len(q.options)
+
+
+@dataclass
+class StructuredReader:
+    """The LLM reads language into typed slots; code does the arithmetic; optionally a decision model
+    gives calibrated probabilities for the questions that are judgments rather than amounts.
+
+    Amount questions (q.edges set): the LLM returns low/high as stated, the period, and flags for
+    approximate / zero / unknown. Code converts to the question's unit and spreads the interval over
+    the ranges (approximate answers widened by 15% each way). Other questions: the decision model's
+    per-option probabilities when dm_url is set, else the LLM's single pick."""
+
+    url: str = "http://127.0.0.1:9996"
+    dm_url: str | None = None
+    name: str = "structured"
+
+    def extract(self, q: Question, utterance: str) -> dict:
+        prompt = (
+            f"An intake assistant asked: {q.text}\nThe person answered: {utterance}\n\n"
+            "Extract what the answer says, without converting anything. Reply with JSON only:\n"
+            '{"low": number or null, "high": number or null, "period": "year" | "month" | "week" | "none", '
+            '"approximate": true/false, "zero": true/false, "unknown": true/false}\n'
+            "low and high: the smallest and largest dollar amount the answer allows, as stated (one amount: "
+            "low = high; \"35 thousand\" = 35000). period: the time period the person stated, \"none\" if they "
+            "stated none. approximate: they said about/around/roughly or gave a range. zero: the answer means "
+            "none or nothing. unknown: they don't know or won't say. Words without numbers: low and high null."
+        )
+        r = _post(self.url + "/v1/chat/completions", {
+            "messages": [{"role": "user", "content": prompt}], "temperature": 0, "max_tokens": 80,
+            "chat_template_kwargs": {"enable_thinking": False},
+        })
+        text = r["choices"][0]["message"]["content"]
+        m = re.search(r"\{.*\}", text, re.S)
+        try:
+            return json.loads(m.group(0)) if m else {}
+        except json.JSONDecodeError:
+            return {}
+
+    def raw(self, q: Question, utterance: str):
+        if q.edges is not None:
+            return {"slots": self.extract(q, utterance)}
+        if self.dm_url:
+            return {"p": DecisionModelReader(url=self.dm_url).probabilities(q, utterance).tolist()}
+        return {"pick": list(LLMReader(url=self.url, mode="hard").ask(q, utterance))}
+
+    def evidence(self, q: Question, utterance: str, raw=None) -> np.ndarray:
+        raw = raw if raw is not None else self.raw(q, utterance)
+        b = len(q.options)
+        if "p" in raw:
+            return DecisionModelReader().evidence(q, "", p=np.array(raw["p"]))
+        if "pick" in raw:
+            return LLMReader(mode="hard").evidence(q, "", parsed=tuple(raw["pick"]))
+        s = raw.get("slots") or {}
+        if s.get("unknown"):
+            return np.ones(b)
+        if s.get("zero"):
+            return interval_evidence(q, 0.0, 0.0)
+        low, high = s.get("low"), s.get("high")
+        if low is None and high is None:
+            return np.ones(b)  # words without an amount: no reliable reading
+        low = float(low if low is not None else high)
+        high = float(high if high is not None else low)
+        period = str(s.get("period") or "none").lower()
+        if q.per is None:  # a stock (savings): periods don't apply
+            factor = 1.0
+        else:
+            per_year = PERIOD_PER_YEAR.get(period, PERIOD_PER_YEAR[q.per])  # unstated: assume the question's unit
+            factor = per_year / PERIOD_PER_YEAR[q.per]
+        low, high = low * factor, high * factor
+        if s.get("approximate"):
+            low, high = low * 0.85, high * 1.15
+        return interval_evidence(q, low, high)

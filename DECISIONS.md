@@ -210,3 +210,74 @@ Frozen for the test run (experiments/run_final.py), chosen on validation only: w
 cost $1,000; support floor 10; question costs $50/$15/$5 for the engine's own stopping; tree minimum
 leaf 10; k in {3, 5, 7, 9, 12}; outcome model trained on train + validation. The test split is
 scored once; any later change is reported as a change, with both results.
+
+## D17. Test run cut to 600 households, before any result was looked at (2026-11-22)
+
+The 1,200-household run would have taken about four hours. It was stopped at 12:44 UTC with 5,360
+interviews done; none of their outcomes had been read. The run now scores the first 600 households
+of the same fixed random order of test households, reusing every interview already computed for
+them (same seeds, identical results). Settings are otherwise unchanged from D16.
+
+GPT's second review (2026-11-22, notes/gpt_reply_build_r2.txt): CONTINUE. Its points, all accepted:
+completion treats a possibly-misreported answer as truth (ablation needed); the fixed baseline
+should be optimised per question budget; the tree should decide with the same calibrated model;
+45% wrong recommendations comes largely from a dollar-scaled threshold, so report per-programme
+precision/recall and a risk-coverage curve; no "matches the full questionnaire" headline; the
+language-layer comparison is the top priority. Everything it asked for after the freeze is reported
+as a secondary experiment.
+
+## D18. Readers: each component does only what it is reliable at (2026-11-22)
+
+First readings showed both 4B models fail at arithmetic hidden in language. "Around $2,900 a month"
+(about $35k a year) became $60-80k at 100% confidence from the instruct model (confidently wrong),
+and a near-flat spread from the decision model (uninformative, but not confidently wrong).
+
+So a fifth reader splits the work:
+- The LLM reads language into typed slots: low and high amount as stated, the period, approximate,
+  zero, don't know. It never converts anything.
+- Code does the arithmetic: per-month to per-year, then spreads the amount interval over the
+  question's ranges in proportion to overlap (an approximate answer widened 15% each way).
+- For questions that are judgments rather than amounts ("my dad lives with us, he's 72" for
+  "anyone 65 or older?"), the decision model's per-option probabilities are the evidence
+  (structured_dm), or the LLM's single pick (structured).
+
+Six readers are compared on held-out generated answers (experiments/read_eval.py): llm_hard,
+llm_selfconf, dm (per option), dm_thr (threshold chain on ordered questions), structured,
+structured_dm. If the decision model adds nothing over the LLM's pick, that is the result (GPT r2).
+
+## D19. Fairer baselines and ablations, added after the freeze (2026-11-22, secondary)
+
+experiments/run_secondary.py, same test households, labelled secondary: the best fixed set per
+question budget (beam search on training data); a tree that decides with the same calibrated belief
+and completion as the engine, with rare branches falling back to the parent; the engine without
+completion (does completion hurt when answers may be misreported?); final probabilities saved for
+per-programme precision-recall curves.
+
+## D20. Two reader bugs that would have sunk the LLM baseline (2026-11-22)
+
+The first run of the instruct-model reader said "not stated" for 59% of answers, including plain
+"No, not us." Two causes, both mine:
+- The model returns numbers quoted ({"choice": "1"}); the parser only accepted bare numbers, so every
+  quoted answer became "not stated".
+- The prompt used 0 as the "not stated" sentinel while option 1 was "no", inviting confusion. It now
+  asks for null.
+Also, the generated "exact" answer for a state was its abbreviation, and "OK." (Oklahoma) reads as
+"okay"; it now says the full name. All cached readings from before the fix were discarded and the
+evaluation re-run. The accuracy metric was also wrong: a flat ("no information") reading counted as
+correct whenever the truth was option 1. Readers are now scored on how often they commit, accuracy
+when they commit, how often they are confidently wrong, and log loss.
+
+## D21. Held-out test result (2026-11-22)
+
+Frozen run, 600 test households, full table in results/final_600_analysis.txt and WRITEUP.md.
+- Clean answers: the engine stops at 8.2 questions; loss vs asking all 18: +$67 [-363, +496] per
+  household per year, indistinguishable from zero. Expected $1,329, made $1,250.
+- Equal question counts, clean: better than the best single fixed order at k = 5, 7, 9 (-$569 to
+  -$811, all intervals below zero), not at 3 or 12. Better than the tree at 5, 9, 12.
+- Facts volunteered first: better than the fixed order at 3, 5, 9 and than the tree at every k.
+- Realistic answers: no significant difference from the fixed order at any k. My D6 prediction
+  (the engine wins most on messy answers) was wrong on this test.
+- Hand-off: the least-certain 10% carry 22-31% of mistake cost.
+GPT's go/no-go bar (>=25% fewer questions than an optimised tree at equal quality) can't be scored
+cleanly because the frozen tree is weak (it stops at ~5 questions); the fair tree is in the
+secondary run. Against asking everything, the engine asks 54% fewer questions at equal quality.

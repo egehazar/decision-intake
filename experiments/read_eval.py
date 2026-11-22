@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "adapters"))
 from benefits.population import build, load_table  # noqa: E402
 from benefits.utterances import answer, styles_for  # noqa: E402
 
-from decisionintake.language import DecisionModelReader, LLMReader  # noqa: E402
+from decisionintake.language import DecisionModelReader, LLMReader, StructuredReader  # noqa: E402
 from decisionintake.simulate import split_by_group  # noqa: E402
 
 CACHE = "results/read_cache.jsonl"
@@ -34,6 +34,9 @@ READERS = {
     "dm_small": lambda: DecisionModelReader(url="http://127.0.0.1:9997", name="dm_small"),
     "llm_hard": lambda: LLMReader(url="http://127.0.0.1:9996", mode="hard", name="llm_hard"),
     "llm_selfconf": lambda: LLMReader(url="http://127.0.0.1:9996", mode="selfconf", name="llm_selfconf"),
+    "structured": lambda: StructuredReader(url="http://127.0.0.1:9996", name="structured"),
+    "structured_dm": lambda: StructuredReader(url="http://127.0.0.1:9996", dm_url="http://127.0.0.1:9995",
+                                              name="structured_dm"),
 }
 
 
@@ -47,6 +50,8 @@ def load_cache():
 
 
 def raw_reading(reader, q, utt):
+    if isinstance(reader, StructuredReader):
+        return reader.raw(q, utt)
     if isinstance(reader, DecisionModelReader):
         return reader.probabilities(q, utt).tolist()
     choice, conf = reader.ask(q, utt)
@@ -54,6 +59,8 @@ def raw_reading(reader, q, utt):
 
 
 def evidence_from_raw(reader, q, raw):
+    if isinstance(reader, StructuredReader):
+        return reader.evidence(q, "", raw=raw)
     if isinstance(reader, DecisionModelReader):
         return reader.evidence(q, "", p=np.array(raw))
     return reader.evidence(q, "", parsed=(raw[0], raw[1]))
@@ -85,6 +92,25 @@ def main():
     os.makedirs("results", exist_ok=True)
     for name in names:
         reader = READERS[name]()
+        # Readers that make the very same model call share it: on questions that aren't amounts,
+        # "structured" asks the LLM exactly what llm_hard asks, "structured_dm" and "dm_thr" ask the
+        # decision model exactly what dm asks (thresholds only differ on ordered questions).
+        for it in its:
+            q = pop.questions[it["j"]]
+            key = (name, it["qid"], it["utterance"])
+            if key in cache:
+                continue
+            src = None
+            if name == "structured" and q.edges is None:
+                src = cache.get(("llm_hard", it["qid"], it["utterance"]))
+                src = {"pick": src} if src is not None else None
+            elif name == "structured_dm" and q.edges is None:
+                src = cache.get(("dm", it["qid"], it["utterance"]))
+                src = {"p": src} if src is not None else None
+            elif name == "dm_thr" and not q.ordered:
+                src = cache.get(("dm", it["qid"], it["utterance"]))
+            if src is not None:
+                cache[key] = src
         todo = [it for it in its if (name, it["qid"], it["utterance"]) not in cache]
         with open(CACHE, "a", encoding="utf-8") as f, ThreadPoolExecutor(4) as ex:
             futs = {ex.submit(raw_reading, reader, pop.questions[it["j"]], it["utterance"]): it for it in todo}
@@ -107,17 +133,24 @@ def report(name, reader, pop, its, cache, by_style=True):
         p = ev / ev.sum()
         rows.append((it["style"], it["truth"], p))
     def summary(sel):
-        acc = np.mean([np.argmax(p) == t for _, t, p in sel])
-        nll = np.mean([-np.log(max(p[t], 1e-6)) for _, t, p in sel])
-        conf_wrong = np.mean([(p.max() > 0.8) and (np.argmax(p) != t) for _, t, p in sel])
-        flat = np.mean([p.max() - p.min() < 1e-9 for _, t, p in sel])
-        return acc, nll, conf_wrong, flat, len(sel)
-    acc, nll, cw, flat, k = summary(rows)
-    print(f"\n{name}: n={k}  top-option accuracy {acc:.3f}  log loss {nll:.3f}  confidently wrong {cw:.3f}  no-info {flat:.3f}")
+        """coverage: share where the reader committed (evidence not flat); accuracy among those;
+        confidently wrong: top option wrong with more than 0.8 of the mass; log loss of the truth
+        (a flat reading pays log of the option count)."""
+        flat = np.array([p.max() - p.min() < 1e-9 for _, t, p in sel])
+        right = np.array([np.argmax(p) == t for _, t, p in sel])
+        cov = float(np.mean(~flat))
+        acc = float(np.mean(right[~flat])) if (~flat).any() else float("nan")
+        cw = float(np.mean([(p.max() > 0.8) and (np.argmax(p) != t) for _, t, p in sel]))
+        nll = float(np.mean([-np.log(max(p[t], 1e-6)) for _, t, p in sel]))
+        return cov, acc, cw, nll, len(sel)
+
+    cov, acc, cw, nll, k = summary(rows)
+    print()
+    print(f"{name}: n={k}  commits {cov:.3f}  accuracy when committing {acc:.3f}  confidently wrong {cw:.3f}  log loss {nll:.3f}")
     if by_style:
         for st in sorted({r[0] for r in rows}):
-            a, l, c, fl, kk = summary([r for r in rows if r[0] == st])
-            print(f"   {st:<10} n={kk:4d}  acc {a:.3f}  log loss {l:.3f}  conf wrong {c:.3f}  no-info {fl:.3f}")
+            c, a, w_, l, kk = summary([r for r in rows if r[0] == st])
+            print(f"   {st:<10} n={kk:4d}  commits {c:.3f}  accuracy {a:.3f}  conf wrong {w_:.3f}  log loss {l:.3f}")
 
 
 if __name__ == "__main__":

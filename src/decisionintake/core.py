@@ -22,6 +22,10 @@ class Question:
     # noise[a, b] = P(person reports option b | true option a). None means exact answers.
     noise: np.ndarray | None = None
     ordered: bool = False  # options are an ordered scale (amounts, counts)
+    # For amounts: the options are ranges with these upper edges (the last range is open), stated per
+    # "year", "month", or None for a stock such as savings. Lets a reader do the arithmetic in code.
+    edges: tuple | None = None
+    per: str | None = None
 
     def report_matrix(self) -> np.ndarray:
         if self.noise is None:
