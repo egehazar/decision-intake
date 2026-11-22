@@ -187,3 +187,26 @@ Two causes, two fixes, both in smoothing.py:
 
 Then a cleaner test of question choice alone: engine and fixed form each ask exactly k questions
 (experiments/k_compare.py), so the stopping rule is not mixed in.
+
+## D16. Question choice alone, and the settings frozen before the test run (2026-11-22)
+
+Validation, 400 households, $1,000 per wrong recommendation, engine and fixed form each asking
+exactly k questions (support floor 10):
+
+| k | engine | fixed form |
+|---|---|---|
+| 3 | $2,477 | $2,716 |
+| 5 | $2,062 | $2,046 |
+| 7 | $1,724 | $2,295 |
+| 9 | $1,685 | $1,756 |
+| 12 | $1,635 | $1,544 |
+
+With its own stopping rule (question cost $5), the engine asked 7.4 questions for $1,604, as good as
+asking all 18 ($1,684). With realistic answers it was also ahead in the middle range (k=7: $1,830 vs
+$2,255). The fixed form's own curve isn't smooth (k=7 worse than k=5), so differences of a few hundred
+dollars on 400 households are noise; the test run uses more households and paired intervals.
+
+Frozen for the test run (experiments/run_final.py), chosen on validation only: wrong-recommendation
+cost $1,000; support floor 10; question costs $50/$15/$5 for the engine's own stopping; tree minimum
+leaf 10; k in {3, 5, 7, 9, 12}; outcome model trained on train + validation. The test split is
+scored once; any later change is reported as a change, with both results.

@@ -171,9 +171,9 @@ footer p { margin: 0; }
 </div>
 
 <script>
-const LAMBDA = 50;          // dollars a year a question must be worth
-const MIN_ESS = 30;         // support floor: the belief always rests on at least this many households
-const HANDOFF_RISK = 1500;  // stop with more expected loss than this, and it hands off to a person
+const LAMBDA = 15;          // dollars a year a question must be worth (the cost frozen for testing)
+const MIN_ESS = 10;         // support floor: the belief always rests on at least this many households
+const HANDOFF_RISK = 2500;  // stop with more expected loss than this, and it hands off to a person (illustrative)
 const N_PLAN = 1500;        // resampled households for pair look-ahead
 
 let D, N, Q, P, ANS, LSKIP, LREC, VAL, PEL, BT, RT, INIT;
@@ -379,7 +379,7 @@ function render() {
   const st = document.getElementById("status"), ask = document.getElementById("ask");
   if (!nq) {
     S.done = true; ask.hidden = true;
-    if (r > HANDOFF_RISK || ess < MIN_ESS * 1.05 && S.tau < 0.5) {
+    if (r > HANDOFF_RISK) {
       st.className = "status handoff";
       st.innerHTML = `<strong>Hand off to a person.</strong><span>No remaining question is worth asking, but about ${fmt$(r)} a year of possible mistakes is left. A caseworker should check this household.</span>`;
     } else {
