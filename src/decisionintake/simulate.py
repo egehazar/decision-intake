@@ -46,8 +46,9 @@ class Outcome:
     asked: list[str]
 
 
-def run_one(policy: Policy, train: Population, loss: LossModel, answers_row: np.ndarray, user: UserModel, rng) -> Outcome:
-    s = Session(train, loss)
+def run_one(policy: Policy, train: Population, loss: LossModel, answers_row: np.ndarray, user: UserModel, rng,
+            min_ess: float = 1.0) -> Outcome:
+    s = Session(train, loss, min_ess=min_ess)
     policy.start(s)
     if user.opener and user.volunteerable:
         k = min(user.opener, len(user.volunteerable))
@@ -129,7 +130,7 @@ def evaluate(policy_factory, train: Population, test: Population, loss: LossMode
 
 
 def split_by_group(pop: Population, test_share: float, seed: int = 0) -> tuple[np.ndarray, np.ndarray]:
-    """Train/test indices with every lineage group wholly on one side."""
+    """Train/test indices with every lineage group wholly on one side. Apply twice for train/val/test."""
     rng = np.random.default_rng(seed)
     groups = pop.group if pop.group is not None else np.arange(len(pop))
     uniq = np.unique(groups)

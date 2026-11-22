@@ -1,0 +1,11 @@
+pyproject.toml
+src/decisionintake/__init__.py
+src/decisionintake/core.py
+src/decisionintake/policies.py
+src/decisionintake/simulate.py
+src/decisionintake.egg-info/PKG-INFO
+src/decisionintake.egg-info/SOURCES.txt
+src/decisionintake.egg-info/dependency_links.txt
+src/decisionintake.egg-info/requires.txt
+src/decisionintake.egg-info/top_level.txt
+tests/test_toy.py

@@ -62,6 +62,19 @@ class Population:
             None if self.group is None else self.group[idx],
         )
 
+    def onehot(self) -> tuple[np.ndarray, np.ndarray]:
+        """(N, sum of option counts) one-hot of every record's answers, and each question's
+        column offset. Lets one matrix product aggregate any per-record quantity by (question, option)."""
+        if getattr(self, "_onehot", None) is None:
+            sizes = np.array([len(q.options) for q in self.questions])
+            offsets = np.concatenate([[0], np.cumsum(sizes)[:-1]])
+            oh = np.zeros((len(self), int(sizes.sum())), dtype=np.float64)
+            rows = np.arange(len(self))
+            for j in range(len(self.questions)):
+                oh[rows, offsets[j] + self.answers[:, j]] = 1.0
+            self._onehot = (oh, offsets)
+        return self._onehot
+
     def qindex(self, qid: str) -> int:
         for j, q in enumerate(self.questions):
             if q.id == qid:
@@ -131,14 +144,46 @@ class Session:
 
     pop: Population
     loss: LossModel
+    min_ess: float = 1.0  # support floor: soften the evidence until the belief rests on this many records
     w: np.ndarray = field(init=False)
     asked: dict[int, np.ndarray] = field(init=False, default_factory=dict)
     log: list[dict] = field(init=False, default_factory=list)
 
     def __post_init__(self):
         self.l_skip, self.l_rec = self.loss.matrices(self.pop)
-        self.w = self.pop.weight.astype(float).copy()
-        self.w /= self.w.sum()
+        self.prior = self.pop.weight.astype(float) / self.pop.weight.sum()
+        self.loglik = np.zeros(len(self.pop))
+        self.tau = 1.0
+        self.w = self.prior.copy()
+
+    def _reweight(self) -> None:
+        """w = prior * likelihood^tau, with tau the largest value in (0, 1] whose ESS meets the floor.
+
+        Records that the evidence rules out entirely (likelihood 0, e.g. another state) stay out.
+        Without a floor tau is 1 and this is plain Bayes."""
+        finite = np.isfinite(self.loglik)
+        ll = np.where(finite, self.loglik - self.loglik[finite].max(), 0.0)
+
+        def weights(tau):
+            w = np.where(finite, self.prior * np.exp(tau * ll), 0.0)
+            return w / w.sum()
+
+        def ess(w):
+            return 1.0 / np.square(w).sum()
+
+        w = weights(1.0)
+        tau = 1.0
+        if self.min_ess > 1 and ess(w) < self.min_ess:
+            lo, hi = 0.0, 1.0
+            for _ in range(30):
+                mid = (lo + hi) / 2
+                if ess(weights(mid)) >= self.min_ess:
+                    lo = mid
+                else:
+                    hi = mid
+            tau = lo
+            w = weights(tau)
+        self.w, self.tau = w, tau
 
     # evidence -------------------------------------------------------------------------------
     def observe(self, q: int, likelihood: np.ndarray, source: str = "answer") -> None:
@@ -152,18 +197,21 @@ class Session:
         assert likelihood.shape == (len(qu.options),)
         per_true = qu.report_matrix() @ likelihood  # (B,) P(evidence | true option a)
         lik = per_true[self.pop.answers[:, q]]
-        new = self.w * lik
-        mass = new.sum()
+        mass = float((self.w * lik).sum())
         self.log.append(
-            {"q": qu.id, "source": source, "likelihood": likelihood.round(3).tolist(), "evidence_mass": float(mass)}
+            {"q": qu.id, "source": source, "likelihood": likelihood.round(3).tolist(), "evidence_mass": mass}
         )
-        if mass <= 0:
-            # No record is compatible with this evidence: keep the old belief, mark the conflict.
-            self.log[-1]["conflict"] = True
-            return
-        self.w = new / mass
         prev = self.asked.get(q)
         self.asked[q] = likelihood if prev is None else prev * likelihood
+        if mass <= 0:
+            # No record is compatible with this evidence: keep the old belief, mark the conflict.
+            # The question still counts as asked, so it isn't asked again.
+            self.log[-1]["conflict"] = True
+            return
+        with np.errstate(divide="ignore"):
+            self.loglik = self.loglik + np.log(lik)
+        self._reweight()
+        self.log[-1]["tau"] = self.tau
 
     def answer(self, q: int, option: int, source: str = "answer") -> None:
         v = np.zeros(len(self.pop.questions[q].options))
@@ -210,13 +258,63 @@ class Session:
         )
 
     def voi_table(self, candidates=None) -> list[tuple[int, float]]:
+        """Value of information of every candidate question, sorted best first.
+
+        One product aggregates the weighted losses by (question, true option); each question's
+        report-noise matrix then maps true options to reported ones. Exact, same as voi(q)."""
         if candidates is None:
             candidates = [j for j in range(len(self.pop.questions)) if j not in self.asked]
+        if not candidates:
+            return []
+        oh, offsets = self.pop.onehot()
+        d = self.l_skip.shape[1]
+        wl = np.concatenate([self.w[:, None] * self.l_skip, self.w[:, None] * self.l_rec], axis=1)
+        agg = oh.T @ wl
         now = self.risk()
+        total = self.w.sum()
         rows = []
         for j in candidates:
             qu = self.pop.questions[j]
-            post = expected_posterior_risk(self.w, self.pop.answers[:, j], qu.report_matrix(), self.l_skip, self.l_rec)
-            rows.append((j, now - post))
+            b = len(qu.options)
+            block = agg[offsets[j] : offsets[j] + b]  # (B_true, 2D)
+            rep = qu.report_matrix()  # (B_true, B_reported)
+            post = rep.T @ block  # (B_reported, 2D)
+            exp_post = np.minimum(post[:, :d], post[:, d:]).sum() / total
+            rows.append((j, now - exp_post))
         rows.sort(key=lambda r: -r[1])
+        return rows
+
+    def pair_table(self, candidates=None, n_plan: int = 4000, seed: int = 0) -> list[tuple[int, int, float]]:
+        """Value of asking two questions, for every pair of candidates, best first.
+
+        For planning, the belief is resampled to n_plan equally weighted records (systematic
+        resampling), losses are summed by the pair's joint true options, and both questions'
+        report-noise models map them to joint reported options."""
+        if candidates is None:
+            candidates = [j for j in range(len(self.pop.questions)) if j not in self.asked]
+        if len(candidates) < 2:
+            return []
+        rng = np.random.default_rng(seed)
+        c = np.cumsum(self.w)
+        c[-1] = 1.0
+        idx = np.searchsorted(c, (rng.random() + np.arange(n_plan)) / n_plan)
+        ls, lr = self.l_skip[idx], self.l_rec[idx]
+        d = ls.shape[1]
+        losses = np.concatenate([ls, lr], axis=1)  # (M, 2D)
+        now = float(np.minimum(ls.sum(0), lr.sum(0)).sum() / n_plan)
+        ans = self.pop.answers[idx]
+        rows = []
+        for x, q1 in enumerate(candidates):
+            b1 = len(self.pop.questions[q1].options)
+            m1 = self.pop.questions[q1].report_matrix()
+            for q2 in candidates[x + 1 :]:
+                b2 = len(self.pop.questions[q2].options)
+                m2 = self.pop.questions[q2].report_matrix()
+                code = ans[:, q1] * b2 + ans[:, q2]
+                agg = np.stack([np.bincount(code, weights=losses[:, k], minlength=b1 * b2) for k in range(2 * d)], 1)
+                agg = agg.reshape(b1, b2, 2 * d)
+                post = np.einsum("ab,cd,ack->bdk", m1, m2, agg)  # joint reported options
+                exp_post = np.minimum(post[..., :d], post[..., d:]).sum() / n_plan
+                rows.append((q1, q2, now - exp_post))
+        rows.sort(key=lambda r: -r[2])
         return rows

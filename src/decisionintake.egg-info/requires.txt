@@ -1,0 +1,9 @@
+numpy>=1.26
+
+[benefits]
+policyengine-us
+tables
+pandas
+
+[dev]
+pytest

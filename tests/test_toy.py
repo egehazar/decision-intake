@@ -98,3 +98,43 @@ def test_volunteered_fact_is_not_asked_again():
     user = UserModel(opener=1, volunteerable=[0], name="opener")
     o = run_one(VOIPolicy(question_cost=1.0), pop, loss, pop.answers[0], user, rng)
     assert "kids" not in o.asked
+
+
+def test_fast_voi_table_matches_the_direct_computation():
+    pop, loss = toy()
+    noisy = np.full((5, 5), 0.02) + np.eye(5) * 0.9
+    pop.questions[1].noise = noisy / noisy.sum(1, keepdims=True)
+    s = Session(pop, loss)
+    s.observe(0, np.array([0.1, 0.7, 0.2]))
+    fast = dict(s.voi_table())
+    for j, v in fast.items():
+        assert v == pytest.approx(s.voi(j), rel=1e-4, abs=1e-3)
+
+
+def test_support_floor_keeps_enough_records():
+    pop, loss = toy()
+    for q in pop.questions:  # small chance of any wrong answer, so evidence is soft, not exclusion
+        b = len(q.options)
+        q.noise = np.full((b, b), 0.02 / b) + np.eye(b) * 0.98
+    answers = [(0, 1), (1, 2), (2, 0), (3, 1)]
+    floor, plain = Session(pop, loss, min_ess=200), Session(pop, loss)
+    for j, b in answers:
+        floor.answer(j, b)
+        plain.answer(j, b)
+    assert floor.ess() >= 199 and plain.ess() < floor.ess()
+
+
+def test_pair_lookahead_finds_value_a_single_question_misses():
+    # xor: eligible only when exactly one of two facts holds; each fact alone says nothing
+    rng = np.random.default_rng(3)
+    n = 4000
+    a, b = rng.integers(0, 2, n), rng.integers(0, 2, n)
+    qs = [Question("a", "a?", ("no", "yes")), Question("b", "b?", ("no", "yes"))]
+    el = (a ^ b).astype(bool)[:, None]
+    pop = Population(qs, ["x"], np.stack([a, b], 1), np.ones(n), el, el * 1000.0)
+    loss = LossModel(false_rec_cost=np.array([1000.0]), miss_floor=np.zeros(1))
+    s = Session(pop, loss)
+    assert max(v for _, v in s.voi_table()) < 20  # alone, neither question is worth anything
+    assert s.pair_table()[0][2] > 400  # together they settle it
+    assert VOIPolicy(question_cost=50).next_question(s, 0) is not None
+    assert VOIPolicy(question_cost=50, lookahead=False).next_question(s, 0) is None

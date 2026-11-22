@@ -42,17 +42,28 @@ class VOIPolicy(Policy):
 
     question_cost: float = 50.0
     budget: int = 99
+    lookahead: bool = True  # when no single question pays, price pairs before stopping
+    n_plan: int = 4000
     name: str = "engine"
 
     def next_question(self, s, n_asked):
         if n_asked >= self.budget:
             return None
+        table = s.voi_table(_unasked(s))
         best, best_net = None, 0.0
-        for j, v in s.voi_table(_unasked(s)):
+        for j, v in table:
             net = v - self.question_cost * s.pop.questions[j].cost
             if net > best_net:
                 best, best_net = j, net
-        return best
+        if best is not None or not self.lookahead or n_asked + 2 > self.budget:
+            return best
+        single = dict(table)
+        for q1, q2, v in s.pair_table(_unasked(s), n_plan=self.n_plan, seed=n_asked):
+            cost = self.question_cost * (s.pop.questions[q1].cost + s.pop.questions[q2].cost)
+            if v - cost > 0:
+                return q1 if single.get(q1, 0) >= single.get(q2, 0) else q2
+            break  # sorted: if the best pair doesn't pay, none will
+        return None
 
 
 @dataclass
@@ -82,14 +93,17 @@ class EntropyGreedy(Policy):
             return None
         el = s.pop.eligible.astype(float)
         now = _binary_entropy(s.w @ el).sum()
+        oh, offsets = s.pop.onehot()
+        agg_w = oh.T @ s.w
+        agg_e = oh.T @ (s.w[:, None] * el)
         best, best_gain = None, self.min_gain
         for j in _unasked(s):
+            b = len(s.pop.questions[j].options)
             rep = s.pop.questions[j].report_matrix()
-            lik = rep[s.pop.answers[:, j]]  # (N, B)
-            wb = lik * s.w[:, None]
-            mass = wb.sum(0)  # (B,)
-            keep = mass > 0
-            p = (wb.T @ el)[keep] / mass[keep, None]
+            mass = rep.T @ agg_w[offsets[j] : offsets[j] + b]  # (B_reported,)
+            pe = rep.T @ agg_e[offsets[j] : offsets[j] + b]  # (B_reported, D)
+            keep = mass > 1e-15
+            p = pe[keep] / mass[keep, None]
             post = (mass[keep] * _binary_entropy(p).sum(1)).sum() / mass.sum()
             gain = now - post
             if gain > best_gain:
@@ -180,13 +194,19 @@ class GreedyTree(Policy):
             used = {j for j, _ in path}
             now = bayes_risk(w, ls, lr)
             best_net = 0.0
+            oh, offsets = self.train.onehot()
+            sub = oh[idx]
+            counts = sub.sum(0)
+            d = ls.shape[1]
+            agg = sub.T @ np.concatenate([w[:, None] * ls, w[:, None] * lr], axis=1)
             for j in range(len(self.train.questions)):
                 if j in used:
                     continue
-                col = self.train.answers[idx, j]
-                if np.bincount(col).max() > len(idx) - self.min_leaf:
+                b = len(self.train.questions[j].options)
+                if counts[offsets[j] : offsets[j] + b].max() > len(idx) - self.min_leaf:
                     continue  # one branch would hold almost everything: no real split
-                post = _grouped_risk(self.train.subset(idx), w, ls, lr, [j])
+                block = agg[offsets[j] : offsets[j] + b]
+                post = np.minimum(block[:, :d], block[:, d:]).sum() / w.sum()
                 net = (now - post) - self.question_cost * self.train.questions[j].cost
                 if net > best_net:
                     split, best_net = j, net
