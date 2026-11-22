@@ -44,6 +44,29 @@ person's words ──► reader ──► evidence over a question's options
   a probability for each option (or for each step of an ordered scale), or an instruct model that
   picks one option. Hedged answers become spread-out evidence instead of a guess.
 
+## Results (held-out test, 600 households never used for training or tuning)
+
+Settings were frozen on a validation split first (DECISIONS D16). Loss is the cost of mistakes per
+household per year: a missed programme at its value, a wrong recommendation at $1,000. Intervals are
+95% paired bootstrap. Full tables: [WRITEUP.md](WRITEUP.md), `results/final_600_analysis.txt`,
+`results/secondary_600_analysis.txt`.
+
+- **Fewer questions, same quality.** With clean answers the engine stops after 8.2 questions instead
+  of 18; the difference in loss is +$67 [-363, +496], indistinguishable from zero. It expected $1,329
+  of mistakes per household and made $1,250.
+- **Where it beats a precomputed tree: facts said up front.** A greedy tree on the same loss, deciding
+  with the same calibrated model, matches the engine when it is asked questions on a blank form, with
+  clean or messy answers. When the person volunteers three facts first, the engine is ahead by
+  $376-$1,072 per household at 3, 5 and 9 questions (all intervals below zero): it re-plans around
+  what it was told, while a tree can only skip along its branches.
+- **It beats fixed forms** (a fixed set chosen for each question budget) with clean answers at 5-9
+  questions, and with realistic answers at 7 and 9.
+- **Hand-off.** The 10% of households it is least sure about carry 22-31% of all mistake cost.
+- **Not yet a screener people should rely on.** About 45% of recommendations are for programmes the
+  household can't get, almost all Medicaid and the ACA credit, where the dollar-weighted objective
+  recommends at low probability. Showing only recommendations at 30% or more: 73% precision, 77% of
+  eligible programmes still found.
+
 ## Reproduce
 
 ```bash
