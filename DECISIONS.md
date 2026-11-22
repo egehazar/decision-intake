@@ -313,3 +313,28 @@ Same 600 test households, run after the freeze (results/secondary_600_analysis.t
   borderline. It beats the per-budget fixed sets at every k. This is the defensible advantage: not
   smarter questions on a clean form (a fair tree matches it there), but using whatever the person has
   already said, in any order, which a precomputed tree can only skip along its own branches.
+
+## D23. Readers: what each component is good at, measured (2026-11-22)
+
+240 held-out generated answers (results_read_eval.log), after the D20 fixes:
+- Plain LLM pick: commits on 70% (abstains on every "don't know"), 95.2% accurate when it commits,
+  confidently wrong 3.3%, log loss 0.80. Fails on monthly amounts and vague answers.
+- LLM pick + self-rated confidence: no better (95.2%, 3.3%, 0.77). Self-confidence adds nothing.
+- Structured (LLM slots, code arithmetic): 97.6% when committing, confidently wrong 1.7%, log loss
+  0.51; all monthly and range answers right.
+- Decision model (Kev-4B), per option, uncalibrated: never confidently wrong, but diffuse (log loss
+  1.00, 75% top-option accuracy) and it leans one way on "don't know" instead of going flat.
+- Split by question type, with the decision model's sharpness cross-fitted: on non-amount questions
+  the LLM pick is better (0.35 vs 0.41), so handing those to the decision model is the wrong design;
+  on amounts the decision model (0.84) beats the LLM pick (1.76) and roughly ties structured (0.86).
+- Multiplying the structured reading and the calibrated decision model on amounts (product of
+  independent evidence, weight 0.5-0.75 on the decision model, sharpness 0.1; cross-fitted 5 times):
+  log loss 0.785, better than either alone.
+Frozen before confirmation: CombinedReader = LLM pick for non-amount questions; for amounts,
+structured^(0.4) x decision-model(T=0.1)^(0.6). Tested on a NEW set of 120 amount answers
+(read_eval.py amounts 120), which none of these choices saw.
+
+End to end (40 test households, unweighted, experiments/analyze_language.py): misreading rate when a
+reader commits, typed 0%, plain LLM 8.9%, structured 3.7%; loss differences vs typed answers are
+within noise at this size (structured +$93 [-697, +743]). Survey-weighted means were dominated by one
+household carrying 16% of the weight, so this comparison is reported unweighted.

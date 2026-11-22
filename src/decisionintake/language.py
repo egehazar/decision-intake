@@ -231,3 +231,35 @@ class StructuredReader:
         if s.get("approximate"):
             low, high = low * 0.85, high * 1.15
         return interval_evidence(q, low, high)
+
+
+@dataclass
+class CombinedReader:
+    """Amounts: the structured reading (LLM slots + code arithmetic) and the decision model's calibrated
+    per-range probabilities, multiplied as independent evidence (weights 1 - dm_weight and dm_weight).
+    Everything else: the LLM's single pick, which read non-amount answers better than the decision model.
+    dm_temperature and dm_weight were fitted on one set of held-out answers and frozen before testing
+    on another (DECISIONS D23)."""
+
+    url: str = "http://127.0.0.1:9996"
+    dm_url: str = "http://127.0.0.1:9995"
+    dm_temperature: float = 0.1
+    dm_weight: float = 0.6
+    name: str = "combined"
+
+    def raw(self, q: Question, utterance: str):
+        if q.edges is None:
+            return {"pick": list(LLMReader(url=self.url, mode="hard").ask(q, utterance))}
+        return {"slots": StructuredReader(url=self.url).extract(q, utterance),
+                "p": DecisionModelReader(url=self.dm_url).probabilities(q, utterance).tolist()}
+
+    def evidence(self, q: Question, utterance: str, raw=None) -> np.ndarray:
+        raw = raw if raw is not None else self.raw(q, utterance)
+        if "pick" in raw:
+            return LLMReader(mode="hard").evidence(q, "", parsed=tuple(raw["pick"]))
+        s = StructuredReader().evidence(q, "", raw={"slots": raw["slots"]})
+        s = s / s.sum()
+        d = DecisionModelReader(temperature=self.dm_temperature).evidence(q, "", p=np.array(raw["p"]))
+        d = d / d.sum()
+        ev = s ** (1 - self.dm_weight) * d ** self.dm_weight
+        return ev / ev.sum()

@@ -101,13 +101,40 @@ a guarantee.
 
 ## The language layer
 
-*To be filled from `experiments/read_eval.py`: six readers on held-out generated answers.*
+The engine needs evidence, not just an answer: "about $2,900 a month" should land on one income
+range, "somewhere between 25 and 40 thousand" should spread over two, and "I'd have to check" should
+change nothing. Readers were compared on 240 answers generated from held-out households' records in
+controlled styles (exact, approximate, monthly, range, vague, indirect, don't know), all on this
+CPU-only machine with 4B-parameter models (Qwen3.5-4B as the language model, Kev-4B as the decision
+model).
 
-Early readings set the design: both 4B models fail at arithmetic hidden in language. Asked about
-"around $2,900 a month", the instruct model picked $60-80k a year with full confidence (the truth is
-about $35k). So the structured reader splits the work: the language model fills typed slots (amount,
-period, approximate, zero, don't know), code does the arithmetic and spreads hedged answers across
-ranges, and a decision model gives calibrated probabilities for the judgement questions.
+| reader | commits | accurate when it commits | confidently wrong | log loss |
+|---|---|---|---|---|
+| language model picks an option | 70% | 95.2% | 3.3% | 0.80 |
+| ... and rates its own confidence | 69% | 95.2% | 3.3% | 0.77 |
+| decision model, probability per option | 100% | 75.4% | 0.0% | 1.00 |
+| structured: model fills slots, code does arithmetic | 70% | 97.6% | 1.7% | 0.51 |
+
+Three things came out of this:
+
+- **Let code do the arithmetic.** Both small models fail at arithmetic hidden in language. Asked about
+  "around $2,900 a month", the language model picked $60-80k a year with full confidence (the truth is
+  about $35k). When it only fills typed slots (amount as stated, period, approximate, zero, don't know)
+  and code converts and spreads the amount over the ranges, monthly and range answers are all read
+  right and confident mistakes halve.
+- **Self-rated confidence is worthless here.** Asking the language model how sure it is changed
+  nothing measurable.
+- **The decision model earns its place only where it is good.** On yes/no and category questions the
+  language model's pick reads better (log loss 0.35 vs 0.41, decision model calibrated by cross-fitting),
+  so handing those to the decision model would be worse. On amounts the calibrated decision model
+  roughly ties the structured reading, and multiplying the two as independent evidence beats either
+  (0.785 vs 0.84 and 0.86, cross-fitted). Confirmation on a fresh set of 120 amount answers, with the
+  combination frozen beforehand: *pending*.
+
+In full interviews (40 held-out households answering in sentences), the structured reader misread
+3.7% of the answers it committed to, against 8.9% for the plain pick. At 40 households the effect on
+decision loss is within noise for every reader, including typed answers, so the claim is about
+reading accuracy, not about benefits found.
 
 ## What this is not
 

@@ -746,3 +746,337 @@
 {"reader": "llm_hard", "qid": "social_security", "utterance": "Somewhere between 60 thousand and 75 thousand a year.", "raw": [4, 1.0]}
 {"reader": "llm_hard", "qid": "household_size", "utterance": "Six of us.", "raw": [5, 1.0]}
 {"reader": "llm_hard", "qid": "state", "utterance": "We're in West Virginia.", "raw": [48, 1.0]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "Zero.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "$219,700.", "raw": [4, 1.0]}
+{"reader": "llm_hard", "qid": "college", "utterance": "Yes.", "raw": [1, 1.0]}
+{"reader": "llm_hard", "qid": "childcare", "utterance": "Somewhere between $6,500 and 10 thousand a year.", "raw": [2, 1.0]}
+{"reader": "dm", "qid": "state", "utterance": "We're in Oklahoma.", "raw": [0.3538637129758554, 0.36095860343987846, 0.2731431622405436, 0.357595324998701, 0.2724866696723188, 0.22421701208931716, 0.22227337695819427, 0.30551321109032753, 0.42428248302700644, 0.32489022379246674, 0.34968057457307544, 0.33349271026770977, 0.3618331830096168, 0.1624952635408726, 0.23748598110138447, 0.18928488875255137, 0.4921071926918392, 0.20810484902827736, 0.31175125804212667, 0.34770695432174986, 0.19995797252503286, 0.1917826222084216, 0.27229153432534287, 0.2683031955056415, 0.3728707960470632, 0.3987946338198264, 0.3997870937446154, 0.2829655092500079, 0.20432458103036652, 0.2802466188289998, 0.19421336340919934, 0.2946108736196414, 0.17429913303091052, 0.24500562083122215, 0.4359710413175757, 0.34140874341926325, 0.9130733110710562, 0.31922738356754005, 0.3105914337313563, 0.2982731246768821, 0.3286285564517374, 0.3635619227049245, 0.29498737577931305, 0.38328099820281414, 0.3119300880062311, 0.3568701272197911, 0.3445196323071646, 0.33299082689845455, 0.3955053720178372, 0.24039201563693258, 0.405678257930746]}
+{"reader": "dm", "qid": "self_employed", "utterance": "No, we both have regular jobs.", "raw": [0.07871985000198108, 0.0313475970545081]}
+{"reader": "dm", "qid": "infant_or_pregnant", "utterance": "No.", "raw": [0.32383926401092383, 0.07115463931295801]}
+{"reader": "dm", "qid": "employer_insurance", "utterance": "No, we buy our own or go without.", "raw": [0.0688295142639256, 0.10095198171061111]}
+{"reader": "dm", "qid": "children", "utterance": "I have my son, my son, my son and my son.", "raw": [0.41822213719920615, 0.4705941423007712, 0.2968397512313625, 0.33287492681233793, 0.7159898506248514]}
+{"reader": "dm", "qid": "tenure", "utterance": "We own our house.", "raw": [0.6455784489542505, 0.9486823508249485, 0.7178214791577974]}
+{"reader": "dm", "qid": "child_under5", "utterance": "No, the kids are older.", "raw": [0.6432832868511824, 0.04627653033457089]}
+{"reader": "dm", "qid": "other_income", "utterance": "Around $1,700 a month.", "raw": [0.6372335053219592, 0.523263969119862, 0.625317500806014, 0.7440062776111434]}
+{"reader": "dm", "qid": "earned_income", "utterance": "Nobody's working right now.", "raw": [0.6747022009065805, 0.18678897960894805, 0.07898772203257119, 0.043784124437249106, 0.03983678599466929, 0.032808839127490774, 0.03009363204937135, 0.0267135123061304, 0.02647535238229737, 0.03160657724182498, 0.05683209526401748]}
+{"reader": "dm", "qid": "self_employed", "utterance": "I drive for a delivery app.", "raw": [0.6065909843806107, 0.8241444624867166]}
+{"reader": "dm", "qid": "senior", "utterance": "No, we're all in our thirties.", "raw": [0.14302548237448443, 0.03518826168145687]}
+{"reader": "dm", "qid": "child_under5", "utterance": "No, the kids are older.", "raw": [0.6432832868511824, 0.04627653033457089]}
+{"reader": "dm", "qid": "childcare", "utterance": "We don't pay for childcare.", "raw": [0.8722417748639463, 0.26339232373861565, 0.12879462506199976, 0.039334097759359664]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "Somewhere between 550 thousand and 1,000 thousand.", "raw": [4, 1.0]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "About 250 thousand a year.", "raw": [9, 1.0]}
+{"reader": "llm_hard", "qid": "social_security", "utterance": "We don't get any.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "married", "utterance": "Yeah.", "raw": [1, 1.0]}
+{"reader": "llm_hard", "qid": "state", "utterance": "Maryland.", "raw": [20, 1.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "$138,700.", "raw": [4, 1.0]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "Decent money, both of us work.", "raw": [null, 0.0]}
+{"reader": "dm", "qid": "state", "utterance": "New Mexico.", "raw": [0.44398904182955984, 0.47079981272729754, 0.5747673757528845, 0.47622874308945423, 0.3884018681640641, 0.43598157379874697, 0.3586279142825915, 0.49003167267950043, 0.5027380753584237, 0.3823518366804998, 0.44131081059988303, 0.4061773656740734, 0.47394057889944957, 0.30092186637168666, 0.361825023055283, 0.33357905599538484, 0.4972504180128191, 0.3872056815664043, 0.43180004352287493, 0.4122514029044767, 0.2831532091133828, 0.2908746529076842, 0.3727766789465845, 0.25952969752393273, 0.3809076115371011, 0.46343503661657187, 0.539023990996882, 0.36782879947165836, 0.4413446973758093, 0.3212265407223663, 0.31248527791389763, 0.9233599849041806, 0.34740902352558584, 0.4071906747783761, 0.48772312578882276, 0.440781782569258, 0.513753053891156, 0.4326754605232358, 0.46805178527300617, 0.4915465726289509, 0.4267601790485295, 0.428559030694393, 0.41934190874926014, 0.48609963269495904, 0.5619661769780895, 0.46829603636770994, 0.46497378686690854, 0.4705374147278178, 0.531547014147984, 0.39762472896424184, 0.5646598819678328]}
+{"reader": "dm", "qid": "earned_income", "utterance": "Around $6,500 a month.", "raw": [0.5625811736575531, 0.32543014159350125, 0.4541481283387848, 0.48455059342085754, 0.5314191380179016, 0.5743300847731564, 0.6196592769323788, 0.660838815920463, 0.558928481615169, 0.5699467206512552, 0.38312904204279635]}
+{"reader": "dm", "qid": "other_income", "utterance": "$93,400 a year.", "raw": [0.252074478659336, 0.22403801214394384, 0.23138118560015947, 0.42581953170418113]}
+{"reader": "dm", "qid": "children", "utterance": "No kids.", "raw": [0.9471045498892263, 0.8264035216784591, 0.6375552032485243, 0.3489768940352777, 0.03546811528476646]}
+{"reader": "dm", "qid": "housing_cost", "utterance": "$300 a month.", "raw": [0.5438176724102319, 0.9302761086089605, 0.21143453175609372, 0.058708507890506884, 0.048948489589861276, 0.0388239781920594, 0.04872750967324178]}
+{"reader": "dm", "qid": "employer_insurance", "utterance": "Hard to say.", "raw": [0.40682668614373785, 0.7043962567606084]}
+{"reader": "dm", "qid": "college", "utterance": "No.", "raw": [0.09875154901828652, 0.05523983971759094]}
+{"reader": "llm_hard", "qid": "housing_cost", "utterance": "About $2,500 a month.", "raw": [5, 1.0]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "$167,100 a year.", "raw": [9, 1.0]}
+{"reader": "llm_hard", "qid": "children", "utterance": "Five kids.", "raw": [4, 1.0]}
+{"reader": "llm_hard", "qid": "state", "utterance": "Rhode Island.", "raw": [39, 1.0]}
+{"reader": "llm_hard", "qid": "employer_insurance", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_hard", "qid": "state", "utterance": "We're in Missouri.", "raw": [25, 1.0]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "About 12 thousand a year.", "raw": [2, 1.0]}
+{"reader": "llm_hard", "qid": "other_income", "utterance": "Around $0 a month.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "other_income", "utterance": "Somewhere between $100 and $130 a year.", "raw": [0, 1.0]}
+{"reader": "dm", "qid": "housing_cost", "utterance": "None.", "raw": [0.9047260183181317, 0.17124190728730393, 0.07202161824876721, 0.027641019520102082, 0.03419898101503339, 0.04189017195545557, 0.04990143132172755]}
+{"reader": "dm", "qid": "children", "utterance": "Three kids.", "raw": [0.5249836539887218, 0.6290145418857054, 0.38043376978951143, 0.9185795341510716, 0.3017579015833475]}
+{"reader": "dm", "qid": "infant_or_pregnant", "utterance": "Nope.", "raw": [0.4126811977264961, 0.06019459979285786]}
+{"reader": "dm", "qid": "other_income", "utterance": "About 80 thousand a year.", "raw": [0.41853222883658536, 0.5058120365247164, 0.45455735452484153, 0.8106837275327792]}
+{"reader": "dm", "qid": "married", "utterance": "Yes, my husband and I.", "raw": [0.8935671731050903, 0.9535400028363573]}
+{"reader": "dm", "qid": "housing_cost", "utterance": "Somewhere between $3,000 and $3,500 a month.", "raw": [0.2336422588199681, 0.0949819876520433, 0.053925479743368185, 0.03751723670809851, 0.04616174521350655, 0.0727633676628783, 0.8415476344936287]}
+{"reader": "llm_hard", "qid": "social_security", "utterance": "A small check.", "raw": [1, 1.0]}
+{"reader": "dm", "qid": "social_security", "utterance": "Nothing.", "raw": [0.9003778817530845, 0.48798081064988624, 0.2417672846582602, 0.2279779252554431, 0.1904791743234072]}
+{"reader": "llm_hard", "qid": "state", "utterance": "We're in Oregon.", "raw": [37, 1.0]}
+{"reader": "llm_hard", "qid": "housing_cost", "utterance": "About $1,500 a month.", "raw": [4, 1.0]}
+{"reader": "llm_hard", "qid": "housing_cost", "utterance": "$2,100 a month.", "raw": [5, 1.0]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "Around 100 thousand a month.", "raw": [9, 1.0]}
+{"reader": "llm_hard", "qid": "housing_cost", "utterance": "About $1,100 a month.", "raw": [3, 1.0]}
+{"reader": "dm", "qid": "social_security", "utterance": "About 70 thousand a year.", "raw": [0.4637078776571543, 0.21679786812391413, 0.14161838547262295, 0.14860756805446557, 0.8783911430198583]}
+{"reader": "dm", "qid": "child_under5", "utterance": "No idea, honestly.", "raw": [0.020832326810196658, 0.030576214176881715]}
+{"reader": "dm", "qid": "child_under5", "utterance": "Yeah.", "raw": [0.43015828564329256, 0.7350486781724986]}
+{"reader": "dm", "qid": "assets", "utterance": "Hard to say.", "raw": [0.044924231783442826, 0.04428660839836959, 0.04444167185662906, 0.029351871357827478, 0.021599623100340738]}
+{"reader": "dm", "qid": "children", "utterance": "None.", "raw": [0.929634060313392, 0.8421779083169733, 0.6688546546066438, 0.4762808958535932, 0.14247914281787735]}
+{"reader": "dm", "qid": "assets", "utterance": "I'd have to check.", "raw": [0.032346476155168995, 0.039924770479134855, 0.04323907517232393, 0.03440442924128297, 0.02553506343478308]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "Somewhere between 16 thousand and 25 thousand a year.", "raw": [3, 1.0]}
+{"reader": "llm_hard", "qid": "state", "utterance": "South Dakota.", "raw": [41, 1.0]}
+{"reader": "llm_hard", "qid": "other_income", "utterance": "None.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "state", "utterance": "We're in Hawaii.", "raw": [11, 1.0]}
+{"reader": "dm", "qid": "married", "utterance": "No, I'm single.", "raw": [0.0735004160893672, 0.05624447629116429]}
+{"reader": "dm", "qid": "self_employed", "utterance": "I'd have to check.", "raw": [0.024015809417292835, 0.056634594911778975]}
+{"reader": "llm_hard", "qid": "other_income", "utterance": "About $3,500 a year.", "raw": [1, 1.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "About 100 thousand.", "raw": [4, 1.0]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "Not much, I only get a few shifts.", "raw": [1, 1.0]}
+{"reader": "llm_hard", "qid": "social_security", "utterance": "About 25 thousand a year.", "raw": [3, 1.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "$10,500.", "raw": [2, 1.0]}
+{"reader": "llm_hard", "qid": "other_income", "utterance": "About 25 thousand a year.", "raw": [3, 1.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "About 1,200 thousand.", "raw": [3, 1.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "$4,800.", "raw": [1, 1.0]}
+{"reader": "llm_hard", "qid": "childcare", "utterance": "We don't have any of that.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "employer_insurance", "utterance": "No, not us.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "children", "utterance": "I have my daughter.", "raw": [1, 1.0]}
+{"reader": "dm", "qid": "children", "utterance": "None.", "raw": [0.929634060313392, 0.8421779083169733, 0.6688546546066438, 0.4762808958535932, 0.14247914281787735]}
+{"reader": "dm", "qid": "college", "utterance": "No.", "raw": [0.09875154901828652, 0.05523983971759094]}
+{"reader": "dm", "qid": "other_income", "utterance": "No idea, honestly.", "raw": [0.08360025144334907, 0.041947149637646314, 0.047106481668043446, 0.02799566767785085]}
+{"reader": "dm", "qid": "housing_cost", "utterance": "About $190 a month.", "raw": [0.517433288924118, 0.871525207058311, 0.14983389920428336, 0.04009716108632969, 0.031091879747757525, 0.028932013221163008, 0.03404155647702968]}
+{"reader": "llm_hard", "qid": "state", "utterance": "We're in Montana.", "raw": [26, 1.0]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "About 30 thousand a year.", "raw": [4, 1.0]}
+{"reader": "llm_hard", "qid": "state", "utterance": "West Virginia.", "raw": [48, 1.0]}
+{"reader": "dm", "qid": "earned_income", "utterance": "Somewhere between 150 thousand and 180 thousand a year.", "raw": [0.5204980208211366, 0.25207546413456094, 0.11019129975342791, 0.08872939348469135, 0.08489507701555321, 0.07449580010502703, 0.06982315089813475, 0.07583361244336462, 0.08194118560927313, 0.18692756961490867, 0.8777521759759308]}
+{"reader": "dm", "qid": "children", "utterance": "One kid.", "raw": [0.5261870852133093, 0.9216188987821161, 0.46619092669624074, 0.2785342782129671, 0.08563266426868645]}
+{"reader": "dm", "qid": "disabled", "utterance": "I'd have to check.", "raw": [0.026889088884475738, 0.10373141323224314]}
+{"reader": "dm", "qid": "employer_insurance", "utterance": "No.", "raw": [0.0882064219747501, 0.1107401668239833]}
+{"reader": "dm", "qid": "married", "utterance": "Nope.", "raw": [0.04633211621767963, 0.029456971319751748]}
+{"reader": "dm", "qid": "tenure", "utterance": "We own our house.", "raw": [0.6455784489542505, 0.9486823508249485, 0.7178214791577974]}
+{"reader": "dm", "qid": "childcare", "utterance": "We don't pay for childcare.", "raw": [0.8722417748639463, 0.26339232373861565, 0.12879462506199976, 0.039334097759359664]}
+{"reader": "dm", "qid": "employer_insurance", "utterance": "Yes, I'm on my company's plan.", "raw": [0.9513792094702436, 0.9649080684786362]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "About 110 thousand a year.", "raw": [8, 1.0]}
+{"reader": "dm", "qid": "other_income", "utterance": "I don't really know.", "raw": [0.05689694472323621, 0.03795579920922037, 0.04782125840120196, 0.024798106989283517]}
+{"reader": "llm_hard", "qid": "state", "utterance": "We're in Rhode Island.", "raw": [39, 1.0]}
+{"reader": "llm_hard", "qid": "state", "utterance": "Virginia.", "raw": [46, 1.0]}
+{"reader": "dm", "qid": "infant_or_pregnant", "utterance": "I'm not sure.", "raw": [0.016628072970643146, 0.050180121020665026]}
+{"reader": "llm_hard", "qid": "other_income", "utterance": "Somewhere between $0 and $0 a year.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "Somewhere between 65 thousand and 80 thousand a year.", "raw": [7, 1.0]}
+{"reader": "dm", "qid": "married", "utterance": "No, I'm single.", "raw": [0.0735004160893672, 0.05624447629116429]}
+{"reader": "llm_hard", "qid": "social_security", "utterance": "Somewhere between 25 thousand and 35 thousand a year.", "raw": [4, 1.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "$2,256,900.", "raw": [4, 1.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "About $95.", "raw": [2, 1.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "We don't have any of that.", "raw": [null, 0.0]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "Around 90 thousand a month.", "raw": [8, 1.0]}
+{"reader": "llm_hard", "qid": "other_income", "utterance": "$64,500 a year.", "raw": [3, 1.0]}
+{"reader": "llm_hard", "qid": "college", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "Around $1,400 a month.", "raw": [7, 1.0]}
+{"reader": "llm_hard", "qid": "state", "utterance": "We're in New York.", "raw": [32, 1.0]}
+{"reader": "llm_hard", "qid": "housing_cost", "utterance": "$800 a month.", "raw": [2, 1.0]}
+{"reader": "llm_hard", "qid": "other_income", "utterance": "Around $650 a month.", "raw": [1, 1.0]}
+{"reader": "llm_hard", "qid": "state", "utterance": "North Dakota.", "raw": [34, 1.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "About 1,100 thousand.", "raw": [3, 1.0]}
+{"reader": "dm", "qid": "social_security", "utterance": "None.", "raw": [0.8334726045834269, 0.23206520534899874, 0.08807770350210958, 0.07423569614691017, 0.08822533946356445]}
+{"reader": "dm", "qid": "self_employed", "utterance": "No, not us.", "raw": [0.1317749288843565, 0.04785139783153241]}
+{"reader": "dm", "qid": "assets", "utterance": "A little cushion, not much.", "raw": [0.27786990847534065, 0.39531945409466757, 0.36483832730372145, 0.14839926130827266, 0.06468956019344688]}
+{"reader": "dm", "qid": "disabled", "utterance": "No, everyone's healthy.", "raw": [0.07598868578541818, 0.05794989342815757]}
+{"reader": "dm", "qid": "senior", "utterance": "I'm not sure.", "raw": [0.011177370827305603, 0.03786596238071312]}
+{"reader": "llm_hard", "qid": "state", "utterance": "We're in Maine.", "raw": [19, 1.0]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "Somewhere between 140 thousand and 200 thousand a year.", "raw": [9, 1.0]}
+{"reader": "llm_hard", "qid": "married", "utterance": "Yes, that's right.", "raw": [1, 1.0]}
+{"reader": "llm_hard", "qid": "other_income", "utterance": "$6,800 a year.", "raw": [2, 1.0]}
+{"reader": "llm_hard", "qid": "married", "utterance": "Yes, that's right.", "raw": [1, 1.0]}
+{"reader": "llm_hard", "qid": "child_under5", "utterance": "Yes, that's right.", "raw": [1, 1.0]}
+{"reader": "llm_hard", "qid": "social_security", "utterance": "A decent amount, it's most of what we live on.", "raw": [null, 0.0]}
+{"reader": "llm_hard", "qid": "childcare", "utterance": "Around $650 a month.", "raw": [2, 1.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "$8,700.", "raw": [2, 1.0]}
+{"reader": "llm_hard", "qid": "other_income", "utterance": "Around $400 a month.", "raw": [1, 1.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "$190,900.", "raw": [4, 1.0]}
+{"reader": "dm", "qid": "children", "utterance": "Three kids.", "raw": [0.5249836539887218, 0.6290145418857054, 0.38043376978951143, 0.9185795341510716, 0.2994729617237281]}
+{"reader": "llm_hard", "qid": "housing_cost", "utterance": "About $1,900 a month.", "raw": [4, 1.0]}
+{"reader": "llm_hard", "qid": "social_security", "utterance": "About 55 thousand a year.", "raw": [4, 1.0]}
+{"reader": "structured", "qid": "earned_income", "utterance": "I don't really know.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "I don't really know.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "I don't really know.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "Around 19 thousand a month.", "raw": {"slots": {"low": 19000, "high": 19000, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "childcare", "utterance": "About $6,000 a year.", "raw": {"slots": {"low": 6000, "high": 6000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "state", "utterance": "We're in Alaska.", "raw": [0.37971092160652103, 0.9183070412570568, 0.2513646253741408, 0.2732193680369228, 0.23862915720691366, 0.1999226325964444, 0.20937141122618239, 0.3379696026764626, 0.4444593911918315, 0.29506123506414694, 0.2905490410768074, 0.3760783052889415, 0.29852833613333896, 0.15475175617673206, 0.26808775193879775, 0.18907185112887015, 0.37185902829020046, 0.20566086058599864, 0.23307128730914334, 0.3629325254123645, 0.1834119135018305, 0.2006813934348908, 0.252939440299545, 0.2591726481502355, 0.33012219163816536, 0.31224756292635164, 0.3993613469136927, 0.23048651418697297, 0.17297154565641423, 0.29166075724890994, 0.21914702827989133, 0.2257145697332488, 0.2071955794656576, 0.24063321793394668, 0.38683547783899497, 0.28210119750930474, 0.41071815737606054, 0.2508851388635859, 0.31657922574676295, 0.3267748136967904, 0.3660075504182869, 0.263311324725205, 0.30490316951525137, 0.26130027808287276, 0.28973890567856925, 0.37656444799650163, 0.35582092778201374, 0.3143087466493974, 0.40483312267269, 0.27521322102824286, 0.4117730659405697]}
+{"reader": "dm", "qid": "self_employed", "utterance": "I'd have to check.", "raw": [0.024015809417292835, 0.056634594911778975]}
+{"reader": "dm", "qid": "self_employed", "utterance": "No, not us.", "raw": [0.1317749288843565, 0.04785139783153241]}
+{"reader": "dm", "qid": "tenure", "utterance": "We own our house.", "raw": [0.6455784489542505, 0.9486823508249485, 0.7178214791577974]}
+{"reader": "dm", "qid": "household_size", "utterance": "Just me.", "raw": [0.8925626974770274, 0.5885137009338265, 0.5362468756902451, 0.48615887771547683, 0.5240537792134126, 0.38899770553855695, 0.07582285595505865]}
+{"reader": "dm", "qid": "employer_insurance", "utterance": "Yeah.", "raw": [0.9351019264287115, 0.9459346716025255]}
+{"reader": "dm", "qid": "other_income", "utterance": "I don't really know.", "raw": [0.05689694472323621, 0.03795579920922037, 0.04782125840120196, 0.024798106989283517]}
+{"reader": "dm", "qid": "other_income", "utterance": "Nothing.", "raw": [0.8414614247932423, 0.24543411252936664, 0.1721315445171362, 0.06449629919597907]}
+{"reader": "dm", "qid": "self_employed", "utterance": "I'd have to check.", "raw": [0.024015809417292835, 0.056634594911778975]}
+{"reader": "dm", "qid": "child_under5", "utterance": "Hard to say.", "raw": [0.016997129694835005, 0.03850341487740278]}
+{"reader": "structured", "qid": "childcare", "utterance": "I'd have to check.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "assets", "utterance": "About 300 thousand.", "raw": {"slots": {"low": 300000, "high": 300000, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "About 130 thousand a year.", "raw": {"slots": {"low": 130000, "high": 130000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "Barely anything in the bank.", "raw": {"slots": {"low": null, "high": null, "period": "none", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "None.", "raw": {"slots": {"low": null, "high": null, "period": "none", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "We don't have any of that.", "raw": {"slots": {"low": null, "high": null, "period": "none", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "$181,100.", "raw": {"slots": {"low": 181100, "high": 181100, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "$24,600 a year.", "raw": {"slots": {"low": 24600, "high": 24600, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "Zero.", "raw": {"slots": {"low": 0, "high": 0, "period": "year", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "A little bit here and there.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "state", "utterance": "We're in Ohio.", "raw": [0.3611518944737872, 0.36078780964339446, 0.2524077427792415, 0.2845076244728246, 0.2377847986505792, 0.22318848948783598, 0.22065347137851732, 0.3538416570421192, 0.46894462514973106, 0.28105941096831805, 0.3472767242844876, 0.33411946559920974, 0.3488949271211254, 0.18373655126772015, 0.39297057573811744, 0.23466479191982273, 0.3498986426590953, 0.27445515878486165, 0.3055394925759722, 0.4115794835422824, 0.21068320590500353, 0.20605628682837174, 0.44221020379119313, 0.27364355010665387, 0.2963731499601625, 0.34915150945494544, 0.3951453636539467, 0.3280799932990983, 0.20625949753546957, 0.3375785121879899, 0.24520413071833524, 0.24769301691876086, 0.20037396657732168, 0.2674111400392079, 0.43435338615993185, 0.9182460786562525, 0.4843788978889324, 0.3494536767528592, 0.4082104653062185, 0.3733803933034517, 0.2976197468109, 0.33872815469597195, 0.2670952810046713, 0.2279519770697521, 0.30424169615848407, 0.4133418660873735, 0.34620029528269136, 0.4090841421887724, 0.4413005371755767, 0.27224901719094313, 0.4229413283496084]}
+{"reader": "dm", "qid": "children", "utterance": "No, no children.", "raw": [0.9425006617947471, 0.8325994912013772, 0.7338216709907476, 0.6062810167847357, 0.07003986565193702]}
+{"reader": "dm", "qid": "childcare", "utterance": "$12,700 a year.", "raw": [0.47285690116357315, 0.06346826833629773, 0.05247778373944165, 0.9601187792743294]}
+{"reader": "dm", "qid": "married", "utterance": "Yes.", "raw": [0.7760038713599822, 0.8838066714702225]}
+{"reader": "structured", "qid": "social_security", "utterance": "About 17 thousand a year.", "raw": {"slots": {"low": 17000, "high": 17000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "We don't have any of that.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "About 75 thousand a year.", "raw": {"slots": {"low": 75000, "high": 75000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "earned_income", "utterance": "We're pretty comfortable.", "raw": [0.17132272929851566, 0.05666742898048935, 0.05526261161566574, 0.07143224469097008, 0.0860812590102052, 0.11092486671775142, 0.11126678076474784, 0.14019553230283682, 0.17533152973028612, 0.17209868628982924, 0.1568909817855043]}
+{"reader": "dm", "qid": "assets", "utterance": "$1,700.", "raw": [0.9487443976200671, 0.2577460777931512, 0.1278564192647733, 0.048131921642791835, 0.01146198739706161]}
+{"reader": "dm", "qid": "married", "utterance": "No idea, honestly.", "raw": [0.009096668321561757, 0.016497578240066386]}
+{"reader": "structured", "qid": "earned_income", "utterance": "Somewhere between 35 thousand and 65 thousand a year.", "raw": {"slots": {"low": 35000, "high": 65000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "About 45 thousand a year.", "raw": {"slots": {"low": 45000, "high": 45000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "I'm not sure.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "other_income", "utterance": "No, nothing else.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "We don't have any of that.", "raw": {"slots": {"low": null, "high": null, "period": "none", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "Somewhere between $6,000 and 11 thousand.", "raw": {"slots": {"low": 6000, "high": 11000, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "Around 30 thousand a month.", "raw": {"slots": {"low": 30000, "high": 30000, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "Almost nothing saved.", "raw": {"slots": {"low": null, "high": null, "period": "none", "approximate": true, "zero": true, "unknown": false}}}
+{"reader": "dm", "qid": "assets", "utterance": "No idea, honestly.", "raw": [0.04621835635944165, 0.03904858304157068, 0.03962151787229974, 0.027971066888550902, 0.01901079677523441]}
+{"reader": "dm", "qid": "child_under5", "utterance": "I'm not sure.", "raw": [0.014350485376813047, 0.03678272536408692]}
+{"reader": "dm", "qid": "college", "utterance": "No.", "raw": [0.09875154901828652, 0.05523983971759094]}
+{"reader": "dm", "qid": "housing_cost", "utterance": "Nothing.", "raw": [0.8837764608246798, 0.12698407330725156, 0.05260628448321162, 0.024241238456138868, 0.022284583573178245, 0.027043284529842754, 0.02346067504286636]}
+{"reader": "dm", "qid": "childcare", "utterance": "None.", "raw": [0.8797999778101547, 0.173060011753965, 0.07721300681607791, 0.04243943958415148]}
+{"reader": "dm", "qid": "married", "utterance": "Yes, my husband and I.", "raw": [0.8935671731050903, 0.9535400028363573]}
+{"reader": "structured", "qid": "social_security", "utterance": "About 30 thousand a year.", "raw": {"slots": {"low": 30000, "high": 30000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "About 40 thousand a year.", "raw": {"slots": {"low": 40000, "high": 40000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "About 3,000 thousand.", "raw": {"slots": {"low": 3000000, "high": 3000000, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "childcare", "utterance": "I don't really know.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "other_income", "utterance": "Around 10 thousand a month.", "raw": {"slots": {"low": 10000, "high": 10000, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "Somewhere between $450 and $650.", "raw": {"slots": {"low": 450, "high": 650, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "$9,900 a year.", "raw": {"slots": {"low": 9900, "high": 9900, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "About 60 thousand a year.", "raw": {"slots": {"low": 60000, "high": 60000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "$3,000 a month.", "raw": {"slots": {"low": 3000, "high": 3000, "period": "month", "approximate": false, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "None.", "raw": {"slots": {"low": null, "high": null, "period": "none", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "About 900 thousand.", "raw": {"slots": {"low": 900000, "high": 900000, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "About $0 a year.", "raw": {"slots": {"low": 0, "high": 0, "period": "year", "approximate": true, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "No idea, honestly.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "assets", "utterance": "Somewhere between 140 thousand and 170 thousand.", "raw": {"slots": {"low": 140000, "high": 170000, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "It's pretty cheap.", "raw": {"slots": {"low": null, "high": null, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "Around 12 thousand a month.", "raw": {"slots": {"low": 12000, "high": 12000, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "I'd have to check.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "other_income", "utterance": "$1,500 a year.", "raw": {"slots": {"low": 1500, "high": 1500, "period": "year", "approximate": false, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "Around 11 thousand a month.", "raw": {"slots": {"low": 11000, "high": 11000, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "Nothing, it's paid off.", "raw": {"slots": {"low": null, "high": null, "period": "month", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "$55,900.", "raw": {"slots": {"low": 55900, "high": 55900, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "state", "utterance": "Alabama.", "raw": [0.9378309776645356, 0.3666290178072791, 0.23002958008122376, 0.4190658475557068, 0.24385388135841987, 0.22968463691340357, 0.25635452641733997, 0.36832781244285934, 0.43201624420827617, 0.28885439767114585, 0.4189150877757225, 0.3549486625673251, 0.37346797553245215, 0.21772879542247808, 0.2588952091292576, 0.2996187804449826, 0.420887499916241, 0.3183999098243831, 0.43612152299641216, 0.45181450714026467, 0.22960502857883472, 0.2027415589187935, 0.2926640914118191, 0.2770259318986101, 0.5271268447852867, 0.37172008348879815, 0.3921359465753756, 0.29677606471737494, 0.2624283551987024, 0.3389459053985022, 0.20122066271281513, 0.29943031636324996, 0.1712047968635692, 0.28377271574165197, 0.49558837236794123, 0.3264152637776678, 0.4702362649810394, 0.2280638396526318, 0.2767685848558703, 0.29527388717964137, 0.4115925145761544, 0.39175764379938394, 0.3825106386860151, 0.25422933525533103, 0.29471348707837197, 0.3886174693872069, 0.3905851881612439, 0.2621318624288547, 0.4568966913522989, 0.29392429124441005, 0.49078733704438343]}
+{"reader": "dm", "qid": "employer_insurance", "utterance": "No idea, honestly.", "raw": [0.09778999490705186, 0.2199217176461957]}
+{"reader": "dm", "qid": "infant_or_pregnant", "utterance": "I'm expecting in March.", "raw": [0.7048448293540086, 0.874943287448961]}
+{"reader": "dm", "qid": "disabled", "utterance": "No, everyone's healthy.", "raw": [0.07598868578541818, 0.05794989342815757]}
+{"reader": "structured", "qid": "housing_cost", "utterance": "$1,600 a month.", "raw": {"slots": {"low": 1600, "high": 1600, "period": "month", "approximate": false, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "state", "utterance": "We're in Kansas.", "raw": [0.38742269734975354, 0.3997318237939782, 0.3065078047455859, 0.36552131210856537, 0.28111027189106963, 0.2906773568264952, 0.24134719311831748, 0.31944923129957586, 0.42908746688410504, 0.34371181197255907, 0.37262708920685267, 0.36505052970297963, 0.3800581627533186, 0.20469949549787272, 0.2951687688730667, 0.31864784317386685, 0.9054889475581643, 0.2626091243873209, 0.2910885037162135, 0.37057572366416697, 0.1937213388630703, 0.18947452535572815, 0.24022856137837362, 0.2863694409507749, 0.3598627814948921, 0.5494040188019571, 0.43723360554739493, 0.4389460850164448, 0.26925357282417883, 0.2981263965462848, 0.2057527507606826, 0.32113773626797604, 0.2205883716001179, 0.28473748720243414, 0.48239104776369085, 0.3215339940430412, 0.5995702017080513, 0.3158666203223555, 0.3523031241284389, 0.3290533573503875, 0.3318130956400249, 0.4046062314377314, 0.33458862911034015, 0.3302628895701318, 0.35767658283163695, 0.4111413243417442, 0.35748275676044294, 0.33317125881345167, 0.414257909856865, 0.28327825007071616, 0.4696534797425852]}
+{"reader": "dm", "qid": "disabled", "utterance": "Yes.", "raw": [0.8612055593639331, 0.9101042697760047]}
+{"reader": "dm", "qid": "infant_or_pregnant", "utterance": "No idea, honestly.", "raw": [0.0274901209715172, 0.05558265248721907]}
+{"reader": "dm", "qid": "married", "utterance": "No idea, honestly.", "raw": [0.009096668321561757, 0.016497578240066386]}
+{"reader": "dm", "qid": "college", "utterance": "Nope.", "raw": [0.10759253581787177, 0.027669641317998008]}
+{"reader": "dm", "qid": "infant_or_pregnant", "utterance": "Nope.", "raw": [0.4126811977264961, 0.06019459979285786]}
+{"reader": "structured", "qid": "other_income", "utterance": "Somewhere between 120 thousand and 250 thousand a year.", "raw": {"slots": {"low": 120000, "high": 250000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "Around $5,000 a month.", "raw": {"slots": {"low": 5000, "high": 5000, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "We don't get any.", "raw": {"slots": {"low": null, "high": null, "period": "none", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "I'm not sure.", "raw": {"slots": {"low": null, "high": null, "period": "none", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "Good money, honestly.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "$4,121,300.", "raw": {"slots": {"low": 4121300, "high": 4121300, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "Zero.", "raw": {"slots": {"low": 0, "high": 0, "period": "year", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "Somewhere between 60 thousand and 75 thousand a year.", "raw": {"slots": {"low": 60000, "high": 75000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "Hard to say.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "social_security", "utterance": "I'd have to check.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "social_security", "utterance": "Hard to say.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "assets", "utterance": "$219,700.", "raw": {"slots": {"low": 219700, "high": 219700, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "state", "utterance": "We're in Utah.", "raw": [0.28716828972132274, 0.37932995126539726, 0.3187350236280302, 0.2370529799391793, 0.22169509825808734, 0.27339855530300716, 0.17264073863674753, 0.2648963930368012, 0.3916846148418728, 0.2803330931120588, 0.29955394862732154, 0.2743711775166589, 0.3926419361184758, 0.12792963719846867, 0.21513726268942926, 0.17386735838367884, 0.3094140121036011, 0.1624312383470174, 0.20752038114965068, 0.32279056578419574, 0.15333916749034063, 0.13795322203824253, 0.2109449782972042, 0.19866564977653903, 0.24050752685089402, 0.19833853116409872, 0.33192315176416626, 0.1697971764187946, 0.2037736811661313, 0.24598028353911022, 0.1684367905691905, 0.22435110028352687, 0.1475438374980323, 0.21717813494948868, 0.3345927436098272, 0.27877533546703337, 0.36742939200899594, 0.2489332108251163, 0.28263462405817036, 0.30143508178233974, 0.28850184314749894, 0.26341091900253677, 0.25496536489491495, 0.2242836805589194, 0.9031648577377127, 0.348847330609394, 0.3299394174164666, 0.33686113263057504, 0.3593377841521528, 0.1953312156031619, 0.41250135589561854]}
+{"reader": "dm", "qid": "tenure", "utterance": "We own our house.", "raw": [0.6455784489542505, 0.9486823508249485, 0.7178214791577974]}
+{"reader": "dm", "qid": "other_income", "utterance": "Somewhere between $1,800 and $2,500 a year.", "raw": [0.7163247134298507, 0.9125943829851122, 0.5744596701210022, 0.27813469294297644]}
+{"reader": "dm", "qid": "household_size", "utterance": "Me and my partner.", "raw": [0.5963311534126344, 0.9561745783202974, 0.4562962362752572, 0.38448826776763556, 0.2933903811747411, 0.2535566300559168, 0.07655940874125924]}
+{"reader": "dm", "qid": "earned_income", "utterance": "I'd have to check.", "raw": [0.2548749100499254, 0.04178464997503936, 0.04633764808419493, 0.04494860834126754, 0.04813584312522506, 0.046888734797926615, 0.04917188412329795, 0.053991371102945086, 0.050106778618127144, 0.052768955848259545, 0.02856655653041544]}
+{"reader": "dm", "qid": "household_size", "utterance": "Just me.", "raw": [0.8925626974770274, 0.5885137009338265, 0.5362468756902451, 0.48615887771547683, 0.5240537792134126, 0.38899770553855695, 0.07582285595505865]}
+{"reader": "dm", "qid": "other_income", "utterance": "Yes, a fair amount from a pension.", "raw": [0.6992689695035198, 0.34525131502960016, 0.3028571102568082, 0.3153734053622075]}
+{"reader": "dm", "qid": "self_employed", "utterance": "No, not us.", "raw": [0.1317749288843565, 0.04785139783153241]}
+{"reader": "dm", "qid": "tenure", "utterance": "We own our house.", "raw": [0.6455784489542505, 0.9486823508249485, 0.7178214791577974]}
+{"reader": "dm", "qid": "married", "utterance": "No idea, honestly.", "raw": [0.009096668321561757, 0.016497578240066386]}
+{"reader": "structured", "qid": "childcare", "utterance": "Somewhere between $6,500 and 10 thousand a year.", "raw": {"slots": {"low": 6500, "high": 10000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "About $140 a month.", "raw": {"slots": {"low": 140, "high": 140, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "infant_or_pregnant", "utterance": "No.", "raw": [0.32383926401092383, 0.07115463931295801]}
+{"reader": "dm", "qid": "tenure", "utterance": "We own our house.", "raw": [0.6455784489542505, 0.9486823508249485, 0.7178214791577974]}
+{"reader": "dm", "qid": "self_employed", "utterance": "Hard to say.", "raw": [0.04076349511337309, 0.11943335504769875]}
+{"reader": "dm", "qid": "self_employed", "utterance": "Yes, that's right.", "raw": [0.6233659348301737, 0.8995773656249152]}
+{"reader": "dm", "qid": "child_under5", "utterance": "Hard to say.", "raw": [0.016997129694835005, 0.03850341487740278]}
+{"reader": "structured", "qid": "assets", "utterance": "Somewhere between 550 thousand and 1,000 thousand.", "raw": {"slots": {"low": 550000, "high": 1000000, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "children", "utterance": "I have my son, my daughter and my daughter.", "raw": [0.3452292906929762, 0.5255499352661926, 0.338060139543729, 0.8125596876312852, 0.5161289279132315]}
+{"reader": "structured", "qid": "earned_income", "utterance": "About 250 thousand a year.", "raw": {"slots": {"low": 250000, "high": 250000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "senior", "utterance": "No, we're all in our thirties.", "raw": [0.14302548237448443, 0.03518826168145687]}
+{"reader": "structured", "qid": "housing_cost", "utterance": "About $2,500 a month.", "raw": {"slots": {"low": 2500, "high": 2500, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "Decent money, both of us work.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "childcare", "utterance": "None.", "raw": [0.8797999778101547, 0.173060011753965, 0.07721300681607791, 0.04243943958415148]}
+{"reader": "dm", "qid": "child_under5", "utterance": "No.", "raw": [0.2662547021104931, 0.06141348615322417]}
+{"reader": "dm", "qid": "assets", "utterance": "Hard to say.", "raw": [0.044924231783442826, 0.04428660839836959, 0.04444167185662906, 0.029351871357827478, 0.02132107798515454]}
+{"reader": "structured", "qid": "earned_income", "utterance": "About 12 thousand a year.", "raw": {"slots": {"low": 12000, "high": 12000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "$167,100 a year.", "raw": {"slots": {"low": 167100, "high": 167100, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "Decent money, both of us work.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "other_income", "utterance": "Somewhere between 130 thousand and 200 thousand a year.", "raw": [0.49791070960921524, 0.4744534806345473, 0.40349805086314894, 0.7555564445568361]}
+{"reader": "structured", "qid": "other_income", "utterance": "Somewhere between $100 and $130 a year.", "raw": {"slots": {"low": 100, "high": 130, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "About $1,100 a month.", "raw": {"slots": {"low": 1100, "high": 1100, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "Around 100 thousand a month.", "raw": {"slots": {"low": 100000, "high": 100000, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "Around $0 a month.", "raw": {"slots": {"low": 0, "high": 0, "period": "month", "approximate": true, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "About $1,500 a month.", "raw": {"slots": {"low": 1500, "high": 1500, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "None.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "dm", "qid": "childcare", "utterance": "Nothing.", "raw": [0.8463143520253794, 0.31596496430346316, 0.10599300985426133, 0.033755414555856914]}
+{"reader": "dm", "qid": "self_employed", "utterance": "Nope.", "raw": [0.1153098057869056, 0.038188717481447164]}
+{"reader": "dm", "qid": "college", "utterance": "No idea, honestly.", "raw": [0.0231511763036307, 0.03747585849492438]}
+{"reader": "dm", "qid": "household_size", "utterance": "Five of us.", "raw": [0.7245798492389562, 0.2908943516003588, 0.31641564686165263, 0.36621245460271745, 0.9169155098730754, 0.38260623505880753, 0.3276348793028225]}
+{"reader": "dm", "qid": "college", "utterance": "No.", "raw": [0.09875154901828652, 0.05523983971759094]}
+{"reader": "dm", "qid": "tenure", "utterance": "We own our house.", "raw": [0.6455784489542505, 0.9486823508249485, 0.7178214791577974]}
+{"reader": "dm", "qid": "infant_or_pregnant", "utterance": "I'd have to check.", "raw": [0.03415923316241152, 0.08106806221898201]}
+{"reader": "dm", "qid": "social_security", "utterance": "Somewhere between $6,500 and $9,500 a year.", "raw": [0.3731747701854703, 0.8956262972870127, 0.18646270213176847, 0.10278920141136443, 0.0495816269103117]}
+{"reader": "dm", "qid": "infant_or_pregnant", "utterance": "No, not us.", "raw": [0.5081992668039773, 0.059527359759446]}
+{"reader": "structured", "qid": "assets", "utterance": "About 1,200 thousand.", "raw": {"slots": {"low": 1200000, "high": 1200000, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "$2,100 a month.", "raw": {"slots": {"low": 2100, "high": 2100, "period": "month", "approximate": false, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "Somewhere between 16 thousand and 25 thousand a year.", "raw": {"slots": {"low": 16000, "high": 25000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "About $3,500 a year.", "raw": {"slots": {"low": 3500, "high": 3500, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "children", "utterance": "No kids.", "raw": [0.9471045498892263, 0.8264035216784591, 0.6375552032485243, 0.3489768940352777, 0.03546811528476646]}
+{"reader": "dm", "qid": "housing_cost", "utterance": "Zero.", "raw": [0.6327225293935588, 0.1676965214706291, 0.09005589387415902, 0.03619689495132559, 0.03658015556043896, 0.04187878162571921, 0.0347624341347586]}
+{"reader": "dm", "qid": "disabled", "utterance": "No, not us.", "raw": [0.062176799199141534, 0.04106531374806458]}
+{"reader": "dm", "qid": "assets", "utterance": "I'd have to check.", "raw": [0.032346476155168995, 0.039924770479134855, 0.04323907517232393, 0.03440442924128297, 0.02553506343478308]}
+{"reader": "dm", "qid": "children", "utterance": "Two kids.", "raw": [0.5572292825441971, 0.635052065779537, 0.932786685802872, 0.3886068042406339, 0.1449723325211011]}
+{"reader": "structured", "qid": "earned_income", "utterance": "Not much, I only get a few shifts.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": true, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "About 25 thousand a year.", "raw": {"slots": {"low": 25000, "high": 25000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "childcare", "utterance": "Daycare costs us a fortune.", "raw": [0.369779845523614, 0.09238846967632733, 0.1332887220174575, 0.678993286348927]}
+{"reader": "dm", "qid": "disabled", "utterance": "No idea, honestly.", "raw": [0.01742586627205189, 0.050631966598766766]}
+{"reader": "structured", "qid": "assets", "utterance": "$10,500.", "raw": {"slots": {"low": 10500, "high": 10500, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "About 100 thousand.", "raw": {"slots": {"low": 100000, "high": 100000, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "$4,800.", "raw": {"slots": {"low": 4800, "high": 4800, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "About 110 thousand a year.", "raw": {"slots": {"low": 110000, "high": 110000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "housing_cost", "utterance": "Hard to say.", "raw": [0.4553054267319673, 0.05247684511544866, 0.03265603096523679, 0.025318930351682457, 0.028244756869127852, 0.028588996847379106, 0.025046071560851257]}
+{"reader": "dm", "qid": "infant_or_pregnant", "utterance": "Nope.", "raw": [0.4126811977264961, 0.06019459979285786]}
+{"reader": "structured", "qid": "childcare", "utterance": "We don't have any of that.", "raw": {"slots": {"low": null, "high": null, "period": "none", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "About 25 thousand a year.", "raw": {"slots": {"low": 25000, "high": 25000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "About 30 thousand a year.", "raw": {"slots": {"low": 30000, "high": 30000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "Somewhere between $500 and $700 a year.", "raw": {"slots": {"low": 500, "high": 700, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "Somewhere between $0 and $0 a year.", "raw": {"slots": {"low": 0, "high": 0, "period": "year", "approximate": true, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "$700 a month.", "raw": {"slots": {"low": 700, "high": 700, "period": "month", "approximate": false, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "household_size", "utterance": "Me, my husband and our two kids.", "raw": [0.5982826826193113, 0.3180779549441903, 0.43572890157700844, 0.9007953424857853, 0.8241884182145331, 0.5741959980803268, 0.30438557584872333]}
+{"reader": "dm", "qid": "social_security", "utterance": "$39,900 a year.", "raw": [0.3989913337975415, 0.20283118801565125, 0.2303333951283325, 0.277512984589635, 0.8888013540027647]}
+{"reader": "dm", "qid": "children", "utterance": "No, no children.", "raw": [0.9425006617947471, 0.8325994912013772, 0.7338216709907476, 0.6062810167847357, 0.07003986565193702]}
+{"reader": "dm", "qid": "disabled", "utterance": "No idea, honestly.", "raw": [0.01742586627205189, 0.050631966598766766]}
+{"reader": "dm", "qid": "earned_income", "utterance": "Somewhere between 300 thousand and 450 thousand a year.", "raw": [0.3904832047469468, 0.10023888015839741, 0.05028732217968451, 0.04464333570160525, 0.04251522155275098, 0.03232906844132484, 0.03629937519193987, 0.04113459575878769, 0.04537063585194149, 0.07235400534037374, 0.9046237163641024]}
+{"reader": "dm", "qid": "tenure", "utterance": "We rent an apartment.", "raw": [0.9498715187384932, 0.7951828542082244, 0.8089930730629782]}
+{"reader": "dm", "qid": "disabled", "utterance": "My wife can't work because of her back.", "raw": [0.8171129983467236, 0.9098213246392471]}
+{"reader": "dm", "qid": "children", "utterance": "No kids.", "raw": [0.9471045498892263, 0.8264035216784591, 0.6375552032485243, 0.3489768940352777, 0.03546811528476646]}
+{"reader": "structured", "qid": "assets", "utterance": "$2,256,900.", "raw": {"slots": {"low": 2256900, "high": 2256900, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "Somewhere between 25 thousand and 35 thousand a year.", "raw": {"slots": {"low": 25000, "high": 35000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "About $95.", "raw": {"slots": {"low": 95, "high": 95, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "Somewhere between 65 thousand and 80 thousand a year.", "raw": {"slots": {"low": 65000, "high": 80000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "Around 90 thousand a month.", "raw": {"slots": {"low": 90000, "high": 90000, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "We don't have any of that.", "raw": {"slots": {"low": null, "high": null, "period": "none", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "dm", "qid": "childcare", "utterance": "Hard to say.", "raw": [0.43666678996567476, 0.0485696202036864, 0.04948415607400219, 0.02110048957904696]}
+{"reader": "dm", "qid": "children", "utterance": "None.", "raw": [0.929634060313392, 0.8421779083169733, 0.6688546546066438, 0.4762808958535932, 0.14247914281787735]}
+{"reader": "structured", "qid": "housing_cost", "utterance": "$800 a month.", "raw": {"slots": {"low": 800, "high": 800, "period": "month", "approximate": false, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "Around $1,400 a month.", "raw": {"slots": {"low": 1400, "high": 1400, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "Around $650 a month.", "raw": {"slots": {"low": 650, "high": 650, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "other_income", "utterance": "Yes, a fair amount from a pension.", "raw": [0.6992689695035198, 0.34525131502960016, 0.3028571102568082, 0.3153734053622075]}
+{"reader": "dm", "qid": "social_security", "utterance": "No idea, honestly.", "raw": [0.4758915546631093, 0.041035606292120545, 0.028303475779501822, 0.02249576076702163, 0.02107314027201907]}
+{"reader": "dm", "qid": "assets", "utterance": "Hard to say.", "raw": [0.044924231783442826, 0.04428660839836959, 0.04444167185662906, 0.029351871357827478, 0.02132107798515454]}
+{"reader": "structured", "qid": "earned_income", "utterance": "Somewhere between 140 thousand and 200 thousand a year.", "raw": {"slots": {"low": 140000, "high": 200000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "A decent amount, it's most of what we live on.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "$8,700.", "raw": {"slots": {"low": 8700, "high": 8700, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "Around $400 a month.", "raw": {"slots": {"low": 400, "high": 400, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "About 55 thousand a year.", "raw": {"slots": {"low": 55000, "high": 55000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "dm", "qid": "state", "utterance": "We're in New Jersey.", "raw": [0.38369070008442285, 0.40584299868358037, 0.32146881220370516, 0.3427852637184289, 0.3456110669858385, 0.2791643739267932, 0.34203324121048423, 0.4770105692212211, 0.5392746383843573, 0.38850367801239094, 0.358057894690541, 0.39079469217251184, 0.3944989975208501, 0.2263636411785736, 0.3069210354445467, 0.2623280701107709, 0.34679245371318285, 0.22283991702974715, 0.3202254790890085, 0.4486140363938832, 0.2653160645156248, 0.34629611769964935, 0.36650959154331253, 0.3556288221623143, 0.2892685045969141, 0.26413179530908504, 0.37698553219596553, 0.28448306652616767, 0.26146535249814296, 0.4414895835488652, 0.9221003972825494, 0.34994492484656253, 0.4009170170438789, 0.36666845818860716, 0.45057268915686893, 0.3858927882816834, 0.4560258915356837, 0.36685160092559116, 0.45421903467413705, 0.5329495636800536, 0.38264144012533513, 0.35601042178760406, 0.316712205875265, 0.24848729168481481, 0.33788224222386753, 0.4884337880957632, 0.3943696430531123, 0.468680920375745, 0.47969796305930973, 0.3286863640019717, 0.4365186726727236]}
+{"reader": "dm", "qid": "disabled", "utterance": "No.", "raw": [0.05542955303349019, 0.048635204687583374]}
+{"reader": "dm", "qid": "household_size", "utterance": "Five of us, two adults and three kids.", "raw": [0.7742780982011682, 0.40326310261164444, 0.4427733089748274, 0.42633765847261207, 0.9378839528670376, 0.4945835726787134, 0.4905688052769289]}
+{"reader": "dm", "qid": "housing_cost", "utterance": "Somewhere between $600 and $1,100 a month.", "raw": [0.3638023904999148, 0.12014668331710242, 0.3478240448472506, 0.23002864112284555, 0.08243804875335402, 0.06822846846796433, 0.03725250698928439]}
+{"reader": "dm", "qid": "assets", "utterance": "We have some savings and investments.", "raw": [0.04278661738010856, 0.06477660186866717, 0.06580447074096626, 0.05490066299738976, 0.038856277584432136]}
+{"reader": "dm", "qid": "senior", "utterance": "No, we're all in our thirties.", "raw": [0.14302548237448443, 0.03518826168145687]}
+{"reader": "dm_thr", "qid": "household_size", "utterance": "Two of us.", "raw": [0.6766231380160702, 0.7108620404966515, 0.07926851290996106, 0.0254494564238829, 0.0341035472979416, 0.0, 0.10038227694912748]}
+{"reader": "dm_thr", "qid": "childcare", "utterance": "Zero.", "raw": [0.8209337494958208, 0.01198245046781472, 0.052953709958588974, 0.04395335980953708]}
+{"reader": "dm_thr", "qid": "other_income", "utterance": "Hard to say.", "raw": [0.780061383524663, 0.06133905100991557, 0.04377532339785287, 0.05360743954297674]}
+{"reader": "dm_thr", "qid": "assets", "utterance": "$29,500.", "raw": [0.14471920650782977, 0.15342353142626997, 0.03415963248250444, 0.5662902772890646, 0.03237594900810798]}
+{"reader": "dm_thr", "qid": "social_security", "utterance": "About 35 thousand a year.", "raw": [0.05613793243204347, 0.0, 0.004835020364263831, 0.050157751106962585, 0.8524335445019118]}
+{"reader": "dm_thr", "qid": "earned_income", "utterance": "$0 a year.", "raw": [0.8852811762669524, 0.028720312119997277, 0.00996166725786334, 0.00792946048885535, 0.0006265645383238328, 0.005284466431856819, 0.0, 0.0, 0.006065732272550279, 0.009114532292071839, 0.03338586346200785]}
+{"reader": "dm_thr", "qid": "housing_cost", "utterance": "Somewhere between $3,000 and $5,500 a month.", "raw": [0.0672348879568333, 0.0070147969150749535, 0.006652064231047291, 0.006806601181862874, 0.008567234698660475, 0.12137495769782165, 0.7944876068683792]}

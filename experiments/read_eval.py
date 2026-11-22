@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "adapters"))
 from benefits.population import build, load_table  # noqa: E402
 from benefits.utterances import answer, styles_for  # noqa: E402
 
-from decisionintake.language import DecisionModelReader, LLMReader, StructuredReader  # noqa: E402
+from decisionintake.language import CombinedReader, DecisionModelReader, LLMReader, StructuredReader  # noqa: E402
 from decisionintake.simulate import split_by_group  # noqa: E402
 
 CACHE = "results/read_cache.jsonl"
@@ -37,6 +37,7 @@ READERS = {
     "structured": lambda: StructuredReader(url="http://127.0.0.1:9996", name="structured"),
     "structured_dm": lambda: StructuredReader(url="http://127.0.0.1:9996", dm_url="http://127.0.0.1:9995",
                                               name="structured_dm"),
+    "combined": lambda: CombinedReader(name="combined"),
 }
 
 
@@ -50,7 +51,7 @@ def load_cache():
 
 
 def raw_reading(reader, q, utt):
-    if isinstance(reader, StructuredReader):
+    if isinstance(reader, (StructuredReader, CombinedReader)):
         return reader.raw(q, utt)
     if isinstance(reader, DecisionModelReader):
         return reader.probabilities(q, utt).tolist()
@@ -59,7 +60,7 @@ def raw_reading(reader, q, utt):
 
 
 def evidence_from_raw(reader, q, raw):
-    if isinstance(reader, StructuredReader):
+    if isinstance(reader, (StructuredReader, CombinedReader)):
         return reader.evidence(q, "", raw=raw)
     if isinstance(reader, DecisionModelReader):
         return reader.evidence(q, "", p=np.array(raw))
@@ -112,6 +113,14 @@ def main():
                 src = cache.get(("dm", it["qid"], it["utterance"]))
             elif name == "structured_dm" and q.edges is not None:
                 src = cache.get(("structured", it["qid"], it["utterance"]))  # same slot extraction
+            elif name == "combined":
+                if q.edges is None:
+                    src = cache.get(("llm_hard", it["qid"], it["utterance"]))
+                    src = {"pick": src} if src is not None else None
+                else:
+                    sl = cache.get(("structured", it["qid"], it["utterance"]))
+                    pp = cache.get(("dm", it["qid"], it["utterance"]))
+                    src = {"slots": sl["slots"], "p": pp} if sl is not None and pp is not None else None
             if src is not None:
                 cache[key] = src
         todo = [it for it in its if (name, it["qid"], it["utterance"]) not in cache]
