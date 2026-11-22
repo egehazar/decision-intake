@@ -50,7 +50,7 @@ def main():
         return float(w @ d), float(np.percentile(bs, 2.5)), float(np.percentile(bs, 97.5))
 
     print("SECONDARY (added after the freeze). Paired loss difference, engine minus baseline, $/household/year:")
-    for user in ["clean", "realistic"]:
+    for user in ["clean", "opener", "realistic"]:
         for k in [3, 5, 7, 9, 12]:
             e = hh(("engine_k", k, user))[2]
             row = []

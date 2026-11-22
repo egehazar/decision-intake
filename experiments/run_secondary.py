@@ -63,10 +63,22 @@ def main():
     for u in ["clean", "realistic"]:
         grid += [("fixed_set_k", k, u) for k in KS] + [("fair_tree_k", k, u) for k in KS]
         grid += [("engine_k_nocomp", k, u) for k in [5, 9]] + [("engine_k_p", k, u) for k in [5, 9]]
+    # facts volunteered first: the one setting where a precomputed tree can only skip along its branches
+    grid += [("fair_tree_k", k, "opener") for k in KS] + [("fixed_set_k", k, "opener") for k in KS]
     path = f"results/secondary_{n}.jsonl"
-    jobs = [(*g, ch) for g in grid for ch in np.array_split(sample, max(1, n // 30))]
+    have = set()
+    if os.path.exists(path):  # resume: keep finished interviews, run only the rest
+        for line in open(path):
+            r = json.loads(line)
+            have.add((r["policy"], r["k"], r["user"], r["i"]))
+    jobs = []
+    for g in grid:
+        rows = [i for i in sample.tolist() if (*g, i) not in have]
+        if rows:
+            jobs += [(*g, np.array(ch)) for ch in np.array_split(rows, max(1, len(rows) // 30)) if len(ch)]
+    print(f"resuming with {len(have)} done, {sum(len(j[3]) for j in jobs)} to run", flush=True)
     t0 = time.time()
-    with Pool(workers, initializer=init) as pool, open(path, "w") as f:
+    with Pool(workers, initializer=init) as pool, open(path, "a") as f:
         for d, (key, out) in enumerate(pool.imap_unordered(work, jobs), 1):
             for r in out:
                 f.write(json.dumps({"policy": key[0], "k": key[1], "user": key[2], **r}) + "\n")

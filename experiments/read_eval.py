@@ -6,7 +6,7 @@ how often it is confidently wrong, and how often it says "not stated". The calib
 the decision model's temperature; the evaluation split reports.
 
 usage: python experiments/read_eval.py SPLIT N READER [READER...]
-  SPLIT: calib | eval     READER: dm (decision model) | dm_small | llm_hard | llm_selfconf
+  SPLIT: calib | eval | amounts (test households, amount questions only)     READER: dm (decision model) | dm_small | llm_hard | llm_selfconf
 Every model call is cached in results/read_cache.jsonl.
 """
 
@@ -73,11 +73,12 @@ def items(split: str, n: int, seed: int = 3):
     rest, test = split_by_group(pop, 0.15, seed=0)
     sub_tr, sub_va = split_by_group(pop.subset(rest), 0.12, seed=1)
     idx = rest[sub_va] if split == "calib" else test
-    rng = np.random.default_rng(seed if split == "eval" else seed + 100)
+    rng = np.random.default_rng({"eval": seed, "calib": seed + 100, "amounts": seed + 200}[split])
+    amount_qs = [j for j, q in enumerate(pop.questions) if q.edges is not None]
     out = []
     for _ in range(n):
         i = int(rng.choice(idx))
-        j = int(rng.integers(len(pop.questions)))
+        j = int(rng.choice(amount_qs)) if split == "amounts" else int(rng.integers(len(pop.questions)))
         q = pop.questions[j]
         style = str(rng.choice(styles_for(q.id)))
         utt = answer(q.id, t.iloc[i], int(pop.answers[i, j]), style, rng)
@@ -109,6 +110,8 @@ def main():
                 src = {"p": src} if src is not None else None
             elif name == "dm_thr" and not q.ordered:
                 src = cache.get(("dm", it["qid"], it["utterance"]))
+            elif name == "structured_dm" and q.edges is not None:
+                src = cache.get(("structured", it["qid"], it["utterance"]))  # same slot extraction
             if src is not None:
                 cache[key] = src
         todo = [it for it in its if (name, it["qid"], it["utterance"]) not in cache]

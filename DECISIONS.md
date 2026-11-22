@@ -281,3 +281,35 @@ Frozen run, 600 test households, full table in results/final_600_analysis.txt an
 GPT's go/no-go bar (>=25% fewer questions than an optimised tree at equal quality) can't be scored
 cleanly because the frozen tree is weak (it stops at ~5 questions); the fair tree is in the
 secondary run. Against asking everything, the engine asks 54% fewer questions at equal quality.
+
+## D22. Secondary results: the fair tree matches the engine on clean answers (2026-11-22)
+
+Same 600 test households, run after the freeze (results/secondary_600_analysis.txt):
+- A greedy tree that decides with the same calibrated belief and completion as the engine is not
+  significantly different from the engine on clean answers at any k (engine minus tree: -$142 to
+  +$247). The engine's win over the frozen tree came from that tree's decision rule, not from its
+  questions. This is what D6 predicted: on clean answers a greedy tree on the same loss is the same
+  rule, computed in advance. GPT's bar (>=25% fewer questions than an optimised tree) is NOT met on
+  clean answers. Where the engine can differ is what a precomputed tree can't do: use facts
+  volunteered out of order, absorb misreports and "don't know", change its question budget or cost
+  without regrowing, and say how unsure it is. The realistic-answer tree comparison tests that.
+- Against the best fixed set chosen per question budget, the engine still wins with clean answers at
+  k = 5, 7, 9 and with realistic answers at k = 7 (-$729 [-1,401, -132]) and 9 (-$598 [-1,167, -71]).
+- Completion helps: clean, k = 9: -$736 [-1,469, -162].
+- Precision by programme (engine, 9 questions, clean): SNAP 0.81, WIC 0.96, school meals 0.88,
+  EITC 0.76, CTC 0.71; Medicaid 0.47, ACA credit 0.23, SSI 0.42, CHIP 0.16. Medicaid and the ACA
+  credit make up 69% of wrong recommendations. Showing only recommendations at >= 30% probability:
+  precision 0.73 with 77% of eligible programmes still found; at >= 50%: 0.84 and 55%.
+- The secondary run first crashed on a bug in the tree's fallback branch ("don't know" after a
+  backed-off answer filtered on it and found no households). Fixed; the missing runs were resumed.
+- Update after the resumed run: the fair tree also matches the engine with REALISTIC answers (engine
+  minus tree -$224 to +$244, no interval excludes zero). So on clean and messy answers alike, a
+  well-built greedy tree asking as many questions does as well. The completion ablation follows
+  GPT's warning: completion helps clearly on clean answers (k = 9: -$736) but its benefit shrinks and
+  is not significant when answers may be misreported (k = 9: -$423 [-1,158, +112]). The last open
+  comparison is facts volunteered first, the one setting where a precomputed tree can only skip.
+- Facts volunteered first (3 facts before any question): the engine beats the fair tree at k = 3
+  (-$1,072 [-1,924, -409]), 5 (-$524 [-996, -123]) and 9 (-$376 [-769, -62]); 7 and 12 are
+  borderline. It beats the per-budget fixed sets at every k. This is the defensible advantage: not
+  smarter questions on a clean form (a fair tree matches it there), but using whatever the person has
+  already said, in any order, which a precomputed tree can only skip along its own branches.

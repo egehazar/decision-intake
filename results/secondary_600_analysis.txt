@@ -1,0 +1,42 @@
+SECONDARY (added after the freeze). Paired loss difference, engine minus baseline, $/household/year:
+  clean      k=3  vs fixed_set_k    -94 [ -548,  408]  vs fair_tree_k    213 [ -469, 1230]  vs fixed_k        106 [ -415,  810]
+  clean      k=5  vs fixed_set_k  -1307 [-2185, -590]  vs fair_tree_k   -142 [ -580,  318]  vs fixed_k       -674 [-1345, -169]
+  clean      k=7  vs fixed_set_k   -569 [-1012, -170]  vs fair_tree_k    247 [ -200,  774]  vs fixed_k       -569 [-1012, -170]
+  clean      k=9  vs fixed_set_k   -811 [-1379, -297]  vs fair_tree_k     77 [ -282,  530]  vs fixed_k       -811 [-1379, -297]
+  clean      k=12 vs fixed_set_k   -157 [ -633,  318]  vs fair_tree_k      6 [ -366,  467]  vs fixed_k       -157 [ -633,  318]
+  opener     k=3  vs fixed_set_k   -593 [-1288,  -91]  vs fair_tree_k  -1072 [-1924, -409]  vs fixed_k       -747 [-1493, -149]
+  opener     k=5  vs fixed_set_k   -953 [-1712, -373]  vs fair_tree_k   -524 [ -996, -123]  vs fixed_k       -572 [ -981, -238]
+  opener     k=7  vs fixed_set_k   -609 [-1182,  -71]  vs fair_tree_k   -328 [ -788,  125]  vs fixed_k       -303 [ -828,  207]
+  opener     k=9  vs fixed_set_k   -608 [-1087, -177]  vs fair_tree_k   -376 [ -769,  -62]  vs fixed_k       -449 [ -848, -156]
+  opener     k=12 vs fixed_set_k   -282 [ -665,  -43]  vs fair_tree_k   -304 [ -707,   25]  vs fixed_k       -147 [ -466,   21]
+  realistic  k=3  vs fixed_set_k   -132 [ -461,  257]  vs fair_tree_k   -135 [ -609,  383]  vs fixed_k       -139 [ -543,  262]
+  realistic  k=5  vs fixed_set_k   -321 [ -854,  230]  vs fair_tree_k    244 [ -438,  988]  vs fixed_k       -113 [ -643,  406]
+  realistic  k=7  vs fixed_set_k   -729 [-1401, -132]  vs fair_tree_k    -61 [ -496,  424]  vs fixed_k       -445 [-1026,   66]
+  realistic  k=9  vs fixed_set_k   -598 [-1167,  -71]  vs fair_tree_k   -224 [ -684,  287]  vs fixed_k          6 [ -455,  474]
+  realistic  k=12 vs fixed_set_k    -71 [ -528,  421]  vs fair_tree_k   -155 [ -662,  399]  vs fixed_k        266 [ -181,  717]
+
+Completion ablation (engine asking exactly k): loss with completion minus without:
+  clean      k=5:   -321 [ -664,    33]  (negative = completion helps)
+  clean      k=9:   -736 [-1469,  -162]  (negative = completion helps)
+  realistic  k=5:    -41 [ -436,   316]  (negative = completion helps)
+  realistic  k=9:   -423 [-1158,   112]  (negative = completion helps)
+
+Per programme at the engine's operating point (engine asking 9, clean answers):
+  programme     eligible  recall precision  share of wrong recs
+  snap             0.143   0.746     0.806                0.038
+  wic              0.031   0.741     0.961                0.001
+  tanf             0.006   1.000     1.000                0.000
+  ssi              0.084   0.669     0.423                0.112
+  medicaid         0.219   0.983     0.468                0.359
+  chip             0.010   0.591     0.159                0.044
+  eitc             0.155   0.610     0.757                0.045
+  ctc              0.107   0.781     0.711                0.050
+  aca_ptc          0.070   0.959     0.231                0.326
+  school_meals     0.140   0.877     0.878                0.025
+
+  Show only recommendations the engine is at least t sure of (precision / programmes found):
+    t=0.1: precision 0.444, programmes found 0.916, recommendations per household 2.00
+    t=0.3: precision 0.730, programmes found 0.772, recommendations per household 1.02
+    t=0.5: precision 0.843, programmes found 0.548, recommendations per household 0.63
+    t=0.7: precision 0.901, programmes found 0.438, recommendations per household 0.47
+    t=0.9: precision 0.919, programmes found 0.163, recommendations per household 0.17

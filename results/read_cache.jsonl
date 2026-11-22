@@ -208,3 +208,304 @@
 {"reader": "llm_hard", "qid": "college", "utterance": "No.", "raw": [0, 1.0]}
 {"reader": "llm_hard", "qid": "tenure", "utterance": "We own our house.", "raw": [1, 1.0]}
 {"reader": "llm_hard", "qid": "infant_or_pregnant", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_hard", "qid": "social_security", "utterance": "Somewhere between $6,500 and $9,500 a year.", "raw": [1, 1.0]}
+{"reader": "llm_hard", "qid": "infant_or_pregnant", "utterance": "No, not us.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "children", "utterance": "No kids.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "housing_cost", "utterance": "Zero.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "disabled", "utterance": "No, not us.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_hard", "qid": "children", "utterance": "Two kids.", "raw": [2, 1.0]}
+{"reader": "llm_hard", "qid": "childcare", "utterance": "Daycare costs us a fortune.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "disabled", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_hard", "qid": "housing_cost", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_hard", "qid": "infant_or_pregnant", "utterance": "Nope.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "household_size", "utterance": "Me, my husband and our two kids.", "raw": [3, 1.0]}
+{"reader": "llm_hard", "qid": "social_security", "utterance": "$39,900 a year.", "raw": [4, 1.0]}
+{"reader": "llm_hard", "qid": "children", "utterance": "No, no children.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "disabled", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_hard", "qid": "earned_income", "utterance": "Somewhere between 300 thousand and 450 thousand a year.", "raw": [9, 1.0]}
+{"reader": "llm_hard", "qid": "tenure", "utterance": "We rent an apartment.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "disabled", "utterance": "My wife can't work because of her back.", "raw": [1, 1.0]}
+{"reader": "llm_hard", "qid": "children", "utterance": "No kids.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "childcare", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_hard", "qid": "children", "utterance": "None.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "other_income", "utterance": "Yes, a fair amount from a pension.", "raw": [null, 0.0]}
+{"reader": "llm_hard", "qid": "social_security", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_hard", "qid": "state", "utterance": "We're in New Jersey.", "raw": [30, 1.0]}
+{"reader": "llm_hard", "qid": "disabled", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_hard", "qid": "household_size", "utterance": "Five of us, two adults and three kids.", "raw": [4, 1.0]}
+{"reader": "llm_hard", "qid": "housing_cost", "utterance": "Somewhere between $600 and $1,100 a month.", "raw": [2, 1.0]}
+{"reader": "llm_hard", "qid": "assets", "utterance": "We have some savings and investments.", "raw": [null, 0.0]}
+{"reader": "llm_hard", "qid": "senior", "utterance": "No, we're all in our thirties.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "household_size", "utterance": "Two of us.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "state", "utterance": "Oklahoma.", "raw": [36, 1.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "Yes, my husband and I.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "infant_or_pregnant", "utterance": "No, not us.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "state", "utterance": "New Hampshire.", "raw": [29, 1.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "Yes, my husband and I.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "I don't really know.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "childcare", "utterance": "Zero.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "assets", "utterance": "$29,500.", "raw": [3, 1.0]}
+{"reader": "llm_selfconf", "qid": "college", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "senior", "utterance": "No, not us.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "social_security", "utterance": "About 35 thousand a year.", "raw": [4, 1.0]}
+{"reader": "llm_selfconf", "qid": "earned_income", "utterance": "$0 a year.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "Somewhere between $3,000 and $5,500 a month.", "raw": [6, 1.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "social_security", "utterance": "None.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "earned_income", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "Zero.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "employer_insurance", "utterance": "Yes, I'm on my company's plan.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "About $600 a month.", "raw": [2, 1.0]}
+{"reader": "llm_selfconf", "qid": "college", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "disabled", "utterance": "Yeah.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "Somewhere between 250 thousand and 350 thousand a year.", "raw": [3, 1.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "We don't pay rent.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "employer_insurance", "utterance": "Yes.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "social_security", "utterance": "Somewhere between 18 thousand and 25 thousand a year.", "raw": [2, 1.0]}
+{"reader": "llm_selfconf", "qid": "childcare", "utterance": "None.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "assets", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "infant_or_pregnant", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "employer_insurance", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "college", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "college", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "disabled", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "I drive for a delivery app.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "household_size", "utterance": "Three of us.", "raw": [2, 1.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "About $1,400 a month.", "raw": [3, 1.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "No kids.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "earned_income", "utterance": "We don't have any of that.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "college", "utterance": "I don't really know.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "I'm not sure.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "About what you'd expect around here.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "No kids.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "childcare", "utterance": "I'm not sure.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "senior", "utterance": "No, we're all in our thirties.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "Nope.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "I have my son and my daughter.", "raw": [2, 1.0]}
+{"reader": "llm_selfconf", "qid": "tenure", "utterance": "We own our house.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "I'm not sure.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "tenure", "utterance": "We own our house.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "college", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "assets", "utterance": "$1,500.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "state", "utterance": "Oregon.", "raw": [37, 1.0]}
+{"reader": "llm_selfconf", "qid": "disabled", "utterance": "No, everyone's healthy.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "household_size", "utterance": "Four of us.", "raw": [3, 1.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "No, not us.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "social_security", "utterance": "I don't really know.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "college", "utterance": "No, not us.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "tenure", "utterance": "We rent an apartment.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "college", "utterance": "I don't really know.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "No, we both have regular jobs.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "disabled", "utterance": "No, everyone's healthy.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "earned_income", "utterance": "Enough to get by, barely.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "I drive for a delivery app.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "social_security", "utterance": "I'm not sure.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "I'm not sure.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "Our youngest just turned three.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "social_security", "utterance": "Somewhere between 30 thousand and 35 thousand a year.", "raw": [4, 1.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "infant_or_pregnant", "utterance": "I'm not sure.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "senior", "utterance": "My dad lives with us, he's 72.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "senior", "utterance": "Nope.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "Around $2,500 a month.", "raw": [2, 1.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "I don't really know.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "employer_insurance", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "None.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "employer_insurance", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "social_security", "utterance": "$22,200 a year.", "raw": [3, 1.0]}
+{"reader": "llm_selfconf", "qid": "employer_insurance", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "senior", "utterance": "No, we're all in our thirties.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "state", "utterance": "Vermont.", "raw": [45, 1.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "Three kids.", "raw": [3, 1.0]}
+{"reader": "llm_selfconf", "qid": "employer_insurance", "utterance": "No, we buy our own or go without.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "I have my daughter and my son.", "raw": [2, 1.0]}
+{"reader": "llm_selfconf", "qid": "infant_or_pregnant", "utterance": "I don't really know.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "senior", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "tenure", "utterance": "We own our house.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "state", "utterance": "We're in Oklahoma.", "raw": [36, 1.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "No, we both have regular jobs.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "infant_or_pregnant", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "employer_insurance", "utterance": "No, we buy our own or go without.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "I have my son, my son, my son and my son.", "raw": [3, 1.0]}
+{"reader": "llm_selfconf", "qid": "tenure", "utterance": "We own our house.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "No, the kids are older.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "Around $1,700 a month.", "raw": [2, 1.0]}
+{"reader": "llm_selfconf", "qid": "earned_income", "utterance": "Nobody's working right now.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "I drive for a delivery app.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "senior", "utterance": "No, we're all in our thirties.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "No, the kids are older.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "childcare", "utterance": "We don't pay for childcare.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "state", "utterance": "New Mexico.", "raw": [31, 1.0]}
+{"reader": "llm_selfconf", "qid": "earned_income", "utterance": "Around $6,500 a month.", "raw": [7, 1.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "$93,400 a year.", "raw": [3, 1.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "No kids.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "$300 a month.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "employer_insurance", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "college", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "None.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "Three kids.", "raw": [3, 1.0]}
+{"reader": "llm_selfconf", "qid": "infant_or_pregnant", "utterance": "Nope.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "About 80 thousand a year.", "raw": [3, 1.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "Yes, my husband and I.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "Somewhere between $3,000 and $3,500 a month.", "raw": [6, 1.0]}
+{"reader": "llm_selfconf", "qid": "social_security", "utterance": "Nothing.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "social_security", "utterance": "About 70 thousand a year.", "raw": [4, 1.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "Yeah.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "assets", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "None.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "assets", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "No, I'm single.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "None.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "college", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "About $190 a month.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "earned_income", "utterance": "Somewhere between 150 thousand and 180 thousand a year.", "raw": [10, 1.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "One kid.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "disabled", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "employer_insurance", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "Nope.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "tenure", "utterance": "We own our house.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "childcare", "utterance": "We don't pay for childcare.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "employer_insurance", "utterance": "Yes, I'm on my company's plan.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "I don't really know.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "infant_or_pregnant", "utterance": "I'm not sure.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "No, I'm single.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "social_security", "utterance": "None.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "No, not us.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "assets", "utterance": "A little cushion, not much.", "raw": [0, 0.9]}
+{"reader": "llm_selfconf", "qid": "disabled", "utterance": "No, everyone's healthy.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "senior", "utterance": "I'm not sure.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "Three kids.", "raw": [3, 1.0]}
+{"reader": "llm_selfconf", "qid": "state", "utterance": "We're in Alaska.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "No, not us.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "tenure", "utterance": "We own our house.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "household_size", "utterance": "Just me.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "employer_insurance", "utterance": "Yeah.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "I don't really know.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "Nothing.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "state", "utterance": "We're in Ohio.", "raw": [35, 1.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "No, no children.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "childcare", "utterance": "$12,700 a year.", "raw": [3, 1.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "Yes.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "earned_income", "utterance": "We're pretty comfortable.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "assets", "utterance": "$1,700.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "assets", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "I'm not sure.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "college", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "Nothing.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "childcare", "utterance": "None.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "Yes, my husband and I.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "state", "utterance": "Alabama.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "employer_insurance", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "infant_or_pregnant", "utterance": "I'm expecting in March.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "disabled", "utterance": "No, everyone's healthy.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "state", "utterance": "We're in Kansas.", "raw": [16, 1.0]}
+{"reader": "llm_selfconf", "qid": "disabled", "utterance": "Yes.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "infant_or_pregnant", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "college", "utterance": "Nope.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "infant_or_pregnant", "utterance": "Nope.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "state", "utterance": "We're in Utah.", "raw": [44, 1.0]}
+{"reader": "llm_selfconf", "qid": "tenure", "utterance": "We own our house.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "Somewhere between $1,800 and $2,500 a year.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "household_size", "utterance": "Me and my partner.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "earned_income", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "household_size", "utterance": "Just me.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "Yes, a fair amount from a pension.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "No, not us.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "tenure", "utterance": "We own our house.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "married", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "infant_or_pregnant", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "tenure", "utterance": "We own our house.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "Yes, that's right.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "I have my son, my daughter and my daughter.", "raw": [2, 1.0]}
+{"reader": "llm_selfconf", "qid": "senior", "utterance": "No, we're all in our thirties.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "childcare", "utterance": "None.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "child_under5", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "assets", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "Somewhere between 130 thousand and 200 thousand a year.", "raw": [3, 1.0]}
+{"reader": "llm_selfconf", "qid": "childcare", "utterance": "Nothing.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "self_employed", "utterance": "Nope.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "college", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "household_size", "utterance": "Five of us.", "raw": [4, 1.0]}
+{"reader": "llm_selfconf", "qid": "college", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "tenure", "utterance": "We own our house.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "infant_or_pregnant", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "social_security", "utterance": "Somewhere between $6,500 and $9,500 a year.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "infant_or_pregnant", "utterance": "No, not us.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "No kids.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "Zero.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "disabled", "utterance": "No, not us.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "assets", "utterance": "I'd have to check.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "Two kids.", "raw": [2, 1.0]}
+{"reader": "llm_selfconf", "qid": "childcare", "utterance": "Daycare costs us a fortune.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "disabled", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "infant_or_pregnant", "utterance": "Nope.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "household_size", "utterance": "Me, my husband and our two kids.", "raw": [3, 1.0]}
+{"reader": "llm_selfconf", "qid": "social_security", "utterance": "$39,900 a year.", "raw": [4, 1.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "No, no children.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "disabled", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "earned_income", "utterance": "Somewhere between 300 thousand and 450 thousand a year.", "raw": [9, 1.0]}
+{"reader": "llm_selfconf", "qid": "tenure", "utterance": "We rent an apartment.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "disabled", "utterance": "My wife can't work because of her back.", "raw": [1, 1.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "No kids.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "childcare", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "children", "utterance": "None.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "other_income", "utterance": "Yes, a fair amount from a pension.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "social_security", "utterance": "No idea, honestly.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "assets", "utterance": "Hard to say.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "state", "utterance": "We're in New Jersey.", "raw": [30, 1.0]}
+{"reader": "llm_selfconf", "qid": "disabled", "utterance": "No.", "raw": [0, 1.0]}
+{"reader": "llm_selfconf", "qid": "household_size", "utterance": "Five of us, two adults and three kids.", "raw": [4, 1.0]}
+{"reader": "llm_selfconf", "qid": "housing_cost", "utterance": "Somewhere between $600 and $1,100 a month.", "raw": [2, 1.0]}
+{"reader": "llm_selfconf", "qid": "assets", "utterance": "We have some savings and investments.", "raw": [null, 0.0]}
+{"reader": "llm_selfconf", "qid": "senior", "utterance": "No, we're all in our thirties.", "raw": [0, 1.0]}
+{"reader": "structured", "qid": "childcare", "utterance": "Zero.", "raw": {"slots": {"low": 0, "high": 0, "period": "year", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "Hard to say.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "assets", "utterance": "$29,500.", "raw": {"slots": {"low": 29500, "high": 29500, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "About 35 thousand a year.", "raw": {"slots": {"low": 35000, "high": 35000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "$0 a year.", "raw": {"slots": {"low": 0, "high": 0, "period": "year", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "Somewhere between $3,000 and $5,500 a month.", "raw": {"slots": {"low": 3000, "high": 5500, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "None.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "I'd have to check.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "other_income", "utterance": "Zero.", "raw": {"slots": {"low": 0, "high": 0, "period": "year", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "About $600 a month.", "raw": {"slots": {"low": 600, "high": 600, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "Somewhere between 250 thousand and 350 thousand a year.", "raw": {"slots": {"low": 250000, "high": 350000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "We don't pay rent.", "raw": {"slots": {"low": null, "high": null, "period": "month", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "Somewhere between 18 thousand and 25 thousand a year.", "raw": {"slots": {"low": 18000, "high": 25000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "childcare", "utterance": "None.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "assets", "utterance": "No idea, honestly.", "raw": {"slots": {"low": null, "high": null, "period": "none", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "About $1,400 a month.", "raw": {"slots": {"low": 1400, "high": 1400, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "We don't have any of that.", "raw": {"slots": {"low": null, "high": null, "period": "none", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "I'm not sure.", "raw": {"slots": {"low": null, "high": null, "period": "month", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "About what you'd expect around here.", "raw": {"slots": {"low": null, "high": null, "period": "month", "approximate": true, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "childcare", "utterance": "I'm not sure.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "assets", "utterance": "$1,500.", "raw": {"slots": {"low": 1500, "high": 1500, "period": "none", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "I don't really know.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "Enough to get by, barely.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "I'm not sure.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "housing_cost", "utterance": "I'm not sure.", "raw": {"slots": {"low": null, "high": null, "period": "month", "approximate": false, "zero": false, "unknown": true}}}
+{"reader": "structured", "qid": "social_security", "utterance": "Somewhere between 30 thousand and 35 thousand a year.", "raw": {"slots": {"low": 30000, "high": 35000, "period": "year", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "Around $2,500 a month.", "raw": {"slots": {"low": 2500, "high": 2500, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "social_security", "utterance": "$22,200 a year.", "raw": {"slots": {"low": 22200, "high": 22200, "period": "year", "approximate": false, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "other_income", "utterance": "Around $1,700 a month.", "raw": {"slots": {"low": 1700, "high": 1700, "period": "month", "approximate": true, "zero": false, "unknown": false}}}
+{"reader": "structured", "qid": "earned_income", "utterance": "Nobody's working right now.", "raw": {"slots": {"low": null, "high": null, "period": "none", "approximate": false, "zero": true, "unknown": false}}}
+{"reader": "structured", "qid": "childcare", "utterance": "We don't pay for childcare.", "raw": {"slots": {"low": null, "high": null, "period": "year", "approximate": false, "zero": true, "unknown": false}}}

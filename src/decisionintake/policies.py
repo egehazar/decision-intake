@@ -281,7 +281,8 @@ class GreedyTree(Policy):
             return int(np.argmax(ev))
         mask = np.ones(len(self.train), dtype=bool)
         for jj, b in path:
-            mask &= self.train.answers[:, jj] == b
+            if b is not None:  # a backed-off answer didn't narrow the households
+                mask &= self.train.answers[:, jj] == b
         col = self.train.answers[mask, j]
         return int(np.bincount(col, weights=self.w[mask]).argmax())
 

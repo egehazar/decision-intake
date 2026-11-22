@@ -72,7 +72,23 @@ of mistakes per household and made $1,250 (on realistic answers it is about 12% 
 | realistic | any | not significant | 9: -$798 [-1,551, -40] |
 
 The engine's advantage is real with clean answers in the middle range, and largest when people
-volunteer facts before being asked, which is how conversations usually start. My prediction (D6) was
+volunteer facts before being asked, which is how conversations usually start.
+
+**A fair tree changes the story, and sharpens it** (secondary experiment, run after the freeze at GPT's
+request). The frozen tree decided with its own leaves; a tree that decides with the same calibrated
+belief as the engine, and only differs in how it picks questions, matches the engine on clean answers
+and on realistic answers at every question budget (no interval excludes zero). That was the prediction
+written down before any result: on a fixed form, a greedy tree on the same loss *is* the same rule,
+computed in advance. Where the engine pulls ahead is when the person has already volunteered facts:
+
+| facts volunteered first | engine minus fair tree [95% CI] |
+|---|---|
+| 3 questions | -$1,072 [-1,924, -409] |
+| 5 questions | -$524 [-996, -123] |
+| 9 questions | -$376 [-769, -62] |
+
+A precomputed tree can only skip along its own branches; the engine re-plans around whatever it has been
+told. That, not cleverer questions on a blank form, is what it adds. My prediction (D6) was
 that the engine would gain most when answers are messy; on this test it is the reverse: with
 misreports and "don't know", its edge over a fixed form is not significant. The fixed order's own
 curve is uneven (5 to 9 questions barely help it, 12 helps a lot), so part of the clean-answer margin
