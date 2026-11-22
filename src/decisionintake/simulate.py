@@ -110,7 +110,7 @@ def evaluate(policy_factory, train: Population, test: Population, loss: LossMode
     w = test.weight[idx] / test.weight[idx].sum()
     el = test.eligible[idx]
     val = test.value[idx]
-    miss, fr = loss.matrices(test.subset(idx))
+    miss, fr = loss.realised(test.subset(idx))
     loss_per = (np.where(recs, 0.0, miss) + np.where(recs, fr, 0.0)).sum(1)
     val_el = np.where(el, val, 0.0)
     value_recall = float((w[:, None] * val_el * recs).sum() / max((w[:, None] * val_el).sum(), 1e-12))

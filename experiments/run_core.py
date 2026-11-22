@@ -85,7 +85,7 @@ def metrics(test, loss, rows):
     rec = np.array([r[2] for r in rows], bool)
     w = test.weight[idx] / test.weight[idx].sum()
     el, val = test.eligible[idx], test.value[idx]
-    miss, fr = loss.matrices(test.subset(idx))
+    miss, fr = loss.realised(test.subset(idx))
     realised = (np.where(rec, 0.0, miss) + np.where(rec, fr, 0.0)).sum(1)
     val_el = np.where(el, val, 0.0)
     any_el = el.any(1)

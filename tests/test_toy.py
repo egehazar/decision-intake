@@ -138,3 +138,32 @@ def test_pair_lookahead_finds_value_a_single_question_misses():
     assert s.pair_table()[0][2] > 400  # together they settle it
     assert VOIPolicy(question_cost=50).next_question(s, 0) is not None
     assert VOIPolicy(question_cost=50, lookahead=False).next_question(s, 0) is None
+
+
+def test_tree_lookahead_splits_where_single_questions_show_nothing():
+    rng = np.random.default_rng(4)
+    n = 4000
+    a, b = rng.integers(0, 2, n), rng.integers(0, 2, n)
+    qs = [Question("a", "a?", ("no", "yes")), Question("b", "b?", ("no", "yes"))]
+    el = (a ^ b).astype(bool)[:, None]
+    pop = Population(qs, ["x"], np.stack([a, b], 1), np.ones(n), el, el * 1000.0)
+    loss = LossModel(false_rec_cost=np.array([1000.0]), miss_floor=np.zeros(1))
+    assert GreedyTree(train=pop, loss=loss, question_cost=50)._node(())["split"] is not None
+    assert GreedyTree(train=pop, loss=loss, question_cost=50, lookahead=False)._node(())["split"] is None
+
+
+def test_smoothing_scores_against_truth_and_keeps_probabilities_valid():
+    from decisionintake.smoothing import smooth
+
+    pop, loss = toy()
+
+    def feats(p, answers):
+        cols = [np.eye(len(q.options))[answers[:, j]] for j, q in enumerate(p.questions)]
+        return np.concatenate(cols + [np.ones((len(answers), 1))], axis=1)
+
+    sm, model = smooth(pop, feats, folds=3)
+    assert sm.p_eligible.shape == pop.eligible.shape
+    assert (sm.p_eligible >= 0).all() and (sm.p_eligible <= 1).all()
+    # the realised loss ignores smoothing; the planning loss uses it
+    assert np.allclose(loss.realised(sm)[0], loss.realised(pop)[0])
+    assert not np.allclose(loss.matrices(sm)[0], loss.realised(pop)[0])

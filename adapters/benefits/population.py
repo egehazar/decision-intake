@@ -56,7 +56,7 @@ def bucket(x, edges) -> np.ndarray:
 
 
 def ranges(edges, fmt=lambda v: f"${v:,.0f}") -> tuple[str, ...]:
-    labs = [f"under {fmt(edges[0])}" if edges[0] > 0 else "none"]
+    labs = ["none" if edges[0] <= 1 else f"under {fmt(edges[0])}"]
     for lo, hi in zip(edges[:-1], edges[1:]):
         labs.append(f"{fmt(lo)} to {fmt(hi)}")
     labs.append(f"{fmt(edges[-1])} or more")
@@ -69,7 +69,19 @@ def load_table(pattern="data/cache/chunks/c*.csv") -> pd.DataFrame:
     return pd.concat([pd.read_csv(f) for f in files], ignore_index=True)
 
 
-def build(table: pd.DataFrame) -> tuple[Population, LossModel, dict]:
+def poverty_ratio(t: pd.DataFrame) -> np.ndarray:
+    """Household income as a percentage of the federal poverty guideline for its size (48 states,
+    2025 guideline uprated 2.5% to 2026: $16,040 plus $5,640 per extra person). Bracket edges sit at
+    real programme cutoffs (SNAP 130%, Medicaid 138%, WIC and school meals 185%, ...)."""
+    income = np.maximum(t["market_income"], t["earned_income"] + t["social_security"]).clip(lower=0)
+    size = t["household_size"].clip(lower=1)
+    return 100 * income / (16_040 + 5_640 * (size - 1))
+
+
+FPL_EDGES = [1, 50, 100, 130, 138, 150, 185, 200, 250, 300, 400]
+
+
+def build(table: pd.DataFrame, poverty_question: bool = False) -> tuple[Population, LossModel, dict]:
     t = table
     income_edges = [1, 10_000, 20_000, 30_000, 40_000, 50_000, 60_000, 80_000, 100_000, 150_000]
     ss_edges = [1, 10_000, 20_000, 30_000]
@@ -111,7 +123,13 @@ def build(table: pd.DataFrame) -> tuple[Population, LossModel, dict]:
          bucket(t["assets"].clip(lower=0), asset_edges), adjacent_noise(5, 0.12)),
         ("college", "Is anyone a full-time college student?", ("no", "yes"), (t["n_college"] > 0).astype(int), flip_noise(0.02)),
     ]
-    questions = [Question(qid, text, opts, 1.0, noise) for qid, text, opts, _, noise in spec]
+    if poverty_question:
+        spec.append(("income_vs_poverty_line", "Household income compared with the poverty line for its size",
+                     tuple(["none"] + [f"{a}% to {b}%" for a, b in zip(FPL_EDGES[:-1], FPL_EDGES[1:])] + ["400% or more"]),
+                     bucket(poverty_ratio(t), FPL_EDGES), adjacent_noise(len(FPL_EDGES) + 1, 0.10)))
+    ordered = {"income_vs_poverty_line", "household_size", "children", "earned_income", "social_security", "other_income", "housing_cost",
+               "childcare", "assets"}
+    questions = [Question(qid, text, opts, 1.0, noise, qid in ordered) for qid, text, opts, _, noise in spec]
     answers = np.stack([np.asarray(col, dtype=int) for *_, col, _ in spec], axis=1)
     value = np.stack([t[f"v_{p}"].to_numpy(float) for p in PROGRAMMES], axis=1)
     value = np.where(value >= MIN_VALUE, value, 0.0)
@@ -125,3 +143,22 @@ def build(table: pd.DataFrame) -> tuple[Population, LossModel, dict]:
         "noncitizen": (t["n_noncitizen"] > 0).to_numpy(),
     }
     return pop, loss, meta
+
+
+def features(pop: Population, answers: np.ndarray) -> np.ndarray:
+    """Design matrix for the outcome model: every answer one-hot, plus the interactions the rules
+    actually use (income against household size, children, age, disability, marriage, other income,
+    savings; children by state)."""
+    n = len(answers)
+    blocks, parts = {}, []
+    for j, q in enumerate(pop.questions):
+        m = np.zeros((n, len(q.options)))
+        m[np.arange(n), answers[:, j]] = 1.0
+        blocks[q.id] = m
+        parts.append(m)
+    inc = blocks["earned_income"]
+    for k in ["household_size", "children", "senior", "disabled", "married", "social_security", "assets"]:
+        parts.append(np.einsum("ni,nj->nij", inc, blocks[k]).reshape(n, -1))
+    parts.append(np.einsum("ni,nj->nij", blocks["children"], blocks["state"]).reshape(n, -1))
+    parts.append(np.ones((n, 1)))
+    return np.concatenate(parts, axis=1)

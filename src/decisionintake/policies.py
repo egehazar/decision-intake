@@ -172,6 +172,7 @@ class GreedyTree(Policy):
     budget: int = 8
     min_leaf: int = 30
     question_cost: float = 50.0
+    lookahead: bool = True  # same pair look-ahead as the engine, so the comparison is fair
     name: str = "tree"
     _cache: dict = field(default_factory=dict, repr=False)
 
@@ -210,9 +211,39 @@ class GreedyTree(Policy):
                 net = (now - post) - self.question_cost * self.train.questions[j].cost
                 if net > best_net:
                     split, best_net = j, net
+            if split is None and self.lookahead and len(path) + 2 <= self.budget:
+                split = self._best_pair_first(idx, w, ls, lr, used, now)
         node = {"n": len(idx), "rec": rec, "split": split}
         self._cache[path] = node
         return node
+
+    def _best_pair_first(self, idx, w, ls, lr, used, now):
+        """If some pair of questions pays for both, split first on the one worth more alone."""
+        ans = self.train.answers[idx]
+        d = ls.shape[1]
+        losses = np.concatenate([w[:, None] * ls, w[:, None] * lr], axis=1)
+        cands = [j for j in range(len(self.train.questions)) if j not in used]
+        single = {}
+        for j in cands:
+            b = len(self.train.questions[j].options)
+            agg = np.stack([np.bincount(ans[:, j], weights=losses[:, k], minlength=b) for k in range(2 * d)], 1)
+            single[j] = now - np.minimum(agg[:, :d], agg[:, d:]).sum() / w.sum()
+        best, best_net = None, 0.0
+        for x, q1 in enumerate(cands):
+            b2s = {q2: len(self.train.questions[q2].options) for q2 in cands[x + 1 :]}
+            for q2, b2 in b2s.items():
+                code = ans[:, q1] * b2 + ans[:, q2]
+                nb = len(self.train.questions[q1].options) * b2
+                cnt = np.bincount(code, minlength=nb)
+                if np.sort(cnt)[-1] > len(idx) - self.min_leaf:
+                    continue
+                agg = np.stack([np.bincount(code, weights=losses[:, k], minlength=nb) for k in range(2 * d)], 1)
+                v = now - np.minimum(agg[:, :d], agg[:, d:]).sum() / w.sum()
+                net = v - self.question_cost * (self.train.questions[q1].cost + self.train.questions[q2].cost)
+                if net > best_net:
+                    best_net = net
+                    best = q1 if single[q1] >= single[q2] else q2
+        return best
 
     def start(self, s):
         s.policy_state = {"path": ()}

@@ -21,6 +21,7 @@ class Question:
     cost: float = 1.0
     # noise[a, b] = P(person reports option b | true option a). None means exact answers.
     noise: np.ndarray | None = None
+    ordered: bool = False  # options are an ordered scale (amounts, counts)
 
     def report_matrix(self) -> np.ndarray:
         if self.noise is None:
@@ -39,6 +40,10 @@ class Population:
     eligible: np.ndarray  # (N, D) bool
     value: np.ndarray  # (N, D) float, dollars per year when eligible
     group: np.ndarray | None = None  # (N,) lineage id, records sharing one must not straddle a split
+    # Optional smoothed outcomes (see smoothing.py): P(eligible | answers) and dollars if eligible.
+    # When set, decisions and losses use these instead of each record's raw outcome.
+    p_eligible: np.ndarray | None = None  # (N, D)
+    value_if_eligible: np.ndarray | None = None  # (N, D)
 
     def __post_init__(self):
         n, q = self.answers.shape
@@ -60,6 +65,8 @@ class Population:
             self.eligible[idx],
             self.value[idx],
             None if self.group is None else self.group[idx],
+            None if self.p_eligible is None else self.p_eligible[idx],
+            None if self.value_if_eligible is None else self.value_if_eligible[idx],
         )
 
     def onehot(self) -> tuple[np.ndarray, np.ndarray]:
@@ -92,9 +99,20 @@ class LossModel:
     miss_floor: np.ndarray  # (D,)
 
     def matrices(self, pop: Population) -> tuple[np.ndarray, np.ndarray]:
+        if pop.p_eligible is not None:  # expected losses under the smoothed outcome
+            p = pop.p_eligible
+            miss = p * np.maximum(pop.value_if_eligible, self.miss_floor[None, :])
+            false_rec = (1.0 - p) * self.false_rec_cost[None, :]
+            return miss, false_rec
         miss = np.where(pop.eligible, np.maximum(pop.value, self.miss_floor[None, :]), 0.0)
         false_rec = np.where(pop.eligible, 0.0, self.false_rec_cost[None, :])
         return miss, false_rec  # loss if we skip, loss if we recommend
+
+    def realised(self, pop: Population) -> tuple[np.ndarray, np.ndarray]:
+        """Losses against each record's TRUE outcome (for scoring), ignoring any smoothing."""
+        miss = np.where(pop.eligible, np.maximum(pop.value, self.miss_floor[None, :]), 0.0)
+        false_rec = np.where(pop.eligible, 0.0, self.false_rec_cost[None, :])
+        return miss, false_rec
 
 
 def bayes_risk(w: np.ndarray, l_skip: np.ndarray, l_rec: np.ndarray) -> float:
@@ -230,9 +248,14 @@ class Session:
         r_skip = self.w @ self.l_skip
         r_rec = self.w @ self.l_rec
         for d, name in enumerate(self.pop.decisions):
-            el = self.pop.eligible[:, d]
-            p = float(self.w[el].sum())
-            lo, hi = weighted_quantile(self.pop.value[el, d], self.w[el], [0.1, 0.9])
+            if self.pop.p_eligible is not None:
+                pe = self.pop.p_eligible[:, d]
+                p = float(self.w @ pe)
+                lo, hi = weighted_quantile(self.pop.value_if_eligible[:, d], self.w * pe, [0.1, 0.9])
+            else:
+                el = self.pop.eligible[:, d]
+                p = float(self.w[el].sum())
+                lo, hi = weighted_quantile(self.pop.value[el, d], self.w[el], [0.1, 0.9])
             out.append(
                 DecisionView(
                     name,

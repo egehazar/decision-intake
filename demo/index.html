@@ -1,0 +1,436 @@
+<title>DecisionIntake</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a working tool. Interview on the left, the engine's belief and reasoning on the right; one column on phones. */
+:root {
+  --bg: #f3f5f7;
+  --panel: #ffffff;
+  --ink: #18222e;
+  --muted: #5b6876;
+  --line: #d9dfe6;
+  --accent: #1f5fa8;
+  --accent-soft: #e3ecf7;
+  --yes: #2a7a4b;
+  --yes-soft: #e2f1e8;
+  --maybe: #9a6a10;
+  --maybe-soft: #f6ecd7;
+  --no: #8a95a1;
+  --font-display: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11161c; --panel: #18202a; --ink: #e6ebf0; --muted: #9aa7b4; --line: #2a3542;
+    --accent: #7fb0ea; --accent-soft: #1c2d42; --yes: #6fcf97; --yes-soft: #17301f;
+    --maybe: #e0b45a; --maybe-soft: #33291a; --no: #6c7886; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11161c; --panel: #18202a; --ink: #e6ebf0; --muted: #9aa7b4; --line: #2a3542;
+  --accent: #7fb0ea; --accent-soft: #1c2d42; --yes: #6fcf97; --yes-soft: #17301f;
+  --maybe: #e0b45a; --maybe-soft: #33291a; --no: #6c7886; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 48px;
+}
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: grid; gap: 6px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: 1.9rem; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 68ch; margin: 0; }
+.grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 20px; align-items: start; }
+@media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+h2 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 600; margin: 0; }
+.qtext { font-family: var(--font-display); font-size: 1.35rem; font-weight: 600; line-height: 1.3; text-wrap: balance; margin: 0; }
+.options { display: flex; flex-wrap: wrap; gap: 8px; }
+button {
+  font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px;
+  padding: 8px 12px; cursor: pointer; transition: border-color .12s, background .12s;
+}
+button:hover { border-color: var(--accent); }
+button:focus-visible, select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--accent); color: var(--panel); border-color: var(--accent); font-weight: 600; }
+button.ghost { color: var(--muted); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+select { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; max-width: 100%; }
+.why { font-size: 0.9rem; color: var(--muted); margin: 0; }
+.status { border-radius: 8px; padding: 12px 14px; background: var(--accent-soft); display: grid; gap: 4px; }
+.status.done { background: var(--yes-soft); }
+.status.handoff { background: var(--maybe-soft); }
+.status strong { font-family: var(--font-display); }
+.history { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.history li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 12px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 0.9rem; }
+.history li:first-child { border-top: 0; }
+.history .ans { font-weight: 600; }
+.history .meta { grid-column: 1 / -1; color: var(--muted); font-size: 0.8rem; font-family: var(--font-data); }
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+.progs { display: grid; gap: 10px; }
+.prog { display: grid; grid-template-columns: minmax(0, 11rem) minmax(0, 1fr) 5.2rem; gap: 10px; align-items: center; }
+@media (max-width: 520px) { .prog { grid-template-columns: minmax(0, 1fr) 5.2rem; } .prog .bar { grid-column: 1 / -1; grid-row: 2; } }
+.pname { font-size: 0.9rem; font-weight: 500; }
+.bar { height: 10px; background: var(--bg); border-radius: 5px; overflow: hidden; border: 1px solid var(--line); }
+.bar > i { display: block; height: 100%; background: var(--no); }
+.prog.rec .bar > i { background: var(--yes); }
+.prog.maybe .bar > i { background: var(--maybe); }
+.pval { text-align: right; font-size: 0.82rem; }
+.chip { display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; padding: 1px 7px; border-radius: 999px; margin-left: 6px; vertical-align: 1px; }
+.chip.rec { background: var(--yes-soft); color: var(--yes); }
+.chip.maybe { background: var(--maybe-soft); color: var(--maybe); }
+.sub { font-size: 0.78rem; color: var(--muted); }
+.meters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 520px) { .meters { grid-template-columns: minmax(0, 1fr); } }
+.meter { border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; }
+.meter .big { font-family: var(--font-data); font-size: 1.2rem; font-variant-numeric: tabular-nums; }
+.tablewrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 0.88rem; }
+th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+th { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+td.r, th.r { text-align: right; }
+tr.pick td { background: var(--accent-soft); font-weight: 600; }
+.vol { display: grid; gap: 8px; }
+.vol .row select { flex: 1 1 14rem; min-width: 0; }
+.truth { border-top: 1px dashed var(--line); padding-top: 10px; display: grid; gap: 6px; font-size: 0.88rem; }
+footer { color: var(--muted); font-size: 0.82rem; max-width: 90ch; display: grid; gap: 6px; }
+footer p { margin: 0; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="label">DecisionIntake · benefits screening demo</span>
+    <h1>Which question should an assistant ask next?</h1>
+    <p class="lede">The engine keeps a belief over thousands of US households, asks the question expected to prevent the most costly mistakes across ten programmes at once, and stops when no question is worth asking. Every number below is computed live in this page.</p>
+  </header>
+
+  <div class="grid">
+    <section class="panel" aria-labelledby="interview-h">
+      <div class="row" style="justify-content: space-between;">
+        <h2 id="interview-h">Interview</h2>
+        <div class="row">
+          <label class="sub" for="example">Answer as</label>
+          <select id="example"><option value="">yourself</option></select>
+          <button class="ghost" id="restart" type="button">Start over</button>
+        </div>
+      </div>
+
+      <div id="status" class="status" aria-live="polite"></div>
+
+      <div id="ask" class="vol">
+        <p class="qtext" id="qtext"></p>
+        <div class="options" id="options"></div>
+        <p class="why" id="qwhy"></p>
+      </div>
+
+      <div class="vol">
+        <span class="label">Or tell it something first</span>
+        <div class="row">
+          <select id="volq" aria-label="Fact to volunteer"></select>
+          <select id="vola" aria-label="Your answer"></select>
+          <button type="button" id="volgo">Tell it</button>
+        </div>
+      </div>
+
+      <div>
+        <span class="label">Answers so far</span>
+        <ol class="history" id="history"></ol>
+      </div>
+    </section>
+
+    <section class="panel" aria-labelledby="belief-h">
+      <h2 id="belief-h">What the engine believes</h2>
+      <div class="meters">
+        <div class="meter"><span class="label">Questions asked</span><span class="big" id="m-q">0</span></div>
+        <div class="meter"><span class="label">Expected cost of mistakes</span><span class="big" id="m-risk">$0</span><span class="sub">per year, if it stopped now</span></div>
+        <div class="meter"><span class="label">Similar households</span><span class="big" id="m-ess">0</span><span class="sub">effective sample behind the estimate</span></div>
+      </div>
+      <div class="progs" id="progs"></div>
+      <div id="truth" class="truth" hidden></div>
+      <div>
+        <span class="label">Why this question</span>
+        <div class="tablewrap">
+          <table>
+            <thead><tr><th>Question</th><th class="r">Expected saving</th><th class="r">Worth asking?</th></tr></thead>
+            <tbody id="voi"></tbody>
+          </table>
+        </div>
+        <p class="sub" id="voinote"></p>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    <p>Rules: PolicyEngine-US, 2026 rules, everyone assumed to take up what they're entitled to. Households: a resampled slice of PolicyEngine's Populace 2024, a calibrated synthetic population built from census and tax data, not real people. Amounts are estimates, not a determination of eligibility; a real screener must link to the official application.</p>
+    <p>A question is worth asking when the mistakes it is expected to prevent outweigh the cost of asking, here <span class="num" id="lamtxt"></span> a year per question. Missing a programme a household can get costs its value; recommending one it can't costs <span class="num" id="frtxt"></span>. Built by AI agents (Claude, reviewed by GPT and Fable) under Ege Hazar's direction.</p>
+  </footer>
+</div>
+
+<script>
+const LAMBDA = 50;          // dollars a year a question must be worth
+const MIN_ESS = 30;         // support floor: the belief always rests on at least this many households
+const HANDOFF_RISK = 1500;  // stop with more expected loss than this, and it hands off to a person
+const N_PLAN = 1500;        // resampled households for pair look-ahead
+
+let D, N, Q, P, ANS, LSKIP, LREC, VAL;
+let S; // session
+
+const fmt$ = v => (v < 0 ? "-" : "") + "$" + Math.round(Math.abs(v)).toLocaleString("en-US");
+
+function setup(data) {
+  D = data; N = D.answers.length; Q = D.questions.length; P = D.programmes.length;
+  ANS = new Uint8Array(N * Q); VAL = new Float64Array(N * P);
+  LSKIP = new Float64Array(N * P); LREC = new Float64Array(N * P);
+  for (let i = 0; i < N; i++) {
+    for (let q = 0; q < Q; q++) ANS[i * Q + q] = D.answers[i][q];
+    for (let d = 0; d < P; d++) {
+      const v = D.value[i][d]; VAL[i * P + d] = v;
+      LSKIP[i * P + d] = v > 0 ? Math.max(v, D.miss_floor[d]) : 0;
+      LREC[i * P + d] = v > 0 ? 0 : D.false_rec_cost[d];
+    }
+  }
+  document.getElementById("lamtxt").textContent = fmt$(LAMBDA);
+  document.getElementById("frtxt").textContent = fmt$(D.false_rec_cost[0]);
+  const ex = document.getElementById("example");
+  D.examples.forEach((e, k) => {
+    const o = document.createElement("option"); o.value = String(k);
+    const a = e.answers, qi = id => D.questions.findIndex(q => q.id === id);
+    o.textContent = `example ${k + 1}: ${D.questions[qi("state")].options[a[qi("state")]]}, ${D.questions[qi("household_size")].options[a[qi("household_size")]]} people`;
+    ex.appendChild(o);
+  });
+  const vq = document.getElementById("volq");
+  D.questions.forEach((q, j) => { const o = document.createElement("option"); o.value = String(j); o.textContent = q.text; vq.appendChild(o); });
+  vq.addEventListener("change", fillVolAnswers); fillVolAnswers();
+  document.getElementById("volgo").addEventListener("click", () => {
+    const j = +vq.value, b = +document.getElementById("vola").value;
+    if (S.asked.has(j)) return;
+    answer(j, b, "told"); render();
+  });
+  document.getElementById("restart").addEventListener("click", start);
+  ex.addEventListener("change", start);
+  start();
+}
+
+function fillVolAnswers() {
+  const j = +document.getElementById("volq").value, va = document.getElementById("vola");
+  va.innerHTML = "";
+  D.questions[j].options.forEach((o, b) => { const e = document.createElement("option"); e.value = String(b); e.textContent = o; va.appendChild(e); });
+}
+
+function start() {
+  S = { loglik: new Float64Array(N), w: new Float64Array(N).fill(1 / N), asked: new Map(), history: [], nAsked: 0, done: false };
+  S.example = document.getElementById("example").value === "" ? null : D.examples[+document.getElementById("example").value];
+  render();
+}
+
+function reweight() {
+  let mx = -Infinity;
+  for (let i = 0; i < N; i++) if (S.loglik[i] > mx) mx = S.loglik[i];
+  const weights = tau => {
+    const w = new Float64Array(N); let s = 0;
+    for (let i = 0; i < N; i++) { const l = S.loglik[i]; const v = l === -Infinity ? 0 : Math.exp(tau * (l - mx)); w[i] = v; s += v; }
+    for (let i = 0; i < N; i++) w[i] /= s;
+    return w;
+  };
+  const ess = w => { let s = 0; for (let i = 0; i < N; i++) s += w[i] * w[i]; return 1 / s; };
+  let w = weights(1), tau = 1;
+  if (ess(w) < MIN_ESS) {
+    let lo = 0, hi = 1;
+    for (let k = 0; k < 25; k++) { const m = (lo + hi) / 2; if (ess(weights(m)) >= MIN_ESS) lo = m; else hi = m; }
+    tau = lo; w = weights(tau);
+  }
+  S.w = w; S.tau = tau;
+}
+
+function answer(j, b, source) {
+  const noise = D.questions[j].noise; // noise[a][b] = P(report b | true a)
+  for (let i = 0; i < N; i++) { const p = noise[ANS[i * Q + j]][b]; S.loglik[i] += p > 0 ? Math.log(p) : -Infinity; }
+  S.asked.set(j, b);
+  reweight();
+  S.history.push({ j, b, source, risk: risk(S.w) });
+}
+
+function sums(w) {
+  const rs = new Float64Array(P), rr = new Float64Array(P);
+  for (let i = 0; i < N; i++) { const wi = w[i]; if (!wi) continue; for (let d = 0; d < P; d++) { rs[d] += wi * LSKIP[i * P + d]; rr[d] += wi * LREC[i * P + d]; } }
+  return [rs, rr];
+}
+function risk(w) { const [rs, rr] = sums(w); let r = 0; for (let d = 0; d < P; d++) r += Math.min(rs[d], rr[d]); return r; }
+
+function voiTable() {
+  const now = risk(S.w), rows = [];
+  for (let j = 0; j < Q; j++) {
+    if (S.asked.has(j)) continue;
+    const B = D.questions[j].options.length, agg = new Float64Array(B * 2 * P);
+    for (let i = 0; i < N; i++) { const wi = S.w[i]; if (!wi) continue; const a = ANS[i * Q + j];
+      for (let d = 0; d < P; d++) { agg[(a * 2) * P + d] += wi * LSKIP[i * P + d]; agg[(a * 2 + 1) * P + d] += wi * LREC[i * P + d]; } }
+    const M = D.questions[j].noise; let post = 0;
+    for (let b = 0; b < B; b++) for (let d = 0; d < P; d++) {
+      let s = 0, r = 0; for (let a = 0; a < B; a++) { s += M[a][b] * agg[(a * 2) * P + d]; r += M[a][b] * agg[(a * 2 + 1) * P + d]; }
+      post += Math.min(s, r);
+    }
+    rows.push({ j, v: now - post });
+  }
+  rows.sort((x, y) => y.v - x.v);
+  return rows;
+}
+
+function pairBest(cands) {
+  // systematic resample, then joint grouping of every pair
+  const c = new Float64Array(N); let acc = 0; for (let i = 0; i < N; i++) { acc += S.w[i]; c[i] = acc; }
+  const idx = new Int32Array(N_PLAN); let k = 0; const u0 = 0.5 / N_PLAN;
+  for (let m = 0; m < N_PLAN; m++) { const u = u0 + m / N_PLAN; while (k < N - 1 && c[k] < u) k++; idx[m] = k; }
+  let rsT = 0; const rs = new Float64Array(P), rr = new Float64Array(P);
+  for (const i of idx) for (let d = 0; d < P; d++) { rs[d] += LSKIP[i * P + d]; rr[d] += LREC[i * P + d]; }
+  for (let d = 0; d < P; d++) rsT += Math.min(rs[d], rr[d]);
+  const now = rsT / N_PLAN;
+  let best = null;
+  for (let x = 0; x < cands.length; x++) for (let y = x + 1; y < cands.length; y++) {
+    const q1 = cands[x], q2 = cands[y], B1 = D.questions[q1].options.length, B2 = D.questions[q2].options.length;
+    const agg = new Float64Array(B1 * B2 * 2 * P);
+    for (const i of idx) { const cell = ANS[i * Q + q1] * B2 + ANS[i * Q + q2];
+      for (let d = 0; d < P; d++) { agg[(cell * 2) * P + d] += LSKIP[i * P + d]; agg[(cell * 2 + 1) * P + d] += LREC[i * P + d]; } }
+    const M1 = D.questions[q1].noise, M2 = D.questions[q2].noise; let post = 0;
+    for (let b1 = 0; b1 < B1; b1++) for (let b2 = 0; b2 < B2; b2++) for (let d = 0; d < P; d++) {
+      let s = 0, r = 0;
+      for (let a1 = 0; a1 < B1; a1++) { const m1 = M1[a1][b1]; if (!m1) continue;
+        for (let a2 = 0; a2 < B2; a2++) { const m = m1 * M2[a2][b2]; if (!m) continue; const cell = a1 * B2 + a2;
+          s += m * agg[(cell * 2) * P + d]; r += m * agg[(cell * 2 + 1) * P + d]; } }
+      post += Math.min(s, r);
+    }
+    const v = now - post / N_PLAN;
+    if (!best || v > best.v) best = { q1, q2, v };
+  }
+  return best;
+}
+
+function nextQuestion(table) {
+  const top = table[0];
+  if (top && top.v - LAMBDA > 0) return { j: top.j, reason: "single", v: top.v };
+  const cands = table.map(r => r.j);
+  if (cands.length < 2) return null;
+  const pb = pairBest(cands);
+  if (pb && pb.v - 2 * LAMBDA > 0) {
+    const single = new Map(table.map(r => [r.j, r.v]));
+    const j = (single.get(pb.q1) || 0) >= (single.get(pb.q2) || 0) ? pb.q1 : pb.q2;
+    return { j, reason: "pair", v: pb.v, partner: j === pb.q1 ? pb.q2 : pb.q1 };
+  }
+  return null;
+}
+
+function beliefs() {
+  const out = [];
+  for (let d = 0; d < P; d++) {
+    let pe = 0, rs = 0, rr = 0; const vals = [];
+    for (let i = 0; i < N; i++) { const wi = S.w[i]; if (!wi) continue; rs += wi * LSKIP[i * P + d]; rr += wi * LREC[i * P + d];
+      if (VAL[i * P + d] > 0) { pe += wi; vals.push([VAL[i * P + d], wi]); } }
+    vals.sort((a, b) => a[0] - b[0]);
+    const q = t => { let c = 0; for (const [v, wv] of vals) { c += wv / pe; if (c >= t) return v; } return vals.length ? vals[vals.length - 1][0] : 0; };
+    out.push({ d, p: pe, lo: pe > 0 ? q(0.1) : 0, hi: pe > 0 ? q(0.9) : 0, rec: rr < rs });
+  }
+  return out;
+}
+
+function essNow() { let s = 0; for (let i = 0; i < N; i++) s += S.w[i] * S.w[i]; return 1 / s; }
+
+function render() {
+  const table = voiTable();
+  const nq = S.done ? null : nextQuestion(table);
+  const r = risk(S.w), ess = essNow();
+  document.getElementById("m-q").textContent = String(S.history.filter(h => h.source === "asked").length);
+  document.getElementById("m-risk").textContent = fmt$(r);
+  document.getElementById("m-ess").textContent = Math.round(ess).toLocaleString("en-US");
+
+  // status + current question
+  const st = document.getElementById("status"), ask = document.getElementById("ask");
+  if (!nq) {
+    S.done = true; ask.hidden = true;
+    if (r > HANDOFF_RISK || ess < MIN_ESS * 1.05 && S.tau < 0.5) {
+      st.className = "status handoff";
+      st.innerHTML = `<strong>Hand off to a person.</strong><span>No remaining question is worth asking, but about ${fmt$(r)} a year of possible mistakes is left. A caseworker should check this household.</span>`;
+    } else {
+      st.className = "status done";
+      st.innerHTML = `<strong>Done after ${S.history.filter(h => h.source === "asked").length} questions.</strong><span>No remaining question is expected to prevent more than ${fmt$(LAMBDA)} a year of mistakes.</span>`;
+    }
+  } else {
+    ask.hidden = false; st.className = "status";
+    st.innerHTML = nq.reason === "pair"
+      ? `<strong>No single question pays on its own, but a pair does.</strong><span>Together with “${D.questions[nq.partner].text}”, this is expected to prevent ${fmt$(nq.v)} a year of mistakes.</span>`
+      : `<strong>Next: the question expected to prevent the most mistakes.</strong><span>About ${fmt$(nq.v)} a year, more than the ${fmt$(LAMBDA)} a question costs.</span>`;
+    const q = D.questions[nq.j];
+    document.getElementById("qtext").textContent = q.text;
+    const opts = document.getElementById("options"); opts.innerHTML = "";
+    const truth = S.example ? S.example.answers[nq.j] : null;
+    q.options.forEach((o, b) => {
+      const btn = document.createElement("button"); btn.type = "button"; btn.textContent = o;
+      if (truth === b) btn.className = "primary";
+      btn.addEventListener("click", () => { answer(nq.j, b, "asked"); render(); });
+      opts.appendChild(btn);
+    });
+    const dk = document.createElement("button"); dk.type = "button"; dk.className = "ghost"; dk.textContent = "I don't know";
+    dk.addEventListener("click", () => { S.asked.set(nq.j, -1); S.history.push({ j: nq.j, b: -1, source: "asked", risk: risk(S.w) }); render(); });
+    opts.appendChild(dk);
+    document.getElementById("qwhy").textContent = S.example ? "Answering as an example household: its true answer is highlighted." : "";
+  }
+
+  // history
+  const hist = document.getElementById("history"); hist.innerHTML = "";
+  let prev = null;
+  S.history.forEach((h, k) => {
+    const li = document.createElement("li"); const q = D.questions[h.j];
+    const ans = h.b < 0 ? "I don't know" : q.options[h.b];
+    const before = k === 0 ? null : S.history[k - 1].risk;
+    li.innerHTML = `<span>${q.text}</span><span class="ans"></span><span class="meta"></span>`;
+    li.querySelector(".ans").textContent = ans;
+    li.querySelector(".meta").textContent = (h.source === "told" ? "volunteered · " : "") + `expected cost of mistakes now ${fmt$(h.risk)}`;
+    hist.appendChild(li);
+  });
+  if (!S.history.length) { const li = document.createElement("li"); li.innerHTML = `<span class="sub">Nothing yet. Answer the question above, or tell it a fact first.</span>`; hist.appendChild(li); }
+
+  // programmes
+  const progs = document.getElementById("progs"); progs.innerHTML = "";
+  beliefs().forEach(b => {
+    const cls = b.rec ? (b.p > 0.75 ? "rec" : "maybe") : "";
+    const div = document.createElement("div"); div.className = "prog " + cls;
+    const chip = b.rec ? (b.p > 0.75 ? `<span class="chip rec">likely</span>` : `<span class="chip maybe">worth checking</span>`) : "";
+    div.innerHTML = `<div class="pname">${D.programmes[b.d].label}${chip}<div class="sub num">${b.p > 0.02 ? fmt$(b.lo) + "–" + fmt$(b.hi) + " a year if eligible" : "unlikely"}</div></div>
+      <div class="bar" role="img" aria-label="${Math.round(b.p * 100)} percent chance of eligibility"><i style="width:${(b.p * 100).toFixed(1)}%"></i></div>
+      <div class="pval num">${Math.round(b.p * 100)}%</div>`;
+    progs.appendChild(div);
+  });
+
+  // truth for examples, once done
+  const tr = document.getElementById("truth");
+  if (S.done && S.example) {
+    tr.hidden = false;
+    const recs = beliefs();
+    const lines = D.programmes.map((p, d) => {
+      const v = S.example.value[d], el = v >= 120, rec = recs[d].rec;
+      if (!el && !rec) return null;
+      const verdict = el && rec ? "found" : el ? "missed" : "recommended, but not eligible";
+      return `<div><strong>${p.label}</strong>: ${el ? fmt$(v) + " a year" : "not eligible"} · <span class="sub">${verdict}</span></div>`;
+    }).filter(Boolean);
+    tr.innerHTML = `<span class="label">What PolicyEngine says for this household</span>` + (lines.length ? lines.join("") : `<div>Not eligible for any of the ten, and nothing was recommended.</div>`);
+  } else tr.hidden = true;
+
+  // VOI table
+  const tb = document.getElementById("voi"); tb.innerHTML = "";
+  table.slice(0, 6).forEach(row => {
+    const t = document.createElement("tr"); if (nq && row.j === nq.j) t.className = "pick";
+    t.innerHTML = `<td></td><td class="r num">${fmt$(row.v)}</td><td class="r">${row.v > LAMBDA ? "yes" : "no"}</td>`;
+    t.firstChild.textContent = D.questions[row.j].text;
+    tb.appendChild(t);
+  });
+  document.getElementById("voinote").textContent = table.length
+    ? `Expected saving: how much the cost of mistakes is expected to drop once the answer is known, averaged over every answer the belief still allows. ${table.length > 6 ? (table.length - 6) + " more questions are worth less." : ""}`
+    : "Every question has been answered.";
+}
+
+fetch("population.json").then(r => r.json()).then(setup).catch(() => {
+  document.getElementById("status").innerHTML = "<strong>The household data didn't load.</strong><span>Reload the page to try again.</span>";
+});
+</script>

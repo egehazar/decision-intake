@@ -104,3 +104,50 @@ enough to act or should hand off to a person**. US public-benefits screening is 
 - The value of every question is computed with one matrix product per turn (a one-hot answer matrix
   times the weighted losses), then each question's error model is applied to small per-option totals.
   A test checks this equals the direct computation.
+
+## D12. Tuning round 1: the support floor, and look-ahead that didn't pay (2026-11-22)
+
+Validation split only (400 households), clean answers, wrong-recommendation cost $300:
+
+| setting | questions | actual loss | engine's own estimate |
+|---|---|---|---|
+| ask all 18, no floor | 18 | $3,419 | $216 |
+| ask all 18, floor 10 | 18 | $965 | $971 |
+| fixed form 8, floor 30 | 8 | $1,136 | $1,335 |
+| engine, floor 30 | 8.6 | $995 | $1,054 |
+| engine, no floor | 5.7 | $3,049 | $184 |
+
+- Without a floor the belief collapses onto a few households and the engine believes it is 16 times
+  more certain than it is. The floor fixes both the loss and the self-assessment. This is the first
+  result worth showing: an engine that knows how much it doesn't know.
+- The floor is crude: it softens all evidence equally, so extra answers can make things worse
+  (engine at a lower question cost asked 13 questions and did worse than at 9). A better fix would
+  soften unimportant answers more than important ones. Not done yet.
+- Pair look-ahead asked one more question for no gain in this domain. It's kept off by default and
+  reported as a negative result; it does matter when facts only count together (tested on a toy case).
+- With a $300 cost for a wrong recommendation, 70% of recommendations were wrong: the loss told the
+  engine to list anything with a few percent chance. That cost was too low. Round 2 tries $1,000 and
+  $3,000 and reports the trade-off rather than picking one silently.
+
+## D13. The real ceiling problem, and the fix: smoothed outcomes (2026-11-22)
+
+Round 2 (wrong-recommendation cost $1,000 and $3,000) showed that even with all 18 answers, decisions
+were poor: about 69% of programmes found with more than half of recommendations wrong. No question
+policy can beat that ceiling, and the engine did not beat the fixed form. The trained tree was worse
+still (it stopped after ~3.5 questions; multi-way splits like 51 states leave test households in
+branches with a handful of training records).
+
+First guess, wrong: income brackets too coarse. Adding income as a percentage of the poverty line,
+with brackets at real programme cutoffs, changed nothing.
+
+The actual cause: the belief turned answers into a prediction by averaging the raw yes/no outcomes of
+the few training households matching all 18 answers, a noisy nearest-neighbour vote that also matches
+on answers that don't matter for a given programme. Per-programme ranking (AUC, all answers given):
+SNAP 0.82, Medicaid 0.85, SSI 0.82, ACA credit 0.72.
+
+Fix: keep the belief over answers, but replace each training household's raw outcome with a learned
+estimate of P(eligible | its answers) and of the dollars if eligible (regularised logistic and ridge
+regression on one-hot answers plus income interactions; out-of-fold, so no household's estimate saw
+its own label). This is Rao-Blackwellization. Ranking with the same answers: SNAP 0.95, Medicaid
+0.94, SSI 0.92, CHIP 0.94, EITC 0.94, TANF 0.99, ACA credit 0.84, the rest 0.98-0.99.
+Scoring always uses each test household's true PolicyEngine outcome, never the smoothed one.
