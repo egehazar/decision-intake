@@ -163,6 +163,9 @@ class Session:
     pop: Population
     loss: LossModel
     min_ess: float = 1.0  # support floor: soften the evidence until the belief rests on this many records
+    # Optional outcome model (smoothing.OutcomeModel). When set, each record's outcome is re-scored
+    # after every answer on a hybrid: the person's answers where known, the record's own elsewhere.
+    outcome: object = None
     w: np.ndarray = field(init=False)
     asked: dict[int, np.ndarray] = field(init=False, default_factory=dict)
     log: list[dict] = field(init=False, default_factory=list)
@@ -173,6 +176,33 @@ class Session:
         self.loglik = np.zeros(len(self.pop))
         self.tau = 1.0
         self.w = self.prior.copy()
+        self.p_now = self.v_now = None
+        if self.outcome is not None:
+            self._rescore()
+
+    def _rescore(self) -> None:
+        """Re-score records on the hybrid answers (see `outcome`). Before any answer every session
+        scores the same, so that is cached on the model. Afterwards only records that still carry
+        weight are re-scored; the rest keep stale scores, which can't affect any sum they're weighted in."""
+        if not self.asked:
+            cache = getattr(self.outcome, "_initial", None)
+            if cache is None or cache[0] is not self.pop:
+                cache = (self.pop, *self.outcome.predict(self.pop, self.pop.answers))
+                self.outcome._initial = cache
+            p, v = cache[1].copy(), cache[2].copy()
+        else:
+            p, v = self.p_now, self.v_now
+            live = np.flatnonzero(self.w > 1e-9 * self.w.max())
+            h = self.pop.answers[live].copy()
+            for j, ev in self.asked.items():
+                if np.ptp(ev) == 0:
+                    continue  # "don't know": the record keeps its own answer
+                own_ok = ev[h[:, j]] >= 0.5 * ev.max()  # the record's own answer fits the evidence
+                h[:, j] = np.where(own_ok, h[:, j], int(np.argmax(ev)))
+            p[live], v[live] = self.outcome.predict(self.pop, h)
+        self.p_now, self.v_now = p, v
+        self.l_skip = p * np.maximum(v, self.loss.miss_floor[None, :])
+        self.l_rec = (1.0 - p) * self.loss.false_rec_cost[None, :]
 
     def _reweight(self) -> None:
         """w = prior * likelihood^tau, with tau the largest value in (0, 1] whose ESS meets the floor.
@@ -229,6 +259,8 @@ class Session:
         with np.errstate(divide="ignore"):
             self.loglik = self.loglik + np.log(lik)
         self._reweight()
+        if self.outcome is not None:
+            self._rescore()
         self.log[-1]["tau"] = self.tau
 
     def answer(self, q: int, option: int, source: str = "answer") -> None:
@@ -248,10 +280,11 @@ class Session:
         r_skip = self.w @ self.l_skip
         r_rec = self.w @ self.l_rec
         for d, name in enumerate(self.pop.decisions):
-            if self.pop.p_eligible is not None:
-                pe = self.pop.p_eligible[:, d]
+            if self.p_now is not None or self.pop.p_eligible is not None:
+                pe = (self.p_now if self.p_now is not None else self.pop.p_eligible)[:, d]
+                vv = (self.v_now if self.v_now is not None else self.pop.value_if_eligible)[:, d]
                 p = float(self.w @ pe)
-                lo, hi = weighted_quantile(self.pop.value_if_eligible[:, d], self.w * pe, [0.1, 0.9])
+                lo, hi = weighted_quantile(vv, self.w * pe, [0.1, 0.9])
             else:
                 el = self.pop.eligible[:, d]
                 p = float(self.w[el].sum())

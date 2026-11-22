@@ -22,21 +22,27 @@ from multiprocessing import Pool
 import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "adapters"))
+sys.path.insert(0, os.path.dirname(__file__))
 
-from benefits.population import build, load_table  # noqa: E402
 
-from decisionintake import AskAll, EntropyGreedy, FixedOrder, GreedyTree, VOIPolicy  # noqa: E402
+from decisionintake import AskAll, EntropyGreedy, FixedOrder, GreedyTree, LossModel, VOIPolicy  # noqa: E402
 from decisionintake.simulate import UserModel, run_one, split_by_group  # noqa: E402
 
 G = {}
 
 
 def init():
-    pop, loss, meta = build(load_table())
-    tr, te = split_by_group(pop, 0.15, seed=0)
-    G.update(pop=pop, loss=loss, meta=meta, train=pop.subset(tr), test=pop.subset(te), test_idx=te)
+    from common import smoothed, splits
+
+    pop, loss, meta, tr, va, test = splits()
+    rest = np.concatenate([tr, va])  # after tuning, train on train + validation
+    fr = float(os.environ.get("FR_COST", "1000"))
+    loss = LossModel(false_rec_cost=np.full_like(loss.false_rec_cost, fr), miss_floor=loss.miss_floor)
+    G.update(pop=pop, loss=loss, meta=meta, test=pop.subset(test), test_idx=test)
+    G["train"], G["outcome"] = smoothed(pop, np.sort(rest), "rest")
     G["fixed_order"] = FixedOrder.fit(G["train"], loss).order
     G["trees"] = {}
+    G["min_ess"] = float(os.environ.get("MIN_ESS", "1"))
 
 
 def users(meta):
@@ -54,7 +60,8 @@ def make_policy(kind, knob):
     if kind == "tree":
         key = knob
         if key not in G["trees"]:
-            G["trees"][key] = GreedyTree(train=G["train"], loss=G["loss"], budget=99, min_leaf=30, question_cost=knob)
+            G["trees"][key] = GreedyTree(train=G["train"], loss=G["loss"], budget=99,
+                                         min_leaf=int(os.environ.get("TREE_LEAF", "10")), question_cost=knob)
         t = G["trees"][key]
         return t
     if kind == "fixed":
@@ -74,7 +81,7 @@ def work(job):
     for i in rows:
         rng = np.random.default_rng(seed * 1_000_003 + int(i))
         pol = make_policy(kind, knob)
-        o = run_one(pol, G["train"], G["loss"], test.answers[i], user, rng)
+        o = run_one(pol, G["train"], G["loss"], test.answers[i], user, rng, min_ess=G["min_ess"], outcome=G["outcome"])
         out.append((int(i), o.n_questions, o.recommend.astype(int).tolist(), o.ess_at_stop))
     return kind, knob, uname, out
 
@@ -131,7 +138,7 @@ def main():
               f"$recall={m['dollar_recall']:.3f}  prog_recall={m['programme_recall']:.3f}  "
               f"false_rec={m['false_rec_share']:.3f}  miss_any={m['miss_any']:.3f}", flush=True)
     os.makedirs("results", exist_ok=True)
-    with open(f"results/core_{len(sample)}.json", "w") as f:
+    with open(f"results/core_{len(sample)}_fr{int(G['loss'].false_rec_cost[0])}.json", "w") as f:
         json.dump(rows, f, indent=1)
     print(f"done in {time.time() - t0:.0f}s", flush=True)
 

@@ -151,3 +151,39 @@ regression on one-hot answers plus income interactions; out-of-fold, so no house
 its own label). This is Rao-Blackwellization. Ranking with the same answers: SNAP 0.95, Medicaid
 0.94, SSI 0.92, CHIP 0.94, EITC 0.94, TANF 0.99, ACA credit 0.84, the rest 0.98-0.99.
 Scoring always uses each test household's true PolicyEngine outcome, never the smoothed one.
+
+## D14. Completion: score candidates on the person's own answers (2026-11-22)
+
+Smoothing raised the model's ranking (D13) but the engine still lost most of it: deciding straight
+from the model with all answers known gave $1,507 loss and 81% of programmes found, while the
+engine asking all 18 questions gave $2,557 and 66%. The belief can only weight training households
+that roughly match the person; in 18 dimensions none match exactly, and each neighbour's smoothed
+outcome was computed at *its own* answers (another state, another income bracket).
+
+Fix: re-score every candidate household on a hybrid, the person's answers for every question
+answered so far and the household's own answers only where the person hasn't answered. Training
+households now only fill in unknowns. The outcome model is a sum of indicator terms, so re-scoring is
+a table lookup; the pre-answer scores are cached and only households still carrying weight are
+re-scored (0.12 s per full interview, 0.29 s with the engine choosing questions).
+
+Asking all 18 on validation, wrong-recommendation cost $1,000: $2,257 -> $1,673 loss, 61% -> 80% of
+programmes found, 51% -> 42% of recommendations wrong. Within reach of the model's own ceiling.
+
+## D15. Round 4: the engine was overconfident, so it stopped early (2026-11-22)
+
+With completion, on validation ($1,000 per wrong recommendation): asking all 18 gave $1,679 loss;
+a fixed 6- or 9-question form about $1,840; the engine stopped after about 6 questions at $2,230 to
+$2,310, worse than the fixed form. It believed its remaining loss was about $1,200 when it was about
+$2,300, so it stopped too soon.
+
+Two causes, two fixes, both in smoothing.py:
+- Probabilities too sharp: during interviews households are re-scored by a model fitted on those same
+  households. Platt scaling, fitted on out-of-fold predictions, is folded into the model. Validation
+  reliability afterwards: SNAP 0.62 predicted -> 0.61 observed, Medicaid 0.80 -> 0.84, school meals
+  0.82 -> 0.85 (rare programmes stay noisy in their top bins).
+- Dollars biased low: a log-scale fit estimates medians (Medicaid $14.9k vs $16.4k true). A smearing
+  correction then overshot by up to 40% (SNAP $4.9k vs $3.8k). Fitting dollars on the dollar scale
+  is unbiased by construction: now within about 5% for most programmes.
+
+Then a cleaner test of question choice alone: engine and fixed form each ask exactly k questions
+(experiments/k_compare.py), so the stopping rule is not mixed in.

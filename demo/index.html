@@ -165,7 +165,7 @@ footer p { margin: 0; }
   </div>
 
   <footer>
-    <p>Rules: PolicyEngine-US, 2026 rules, everyone assumed to take up what they're entitled to. Households: a resampled slice of PolicyEngine's Populace 2024, a calibrated synthetic population built from census and tax data, not real people. Amounts are estimates, not a determination of eligibility; a real screener must link to the official application.</p>
+    <p>Rules: PolicyEngine-US, 2026 rules, everyone assumed to take up what they're entitled to. Households: a resampled slice of PolicyEngine's Populace 2024, a calibrated synthetic population built from census and tax data, not real people. Each household's chance of eligibility comes from a model trained on PolicyEngine's results, scored on your answers where you've given them and on similar households' answers where you haven't. Amounts are estimates, not a determination of eligibility; a real screener must link to the official application.</p>
     <p>A question is worth asking when the mistakes it is expected to prevent outweigh the cost of asking, here <span class="num" id="lamtxt"></span> a year per question. Missing a programme a household can get costs its value; recommending one it can't costs <span class="num" id="frtxt"></span>. Built by AI agents (Claude, reviewed by GPT and Fable) under Ege Hazar's direction.</p>
   </footer>
 </div>
@@ -176,23 +176,18 @@ const MIN_ESS = 30;         // support floor: the belief always rests on at leas
 const HANDOFF_RISK = 1500;  // stop with more expected loss than this, and it hands off to a person
 const N_PLAN = 1500;        // resampled households for pair look-ahead
 
-let D, N, Q, P, ANS, LSKIP, LREC, VAL;
+let D, N, Q, P, ANS, LSKIP, LREC, VAL, PEL, BT, RT, INIT;
 let S; // session
 
 const fmt$ = v => (v < 0 ? "-" : "") + "$" + Math.round(Math.abs(v)).toLocaleString("en-US");
 
 function setup(data) {
   D = data; N = D.answers.length; Q = D.questions.length; P = D.programmes.length;
-  ANS = new Uint8Array(N * Q); VAL = new Float64Array(N * P);
+  ANS = new Uint8Array(N * Q); VAL = new Float64Array(N * P); PEL = new Float64Array(N * P);
   LSKIP = new Float64Array(N * P); LREC = new Float64Array(N * P);
-  for (let i = 0; i < N; i++) {
-    for (let q = 0; q < Q; q++) ANS[i * Q + q] = D.answers[i][q];
-    for (let d = 0; d < P; d++) {
-      const v = D.value[i][d]; VAL[i * P + d] = v;
-      LSKIP[i * P + d] = v > 0 ? Math.max(v, D.miss_floor[d]) : 0;
-      LREC[i * P + d] = v > 0 ? 0 : D.false_rec_cost[d];
-    }
-  }
+  for (let i = 0; i < N; i++) for (let q = 0; q < Q; q++) ANS[i * Q + q] = D.answers[i][q];
+  BT = D.B; RT = D.R;
+  INIT = scoreAll(null);
   document.getElementById("lamtxt").textContent = fmt$(LAMBDA);
   document.getElementById("frtxt").textContent = fmt$(D.false_rec_cost[0]);
   const ex = document.getElementById("example");
@@ -223,8 +218,42 @@ function fillVolAnswers() {
 
 function start() {
   S = { loglik: new Float64Array(N), w: new Float64Array(N).fill(1 / N), asked: new Map(), history: [], nAsked: 0, done: false };
+  PEL.set(INIT[0]); VAL.set(INIT[1]); LSKIP.set(INIT[2]); LREC.set(INIT[3]);
   S.example = document.getElementById("example").value === "" ? null : D.examples[+document.getElementById("example").value];
   render();
+}
+
+// Outcome model: score household i on its answers, except that answered questions take the
+// person's answer (unless the household's own answer fits the evidence just as well).
+function scoreOne(i, hyb) {
+  const terms = D.terms;
+  const logit = new Float64Array(P), dollars = new Float64Array(P);
+  for (const t of terms) {
+    let col = t.off;
+    for (let k = 0; k < t.qs.length; k++) col += hyb[t.qs[k]] * t.strides[k];
+    const b = BT[col], r = RT[col];
+    for (let d = 0; d < P; d++) { logit[d] += b[d]; dollars[d] += r[d]; }
+  }
+  for (let d = 0; d < P; d++) {
+    const p = 1 / (1 + Math.exp(-logit[d])), v = Math.max(dollars[d], 0);
+    PEL[i * P + d] = p; VAL[i * P + d] = v;
+    LSKIP[i * P + d] = p * Math.max(v, D.miss_floor[d]);
+    LREC[i * P + d] = (1 - p) * D.false_rec_cost[d];
+  }
+}
+function scoreAll(asked) {
+  const hyb = new Uint8Array(Q);
+  let mx = 0; if (asked) for (let i = 0; i < N; i++) if (S.w[i] > mx) mx = S.w[i];
+  for (let i = 0; i < N; i++) {
+    if (asked && S.w[i] <= 1e-9 * mx) continue; // carries no weight: stale scores can't matter
+    for (let q = 0; q < Q; q++) hyb[q] = ANS[i * Q + q];
+    if (asked) for (const [j, b] of asked) {
+      if (b < 0) continue; // "I don't know": keep the household's own answer
+      hyb[j] = b; // a crisp answer: only a household that gave the same answer keeps it, which is the same thing
+    }
+    scoreOne(i, hyb);
+  }
+  return asked ? null : [PEL.slice(), VAL.slice(), LSKIP.slice(), LREC.slice()];
 }
 
 function reweight() {
@@ -251,6 +280,7 @@ function answer(j, b, source) {
   for (let i = 0; i < N; i++) { const p = noise[ANS[i * Q + j]][b]; S.loglik[i] += p > 0 ? Math.log(p) : -Infinity; }
   S.asked.set(j, b);
   reweight();
+  scoreAll(S.asked);
   S.history.push({ j, b, source, risk: risk(S.w) });
 }
 
@@ -327,7 +357,7 @@ function beliefs() {
   for (let d = 0; d < P; d++) {
     let pe = 0, rs = 0, rr = 0; const vals = [];
     for (let i = 0; i < N; i++) { const wi = S.w[i]; if (!wi) continue; rs += wi * LSKIP[i * P + d]; rr += wi * LREC[i * P + d];
-      if (VAL[i * P + d] > 0) { pe += wi; vals.push([VAL[i * P + d], wi]); } }
+      const m = wi * PEL[i * P + d]; if (m > 0) { pe += m; vals.push([VAL[i * P + d], m]); } }
     vals.sort((a, b) => a[0] - b[0]);
     const q = t => { let c = 0; for (const [v, wv] of vals) { c += wv / pe; if (c >= t) return v; } return vals.length ? vals[vals.length - 1][0] : 0; };
     out.push({ d, p: pe, lo: pe > 0 ? q(0.1) : 0, hi: pe > 0 ? q(0.9) : 0, rec: rr < rs });

@@ -47,8 +47,8 @@ class Outcome:
 
 
 def run_one(policy: Policy, train: Population, loss: LossModel, answers_row: np.ndarray, user: UserModel, rng,
-            min_ess: float = 1.0) -> Outcome:
-    s = Session(train, loss, min_ess=min_ess)
+            min_ess: float = 1.0, outcome=None) -> Outcome:
+    s = Session(train, loss, min_ess=min_ess, outcome=outcome)
     policy.start(s)
     if user.opener and user.volunteerable:
         k = min(user.opener, len(user.volunteerable))

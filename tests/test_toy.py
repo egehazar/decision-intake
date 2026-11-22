@@ -156,14 +156,19 @@ def test_smoothing_scores_against_truth_and_keeps_probabilities_valid():
     from decisionintake.smoothing import smooth
 
     pop, loss = toy()
+    sizes = [len(q.options) for q in pop.questions]
+    offs = np.concatenate([[0], np.cumsum(sizes)])
 
     def feats(p, answers):
-        cols = [np.eye(len(q.options))[answers[:, j]] for j, q in enumerate(p.questions)]
-        return np.concatenate(cols + [np.ones((len(answers), 1))], axis=1)
+        return np.concatenate([offs[:-1] + answers, np.full((len(answers), 1), offs[-1])], axis=1)
 
-    sm, model = smooth(pop, feats, folds=3)
+    sm, model = smooth(pop, feats, lambda p: int(offs[-1]) + 1, folds=3)
     assert sm.p_eligible.shape == pop.eligible.shape
     assert (sm.p_eligible >= 0).all() and (sm.p_eligible <= 1).all()
     # the realised loss ignores smoothing; the planning loss uses it
     assert np.allclose(loss.realised(sm)[0], loss.realised(pop)[0])
     assert not np.allclose(loss.matrices(sm)[0], loss.realised(pop)[0])
+    # completion: after a crisp answer every record is scored with that answer
+    s = Session(sm, loss, outcome=model)
+    s.answer(0, 0)  # no kids: the child programme should be off for everyone
+    assert s.p_now[s.w > 0, 0].max() < 0.2  # records the answer rules out keep stale scores; they carry no weight

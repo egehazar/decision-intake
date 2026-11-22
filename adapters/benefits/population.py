@@ -145,20 +145,36 @@ def build(table: pd.DataFrame, poverty_question: bool = False) -> tuple[Populati
     return pop, loss, meta
 
 
+INTERACT = ["household_size", "children", "senior", "disabled", "married", "social_security", "assets"]
+
+
+def _layout(pop: Population):
+    sizes = {q.id: len(q.options) for q in pop.questions}
+    off, pos = {}, 0
+    for q in pop.questions:
+        off[q.id] = pos
+        pos += sizes[q.id]
+    for k in INTERACT:
+        off[("x", k)] = pos
+        pos += sizes["earned_income"] * sizes[k]
+    off[("x", "children_state")] = pos
+    pos += sizes["children"] * sizes["state"]
+    return off, sizes, pos + 1  # last column: intercept
+
+
+def n_features(pop: Population) -> int:
+    return _layout(pop)[2]
+
+
 def features(pop: Population, answers: np.ndarray) -> np.ndarray:
-    """Design matrix for the outcome model: every answer one-hot, plus the interactions the rules
-    actually use (income against household size, children, age, disability, marriage, other income,
-    savings; children by state)."""
-    n = len(answers)
-    blocks, parts = {}, []
-    for j, q in enumerate(pop.questions):
-        m = np.zeros((n, len(q.options)))
-        m[np.arange(n), answers[:, j]] = 1.0
-        blocks[q.id] = m
-        parts.append(m)
-    inc = blocks["earned_income"]
-    for k in ["household_size", "children", "senior", "disabled", "married", "social_security", "assets"]:
-        parts.append(np.einsum("ni,nj->nij", inc, blocks[k]).reshape(n, -1))
-    parts.append(np.einsum("ni,nj->nij", blocks["children"], blocks["state"]).reshape(n, -1))
-    parts.append(np.ones((n, 1)))
-    return np.concatenate(parts, axis=1)
+    """Active indicator columns for the outcome model, one row per record: every answer one-hot,
+    plus the interactions the rules actually use (income against household size, children, age,
+    disability, marriage, Social Security, savings; children by state), plus an intercept."""
+    off, sizes, F = _layout(pop)
+    col = {q.id: answers[:, j] for j, q in enumerate(pop.questions)}
+    parts = [off[q.id] + col[q.id] for q in pop.questions]
+    for k in INTERACT:
+        parts.append(off[("x", k)] + col["earned_income"] * sizes[k] + col[k])
+    parts.append(off[("x", "children_state")] + col["children"] * sizes["state"] + col["state"])
+    parts.append(np.full(len(answers), F - 1))
+    return np.stack(parts, axis=1).astype(np.int64)

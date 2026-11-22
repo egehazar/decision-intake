@@ -6,10 +6,10 @@ import numpy as np
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "adapters"))
 
-from benefits.population import build, features, load_table  # noqa: E402
+from benefits.population import build, features, load_table, n_features  # noqa: E402
 
 from decisionintake.simulate import split_by_group  # noqa: E402
-from decisionintake.smoothing import smooth  # noqa: E402
+from decisionintake.smoothing import OutcomeModel, smooth  # noqa: E402
 
 
 def splits(poverty_question=False):
@@ -22,14 +22,23 @@ def splits(poverty_question=False):
 
 
 def smoothed(pop, idx, key):
-    """pop.subset(idx) with out-of-fold smoothed outcomes, cached in data/cache/smooth_<key>.npz."""
-    path = f"data/cache/smooth_{key}.npz"
+    """(pop.subset(idx) with out-of-fold calibrated outcomes, the calibrated full model), cached in
+    data/cache/smooth2_<key>.npz / .pkl."""
+    import pickle
+
+    path = f"data/cache/smooth2_{key}"
     sub = pop.subset(idx)
-    if os.path.exists(path):
-        z = np.load(path)
+    if os.path.exists(path + ".npz") and os.path.exists(path + ".pkl"):
+        z = np.load(path + ".npz")
         if len(z["p"]) == len(sub):
             sub.p_eligible, sub.value_if_eligible = z["p"], z["v"]
-            return sub
-    sm, _ = smooth(sub, features)
-    np.savez_compressed(path, p=sm.p_eligible, v=sm.value_if_eligible)
-    return sm
+            with open(path + ".pkl", "rb") as f:
+                B, R = pickle.load(f)
+            model = OutcomeModel(features, n_features)
+            model.B, model.R = B, R
+            return sub, model
+    sm, model = smooth(sub, features, n_features)
+    np.savez_compressed(path + ".npz", p=sm.p_eligible, v=sm.value_if_eligible)
+    with open(path + ".pkl", "wb") as f:
+        pickle.dump((model.B, model.R), f)
+    return sm, model

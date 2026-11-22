@@ -32,7 +32,10 @@ def init():
 
     pop, loss, meta, tr, va, _test = splits()  # the test split is never touched here
     G.update(pop=pop, loss=loss, meta=meta, val=pop.subset(va))
-    G["train"] = smoothed(pop, tr, "train_tune") if SMOOTH else pop.subset(tr)
+    if SMOOTH:
+        G["train"], G["outcome"] = smoothed(pop, tr, "train_tune")
+    else:
+        G["train"], G["outcome"] = pop.subset(tr), None
     G["fixed_order"] = FixedOrder.fit(G["train"], loss).order
 
 
@@ -64,7 +67,8 @@ def work(job):
     out = []
     for i in rows:
         rng = np.random.default_rng(1_000_003 * 11 + int(i))
-        o = run_one(policy(kind, knob, look, fr), G["train"], loss_for(fr), G["val"].answers[i], user, rng, min_ess=min_ess)
+        o = run_one(policy(kind, knob, look, fr), G["train"], loss_for(fr), G["val"].answers[i], user, rng,
+                    min_ess=min_ess, outcome=G["outcome"])
         out.append((int(i), o.n_questions, o.recommend, o.risk_at_stop))
     return job[:6], out
 
@@ -93,11 +97,11 @@ def main():
     grid = []
     for fr in [1000, 2000]:
         for m in [1, 10]:
-            grid += [("ask_all", 0, False, m, "clean", fr), ("fixed", 8, False, m, "clean", fr),
-                     ("engine", 100, False, m, "clean", fr), ("engine", 30, False, m, "clean", fr)]
-        for lam in [100, 30]:
-            for leaf in [10, 30]:
-                grid.append(("tree", (lam, leaf), True, 1, "clean", fr))
+            grid += [("ask_all", 0, False, m, "clean", fr), ("fixed", 6, False, m, "clean", fr),
+                     ("fixed", 9, False, m, "clean", fr), ("engine", 100, False, m, "clean", fr),
+                     ("engine", 50, False, m, "clean", fr), ("engine", 25, False, m, "clean", fr)]
+        for leaf in [10, 30]:
+            grid.append(("tree", (50, leaf), True, 1, "clean", fr))
     chunks = np.array_split(sample, workers)
     jobs = [(*g, ch) for g in grid for ch in chunks]
     t0 = time.time()
