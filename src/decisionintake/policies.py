@@ -197,6 +197,9 @@ class GreedyTree(Policy):
     # min_leaf training households doesn't narrow the tree's household set (shared fallback).
     decide_with_session: bool = False
     backoff: bool = False
+    # unknown_backoff: an answer with no evidence (refused, "don't know") doesn't narrow the branch;
+    # the tree carries on from the same households instead of guessing the commonest branch.
+    unknown_backoff: bool = False
     name: str = "tree"
     _cache: dict = field(default_factory=dict, repr=False)
 
@@ -279,6 +282,8 @@ class GreedyTree(Policy):
         ev = s.asked[j]
         if np.ptp(ev) > 0:
             return int(np.argmax(ev))
+        if self.unknown_backoff:
+            return None
         mask = np.ones(len(self.train), dtype=bool)
         for jj, b in path:
             if b is not None:  # a backed-off answer didn't narrow the households

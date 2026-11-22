@@ -56,9 +56,11 @@ household per year: missed programmes at their value, wrong recommendations at $
 | volunteers 3 facts first | 5.6, $1,030 | 15, $1,183 | -$153 [-472, +50] |
 | realistic (misreports, 10% don't know) | 8.0, $1,870 | 16, $1,674 | +$196 [-85, +532] |
 
-With clean answers the engine asks fewer than half the questions and the difference in decision
-quality is indistinguishable from zero. It also knows roughly how well it is doing: it expected $1,329
-of mistakes per household and made $1,250 (on realistic answers it is about 12% optimistic).
+With clean answers the engine asks fewer than half the questions, and the test cannot tell its loss
+apart from asking everything. That is not proof of equal quality: the interval still allows the
+engine to be up to $496 a household worse ($532 with realistic answers), and no margin of "close
+enough" was fixed in advance. On average its estimate of its own loss is close: it expected $1,329 of
+mistakes per household and made $1,250 (on realistic answers it is about 12% optimistic).
 
 **At equal question counts** (engine minus baseline; negative means the engine is better):
 
@@ -71,8 +73,10 @@ of mistakes per household and made $1,250 (on realistic answers it is about 12% 
 | volunteers facts | 3 / 5 / 9 | -$747 / -$572 / -$449, all significant | significant at every k |
 | realistic | any | not significant | 9: -$798 [-1,551, -40] |
 
-The engine's advantage is real with clean answers in the middle range, and largest when people
-volunteer facts before being asked, which is how conversations usually start.
+Against these two baselines the engine is ahead with clean answers in the middle range. Both
+baselines turned out weaker than they should be (the tree decided from a handful of households in its
+leaf; a single fixed order is not the best fixed set for each budget), and the next paragraphs replace
+them with stronger ones.
 
 **A fair tree changes the story, and sharpens it** (secondary experiment, run after the freeze at GPT's
 request). The frozen tree decided with its own leaves; a tree that decides with the same calibrated
@@ -92,10 +96,11 @@ while the engine re-plans around whatever it has been told. **It did not hold up
 assumptions (one fact; two facts from the most natural openers such as state, household size and
 children; three facts that may be misreported), on 300 test households, no difference was significant
 (natural openers: +$19, -$200, +$149 at 3, 5 and 9 questions). The edge above came from openers that
-could include income and disability, two of the most informative facts. So the honest conclusion is that
-a well-built tree matches the engine's decisions. What the engine adds is flexibility: it takes any
-question budget or question cost without regrowing anything, accepts facts in any order and evidence
-that is uncertain, and says how much error it expects to make, which is what the hand-off uses. My prediction (D6) was
+could include income and disability, two of the most informative facts. So a well-built tree does as
+well as the engine in every setting tested so far. What the engine might add is flexibility: it takes
+any question budget or question cost without regrowing anything, accepts facts in any order and
+evidence that is uncertain, and estimates its own remaining risk, which the hand-off uses. Whether that
+flexibility is worth anything in numbers is tested in the next section. My prediction (D6) was
 that the engine would gain most when answers are messy; on this test it is the reverse: with
 misreports and "don't know", its edge over a fixed form is not significant. The fixed order's own
 curve is uneven (5 to 9 questions barely help it, 12 helps a lot), so part of the clean-answer margin
@@ -143,8 +148,15 @@ In full interviews (40 held-out households answering in sentences), the structur
 decision loss is within noise for every reader, including typed answers, so the claim is about
 reading accuracy, not about benefits found.
 
+The browser demo uses the same structured design but with Claude filling the slots, because a page
+can't run the 4B models. The numbers above are for the 4B models, so they don't measure the demo's
+exact pipeline.
+
 ## What this is not
 
+- A research prototype. Nobody should use it to decide whether to apply for a benefit. The demo
+  keeps nothing about the household it is told about; a free-text description is sent to Claude to
+  be read, and nothing else leaves the page.
 - Not an eligibility determination, and not tested on real people. Populace is a calibrated synthetic
   population; every number is agreement with PolicyEngine on it, under 2026 rules with full take-up.
 - About 45% of the engine's recommendations are for programmes the household can't get. That follows

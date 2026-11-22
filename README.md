@@ -40,9 +40,11 @@ person's words ──► reader ──► evidence over a question's options
   candidate household is scored on a hybrid of the person's answers and its own (D13, D14).
 - **Value of information.** For each unasked question, the expected reduction in the cost of mistakes
   across all ten programmes at once, computed with one matrix product per turn (D5, D11).
-- **Readers.** Free-text answers become evidence through a reader: a small decision model that gives
-  a probability for each option (or for each step of an ordered scale), or an instruct model that
-  picks one option. Hedged answers become spread-out evidence instead of a guess.
+- **Readers.** Free-text answers become evidence through a reader. The best one tested lets a language
+  model fill typed slots (amount as stated, per month or year, approximate, don't know) and does the
+  arithmetic in code, so "about $2,900 a month" lands on the right yearly range and a hedged answer
+  becomes evidence spread over several options instead of a guess. A small decision model that gives
+  a probability per option was also tested; it only helped on amounts (D23).
 
 ## Results (held-out test, 600 households never used for training or tuning)
 
@@ -51,16 +53,18 @@ household per year: a missed programme at its value, a wrong recommendation at $
 95% paired bootstrap. Full tables: [WRITEUP.md](WRITEUP.md), `results/final_600_analysis.txt`,
 `results/secondary_600_analysis.txt`.
 
-- **Fewer questions, same quality.** With clean answers the engine stops after 8.2 questions instead
-  of 18; the difference in loss is +$67 [-363, +496], indistinguishable from zero. It expected $1,329
-  of mistakes per household and made $1,250.
+- **About half the questions, no conclusive difference in loss.** With clean answers the engine stops
+  after 8.2 questions instead of 18; the difference in loss is +$67 [-363, +496]. The test can't tell
+  the two apart, which is not the same as showing they're equal: the interval allows the engine to be
+  up to $496 a household worse. On average it expected $1,329 of mistakes per household and made
+  $1,250.
 - **A well-built tree does as well.** A greedy tree on the same loss, deciding with the same calibrated
   model, matches the engine at every question budget with clean or messy answers. In one test, with
   three facts volunteered from a pool including income and disability, the engine was ahead by
   $376-$1,072 per household; with more natural openers (state, household size, children) that edge
-  was not significant (DECISIONS D24). What the engine adds over a tree is flexibility, not accuracy:
-  any budget or question cost without regrowing, facts in any order, uncertain evidence, and an honest
-  estimate of its own remaining error.
+  was not significant (DECISIONS D24). What the engine can add over a tree is flexibility, not
+  accuracy: any budget or question cost without regrowing, facts in any order, uncertain evidence,
+  and an estimate of its own remaining risk.
 - **It beats fixed forms** (a fixed set chosen for each question budget) with clean answers at 5-9
   questions, and with realistic answers at 7 and 9.
 - **Hand-off.** The 10% of households it is least sure about carry 22-31% of all mistake cost.
@@ -91,6 +95,9 @@ under a short prefix; the build script points `PYTHONPATH` at such a copy (D11).
 
 ## What this is not
 
+- **A research prototype.** Nobody should use it to decide whether to apply for a benefit. The demo
+  keeps nothing about the household; a free-text description is sent to Claude to be read. The
+  language results above were measured with 4B models on a CPU, not with Claude.
 - **Not an eligibility determination.** Results are PolicyEngine's estimates under 2026 rules,
   assuming everyone takes up what they're entitled to. A real screener must send people to the
   official application.
