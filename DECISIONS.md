@@ -100,7 +100,8 @@ enough to act or should hand off to a person**. US public-benefits screening is 
 ## D11. Engineering notes (2026-11-22)
 
 - Windows' 260-character path limit breaks PolicyEngine (its longest file needs a short install prefix).
-  We run against a copy of the package at `C:\Users\egeha\pe` rather than change a system setting.
+  We run against a copy of the package under a short path (`PE_SHORT_PATH`, e.g. `C:\pe`) rather
+  than change a system setting.
 - The value of every question is computed with one matrix product per turn (a one-hot answer matrix
   times the weighted losses), then each question's error model is applied to small per-option totals.
   A test checks this equals the direct computation.

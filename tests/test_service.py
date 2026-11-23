@@ -159,3 +159,17 @@ def test_mcp_server_over_stdio(made):
         proc.stdin.close()
         proc.wait(timeout=10)
     assert proc.returncode == 0
+
+
+def test_the_shipped_bundle_runs_an_intake():
+    """The repo ships the v2 benefits engine as one file, so the MCP server works straight after cloning."""
+    from decisionintake.mcp_server import DEFAULT_BUNDLE
+    if not DEFAULT_BUNDLE.exists():
+        pytest.skip("bundle not present")
+    b = bundle.load(str(DEFAULT_BUNDLE))
+    assert len(b.pop) == 48_657 and len(b.pop.questions) == 18 and len(b.pop.decisions) == 10
+    it = Intake(b)
+    it.record([{"question": "state", "choice": "OH"}, {"question": "children", "choice": 2},
+               {"question": "earned_income", "amount": {"value": 2400, "period": "month", "approximate": True}}])
+    step = it.next_step()
+    assert step["action"] == "ask" and step["why"]["worth_per_year"] > 15

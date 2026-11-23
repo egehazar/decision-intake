@@ -3,6 +3,9 @@
 **A decision engine for AI assistants: what to ask next, how far to trust each answer, and when it
 knows enough to act or should hand off to a person.**
 
+**Live demo:** https://claude.ai/artifact/R4AEXkghaed3zDZFiwxufi (talk to it through Claude, or watch a
+held-out household's interview, with everything the engine believes shown as it decides).
+
 First use: US public-benefits screening across ten programmes, with rules from
 [PolicyEngine-US](https://github.com/PolicyEngine/policyengine-us) and 57,240 households from
 PolicyEngine's [Populace](https://huggingface.co/datasets/policyengine/populace-us) data.
@@ -89,10 +92,15 @@ numpy. Any MCP client (Claude Code, Claude Desktop, Cursor, an agent framework) 
 the assistant does the talking and reads the person's words into typed facts; the engine decides
 what to ask, how far to trust it, and when to stop or hand off.
 
+The trained engine ships in the repo (`bundles/benefits_v2.npz`, 1.5 MB), so this works straight after
+cloning, with no data build:
+
 ```bash
-python experiments/export_bundle.py data/bundle/benefits_v2.npz           # once, from the trained model
-claude mcp add decisionintake -- python -m decisionintake.mcp_server --bundle data/bundle/benefits_v2.npz
+pip install -e .                                                  # numpy is the only dependency
+claude mcp add decisionintake -- python -m decisionintake.mcp_server
 ```
+
+Any other MCP client takes the same command (`python -m decisionintake.mcp_server`, stdio transport).
 
 | tool | what it does |
 |---|---|
@@ -155,7 +163,7 @@ py -m uv pip install --python .venv/Scripts/python.exe policyengine-us==2.152.15
 #    into data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)
 bash adapters/benefits/build_all.sh 30 5
 
-# 3. tests (36), and tuning on the validation split only
+# 3. tests (37), and tuning on the validation split only
 .venv/Scripts/python.exe -m pytest -q
 .venv/Scripts/python.exe experiments/outcome_v2.py            # outcome models, validation
 .venv/Scripts/python.exe experiments/val_v2.py 400 WORKERS     # engine with each model, validation
@@ -165,8 +173,8 @@ bash adapters/benefits/build_all.sh 30 5
 .venv/Scripts/python.exe experiments/run_v2.py 2000 1 analyse
 
 # 5. the engine as one file, its MCP server, and the end-to-end agent test (D29; needs Claude Code)
-.venv/Scripts/python.exe experiments/export_bundle.py data/bundle/benefits_v2.npz
-.venv/Scripts/python.exe -m decisionintake.mcp_server --bundle data/bundle/benefits_v2.npz   # speaks MCP on stdio
+.venv/Scripts/python.exe experiments/export_bundle.py bundles/benefits_v2.npz   # rebuilds the shipped bundle
+.venv/Scripts/python.exe -m decisionintake.mcp_server                              # speaks MCP on stdio
 .venv/Scripts/python.exe experiments/agent_e2e.py prep test 200
 .venv/Scripts/python.exe experiments/agent_e2e.py run test engine haiku 200 3
 .venv/Scripts/python.exe experiments/agent_e2e.py run test alone haiku 200 3
@@ -181,7 +189,7 @@ Earlier experiments (D21-D27: v1 test, trees, run-time adaptation, the language 
 own scripts in `experiments/`, listed in DECISIONS.md. Seeds are fixed everywhere, so a rerun gives
 the same households and draws. Tested with Python 3.13, numpy 2.5.5, policyengine-us 2.152.15 on a
 12-core CPU without a GPU. On Windows, PolicyEngine's longest file path exceeds the 260-character
-limit unless the package sits under a short prefix; the build script handles it (D11).
+limit unless the package sits under a short prefix: copy it to one and set `PE_SHORT_PATH` (D11).
 
 ## Scope
 

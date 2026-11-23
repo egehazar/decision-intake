@@ -10,7 +10,7 @@ The assistant keeps the conversation; the engine keeps the decision. Four tools:
 Transport: JSON-RPC 2.0 over stdio, one message per line (the MCP stdio transport). No dependencies
 beyond numpy; nothing but protocol messages is written to stdout.
 
-usage: python -m decisionintake.mcp_server --bundle data/bundle/benefits_v2.npz
+usage: python -m decisionintake.mcp_server [--bundle bundles/benefits_v2.npz]
 """
 
 from __future__ import annotations
@@ -21,11 +21,13 @@ import sys
 import time
 import uuid
 from collections import OrderedDict
+from pathlib import Path
 
 from . import bundle as bundle_mod
 from .service import Intake, Settings
 
 PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"]
+DEFAULT_BUNDLE = Path(__file__).resolve().parents[2] / "bundles" / "benefits_v2.npz"
 VERSION = "0.3.0"
 
 INSTRUCTIONS = """\
@@ -179,7 +181,8 @@ def serve(server: Server, inp=None, out=None) -> None:
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--bundle", required=True)
+    ap.add_argument("--bundle", default=str(DEFAULT_BUNDLE),
+                    help="engine bundle (.npz); default: the v2 benefits bundle shipped in the repo")
     ap.add_argument("--question-cost", type=float, default=Settings.question_cost)
     ap.add_argument("--handoff-cost", type=float, default=Settings.handoff_cost)
     a = ap.parse_args(argv)

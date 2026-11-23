@@ -39,7 +39,9 @@ sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.join(ROOT, "src"))
 
 OUT = os.path.join(ROOT, "results", "agent")
-BUNDLE = os.path.join(ROOT, "data", "bundle", "benefits_v2.npz")
+BUNDLE = os.path.join(ROOT, "data", "bundle", "benefits_v2.npz")  # the runs used this copy; identical to bundles/
+if not os.path.exists(BUNDLE):
+    BUNDLE = os.path.join(ROOT, "bundles", "benefits_v2.npz")
 FR, QCOST = 1000.0, 15.0
 PROGRAMMES = ["snap", "wic", "tanf", "ssi", "medicaid", "chip", "eitc", "ctc", "aca_ptc", "school_meals"]
 OPENER_QS = ["state", "household_size", "children", "senior", "married", "earned_income", "tenure", "disabled"]
