@@ -98,15 +98,17 @@ class Rules:
                 missing = [o for o in opts if o not in options]
                 if missing:
                     raise ValueError(f"rule {r['id']}: {qid} has no option {missing[0]!r}")
-                conds.append((qi[qid], np.array([options.index(o) for o in opts])))
+                lut = np.zeros(len(options), bool)  # option -> allowed, a lookup instead of np.isin
+                lut[[options.index(o) for o in opts]] = True
+                conds.append((qi[qid], lut))
             self.compiled.append((conds, [di[d] for d in r["decisions"]], float(r["cap"])))
 
     def matches(self, answers: np.ndarray) -> list[np.ndarray]:
         out = []
         for conds, _, _ in self.compiled:
             m = np.ones(len(answers), bool)
-            for j, allowed in conds:
-                m &= np.isin(answers[:, j], allowed)
+            for j, lut in conds:
+                m &= lut[answers[:, j]]
             out.append(m)
         return out
 

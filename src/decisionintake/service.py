@@ -204,13 +204,19 @@ class Intake:
 
     @classmethod
     def from_state(cls, bundle: Bundle, token: str, settings: Settings | None = None) -> "Intake":
+        return cls.resume(bundle, token, [], settings)[0]
+
+    @classmethod
+    def resume(cls, bundle: Bundle, token: str, new: list, settings: Settings | None = None) -> tuple["Intake", list]:
+        """Rebuild from a state and record new facts in one batch, so the households are re-scored once, not
+        twice (the stateless service's hot path). Returns the intake and the readings of the new facts."""
         it = cls(bundle, settings)
-        facts = decode(bundle.pop.questions, token)
-        if facts:
-            bad = [r for r in it.record(facts) if "error" in r]
-            if bad:  # only possible if the bundle changed under a state written for another one
-                raise FactError(f"state no longer reads: {bad[0]['error']}")
-        return it
+        old = decode(bundle.pop.questions, token) if token else []
+        readings = it.record(old + list(new)) if (old or new) else []
+        bad = [r for r in readings[:len(old)] if "error" in r]
+        if bad:  # only possible if the bundle changed under a state written for another one
+            raise FactError(f"state no longer reads: {bad[0]['error']}")
+        return it, readings[len(old):]
 
     # ------------------------------------------------------------------------------- what next
     def question_view(self, j: int) -> dict:

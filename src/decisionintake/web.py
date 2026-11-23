@@ -118,11 +118,10 @@ class App:
         except (json.JSONDecodeError, UnicodeDecodeError):
             raise HTTPError(400, "bad_json", "the request body is not valid JSON") from None
 
-    def _intake(self, state) -> Intake:
-        if state in (None, ""):
-            return Intake(self.b, self.settings)
+    def _intake(self, state, new=()) -> tuple[Intake, list]:
+        """The intake for a state plus any new facts, rebuilt and re-scored in one batch."""
         try:
-            return Intake.from_state(self.b, state, self.settings)
+            return Intake.resume(self.b, state if state not in (None, "") else "", list(new), self.settings)
         except (StateError, FactError) as e:
             raise HTTPError(400, "bad_state", str(e)) from None
 
@@ -172,8 +171,7 @@ class App:
             raise HTTPError(400, "bad_request", "facts must be a list")
         if len(facts) > MAX_FACTS:
             raise HTTPError(400, "bad_request", f"at most {MAX_FACTS} facts in one call")
-        it = self._intake(body.get("state"))
-        readings = it.record(facts) if facts else []
+        it, readings = self._intake(body.get("state"), facts)
         nxt = it.next_step()
         log.update(facts=len(it.facts), action=nxt["action"])
         return _json(200, {"state": it.state(), "readings": readings, "next": nxt})
@@ -182,7 +180,7 @@ class App:
         body = self._body(environ) or {}
         if not isinstance(body, dict):
             raise HTTPError(400, "bad_request", 'send an object: {"state": "..."}')
-        it = self._intake(body.get("state"))
+        it, _ = self._intake(body.get("state"))
         log.update(facts=len(it.facts))
         return _json(200, {"state": it.state(), **it.assessment()})
 

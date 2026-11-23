@@ -144,8 +144,8 @@ python -m decisionintake.web --port 8080      # screener at /, API at /v1/*, MCP
 
 - **Keeps nothing.** The facts travel with each call as a short readable string
   (`di1;state=TX;household_size=3;earned_income=~2400/month;#6f0c`, with a check so a mangled copy
-  is refused) and the service rebuilds the belief from it: 125 ms a request at the median, 253 ms at
-  the 95th percentile, no errors in 997 requests of whole screenings (`experiments/load_test.py`). No database, no sessions,
+  is refused) and the service rebuilds the belief from it: 109 ms a request at the median, 175 ms at
+  the 95th percentile on one core, no errors in 997 requests of whole screenings (`experiments/load_test.py`). No database, no sessions,
   no answers in logs. Any instance answers any call, so it scales to zero (D31).
 - **Rules the model may not break.** Statutory limits on top of the network (`bundles/guards_2026.json`):
   where the answers pin down one tax unit, no EITC above its 2026 phase-out end and no EITC or

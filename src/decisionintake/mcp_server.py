@@ -199,9 +199,12 @@ class StatelessServer(Server):
     def __init__(self, b, settings: Settings):
         super().__init__(b, settings, max_sessions=0)
 
-    def _restore(self, args) -> Intake:
+    def _restore(self, args, new=()) -> tuple[Intake, list]:
         try:
-            return Intake.from_state(self.b, args.get("state"), self.settings)
+            token = args.get("state")
+            if not isinstance(token, str) or not token.strip():
+                raise StateError("state is missing; call start_intake and pass the state from the most recent result")
+            return Intake.resume(self.b, token, list(new), self.settings)
         except (StateError, FactError) as e:
             raise ToolError(str(e)) from None
 
@@ -211,16 +214,15 @@ class StatelessServer(Server):
             return {"state": it.state(), "programmes": list(self.b.labels.values()), "questions": it.catalogue(),
                     "next": it.next_step()}
         if name == "record_facts":
-            it = self._restore(args)
             facts = args.get("facts")
             if not isinstance(facts, list):
                 raise ToolError("facts must be a list")
             if len(facts) > 40:
                 raise ToolError("at most 40 facts in one call")
-            readings = it.record(facts)
+            it, readings = self._restore(args, facts)
             return {"state": it.state(), "readings": readings, "next": it.next_step()}
         if name == "get_assessment":
-            it = self._restore(args)
+            it, _ = self._restore(args)
             return {"state": it.state(), **it.assessment()}
         raise ToolError(f"unknown tool {name!r}")
 
