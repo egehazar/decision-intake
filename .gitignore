@@ -6,3 +6,8 @@ data/cache/
 install.log
 *.egg-info/
 results_*.log
+
+# agent runs: raw CLI streams and per-run MCP configs hold local paths; traces and analyses are kept
+results/agent/**/*.stream.jsonl
+results/agent/**/*.mcp.json
+results/agent/*.log

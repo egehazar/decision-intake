@@ -207,7 +207,7 @@ class Intake:
         for dv in self.s.decisions():
             p = dv.p_eligible
             tier = ("likely" if p >= 0.5 else "worth checking") if dv.recommend else ("unlikely" if p < 0.1 else "not recommended")
-            row = {"programme": self.b.labels[dv.decision], "tier": tier, "probability": round(p, 2)}
+            row = {"id": dv.decision, "programme": self.b.labels[dv.decision], "tier": tier, "probability": round(p, 2)}
             if dv.recommend or not brief:
                 lo, hi = max(dv.value_low, 0), max(dv.value_high, 0)
                 row["value_if_eligible_per_year"] = "small" if hi < 120 else [round(lo, -1), round(hi, -1)]

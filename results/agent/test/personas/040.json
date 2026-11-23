@@ -1,0 +1,110 @@
+{
+ "k": 40,
+ "i": 37882,
+ "test_pos": 5652,
+ "weight": 0.14843568205833435,
+ "volunteered": [
+  "senior",
+  "earned_income",
+  "disabled"
+ ],
+ "opener": "Hi, I'd like to find out what help we might qualify for. My dad lives with us, he's 72. From work we make $1,500 a year. Everyone's healthy.",
+ "utterances": {
+  "state": {
+   "style": "exact",
+   "text": "Michigan."
+  },
+  "household_size": {
+   "style": "exact",
+   "text": "Just me."
+  },
+  "children": {
+   "style": "exact",
+   "text": "None."
+  },
+  "child_under5": {
+   "style": "exact",
+   "text": "No, not us."
+  },
+  "infant_or_pregnant": {
+   "style": "exact",
+   "text": "No, not us."
+  },
+  "senior": {
+   "style": "indirect",
+   "text": "My dad lives with us, he's 72."
+  },
+  "disabled": {
+   "style": "exact",
+   "text": "No, not us."
+  },
+  "married": {
+   "style": "indirect",
+   "text": "No, I'm single."
+  },
+  "earned_income": {
+   "style": "dont_know",
+   "text": "No idea, honestly."
+  },
+  "self_employed": {
+   "style": "exact",
+   "text": "Nope."
+  },
+  "social_security": {
+   "style": "dont_know",
+   "text": "I'd have to check."
+  },
+  "other_income": {
+   "style": "exact",
+   "text": "$6,400 a year."
+  },
+  "housing_cost": {
+   "style": "range",
+   "text": "None."
+  },
+  "tenure": {
+   "style": "exact",
+   "text": "We own our house."
+  },
+  "childcare": {
+   "style": "range",
+   "text": "None."
+  },
+  "employer_insurance": {
+   "style": "indirect",
+   "text": "Yes, I'm on my company's plan."
+  },
+  "assets": {
+   "style": "vague",
+   "text": "Barely anything in the bank."
+  },
+  "college": {
+   "style": "dont_know",
+   "text": "I'm not sure."
+  }
+ },
+ "truth": {
+  "snap": 2145.0,
+  "wic": 0.0,
+  "tanf": 0.0,
+  "ssi": 5379.39794921875,
+  "medicaid": 21297.0,
+  "chip": 0.0,
+  "eitc": 0.0,
+  "ctc": 0.0,
+  "aca_ptc": 0.0,
+  "school_meals": 0.0
+ },
+ "labels": {
+  "snap": "SNAP (food)",
+  "wic": "WIC",
+  "tanf": "TANF (cash aid)",
+  "ssi": "SSI",
+  "medicaid": "Medicaid",
+  "chip": "CHIP",
+  "eitc": "Earned income tax credit",
+  "ctc": "Child tax credit (refundable part)",
+  "aca_ptc": "ACA premium tax credit",
+  "school_meals": "Free or reduced-price school meals"
+ }
+}

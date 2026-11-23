@@ -1,0 +1,110 @@
+{
+ "k": 48,
+ "i": 34961,
+ "test_pos": 5208,
+ "weight": 0.03671328350901604,
+ "volunteered": [
+  "state",
+  "household_size",
+  "senior"
+ ],
+ "opener": "Hi, I'd like to find out what help we might qualify for. We're in Nebraska. Me, my partner, our three kids and my mom. We're all in our thirties.",
+ "utterances": {
+  "state": {
+   "style": "exact",
+   "text": "Nebraska."
+  },
+  "household_size": {
+   "style": "indirect",
+   "text": "Me, my partner, our three kids and my mom."
+  },
+  "children": {
+   "style": "indirect",
+   "text": "I have my son, my son, my son and my daughter."
+  },
+  "child_under5": {
+   "style": "indirect",
+   "text": "No, the kids are older."
+  },
+  "infant_or_pregnant": {
+   "style": "indirect",
+   "text": "No."
+  },
+  "senior": {
+   "style": "indirect",
+   "text": "No, we're all in our thirties."
+  },
+  "disabled": {
+   "style": "indirect",
+   "text": "No, everyone's healthy."
+  },
+  "married": {
+   "style": "indirect",
+   "text": "Yes, my husband and I."
+  },
+  "earned_income": {
+   "style": "vague",
+   "text": "We do okay."
+  },
+  "self_employed": {
+   "style": "indirect",
+   "text": "No, we both have regular jobs."
+  },
+  "social_security": {
+   "style": "exact",
+   "text": "We don't have any of that."
+  },
+  "other_income": {
+   "style": "monthly",
+   "text": "Around $0 a month."
+  },
+  "housing_cost": {
+   "style": "dont_know",
+   "text": "No idea, honestly."
+  },
+  "tenure": {
+   "style": "indirect",
+   "text": "We own our house."
+  },
+  "childcare": {
+   "style": "range",
+   "text": "We don't have any of that."
+  },
+  "employer_insurance": {
+   "style": "exact",
+   "text": "Nope."
+  },
+  "assets": {
+   "style": "dont_know",
+   "text": "Hard to say."
+  },
+  "college": {
+   "style": "exact",
+   "text": "No."
+  }
+ },
+ "truth": {
+  "snap": 4320.0,
+  "wic": 0.0,
+  "tanf": 0.0,
+  "ssi": 0.0,
+  "medicaid": 28260.0,
+  "chip": 0.0,
+  "eitc": 2561.46630859375,
+  "ctc": 6190.29638671875,
+  "aca_ptc": 0.0,
+  "school_meals": 4478.39990234375
+ },
+ "labels": {
+  "snap": "SNAP (food)",
+  "wic": "WIC",
+  "tanf": "TANF (cash aid)",
+  "ssi": "SSI",
+  "medicaid": "Medicaid",
+  "chip": "CHIP",
+  "eitc": "Earned income tax credit",
+  "ctc": "Child tax credit (refundable part)",
+  "aca_ptc": "ACA premium tax credit",
+  "school_meals": "Free or reduced-price school meals"
+ }
+}

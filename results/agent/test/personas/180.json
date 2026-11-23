@@ -1,0 +1,110 @@
+{
+ "k": 180,
+ "i": 46021,
+ "test_pos": 6937,
+ "weight": 0.08571699261665344,
+ "volunteered": [
+  "state",
+  "household_size",
+  "children"
+ ],
+ "opener": "Hi, I'd like to find out what help we might qualify for. We're in Michigan. Five of us, two adults and three kids. Two kids.",
+ "utterances": {
+  "state": {
+   "style": "indirect",
+   "text": "We're in Michigan."
+  },
+  "household_size": {
+   "style": "indirect",
+   "text": "Five of us, two adults and three kids."
+  },
+  "children": {
+   "style": "indirect",
+   "text": "I have my daughter and my daughter."
+  },
+  "child_under5": {
+   "style": "exact",
+   "text": "Yeah."
+  },
+  "infant_or_pregnant": {
+   "style": "exact",
+   "text": "No."
+  },
+  "senior": {
+   "style": "exact",
+   "text": "No."
+  },
+  "disabled": {
+   "style": "dont_know",
+   "text": "No idea, honestly."
+  },
+  "married": {
+   "style": "exact",
+   "text": "No."
+  },
+  "earned_income": {
+   "style": "vague",
+   "text": "We're pretty comfortable."
+  },
+  "self_employed": {
+   "style": "indirect",
+   "text": "I drive for a delivery app."
+  },
+  "social_security": {
+   "style": "dont_know",
+   "text": "No idea, honestly."
+  },
+  "other_income": {
+   "style": "vague",
+   "text": "A little bit here and there."
+  },
+  "housing_cost": {
+   "style": "approx",
+   "text": "Nothing."
+  },
+  "tenure": {
+   "style": "exact",
+   "text": "We own our house."
+  },
+  "childcare": {
+   "style": "vague",
+   "text": "None, family watches the kids."
+  },
+  "employer_insurance": {
+   "style": "dont_know",
+   "text": "I'm not sure."
+  },
+  "assets": {
+   "style": "vague",
+   "text": "Barely anything in the bank."
+  },
+  "college": {
+   "style": "dont_know",
+   "text": "Hard to say."
+  }
+ },
+ "truth": {
+  "snap": 0.0,
+  "wic": 729.2127685546875,
+  "tanf": 0.0,
+  "ssi": 0.0,
+  "medicaid": 12082.0,
+  "chip": 0.0,
+  "eitc": 549.680908203125,
+  "ctc": 0.0,
+  "aca_ptc": 1729.960205078125,
+  "school_meals": 1119.5999755859375
+ },
+ "labels": {
+  "snap": "SNAP (food)",
+  "wic": "WIC",
+  "tanf": "TANF (cash aid)",
+  "ssi": "SSI",
+  "medicaid": "Medicaid",
+  "chip": "CHIP",
+  "eitc": "Earned income tax credit",
+  "ctc": "Child tax credit (refundable part)",
+  "aca_ptc": "ACA premium tax credit",
+  "school_meals": "Free or reduced-price school meals"
+ }
+}

@@ -116,8 +116,18 @@ section.sec .inner { padding-block: 56px; display: grid; gap: 24px; }
 .opts { display: flex; flex-wrap: wrap; gap: 7px; }
 .opts button { padding: 7px 11px; font-size: .88rem; border-radius: 999px; }
 .opts button.truth { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
-.free { display: grid; gap: 8px; }
-.free .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+[hidden] { display: none !important; }
+.seg { display: inline-flex; justify-self: start; border: 1px solid var(--line); border-radius: 999px; padding: 3px; gap: 2px; background: var(--bg); max-width: 100%; flex-wrap: wrap; }
+.seg button { border: 0; border-radius: 999px; padding: 6px 13px; background: transparent; font-size: .86rem; color: var(--ink-2); }
+.seg button[aria-selected="true"] { background: var(--surface); color: var(--ink); font-weight: 600; box-shadow: var(--shadow); }
+.seg button:disabled { opacity: .45; cursor: not-allowed; }
+.seg .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--likely); display: inline-block; }
+.talk { display: grid; gap: 8px; }
+.talk .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.tools { display: flex; flex-wrap: wrap; gap: 4px; }
+.tchip { font-family: var(--font-data); font-size: .7rem; line-height: 1.45; color: var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 2px 7px; overflow-wrap: anywhere; max-width: 100%; }
+.tchip.err { color: var(--handoff); background: var(--handoff-soft); }
+.msg.q.typing .b { color: var(--muted); }
 .result { border-radius: 14px; padding: 14px 16px; display: grid; gap: 8px; }
 .result.done { background: var(--likely-soft); }
 .result.handoff { background: var(--handoff-soft); }
@@ -234,6 +244,10 @@ footer p { margin: 0; max-width: 95ch; }
         </div>
       </div>
       <div class="pb">
+        <div class="seg" role="tablist" aria-label="How to answer">
+          <button type="button" role="tab" id="mode-form" aria-selected="true">Answer the questions</button>
+          <button type="button" role="tab" id="mode-talk" aria-selected="false" disabled title="Needs Claude in this viewer"><span class="dot" aria-hidden="true"></span>Talk to Claude</button>
+        </div>
         <div class="chat" id="chat" aria-live="polite"></div>
         <div class="ask" id="ask">
           <p class="qtext" id="qtext"></p>
@@ -241,12 +255,12 @@ footer p { margin: 0; max-width: 95ch; }
           <div class="opts" id="opts"></div>
         </div>
         <div class="result" id="result" hidden></div>
-        <div class="free" id="freebox" hidden>
-          <label class="kicker" for="freetext">Or say it in your own words</label>
-          <textarea id="freetext" rows="2" placeholder="I'm a single mom in Ohio with two kids, one is 3. I make about $2,400 a month and rent is $1,100."></textarea>
-          <div class="row"><button type="button" class="primary" id="freego">Read it</button><span class="sub" id="freestatus" aria-live="polite"></span></div>
-          <span class="sub">Claude turns your words into typed facts (an amount, its period, whether it was approximate). The engine's own code does the arithmetic and decides what to ask next.</span>
-        </div>
+        <form class="talk" id="talk" hidden>
+          <label class="kicker" for="say">Say it in your own words</label>
+          <textarea id="say" rows="2" placeholder="I'm a single mom in Ohio with two kids, one is 3. I make about $2,400 a month and rent is $1,100."></textarea>
+          <div class="row"><button type="submit" class="primary" id="send">Send</button><span class="sub" id="talkstatus" aria-live="polite"></span></div>
+          <span class="sub">Claude holds the conversation and turns your words into typed facts. Every decision (what to ask, when to stop, what to recommend) comes from the engine on the right, through the same tools the DecisionIntake MCP server gives any assistant. The blue chips show each call.</span>
+        </form>
       </div>
     </div>
 
@@ -387,7 +401,10 @@ function setup(data) {
   $("example").addEventListener("change", () => { stopPlay(); start(); });
   $("play").addEventListener("click", () => play(false));
   $("play-hero").addEventListener("click", () => { $("live").scrollIntoView({ behavior: "smooth" }); play(true); });
-  $("freego").addEventListener("click", readFreeText);
+  $("mode-form").addEventListener("click", () => setMode("form"));
+  $("mode-talk").addEventListener("click", () => setMode("talk"));
+  $("talk").addEventListener("submit", e => { e.preventDefault(); talkSend(); });
+  $("say").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); talkSend(); } });
   $("src").textContent = "Data: " + D.source + ".";
   start();
 }
@@ -583,16 +600,24 @@ const tier = b => (b.rec ? (b.p >= 0.5 ? "likely" : "check") : "");
 
 // ---------------------------------------------------------------- session + rendering
 function start() {
-  S = { loglik: new Float64Array(N), w: new Float64Array(N).fill(1 / N), asked: new Map(), history: [], done: false, risks: [] };
-  PEL.set(INIT[0]); VAL.set(INIT[1]); LSKIP.set(INIT[2]); LREC.set(INIT[3]);
-  S.risks.push(risk(S.w));
-  const ex = $("example").value;
+  resetBelief();
+  S.facts = new Map(); S.done = false; S.pending = null; S.risks = [risk(S.w)];
+  const ex = MODE === "talk" ? "" : $("example").value;
   S.example = ex === "" ? null : D.examples[+ex];
   $("chat").innerHTML = "";
-  sys(S.example ? `Answering as held-out household ${+ex + 1}. Its true answers are outlined; PolicyEngine's verdict appears at the end.` : "Answer below, or describe your household in your own words.");
+  CONV = []; TALK_BUSY = false;
+  if (MODE === "talk") {
+    bubbleQ(GREETING, "Claude · the engine decides what to ask next");
+  } else {
+    sys(S.example ? `Answering as held-out household ${+ex + 1}. Its true answers are outlined; PolicyEngine's verdict appears at the end.` : "Answer below, or switch to Talk to Claude and describe your household in your own words.");
+  }
   render();
 }
 
+function resetBelief() {
+  S = Object.assign(S || {}, { loglik: new Float64Array(N), w: new Float64Array(N).fill(1 / N), asked: new Map(), history: [] });
+  PEL.set(INIT[0]); VAL.set(INIT[1]); LSKIP.set(INIT[2]); LREC.set(INIT[3]);
+}
 function sys(text) { const d = document.createElement("div"); d.className = "msg sys"; d.innerHTML = `<div class="b"></div>`; d.firstChild.textContent = text; $("chat").appendChild(d); }
 function bubbleQ(text, meta) { const d = document.createElement("div"); d.className = "msg q"; d.innerHTML = `<div class="b"></div><div class="m"></div>`; d.children[0].textContent = text; d.children[1].textContent = meta; $("chat").appendChild(d); }
 function bubbleA(text, meta, read) { const d = document.createElement("div"); d.className = "msg a" + (read ? " read" : ""); d.innerHTML = `<div class="b"></div><div class="m"></div>`; d.children[0].textContent = text; d.children[1].textContent = meta; $("chat").appendChild(d); }
@@ -601,8 +626,8 @@ function scrollChat() { const c = $("chat"); c.scrollTop = c.scrollHeight; }
 function respond(nq, b, label, dontKnow) {
   const q = D.questions[nq.j];
   bubbleQ(q.text, `worth ${fmt$(nq.v)} a year in prevented mistakes`);
-  if (dontKnow) observe(nq.j, q.options.map(() => 1), "asked", "I don't know");
-  else answer(nq.j, b, "asked");
+  const ev = dontKnow ? q.options.map(() => 1) : q.options.map((_, k) => (k === b ? 1 : 0));
+  applyFact(nq.j, ev, dontKnow ? "I don't know" : q.options[b], "asked");
   const h = S.history[S.history.length - 1];
   bubbleA(label, `expected mistakes ${fmt$(h.before)} → ${fmt$(h.after)}`, false);
   render(); scrollChat();
@@ -620,7 +645,7 @@ function render() {
 
   const B = beliefs();
   if (!nq) {
-    S.done = true; $("ask").hidden = true;
+    S.done = true; $("ask").hidden = true; $("talk").hidden = MODE !== "talk";
     const res = $("result"); res.hidden = false;
     const recs = B.filter(b => b.rec).sort((a, b) => b.p - a.p);
     const items = recs.map(b => `<li><strong>${D.programmes[b.d].label}</strong> · ${b.p >= 0.5 ? "likely" : "worth checking"} · <span class="num">${range$(b)}</span> if eligible</li>`).join("");
@@ -641,8 +666,10 @@ function render() {
       $("truth").className = "truth-list";
       $("truth").innerHTML = `<span class="kicker">What PolicyEngine says for this household</span>` + (lines.length ? lines.join("") : `<div>Not eligible for any of the ten, and nothing was recommended. ✓</div>`);
     }
+  } else if (MODE === "talk") {
+    $("ask").hidden = true; $("result").hidden = true; $("talk").hidden = false;
   } else {
-    $("ask").hidden = false; $("result").hidden = true;
+    $("ask").hidden = false; $("result").hidden = true; $("talk").hidden = true;
     const q = D.questions[nq.j];
     $("qtext").textContent = q.text;
     $("qwhy").innerHTML = nq.reason === "pair"
@@ -714,55 +741,201 @@ function play(random) {
 }
 function stopPlay() { if (PLAY) clearTimeout(PLAY); PLAY = null; $("play").textContent = "▶ Play"; $("play").onclick = () => play(false); }
 
-// ---------------------------------------------------------------- free text, read by Claude into typed slots
-let SAMPLE = null;
-if (window.claude && window.claude.use) {
-  window.claude.use("sample").then(sm => { SAMPLE = sm; $("freebox").hidden = !sm; }).catch(() => {});
+// ---------------------------------------------------------------- the typed intake: the same contract as the MCP server
+// (decisionintake/service.py). An assistant sends facts; code reads them; the engine says what to do next.
+let MODE = "form", SAMPLE = null, CONV = [], TALK_BUSY = false;
+const GREETING = "Hi! Tell me a little about your household: where you live, who lives with you, and roughly what comes in. I'll work out which programmes are worth applying for, and only ask what I need.";
+const YES = new Set(["yes", "y", "true", "yeah", "yep"]), NO = new Set(["no", "n", "false", "nope", "none"]);
+
+function applyFact(j, ev, reading, source) {
+  const id = D.questions[j].id;
+  S.facts.delete(id);
+  S.facts.set(id, { j, ev, reading, source });
+  observe(j, ev, source, reading);
 }
-async function readFreeText() {
-  stopPlay();
-  const text = $("freetext").value.trim(), st = $("freestatus");
-  if (!text || !SAMPLE || S.done) return;
-  const qs = D.questions.map(q => q.edges
-    ? { id: q.id, question: q.text, kind: "amount", unit: q.per ? "per " + q.per : "total" }
-    : { id: q.id, question: q.text, options: q.options });
-  const prompt = "A person described their household to a benefits intake assistant. Turn what they said into answers. " +
-    "Answer only questions the text states or clearly implies; leave out anything it doesn't say. Do no arithmetic: " +
-    "for amount questions give the amount exactly as stated, its period, and whether it was approximate.\n\n" +
-    "Questions:\n" + JSON.stringify(qs) + "\n\nWhat the person said:\n" + JSON.stringify(text) + "\n\n" +
-    'Reply with JSON only: {"facts": [{"id": "...", "option": "<exact option text>"} or ' +
-    '{"id": "...", "low": number, "high": number, "period": "year"|"month"|"week"|"none", "approximate": true|false}]}';
-  st.textContent = "Reading…";
-  let out;
-  try { out = await SAMPLE.json(prompt); } catch (e) {
-    st.textContent = e && e.code === "not_granted" ? "Reading free text isn't available here. Use the questions instead." : "Couldn't read that. Try again, or answer the questions.";
-    return;
+function replayFacts() {  // a correction: every fact again, on a fresh belief
+  resetBelief();
+  for (const f of S.facts.values()) observe(f.j, f.ev, f.source, f.reading);
+}
+function matchChoice(q, value) {
+  const opts = q.options.map(o => o.toLowerCase());
+  if (typeof value === "boolean") value = value ? "yes" : "no";
+  const text = String(value).trim().toLowerCase().replace(/\.$/, "");
+  if (opts.includes(text)) return opts.indexOf(text);
+  if (opts.length === 2 && opts[0] === "no" && opts[1] === "yes" && (YES.has(text) || NO.has(text))) return YES.has(text) ? 1 : 0;
+  const n = Number(text.replace(/[$,]/g, ""));
+  if (text !== "" && Number.isFinite(n) && !q.edges) {
+    if (n === 0 && opts.includes("none")) return opts.indexOf("none");
+    if (Number.isInteger(n) && opts.includes(String(n))) return opts.indexOf(String(n));
+    for (let k = 0; k < opts.length; k++) { const m = opts[k].match(/^(\d+)(?: or more|\+)$/); if (m && n >= +m[1]) return k; }
   }
-  bubbleA(text, "read by Claude into typed facts", true);
-  let n = 0;
-  for (const f of (out && out.facts) || []) {
-    const j = D.questions.findIndex(q => q.id === f.id);
-    if (j < 0 || S.asked.has(j)) continue;
-    const q = D.questions[j];
-    if (q.edges) {
-      if (typeof f.low !== "number" && typeof f.high !== "number") continue;
-      let lo = typeof f.low === "number" ? f.low : f.high, hi = typeof f.high === "number" ? f.high : f.low;
-      const factor = q.per ? (PER_YEAR[f.period] || PER_YEAR[q.per]) / PER_YEAR[q.per] : 1;
-      lo *= factor; hi *= factor;
-      if (f.approximate) { lo *= 0.85; hi *= 1.15; }
-      const ev = intervalEvidence(q, lo, hi), top = ev.indexOf(Math.max(...ev));
-      observe(j, ev, "read", (f.approximate ? "about " : "") + q.options[top]);
-    } else {
-      const b = q.options.findIndex(o => o.toLowerCase() === String(f.option || "").toLowerCase());
-      if (b < 0) continue;
-      answer(j, b, "read");
-    }
-    const h = S.history[S.history.length - 1];
-    sys(`${q.text} → ${h.label}`);
-    n++;
+  throw new Error(`"${value}" is not an option for ${q.id}; use one of: ${q.options.join(", ")}` + (q.edges ? ' (or give "amount")' : ""));
+}
+function amountFact(q, a) {
+  if (!q.edges) throw new Error(`${q.id} is not an amount question; give "choice", one of: ${q.options.join(", ")}`);
+  if (typeof a !== "object" || a === null) a = { value: a };
+  let low = a.low ?? a.value, high = a.high ?? a.value;
+  if (low == null && high == null) throw new Error(`amount for ${q.id} needs "value" or "low"/"high"`);
+  low = +(low ?? high); high = +(high ?? low);
+  const period = String(a.period || "none").toLowerCase();
+  if (!(period in PER_YEAR) && period !== "none") throw new Error(`period must be one of year, month, week, none (got "${period}")`);
+  const factor = q.per ? (PER_YEAR[period] || PER_YEAR[q.per]) / PER_YEAR[q.per] : 1;
+  let lo = low * factor, hi = high * factor;
+  if (a.approximate) { lo *= 0.85; hi *= 1.15; }
+  const ev = low === 0 && high === 0 ? intervalEvidence(q, 0, 0) : intervalEvidence(q, lo, hi);
+  const tot = ev.reduce((x, y) => x + y, 0), top = ev.map((v, k) => [v / tot, k]).sort((x, y) => y[0] - x[0]);
+  const stated = (low === high ? fmt$(low) : `${fmt$(low)}–${fmt$(high)}`) + (period === "none" ? "" : ` a ${period}`);
+  const unit = q.per ? ` a ${q.per}` : "";
+  const conv = lo === hi ? fmt$(lo) + unit : `${fmt$(lo)}–${fmt$(hi)}${unit}`;
+  const spread = top.filter(t => t[0] >= 0.1).slice(0, 2).map(t => `${q.options[t[1]]} ${Math.round(t[0] * 100)}%`).join(", ");
+  return [ev, (factor === 1 && !a.approximate ? stated : `${stated} → ${conv}`) + ` → ${spread}`];
+}
+function factEvidence(q, f) {
+  if (f.dont_know) return [q.options.map(() => 1), "don't know"];
+  if (f.amount != null) return amountFact(q, f.amount);
+  if (f.choice != null) { const k = matchChoice(q, f.choice); return [q.options.map((_, b) => (b === k ? 1 : 0)), q.options[k]]; }
+  throw new Error('give one of "choice", "amount" or "dont_know"');
+}
+function recordFacts(facts) {
+  const out = [], fresh = []; let replaced = false;
+  for (const f of Array.isArray(facts) ? facts : []) {
+    const j = D.questions.findIndex(q => q.id === f.question);
+    if (j < 0) { out.push({ question: f.question, error: "unknown question; use an id from: " + D.questions.map(q => q.id).join(", ") }); continue; }
+    let ev, reading;
+    try { [ev, reading] = factEvidence(D.questions[j], f); } catch (e) { out.push({ question: f.question, error: e.message }); continue; }
+    const r = { question: f.question, reading };
+    if (S.facts.has(f.question)) { replaced = true; r.replaces = S.facts.get(f.question).reading; S.facts.delete(f.question); }
+    S.facts.set(f.question, { j, ev, reading, source: S.pending === j ? "asked" : "read" });  // answers the question Claude was told to ask
+    fresh.push(f.question); out.push(r);
   }
-  st.textContent = n ? `Read ${n} fact${n > 1 ? "s" : ""} from your words.` : "Nothing in that answered a question. Add details, or answer the questions.";
+  if (replaced) replayFacts(); else for (const id of fresh) { const f = S.facts.get(id); observe(f.j, f.ev, f.source, f.reading); }
+  S.done = false;
+  return out;
+}
+function voiByDecision(j) {  // the value of question j, split by programme (Session.voi_by_decision)
+  const B = D.questions[j].options.length, agg = new Float64Array(B * 2 * P), M = D.questions[j].noise;
+  const [rs, rr] = sums(S.w), out = new Float64Array(P);
+  for (let i = 0; i < N; i++) { const wi = S.w[i]; if (!wi) continue; const a = ANS[i * Q + j];
+    for (let d = 0; d < P; d++) { agg[(a * 2) * P + d] += wi * LSKIP[i * P + d]; agg[(a * 2 + 1) * P + d] += wi * LREC[i * P + d]; } }
+  for (let d = 0; d < P; d++) {
+    let post = 0;
+    for (let b = 0; b < B; b++) { let s = 0, r = 0; for (let a = 0; a < B; a++) { s += M[a][b] * agg[(a * 2) * P + d]; r += M[a][b] * agg[(a * 2 + 1) * P + d]; } post += Math.min(s, r); }
+    out[d] = Math.min(rs[d], rr[d]) - post;
+  }
+  return out;
+}
+function questionView(j) {
+  const q = D.questions[j];
+  return q.edges ? { id: q.id, text: q.text, kind: "amount", unit: q.per ? `dollars a ${q.per}` : "dollars in total", ranges: q.options }
+    : { id: q.id, text: q.text, kind: "choice", options: q.options };
+}
+function nextStep() {
+  const table = voiTable(), nq = nextQuestion(table), r = risk(S.w);
+  S.next = nq; S.pending = nq ? nq.j : null;
+  const progress = { facts_recorded: S.facts.size, expected_mistake_cost: Math.round(r), similar_households: Math.round(essNow()) };
+  if (nq) {
+    const by = Array.from(voiByDecision(nq.j), v => Math.max(v, 0)), tot = by.reduce((a, v) => a + v, 0) || 1;
+    const settles = by.map((v, d) => d).sort((a, b) => by[b] - by[a]).filter(d => by[d] / tot >= 0.1).slice(0, 3)
+      .map(d => ({ programme: D.programmes[d].label, share: +(by[d] / tot).toFixed(2) }));
+    const why = { worth_per_year: Math.round(nq.v), question_cost: LAMBDA, mostly_settles: settles };
+    if (nq.reason === "pair") why.note = "worth asking only together with another question";
+    return { action: "ask", question: questionView(nq.j), why, progress };
+  }
+  const recommend = beliefs().filter(b => b.rec).sort((a, b) => b.p - a.p).map(b => ({
+    id: D.programmes[b.d].id, programme: D.programmes[b.d].label, tier: b.p >= 0.5 ? "likely" : "worth checking", probability: +b.p.toFixed(2),
+    value_if_eligible_per_year: b.hi < 120 ? "small" : [Math.round(Math.max(b.lo, 0) / 10) * 10, Math.round(b.hi / 10) * 10] }));
+  const out = { action: r > HANDOFF_RISK ? "hand_off" : "finish", progress, recommend,
+    note: "A screening estimate from PolicyEngine's rules, not an eligibility decision; apply through the official programme. Immigration status isn't asked and can change eligibility." };
+  if (r > HANDOFF_RISK) out.hand_off_reason = `No remaining question is worth asking, but the doubt that is left would still cost about ${fmt$(r)} a year in mistakes. A caseworker should review.`;
+  return out;
+}
+
+// ---------------------------------------------------------------- Talk to Claude: the conversation is Claude's, the decisions are the engine's
+if (window.claude && window.claude.use) {
+  window.claude.use("sample").then(sm => {
+    SAMPLE = sm;
+    if (sm) { $("mode-talk").disabled = false; $("mode-talk").title = "Claude talks; the engine decides"; }
+  }).catch(() => {});
+}
+function setMode(m) {
+  if (m === MODE || (m === "talk" && !SAMPLE)) return;
+  stopPlay(); MODE = m;
+  $("mode-form").setAttribute("aria-selected", String(m === "form"));
+  $("mode-talk").setAttribute("aria-selected", String(m === "talk"));
+  $("example").disabled = $("play").disabled = m === "talk";
+  start();
+  if (m === "talk") $("say").focus();
+}
+function agentBrief() {
+  const cat = D.questions.map(q => `- ${q.id}: ${q.text} [${q.edges ? (q.per ? "amount, dollars a " + q.per : "amount, dollars in total") : q.id === "state" ? "US state, two-letter code" : q.options.join(" | ")}]`).join("\n");
+  return `You are the friendly voice of DecisionIntake, a benefits-screening engine running in this web page. You talk with the person; the engine makes every decision. You have two tools.
+
+Every turn:
+1. If the person's latest message states or clearly implies any facts, call record_facts with ALL of them, for any question below, asked or not. Amounts: the number exactly as said, with its period, and approximate=true for "about", "around" or a range. Never convert or compute anything yourself. If they don't know, record dont_know. If nothing new was said, call next_step instead.
+2. A reading with "error": fix that fact and call record_facts again. A reading with "warning": gently check that answer.
+3. Reply in one to three short, warm sentences that follow the returned step:
+   - "ask": ask exactly that one question in plain words; you may say briefly why, using why.mostly_settles.
+   - "finish": name the programmes worth applying for, "likely" ones first and then "worth checking" ones, each with its yearly value range, then the note in one sentence.
+   - "hand_off": say a caseworker should review the case and why, and name any likely programmes.
+Never judge eligibility yourself, never ask anything the engine didn't ask for (unless what they said was unclear), and never mention tools, JSON or ids.
+
+Questions the engine knows (id: text [options or unit]):
+${cat}
+
+The page greeted the person with: "${GREETING}"`;
+}
+const TOOL_FACT = { type: "object", properties: {
+  question: { type: "string" }, choice: { type: ["string", "number", "boolean"] },
+  amount: { type: "object", properties: { value: { type: "number" }, low: { type: "number" }, high: { type: "number" },
+    period: { type: "string", enum: ["year", "month", "week", "none"] }, approximate: { type: "boolean" } } },
+  dont_know: { type: "boolean" } }, required: ["question"] };
+function chips(call) {  // [text, isError] per chip: what Claude sent the engine and what came back
+  const step = s => `${s.action}${s.question ? " " + s.question.id + " (worth " + fmt$(s.why.worth_per_year) + ")" : ""}`;
+  if (call.name === "next_step") return [[`next_step ⇒ ${step(call.out)}`, false]];
+  const rs = call.out.readings || [], ok = rs.filter(r => !r.error), bad = rs.filter(r => r.error);
+  const out = [];
+  if (ok.length) out.push([`record_facts · ${ok.map(r => `${r.question}: ${r.reading}`).join(" · ")}`, false]);
+  bad.forEach(r => out.push([`✗ ${r.question}: ${r.error}`, true]));
+  if (call.out.next) out.push([`⇒ ${step(call.out.next)}`, false]);
+  return out;
+}
+function talkTools(calls) {
+  return [
+    { name: "record_facts", description: "Record what the person said as typed facts (any questions, asked or volunteered; a fact for an answered question replaces it). Returns how each was read and the next step.",
+      inputSchema: { type: "object", properties: { facts: { type: "array", items: TOOL_FACT } }, required: ["facts"] },
+      execute: input => { const readings = recordFacts(input && input.facts); const next = nextStep(); render(); const out = { readings, next }; calls.push({ name: "record_facts", out }); return out; } },
+    { name: "next_step", description: "What to do now: ask a question (with what it is worth and which programmes it settles), finish with recommendations, or hand off to a person.",
+      inputSchema: { type: "object", properties: {} },
+      execute: () => { const out = nextStep(); calls.push({ name: "next_step", out }); return out; } },
+  ];
+}
+async function talkSend() {
+  const text = $("say").value.trim();
+  if (!text || !SAMPLE || TALK_BUSY) return;
+  TALK_BUSY = true; $("send").disabled = true; $("say").value = "";
+  bubbleA(text, "", true); scrollChat();
+  CONV.push({ role: "user", content: text });
+  const calls = [];
+  const msgs = CONV.map((m, k) => (k === 0 ? { role: "user", content: agentBrief() + "\n\nThe person says: " + m.content } : m));
+  const d = document.createElement("div"); d.className = "msg q typing"; d.innerHTML = `<div class="b">Thinking…</div><div class="tools"></div>`;
+  $("chat").appendChild(d); scrollChat();
+  const st = $("talkstatus"); st.textContent = "";
+  try {
+    const res = await SAMPLE(msgs, { tools: talkTools(calls), cache: false, modelTier: "default",
+      onText: ({ text }) => { d.classList.remove("typing"); d.firstChild.textContent = text; scrollChat(); } });
+    d.classList.remove("typing");
+    d.firstChild.textContent = res.text || "…";
+    CONV.push({ role: "assistant", content: res.text || "" });
+  } catch (e) {
+    d.remove(); CONV.pop();
+    st.textContent = e && e.code === "not_granted" ? "Claude isn't available to this page. Use the questions instead."
+      : e && e.code === "rate_limited" ? "Claude is busy. Wait a moment and send again." : "That didn't go through. Send it again.";
+    if (e && e.code === "not_granted") setMode("form");
+  }
+  const box = d.querySelector(".tools");
+  if (box) calls.forEach(c => chips(c).forEach(([t, err]) => { const s = document.createElement("span"); s.className = "tchip" + (err ? " err" : ""); s.textContent = (err ? "" : "⚙ ") + t; box.appendChild(s); }));
   render(); scrollChat();
+  TALK_BUSY = false; $("send").disabled = false; $("say").focus();
 }
 
 // ---------------------------------------------------------------- static parts: stats, diagram, charts

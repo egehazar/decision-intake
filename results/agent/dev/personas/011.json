@@ -1,0 +1,110 @@
+{
+ "k": 11,
+ "i": 8581,
+ "test_pos": 1237,
+ "weight": 0.006888207048177719,
+ "volunteered": [
+  "household_size",
+  "earned_income",
+  "disabled"
+ ],
+ "opener": "Hi, I'd like to find out what help we might qualify for. Five of us, two adults and three kids. From work we make around $8,000 a month. Everyone's healthy.",
+ "utterances": {
+  "state": {
+   "style": "indirect",
+   "text": "We're in Indiana."
+  },
+  "household_size": {
+   "style": "indirect",
+   "text": "Five of us, two adults and three kids."
+  },
+  "children": {
+   "style": "exact",
+   "text": "Three kids."
+  },
+  "child_under5": {
+   "style": "exact",
+   "text": "Yes."
+  },
+  "infant_or_pregnant": {
+   "style": "indirect",
+   "text": "No."
+  },
+  "senior": {
+   "style": "indirect",
+   "text": "No, we're all in our thirties."
+  },
+  "disabled": {
+   "style": "dont_know",
+   "text": "I don't really know."
+  },
+  "married": {
+   "style": "indirect",
+   "text": "No, I'm single."
+  },
+  "earned_income": {
+   "style": "monthly",
+   "text": "Around $8,000 a month."
+  },
+  "self_employed": {
+   "style": "exact",
+   "text": "No, not us."
+  },
+  "social_security": {
+   "style": "range",
+   "text": "We don't have any of that."
+  },
+  "other_income": {
+   "style": "approx",
+   "text": "None."
+  },
+  "housing_cost": {
+   "style": "vague",
+   "text": "It's pretty cheap."
+  },
+  "tenure": {
+   "style": "exact",
+   "text": "We rent an apartment."
+  },
+  "childcare": {
+   "style": "vague",
+   "text": "We don't pay for childcare."
+  },
+  "employer_insurance": {
+   "style": "dont_know",
+   "text": "No idea, honestly."
+  },
+  "assets": {
+   "style": "vague",
+   "text": "A little cushion, not much."
+  },
+  "college": {
+   "style": "indirect",
+   "text": "No."
+  }
+ },
+ "truth": {
+  "snap": 0.0,
+  "wic": 1458.425537109375,
+  "tanf": 0.0,
+  "ssi": 0.0,
+  "medicaid": 17668.0,
+  "chip": 0.0,
+  "eitc": 5329.9287109375,
+  "ctc": 5100.0,
+  "aca_ptc": 0.0,
+  "school_meals": 0.0
+ },
+ "labels": {
+  "snap": "SNAP (food)",
+  "wic": "WIC",
+  "tanf": "TANF (cash aid)",
+  "ssi": "SSI",
+  "medicaid": "Medicaid",
+  "chip": "CHIP",
+  "eitc": "Earned income tax credit",
+  "ctc": "Child tax credit (refundable part)",
+  "aca_ptc": "ACA premium tax credit",
+  "school_meals": "Free or reduced-price school meals"
+ }
+}

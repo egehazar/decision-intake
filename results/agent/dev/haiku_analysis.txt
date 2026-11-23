@@ -1,0 +1,18 @@
+dev / haiku: 100 households finished in both arms (mean per household; survey-weighted in brackets)
+  engine  questions  7.0 ( 7.1)  mistakes $ 1,857 ($ 2,416)  missed $  877  wrong recs $  980  hand-offs 16%
+  alone   questions  8.2 ( 7.1)  mistakes $ 3,408 ($ 5,295)  missed $2,728  wrong recs $  680  hand-offs 55%
+  engine minus alone, total cost, unweighted: $-1,568 [-3,119, -187]
+  engine minus alone, total cost, weighted: $-2,879 [-9,812, 1,376]
+  engine-arm submissions that differ from the engine's own list: 3; runs without a submission: {'engine': 0, 'alone': 0}
+  households neither arm handed off (44): engine minus alone $-1,362
+  per programme, households where it was missed / wrongly recommended (engine | alone):
+    snap          missed   3 |   2   wrong  11 |  13
+    wic           missed   2 |   3   wrong   2 |   0
+    tanf          missed   1 |   0   wrong   2 |   1
+    ssi           missed   1 |   2   wrong  11 |   1
+    medicaid      missed   1 |  11   wrong  32 |  11
+    chip          missed   0 |   0   wrong   5 |  11
+    eitc          missed   5 |   7   wrong   5 |   7
+    ctc           missed   3 |   2   wrong   3 |   8
+    aca_ptc       missed   6 |  10   wrong  25 |  14
+    school_meals  missed   3 |   3   wrong   2 |   2
