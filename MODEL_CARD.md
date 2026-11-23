@@ -28,6 +28,12 @@ not asked and can change eligibility.
 
 ## Data
 
+- Known issue, fixed in the next candidate: the shipped v2 was trained with self-employment that
+  PolicyEngine keeps in separate variables (service businesses, partnerships, farms) coded as no
+  earnings in 8.4% of households (D34, found by the contradiction ledger). v2.1, retrained on the
+  corrected answers, did not pass the registered release test's cost criterion (D35), so v2 stays.
+  Test households are scored on the corrected answers.
+
 - Rules: [PolicyEngine-US](https://github.com/PolicyEngine/policyengine-us) 2.152.15, tax and benefit year 2026.
 - Households: PolicyEngine's [Populace](https://huggingface.co/datasets/policyengine/populace-us) 2024
   (`populace-us-2024-spm-20260915`, MIT licence), a synthetic population calibrated to official
@@ -46,6 +52,7 @@ All on held-out households the model never saw, registered before running:
 | D29, Claude Haiku interviewing 200 households in everyday sentences | 41% fewer costly mistakes with the engine ($2,305 against $3,884); recall 68% against 51% at the same precision; hand-offs 20% against 60% |
 | D30, same, predictor given to Claude but not the question choice | the engine's question choice alone is worth −$891 a household [−1,538, −324] |
 | D31b, Claude Haiku through the stateless hosted tools, 100 development households | as good as sessions in memory: −$49 [−286, +137]; no dropped facts; 2 miscopied states refused by the check digit and resent |
+| D35, 2,183 fresh households, the release test | "doesn't look likely" wrong 2.17% → 0.71% with the can't-tell layer [−1.66, −1.27 points], about one label a household, no recommendation changed. The retrained v2.1 did not pass its cost criterion (−$90 [−288, +59] against a +$25 margin sized too tightly) and does not ship |
 | D32, 2,000 fresh households, the rules file on and off | costs nothing: −$3.7 [−9.4, +0.0] with clean answers, −$15 [−33, −1] with realistic ones; with clean answers no eligible programme suppressed |
 
 Calibration on the training population (mean predicted probability against PolicyEngine's rate,
@@ -54,6 +61,11 @@ survey-weighted) is within 0.005 for every programme. On validation households i
 the wrong side of 50% for 0.1% to 2.4% of them, depending on the programme (D32).
 
 ## Where it is wrong
+
+- **Thin support.** After about 8 answers most people are matched by fewer than 10 training
+  households, and there the model's negatives are wrong several times as often (2.5% against 0.4% on
+  fresh households, D35). The engine reports the support behind every answer; where it is thin it
+  says "can't tell" for programmes it cannot rule out (D33), instead of "unlikely".
 
 - **Unusual answer combinations.** Where few households look like the person, the network
   extrapolates. Before the rules file, a lone parent with no earnings at all, or earning $78,000, got

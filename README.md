@@ -144,7 +144,8 @@ python -m decisionintake.web --port 8080      # screener at /, API at /v1/*, MCP
 
 - **Keeps nothing.** The facts travel with each call as a short readable string
   (`di1;state=TX;household_size=3;earned_income=~2400/month;#6f0c`, with a check so a mangled copy
-  is refused) and the service rebuilds the belief from it in about 0.13 s. No database, no sessions,
+  is refused) and the service rebuilds the belief from it: 125 ms a request at the median, 253 ms at
+  the 95th percentile, no errors in 997 requests of whole screenings (`experiments/load_test.py`). No database, no sessions,
   no answers in logs. Any instance answers any call, so it scales to zero (D31).
 - **Rules the model may not break.** Statutory limits on top of the network (`bundles/guards_2026.json`):
   where the answers pin down one tax unit, no EITC above its 2026 phase-out end and no EITC or
@@ -152,7 +153,16 @@ python -m decisionintake.web --port 8080      # screener at /, API at /v1/*, MCP
   PolicyEngine's own results before shipping; every exception is traced to its cause
   ([contradiction ledger](results/contradiction_ledger.md)). On 2,000 fresh households the rules cost
   nothing (−$3.7 a household [−9.4, +0.0], registered, D32) and, with clean answers, suppressed no
-  programme anyone qualified for.
+  programme anyone qualified for. The ledger also caught a bug in this project's own data pipeline
+  (self-employment that PolicyEngine keeps in separate variables was coded as no earnings in 8% of
+  households); fixed and retrained in D34.
+- **Says when it can't tell.** After about 8 answers, most people are matched by fewer than 10 of the
+  48,657 training households, and that is where the model's negatives fail: on 2,183 fresh households
+  a "not recommended" was wrong 2.5% of the time where the data was thin and 0.4% where it was not.
+  So when support is thin, a programme that is not recommended but still has a 5% chance is shown as
+  "we couldn't tell, you can still apply" rather than "unlikely". That cut wrong "doesn't look likely"
+  answers from 2.17% to 0.71% [−1.66, −1.27 points] at about one such label a household, and changes
+  no recommendation (D33, D35).
 - **Accessible.** axe-core 4.10.2 finds no WCAG 2.1 A/AA violations on any screen (start, question,
   results), in light and dark mode; one question per screen, labelled controls, focus moved to each
   new question, no colour-only meaning.
