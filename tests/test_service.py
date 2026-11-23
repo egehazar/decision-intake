@@ -2,9 +2,11 @@
 simulated interviews the results come from, and the MCP server speaks the protocol over a real pipe."""
 
 import json
+import os
 import subprocess
 import sys
 from dataclasses import replace
+from pathlib import Path
 
 import numpy as np
 import pytest
@@ -121,8 +123,10 @@ def rpc(proc, msg):
 
 def test_mcp_server_over_stdio(made):
     _, _, _, path = made
+    src = str(Path(__file__).resolve().parents[1] / "src")  # the child process needs the package, installed or not
+    env = {**os.environ, "PYTHONPATH": src + os.pathsep + os.environ.get("PYTHONPATH", "")}
     proc = subprocess.Popen([sys.executable, "-m", "decisionintake.mcp_server", "--bundle", path],
-                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                            stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env)
     try:
         init = rpc(proc, {"jsonrpc": "2.0", "id": 1, "method": "initialize",
                           "params": {"protocolVersion": "2025-06-18", "capabilities": {}, "clientInfo": {"name": "t", "version": "0"}}})
