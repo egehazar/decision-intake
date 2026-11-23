@@ -178,13 +178,17 @@ class Intake:
             new.append(qid)
             out.append(r)
         before = self.s.risk()
+        # Several facts at once (a replayed state, a correction, a volunteered batch): weigh each in turn,
+        # re-score the households through the outcome model once at the end.
         if replaced:  # a correction: replay every fact on a fresh belief
             self.s = self._session()
             for qid, f in self.facts.items():
-                self.s.observe(self.qi[qid], f["evidence"], source="fact")
+                self.s.observe(self.qi[qid], f["evidence"], source="fact", rescore=False)
         else:
             for qid in new:
-                self.s.observe(self.qi[qid], self.facts[qid]["evidence"], source="fact")
+                self.s.observe(self.qi[qid], self.facts[qid]["evidence"], source="fact", rescore=False)
+        if new:
+            self.s.rescore()
         conflicts = {e["q"] for e in self.s.log if e.get("conflict")}
         for r in out:
             if "reading" in r and r["question"] in conflicts:

@@ -244,7 +244,7 @@ class Session:
         self.w, self.tau = w, tau
 
     # evidence -------------------------------------------------------------------------------
-    def observe(self, q: int, likelihood: np.ndarray, source: str = "answer") -> None:
+    def observe(self, q: int, likelihood: np.ndarray, source: str = "answer", rescore: bool = True) -> None:
         """likelihood[b] = P(this evidence | person would report option b).
 
         A crisp answer b is a one-hot vector. A hedged reading of free text is a spread vector.
@@ -269,9 +269,14 @@ class Session:
         with np.errstate(divide="ignore"):
             self.loglik = self.loglik + np.log(lik)
         self._reweight()
-        if self.outcome is not None:
+        if self.outcome is not None and rescore:  # rescore=False: the caller rescores once after a batch
             self._rescore()
         self.log[-1]["tau"] = self.tau
+
+    def rescore(self) -> None:
+        """Re-score after a batch of observe(..., rescore=False): only the final belief's records matter."""
+        if self.outcome is not None and self.asked:
+            self._rescore()
 
     def answer(self, q: int, option: int, source: str = "answer") -> None:
         v = np.zeros(len(self.pop.questions[q].options))
