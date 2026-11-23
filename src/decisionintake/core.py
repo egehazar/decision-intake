@@ -285,6 +285,19 @@ class Session:
     def risk(self) -> float:
         return bayes_risk(self.w, self.l_skip, self.l_rec)
 
+    def support(self) -> dict:
+        """How well the data covers this person: households behind the belief before the support floor
+        softened the evidence (raw_ess), the softening applied (tau, 1 = none), and answers no household fits."""
+        finite = np.isfinite(self.loglik)
+        if finite.any():
+            ll = np.where(finite, self.loglik - self.loglik[finite].max(), -np.inf)
+            w = self.prior * np.exp(ll)
+            raw = float(1.0 / np.square(w / w.sum()).sum())
+        else:
+            raw = 0.0
+        return {"raw_ess": raw, "tau": float(self.tau), "ess": self.ess(),
+                "conflicts": sum(bool(e.get("conflict")) for e in self.log)}
+
     def decisions(self) -> list[DecisionView]:
         out = []
         r_skip = self.w @ self.l_skip

@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Quick Benefits Check</title>
 <meta name="description" content="Find out in a few minutes which of ten US benefit programmes your household should apply for. Free, private, nothing stored.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap">
 <style>
 :root {
   --bg: #f5f4ef; --surface: #ffffff; --ink: #18232c; --muted: #56636e; --line: #d9d6cc; --line-strong: #b9b4a6;
@@ -34,7 +31,7 @@
 html { -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--ink);
-  font: 17px/1.55 "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 17px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;  /* no font request leaves the page */
 }
 [hidden] { display: none !important; }
 a { color: var(--accent); text-underline-offset: 2px; }
@@ -211,6 +208,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
         <button id="q-next" type="submit">Continue</button>
         <button id="q-dk" class="secondary" type="button">I don't know</button>
         <button id="q-cancel" class="link" type="button" hidden>Cancel change</button>
+        <button id="q-clear" class="link" type="button">Clear my answers</button>
       </div>
     </form>
     <details class="answers card" id="sofar" hidden>
@@ -231,14 +229,16 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
       <p style="margin-top:8px">Free local help: call <b>211</b> or visit <a href="https://211.org/" target="_blank" rel="noopener">211.org</a>. A benefits navigator can check every programme with you.</p>
     </div>
     <div id="r-list" class="stack"></div>
-    <details class="others card" id="r-others"><summary>Programmes that don't look likely</summary><ul id="r-others-list"></ul></details>
+    <details class="others card" id="r-others"><summary>Programmes that don't look likely from these answers</summary>
+      <p class="fine" style="margin-top:10px">This is a short screen, not a decision. If you think you might qualify, you can still apply: only the programme can tell you for sure.</p>
+      <ul id="r-others-list"></ul></details>
     <div class="answers card stack">
       <h2>Your answers</h2>
       <p class="fine">Something wrong? Change it and the results update.</p>
       <dl id="r-answers"></dl>
     </div>
     <p class="fine" id="r-note"></p>
-    <div class="actions"><button id="again" class="secondary" type="button">Start a new check</button></div>
+    <div class="actions"><button id="again" class="secondary" type="button">Clear my answers and start again</button></div>
   </section>
 </main>
 
@@ -258,6 +258,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
         <li>JSON API: <a href="openapi.json">openapi.json</a></li>
         <li>MCP connector for AI assistants: <code id="mcp-url">/mcp</code></li>
         <li>Source and evaluation: <a href="https://github.com/egehazar/decision-intake" target="_blank" rel="noopener">github.com/egehazar/decision-intake</a></li>
+        <li id="version-line">Rules year 2026</li>
       </ul>
     </div>
     <div>
@@ -273,16 +274,16 @@ const API = "";  // same origin
 const STATES = {AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",CT:"Connecticut",DE:"Delaware",DC:"District of Columbia",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming"};
 const TAX_HELP = "https://www.irs.gov/individuals/free-tax-return-preparation-for-qualifying-taxpayers";
 const INFO = {
-  snap: {name: "SNAP (food stamps)", desc: "Money for groceries each month, on an EBT card.", apply: "https://www.usa.gov/food-stamps", how: "Apply with your state's SNAP office"},
-  wic: {name: "WIC", desc: "Healthy food, formula and nutrition help for pregnant people, new parents and children under 5.", apply: "https://www.usa.gov/food-assistance", how: "Find your local WIC office"},
-  tanf: {name: "TANF (cash assistance)", desc: "Monthly cash help for families with children, run by your state.", apply: "https://www.usa.gov/welfare-benefits", how: "Apply with your state's TANF office"},
-  ssi: {name: "SSI", desc: "Monthly payments for people 65 or older, or with a disability, who have little income.", apply: "https://www.ssa.gov/ssi", how: "Apply with Social Security"},
-  medicaid: {name: "Medicaid", desc: "Free or low-cost health coverage.", apply: "https://www.healthcare.gov/medicaid-chip/getting-medicaid-chip/", how: "Apply through your state or HealthCare.gov"},
-  chip: {name: "CHIP", desc: "Low-cost health coverage for children.", apply: "https://www.insurekidsnow.gov/", how: "Apply through InsureKidsNow.gov"},
-  eitc: {name: "Earned Income Tax Credit", desc: "A tax credit for working people. You get it by filing a tax return, even if you owe no tax.", apply: "https://www.irs.gov/credits-deductions/individuals/earned-income-tax-credit-eitc", how: "Claim it when you file taxes", tax: true},
-  ctc: {name: "Child Tax Credit (refundable part)", desc: "Money back for each child when you file your tax return, even if you owe no tax.", apply: "https://www.irs.gov/credits-deductions/individuals/child-tax-credit-and-credit-for-other-dependents", how: "Claim it when you file taxes", tax: true},
-  aca_ptc: {name: "Health plan premium tax credit", desc: "Lowers the monthly cost of a health plan bought on the Marketplace.", apply: "https://www.healthcare.gov/", how: "Shop and apply at HealthCare.gov"},
-  school_meals: {name: "Free or reduced-price school meals", desc: "Free or cheaper school breakfast and lunch.", apply: "https://www.usa.gov/school-meals", how: "Apply through your child's school"}
+  snap: {name: "SNAP (food stamps)", desc: "Money for groceries each month, on an EBT card.", apply: "https://www.usa.gov/food-stamps", how: "Apply with your state's SNAP office", when: "a year, paid monthly"},
+  wic: {name: "WIC", desc: "Healthy food, formula and nutrition help for pregnant people, new parents and children under 5.", apply: "https://www.usa.gov/food-assistance", how: "Find your local WIC office", when: "a year in food and formula"},
+  tanf: {name: "TANF (cash assistance)", desc: "Monthly cash help for families with children, run by your state.", apply: "https://www.usa.gov/welfare-benefits", how: "Apply with your state's TANF office", when: "a year, paid monthly"},
+  ssi: {name: "SSI", desc: "Monthly payments for people 65 or older, or with a disability, who have little income.", apply: "https://www.ssa.gov/ssi", how: "Apply with Social Security", when: "a year, paid monthly"},
+  medicaid: {name: "Medicaid", desc: "Free or low-cost health coverage.", apply: "https://www.healthcare.gov/medicaid-chip/getting-medicaid-chip/", how: "Apply through your state or HealthCare.gov", when: "a year in health coverage (its value, not cash)"},
+  chip: {name: "CHIP", desc: "Low-cost health coverage for children.", apply: "https://www.insurekidsnow.gov/", how: "Apply through InsureKidsNow.gov", when: "a year in health coverage (its value, not cash)"},
+  eitc: {name: "Earned Income Tax Credit", desc: "A tax credit for working people. You get it by filing a tax return, even if you owe no tax.", apply: "https://www.irs.gov/credits-deductions/individuals/earned-income-tax-credit-eitc", how: "Claim it when you file taxes", tax: true, when: "paid once, when you file your 2026 tax return in early 2027"},
+  ctc: {name: "Child Tax Credit (refundable part)", desc: "Money back for each child when you file your tax return, even if you owe no tax.", apply: "https://www.irs.gov/credits-deductions/individuals/child-tax-credit-and-credit-for-other-dependents", how: "Claim it when you file taxes", tax: true, when: "paid once, when you file your 2026 tax return in early 2027"},
+  aca_ptc: {name: "Health plan premium tax credit", desc: "Lowers the monthly cost of a health plan bought on the Marketplace.", apply: "https://www.healthcare.gov/", how: "Shop and apply at HealthCare.gov", when: "a year, as lower monthly premiums"},
+  school_meals: {name: "Free or reduced-price school meals", desc: "Free or cheaper school breakfast and lunch.", apply: "https://www.usa.gov/school-meals", how: "Apply through your child's school", when: "a school year, as free or cheaper meals"}
 };
 const QLABEL = {state: "State", household_size: "People in household", children: "Children under 18", child_under5: "A child under 5", infant_or_pregnant: "Pregnant or a baby under 1", senior: "Anyone 65 or older", disabled: "Anyone with a disability", married: "Married couple", earned_income: "Earnings from work", self_employed: "Self-employed", social_security: "Social Security", other_income: "Other income", housing_cost: "Rent or mortgage", tenure: "Rent or own", childcare: "Childcare costs", assets: "Savings and investments", employer_insurance: "Health insurance through a job", college: "Full-time college student"};
 
@@ -320,6 +321,7 @@ async function boot() {
     return;
   }
   for (const q of S.catalogue.questions) S.byId[q.id] = q;
+  $("version-line").textContent = `Engine ${S.catalogue.version}; 2026 rules (PolicyEngine-US 2.152.15); ${S.catalogue.about?.rules || "no extra rules"}`;
   $("programme-chips").innerHTML = S.catalogue.programmes.map(p => `<span class="chip">${esc(INFO[p.id]?.name || p.label)}</span>`).join("");
   const saved = restore();
   if (saved && saved.state && Object.keys(saved.readings || {}).length) {
@@ -477,7 +479,8 @@ function renderResults(next) {
     const info = INFO[r.id] || {name: r.programme, desc: "", apply: "", how: "Apply"};
     const tier = r.tier === "likely" ? ["likely", "Likely"] : ["check", "Worth checking"];
     const v = r.value_if_eligible_per_year;
-    const value = Array.isArray(v) ? `Worth about <b>${money(v[0])}–${money(v[1])}</b> a year if you qualify` : v === "small" ? "A small amount a year if you qualify" : "";
+    const when = info.when || "a year";
+    const value = Array.isArray(v) ? `If you qualify, worth about <b>${money(v[0])}–${money(v[1])}</b> ${esc(when.replace(/^a year/, "a year"))}` : v === "small" ? "A small amount if you qualify" : "";
     const tax = info.tax ? `<p class="fine">Filing is free with <a href="${TAX_HELP}" target="_blank" rel="noopener">IRS free tax help (VITA)</a> if your income is modest.</p>` : "";
     return `<article class="card result ${tier[0]} stack">
       <header><h2 style="font-size:1.2rem">${esc(info.name)}</h2><span class="badge ${tier[0]}">${tier[0] === "likely" ? "&#10003;" : "?"} ${tier[1]}</span></header>
@@ -490,15 +493,16 @@ function renderResults(next) {
   const recIds = new Set(recs.map(r => r.id));
   const others = S.catalogue.programmes.filter(p => !recIds.has(p.id));
   $("r-others").hidden = !others.length;
-  $("r-others-list").innerHTML = others.map(p => `<li>${esc(INFO[p.id]?.name || p.label)}</li>`).join("");
+  $("r-others-list").innerHTML = others.map(p => { const i = INFO[p.id] || {}; return `<li>${esc(i.name || p.label)}${i.apply ? ` · <a href="${i.apply}" target="_blank" rel="noopener">${esc(i.how)}<span class="skip"> (opens in a new tab)</span></a>` : ""}</li>`; }).join("");
   $("r-answers").innerHTML = answersHTML();
   wireEdits($("r-answers"));
-  $("r-note").textContent = (next.note || "") + " Answers are kept only in this browser tab.";
+  $("r-note").textContent = "This is a free screener, not an application and not an eligibility decision; you can apply for any programme whatever it says here. " + (next.note || "") + " Your answers are kept only in this browser tab until you clear them or close it.";
   show("results");
   $("r-h").focus({preventScroll: true});
 }
 
 $("start").onclick = () => { forget(); Object.assign(S, {state: null, readings: {}, asked: 0, editing: null}); step([]); };
+$("q-clear").onclick = () => $("again").onclick();
 $("again").onclick = () => { forget(); Object.assign(S, {state: null, readings: {}, asked: 0, editing: null}); $("resume").hidden = true; show("intro"); };
 boot();
 </script>
