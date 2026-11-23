@@ -429,7 +429,18 @@ const EVIDENCE = {
 
 // ---------------------------------------------------------------- engine settings (frozen in D16/D25)
 const LAMBDA = 15, MIN_ESS = 10, HANDOFF_RISK = 2500, N_PLAN = 1500;
-let D, N, Q, P, OUT, ANS, LSKIP, LREC, VAL, PEL, INIT, QOFF, WW, W1, B1, W2, B2, W3, SCALE, H1, H2, TERMS;
+let D, N, Q, P, OUT, ANS, LSKIP, LREC, VAL, PEL, INIT, QOFF, WW, W1, B1, W2, B2, W3, SCALE, H1, H2, TERMS, RULES = [];
+// Statutory limits on top of the model, as in the service (bundles/guards_2026.json, DECISIONS D32): where the
+// answers pin down one tax unit, no EITC above its 2026 phase-out end and no EITC or refundable CTC without earnings.
+const RULES_SPEC = [{"d":["eitc"],"cap":0.02,"when":{"household_size":["1"],"children":["none"],"married":["no"],"college":["no"],"disabled":["no"],"self_employed":["no"],"earned_income":["$20,000 to $30,000","$30,000 to $40,000","$40,000 to $50,000","$50,000 to $60,000","$60,000 to $80,000","$80,000 to $100,000","$100,000 to $150,000","$150,000 or more"]}},{"d":["eitc"],"cap":0.02,"when":{"household_size":["1"],"children":["none"],"married":["no"],"college":["no"],"disabled":["no"],"self_employed":["no"],"earned_income":["none"]}},{"d":["eitc"],"cap":0.02,"when":{"household_size":["2"],"children":["1"],"married":["no"],"college":["no"],"disabled":["no"],"self_employed":["no"],"earned_income":["$60,000 to $80,000","$80,000 to $100,000","$100,000 to $150,000","$150,000 or more"]}},{"d":["eitc","ctc"],"cap":0.02,"when":{"household_size":["2"],"children":["1"],"married":["no"],"college":["no"],"disabled":["no"],"self_employed":["no"],"earned_income":["none"]}},{"d":["eitc"],"cap":0.02,"when":{"household_size":["3"],"children":["2"],"married":["no"],"college":["no"],"disabled":["no"],"self_employed":["no"],"earned_income":["$60,000 to $80,000","$80,000 to $100,000","$100,000 to $150,000","$150,000 or more"]}},{"d":["eitc"],"cap":0.02,"when":{"household_size":["4"],"children":["3"],"married":["no"],"college":["no"],"disabled":["no"],"self_employed":["no"],"earned_income":["$80,000 to $100,000","$100,000 to $150,000","$150,000 or more"]}},{"d":["eitc","ctc"],"cap":0.02,"when":{"household_size":["5"],"children":["4 or more"],"married":["no"],"college":["no"],"disabled":["no"],"self_employed":["no"],"earned_income":["none"]}},{"d":["eitc"],"cap":0.02,"when":{"household_size":["2"],"children":["none"],"married":["yes"],"college":["no"],"disabled":["no"],"self_employed":["no"],"earned_income":["$30,000 to $40,000","$40,000 to $50,000","$50,000 to $60,000","$60,000 to $80,000","$80,000 to $100,000","$100,000 to $150,000","$150,000 or more"]}},{"d":["eitc"],"cap":0.02,"when":{"household_size":["2"],"children":["none"],"married":["yes"],"college":["no"],"disabled":["no"],"self_employed":["no"],"earned_income":["none"]}},{"d":["eitc"],"cap":0.02,"when":{"household_size":["3"],"children":["1"],"married":["yes"],"college":["no"],"disabled":["no"],"self_employed":["no"],"earned_income":["$60,000 to $80,000","$80,000 to $100,000","$100,000 to $150,000","$150,000 or more"]}},{"d":["eitc"],"cap":0.02,"when":{"household_size":["4"],"children":["2"],"married":["yes"],"college":["no"],"disabled":["no"],"self_employed":["no"],"earned_income":["$80,000 to $100,000","$100,000 to $150,000","$150,000 or more"]}},{"d":["eitc"],"cap":0.02,"when":{"household_size":["5"],"children":["3"],"married":["yes"],"college":["no"],"disabled":["no"],"self_employed":["no"],"earned_income":["$80,000 to $100,000","$100,000 to $150,000","$150,000 or more"]}},{"d":["eitc"],"cap":0.02,"when":{"household_size":["6"],"children":["4 or more"],"married":["yes"],"college":["no"],"disabled":["no"],"self_employed":["no"],"earned_income":["$80,000 to $100,000","$100,000 to $150,000","$150,000 or more"]}},{"d":["eitc","ctc"],"cap":0.02,"when":{"household_size":["6"],"children":["4 or more"],"married":["yes"],"college":["no"],"disabled":["no"],"self_employed":["no"],"earned_income":["none"]}}];
+function compileRules() {
+  const qi = id => D.questions.findIndex(q => q.id === id), di = id => D.programmes.findIndex(p => p.id === id);
+  RULES = RULES_SPEC.map(r => ({cap: r.cap, ds: r.d.map(di), conds: Object.entries(r.when).map(([id, opts]) => {
+    const j = qi(id); return [j, new Set(opts.map(o => D.questions[j].options.indexOf(o)))]; })}));
+}
+function applyRules(hyb, p) {
+  for (const r of RULES) if (r.conds.every(([j, s]) => s.has(hyb[j]))) for (const d of r.ds) p[d] = Math.min(p[d], r.cap);
+}
 let S, PLAY = null;
 const $ = id => document.getElementById(id);
 const fmt$ = v => (v < 0 ? "−" : "") + "$" + Math.round(Math.abs(v)).toLocaleString("en-US");
@@ -448,6 +459,7 @@ function setup(data) {
   const M = D.model; TERMS = M.terms; H1 = M.H1; H2 = M.H2;
   WW = f32(M.Ww); W1 = f32(M.W1); B1 = f32(M.b1); W2 = f32(M.W2); B2 = f32(M.b2); W3 = f32(M.W3); SCALE = M.scale;
   QOFF = new Int32Array(Q); let o = 0; for (let q = 0; q < Q; q++) { QOFF[q] = o; o += D.questions[q].options.length; }
+  compileRules();
   const t0 = performance.now();
   INIT = scoreAll(null);
   $("engine-speed").textContent = `${N.toLocaleString("en-US")} households scored in ${Math.round(performance.now() - t0)} ms`;
@@ -501,6 +513,7 @@ function forward(hyb) {
 }
 function scoreOne(i, hyb) {
   const [p, v] = forward(hyb);
+  applyRules(hyb, p);
   for (let d = 0; d < P; d++) {
     PEL[i * P + d] = p[d]; VAL[i * P + d] = v[d];
     LSKIP[i * P + d] = p[d] * Math.max(v[d], D.miss_floor[d]);
