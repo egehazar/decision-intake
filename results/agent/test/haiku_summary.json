@@ -1,6 +1,10 @@
 {
  "set": "test",
  "model": "haiku",
+ "arms": [
+  "engine",
+  "alone"
+ ],
  "households": [
   0,
   1,

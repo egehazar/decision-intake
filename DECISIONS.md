@@ -712,3 +712,26 @@ gain is concentrated where it matters, households that qualify for something; on
 qualify for nothing, the alone arm's caution is slightly cheaper. What this does not show: real
 speech (the person is templated), and a frontier model (Haiku; the Sonnet replication is next and
 exploratory).
+
+## D29 exploratory: Sonnet 5.5 on 100 of the test households, and precision/recall (2026-11-23, 10:19 UTC)
+
+Registered as exploratory in D29: the same two arms with Claude Sonnet 5.5 on the first 100 test
+households (results/agent/test/sonnet_analysis.txt). Precision and recall were added to the analysis
+after GPT round 5 asked for them next to the dollar loss (they are computed from the same submissions).
+
+| | Haiku alone | Haiku + engine | Sonnet alone | Sonnet + engine |
+|---|---|---|---|---|
+| households | 200 | 200 | 100 | 100 |
+| questions | 8.0 | 7.2 | 5.9 | 7.5 |
+| costly mistakes | $3,884 | $2,305 | $3,494 | $2,388 |
+| handed to a caseworker | 60% | 20% | 46% | 21% |
+| precision of recommendations | 40% | 41% | 45% | 44% |
+| recall of eligible programmes | 51% | 68% | 50% | 76% |
+
+- Sonnet, engine minus alone, total cost: -$1,082 [-2,412, +185] (n = 100, not distinguishable from
+  zero at this size); mistakes 32% lower with the engine. Sonnet alone asks fewer questions than
+  Haiku alone (5.9 against 8.0), which narrows the total-cost gap.
+- Both models, alone, find about half the programmes people qualify for; with the engine, two thirds
+  to three quarters, at the same precision. The stronger model does not close the gap on its own:
+  Sonnet alone misses Medicaid in 13 of 100 households (engine arm 4) and school meals in 10 (1).
+- The agent passed the engine's verdict on exactly in all 100 Sonnet interviews.

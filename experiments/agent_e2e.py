@@ -170,24 +170,40 @@ def serve(arm: str, persona_path: str, trace_path: str):
                 log("submit", programmes=recs, unknown=unknown, hand_off=bool(args.get("hand_off")),
                     summary=args.get("summary"), asked=asked)
                 return {"ok": True, "recorded": recs, "unrecognised": unknown}
-            if arm == "alone":
+            if arm == "alone" or (arm == "predictor" and name == "next_step"):
                 raise ToolError(f"unknown tool {name!r}")
             out = super().call(name, args)
+            if arm == "predictor":  # same model and decision rule, but no advice on what to ask or when to stop
+                it = self.sessions[out["session_id"] if name == "start_intake" else args["session_id"]]
+                if name == "start_intake":
+                    out = {k: v for k, v in out.items() if k != "next"} | {"assessment": it.assessment()}
+                elif name == "record_facts":
+                    out = {"readings": out["readings"], "assessment": it.assessment()}
             log("engine", tool=name, args=args, result=out)
             return out
 
         def handle(self, msg):
             if msg.get("method") == "tools/list" and msg.get("id") is not None:
-                tools = person_tools + ([] if arm == "alone" else TOOLS)
+                tools = person_tools + ([] if arm == "alone" else TOOLS if arm == "engine" else PREDICTOR_TOOLS)
                 return {"jsonrpc": "2.0", "id": msg["id"], "result": {"tools": tools}}
             out = super().handle(msg)
             if msg.get("method") == "initialize" and out and "result" in out:
                 out["result"]["serverInfo"]["name"] = "screening"
-                if arm == "alone":
+                if arm != "engine":
                     out["result"].pop("instructions", None)
             return out
 
-    b = bundle.load(BUNDLE) if arm == "engine" else None
+    PREDICTOR_TOOLS = [
+        {"name": "start_intake", "description": "Open a new intake with the eligibility model. Returns a session_id, the "
+         "programmes, every question, and the model's assessment before any answer.",
+         "inputSchema": TOOLS[0]["inputSchema"]},
+        {"name": "record_facts", "description": "Record what the person said as typed facts (any questions; a fact for an "
+         "answered question replaces it). Returns how each fact was read and the model's updated assessment: every "
+         "programme's probability, tier and value range, the recommend list, and the expected cost of mistakes left.",
+         "inputSchema": TOOLS[1]["inputSchema"]},
+        {"name": "get_assessment", "description": TOOLS[3]["description"], "inputSchema": TOOLS[3]["inputSchema"]},
+    ]
+    b = bundle.load(BUNDLE) if arm in ("engine", "predictor") else None
     serve_stdio(Sim(b, Settings(question_cost=QCOST)))
 
 
@@ -215,6 +231,19 @@ record_facts returns the next step.
 3. When the step is "finish" or "hand_off", call submit_recommendations with the `id` of every item in its \
 `recommend` list, the "worth checking" ones included, and hand_off true only if the action is hand_off.
 Do no eligibility reasoning of your own and ask nothing the engine didn't ask for.
+"""
+PREDICTOR = """
+You have DecisionIntake's eligibility model, trained on PolicyEngine's rules. It judges eligibility; you decide \
+what to ask and when to stop.
+1. Call start_intake, then record_facts with every fact in what the person has already said.
+2. Choose the next question yourself, ask it with ask_person (`about` = its id), then call record_facts with EVERY \
+fact in the reply (amounts exactly as said, with period and approximate; dont_know when they don't know). \
+record_facts returns the model's updated assessment: each programme's probability, tier and yearly value range, \
+the `recommend` list, and the expected cost of mistakes still left.
+3. Stop when you judge more questions aren't worth their cost. Then call submit_recommendations with the `id` of \
+every item in the assessment's `recommend` list, the "worth checking" ones included, and hand_off true if the \
+expected cost of mistakes left is above $2,500.
+Do no eligibility reasoning of your own: the assessment is the judgement.
 """
 ALONE = """
 Decide yourself what to ask, when to stop and what to recommend, using your own knowledge of the 2026 rules for \
@@ -244,7 +273,7 @@ def run_one(arm: str, model: str, persona_path: str, out_dir: str) -> dict:
     json.dump(cfg, open(cfg_path, "w"))
     progs = ", ".join(f"{p} ({persona['labels'][p]})" for p in PROGRAMMES)
     system = COMMON.format(programmes=progs, catalogue=catalogue_text(persona), opener=persona["opener"])
-    system += ENGINE if arm == "engine" else ALONE
+    system += {"engine": ENGINE, "alone": ALONE, "predictor": PREDICTOR}[arm]
     cmd = ["claude", "-p", "Please start the screening.", "--model", model, "--system-prompt", system,
            "--strict-mcp-config", "--mcp-config", cfg_path, "--tools", "", "--allowedTools", "mcp__di",
            "--setting-sources", "", "--no-session-persistence", "--output-format", "stream-json", "--verbose",
@@ -293,7 +322,9 @@ def score_one(persona, trace_path):
     for e in events:
         if e["kind"] == "engine":
             step = e["result"].get("next", e["result"])
-            if step.get("action") in ("finish", "hand_off"):
+            if "assessment" in e["result"]:  # predictor arm: the latest assessment is the model's verdict
+                final = e["result"]["assessment"]
+            elif step.get("action") in ("finish", "hand_off"):
                 final = step
             elif step.get("action") == "ask":
                 final = None
@@ -308,14 +339,15 @@ def score_one(persona, trace_path):
             "engine_list": engine_list, "deviates": engine_list is not None and engine_list != sorted(recs)}
 
 
-def analyse(which: str, model: str):
-    rows, weight = {}, {}
+def analyse(which: str, model: str, a: str = "engine", b: str = "alone"):
+    rows, weight, truth = {}, {}, {}
     pdir = os.path.join(OUT, which, "personas")
-    for arm in ["engine", "alone"]:
+    for arm in [a, b]:
         d = os.path.join(OUT, which, f"{model}_{arm}")
         for name in sorted(os.listdir(pdir)):
             persona = json.load(open(os.path.join(pdir, name), encoding="utf-8"))
             weight[persona["k"]] = persona["weight"]
+            truth[persona["k"]] = {q for q, v in persona["truth"].items() if v > 0}
             s = score_one(persona, os.path.join(d, f"{persona['k']:03d}.trace.jsonl"))
             if s:
                 rows.setdefault(persona["k"], {})[arm] = s
@@ -325,41 +357,45 @@ def analyse(which: str, model: str):
         return
     w = np.array([weight[k] for k in both])
     w = w / w.sum()
-    total = {arm: np.array([rows[k][arm]["loss"] + QCOST * rows[k][arm]["questions"] for k in both]) for arm in ["engine", "alone"]}
-    d = total["engine"] - total["alone"]
+    total = {arm: np.array([rows[k][arm]["loss"] + QCOST * rows[k][arm]["questions"] for k in both]) for arm in [a, b]}
+    d = total[a] - total[b]
     boots = np.random.default_rng(5).choice(len(d), size=(4000, len(d)))
     print(f"{which} / {model}: {len(both)} households finished in both arms (mean per household; survey-weighted in brackets)")
-    for arm in ["engine", "alone"]:
+    for arm in [a, b]:
         r = [rows[k][arm] for k in both]
         m = lambda key: (np.mean([x[key] for x in r]), w @ np.array([x[key] for x in r], float))
         q, l, mi, fr, ho = m("questions"), m("loss"), m("missed"), m("false_recs"), m("hand_off")
         print(f"  {arm:<7} questions {q[0]:4.1f} ({q[1]:4.1f})  mistakes ${l[0]:6,.0f} (${l[1]:6,.0f})"
               f"  missed ${mi[0]:5,.0f}  wrong recs ${fr[0]:5,.0f}  hand-offs {ho[0]:.0%}")
+        hit = sum(len(set(rows[k][arm]["recs"]) & truth[k]) for k in both)
+        nrec, nel = sum(len(rows[k][arm]["recs"]) for k in both), sum(len(truth[k]) for k in both)
+        print(f"  {'':<7} recommendations {nrec}, precision {hit / max(nrec, 1):.0%}, recall {hit / max(nel, 1):.0%} of {nel} eligible programmes")
     out = {}
     for name, ww in [("unweighted", np.full(len(d), 1 / len(d))), ("weighted", w)]:
         est = float(ww @ d)
         bs = np.array([np.average(d[b], weights=ww[b]) for b in boots])
         lo, hi = np.percentile(bs, [2.5, 97.5])
         out[name] = [est, float(lo), float(hi)]
-        print(f"  engine minus alone, total cost, {name}: ${est:,.0f} [{lo:,.0f}, {hi:,.0f}]")
-    dev_ = [k for k in both if rows[k]["engine"]["deviates"]]
-    fails = {arm: sum(rows[k][arm]["failed"] for k in both) for arm in ["engine", "alone"]}
-    print(f"  engine-arm submissions that differ from the engine's own list: {len(dev_)}; runs without a submission: {fails}")
-    calm = [x for x, k in enumerate(both) if not rows[k]["engine"]["hand_off"] and not rows[k]["alone"]["hand_off"]]
+        print(f"  {a} minus {b}, total cost, {name}: ${est:,.0f} [{lo:,.0f}, {hi:,.0f}]")
+    dev_ = [k for k in both if rows[k][a]["deviates"]]
+    fails = {arm: sum(rows[k][arm]["failed"] for k in both) for arm in [a, b]}
+    print(f"  {a}-arm submissions that differ from the engine's own last list: {len(dev_)}; runs without a submission: {fails}")
+    calm = [x for x, k in enumerate(both) if not rows[k][a]["hand_off"] and not rows[k][b]["hand_off"]]
     if calm:
-        print(f"  households neither arm handed off ({len(calm)}): engine minus alone ${d[calm].mean():,.0f}")
-    print("  per programme, households where it was missed / wrongly recommended (engine | alone):")
+        print(f"  households neither arm handed off ({len(calm)}): {a} minus {b} ${d[calm].mean():,.0f}")
+    print(f"  per programme, households where it was missed / wrongly recommended ({a} | {b}):")
     for p in PROGRAMMES:
-        cnt = {arm: [0, 0] for arm in ["engine", "alone"]}
+        cnt = {arm: [0, 0] for arm in [a, b]}
         for k in both:
             truth = json.load(open(os.path.join(pdir, f"{k:03d}.json"), encoding="utf-8"))["truth"][p]
             for arm in cnt:
                 rec = p in rows[k][arm]["recs"]
                 cnt[arm][0] += truth > 0 and not rec
                 cnt[arm][1] += truth <= 0 and rec
-        print(f"    {p:<13} missed {cnt['engine'][0]:3d} | {cnt['alone'][0]:3d}   wrong {cnt['engine'][1]:3d} | {cnt['alone'][1]:3d}")
-    json.dump({"set": which, "model": model, "households": both, "rows": {str(k): rows[k] for k in both}, "diff": out},
-              open(os.path.join(OUT, which, f"{model}_summary.json"), "w"), indent=1)
+        print(f"    {p:<13} missed {cnt[a][0]:3d} | {cnt[b][0]:3d}   wrong {cnt[a][1]:3d} | {cnt[b][1]:3d}")
+    name = f"{model}_summary.json" if (a, b) == ("engine", "alone") else f"{model}_{a}_vs_{b}_summary.json"
+    json.dump({"set": which, "model": model, "arms": [a, b], "households": both, "rows": {str(k): rows[k] for k in both},
+               "diff": out}, open(os.path.join(OUT, which, name), "w"), indent=1)
 
 
 if __name__ == "__main__":
@@ -371,4 +407,4 @@ if __name__ == "__main__":
     elif cmd == "run":
         run(sys.argv[2], sys.argv[3], sys.argv[4], int(sys.argv[5]), int(sys.argv[6]))
     elif cmd == "analyse":
-        analyse(sys.argv[2], sys.argv[3])
+        analyse(sys.argv[2], sys.argv[3], *sys.argv[4:6])

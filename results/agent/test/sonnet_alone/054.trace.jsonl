@@ -1,0 +1,2 @@
+{"t": 1795428538.1898282, "kind": "ask", "message": "How many children under 18 live with you?", "about": ["children"], "reply": "Two kids."}
+{"t": 1795428541.0849166, "kind": "submit", "programmes": ["ctc"], "unknown": [], "hand_off": false, "summary": "Single parent, 2 kids, NM, ~$156k earned. Income is too high for SNAP, WIC, TANF, Medicaid/CHIP, EITC, ACA subsidies and school meals. The Child Tax Credit (refundable part) is the one programme to apply for, since income is under the $200k single phase-out.", "asked": ["children"]}
