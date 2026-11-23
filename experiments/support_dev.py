@@ -100,9 +100,46 @@ def analyse(n):
                   f"{(fn[m] & (p[m] < 0.1)).sum()} of {(~rec[m] & (p[m] < 0.1)).sum()}")
 
 
+def grid(n):
+    """Candidate abstention rules: in profiles backed by fewer than T households, programmes not recommended
+    but with probability >= q become "can't tell". For each: how often a negative is wrong where the engine
+    is thin vs supported, how many misses get flagged, and how many flags a household sees."""
+    RG.init()
+    idx = RG.sample(n)
+    test = R.G["test"]
+    miss, _ = R.G["loss"].realised(test)
+    rows = {}
+    for line in open(OUT):
+        r = json.loads(line)
+        rows[(r["user"], r["i"])] = r
+    for uname in ["clean", "realistic"]:
+        rs = [rows[(uname, int(i))] for i in idx]
+        raw = np.array([r["support"]["raw_ess"] for r in rs])
+        rec = np.array([r["rec"] for r in rs], bool)
+        p = np.array([r["p"] for r in rs])
+        e = test.eligible[idx]
+        mv = np.where(e, np.maximum(miss[idx], 0), 0)
+        neg = ~rec
+        print(f"\n{uname}: negatives {neg.sum()}, of which eligible {(neg & e).sum()} (${mv[neg].sum():,.0f} a year missed)")
+        for T in [3, 5, 10, 20]:
+            thin = raw < T
+            fn_thin = (neg & e)[thin].sum() / max(neg[thin].sum(), 1)
+            fn_sup = (neg & e)[~thin].sum() / max(neg[~thin].sum(), 1)
+            for q in [0.01, 0.02, 0.05]:
+                flag = neg & thin[:, None] & (p >= q)
+                conf = neg & ~flag
+                print(f"  T={T:>2} q={q:.2f}: thin {thin.mean():5.1%} of households; a negative is wrong "
+                      f"{fn_thin:5.1%} thin vs {fn_sup:5.1%} supported; flags/household {flag.sum(1).mean():.2f} "
+                      f"(thin: {flag.sum(1)[thin].mean() if thin.any() else 0:.2f}); misses flagged "
+                      f"{(flag & e).sum()}/{(neg & e).sum()} (${mv[flag].sum():,.0f} of ${mv[neg].sum():,.0f}); "
+                      f"confident negatives wrong {(conf & e).sum() / max(conf.sum(), 1):.2%} (was {(neg & e).sum() / neg.sum():.2%})")
+
+
 if __name__ == "__main__":
     n, workers = int(sys.argv[1]), int(sys.argv[2])
     if len(sys.argv) > 3 and sys.argv[3] == "analyse":
         analyse(n)
+    elif len(sys.argv) > 3 and sys.argv[3] == "grid":
+        grid(n)
     else:
         run(n, workers)

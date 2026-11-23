@@ -40,7 +40,7 @@ class Settings:
     # Abstention (D33): below this many training households like the person, programmes that aren't
     # recommended but keep at least `unsure_floor` probability are "can't tell", not "unlikely". None = off.
     abstain_below: float | None = None
-    unsure_floor: float = 0.02
+    unsure_floor: float = 0.05  # chosen on development data (DECISIONS D33)
 
 
 class FactError(ValueError):

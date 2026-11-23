@@ -918,3 +918,27 @@ gate (the six dropped rules get a second look). The test split is by source hous
 households keep their identity; what they report changes where the old coding was wrong. v2.1 then
 goes into one registered release test against the current production candidate (v2 + rules) on the
 last unused test households.
+
+## D33. Knowing where it can't tell: abstention on thin support (development, 2026-11-23 16:57 UTC)
+
+GPT round 6's main gap: the hand-off threshold is a loss threshold, and a confidently wrong model never
+crosses it. The engine already measures how well the data covers a person: Session.support() gives the
+number of training households that fit the answers before the support floor softens the evidence.
+Development data (experiments/support_dev.py): the production engine (v2 + rules) on D32's 2,000
+households, which had been used only for D32's primary.
+
+- **Thin support is the norm at the end of an interview, and it is where negatives fail.** After about
+  8 answers, 84% of households are matched by fewer than 10 training households (median 2.8). A
+  programme the engine does not recommend turns out to be one the household qualifies for in 2.5% of
+  cases when support is under 10, against 0.3% when it is 10 or more (clean answers; realistic 3.1%
+  against 0.7%). Mistakes per household fall with support: $1,681 under 3, $1,144 from 3 to 10, $674
+  from 10 to 30.
+- **Rule chosen (grid over support 3/5/10/20 and probability floor 1/2/5%):** when support is under 10,
+  the engine's own floor (no new parameter), a programme that is not recommended but keeps at least 5%
+  probability is reported as "can't tell" instead of "doesn't look likely", with the official way to
+  apply and 211. On the development data: about one such label per household (1.03), 73% of the
+  programmes the engine wrongly left out get one ($587k of $1.05M a year), and a remaining "doesn't
+  look likely" is wrong 0.64% of the time instead of 2.06%. A 1-2% floor catches more but labels 2-3
+  programmes per household.
+
+This goes into the release test (D35) with D34's corrected data, registered before it runs.
