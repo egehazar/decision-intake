@@ -1,0 +1,656 @@
+[
+ {
+  "rule": "eitc_income_single_0",
+  "household_id": 1069911,
+  "programme": "eitc",
+  "cause": "pre-tax deductions"
+ },
+ {
+  "rule": "eitc_income_single_0",
+  "household_id": 112213,
+  "programme": "eitc",
+  "cause": "pre-tax deductions"
+ },
+ {
+  "rule": "eitc_income_single_0",
+  "household_id": 1078995,
+  "programme": "eitc",
+  "cause": "pre-tax deductions"
+ },
+ {
+  "rule": "no_earnings_single_0",
+  "household_id": 1021121,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_0",
+  "household_id": 1036170,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_0",
+  "household_id": 1099826,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_0",
+  "household_id": 1065981,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "eitc_income_single_1",
+  "household_id": 1054074,
+  "programme": "eitc",
+  "cause": "pre-tax deductions"
+ },
+ {
+  "rule": "eitc_income_single_1",
+  "household_id": 1033963,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "eitc_income_single_1",
+  "household_id": 113388,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "eitc_income_single_1",
+  "household_id": 1113388,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "no_earnings_single_1",
+  "household_id": 1148011,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_1",
+  "household_id": 1091347,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_1",
+  "household_id": 1088726,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_1",
+  "household_id": 1149049,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_1",
+  "household_id": 1091347,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_1",
+  "household_id": 1088726,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "eitc_income_single_2",
+  "household_id": 1004825,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "eitc_income_single_2",
+  "household_id": 1096854,
+  "programme": "eitc",
+  "cause": "pre-tax deductions"
+ },
+ {
+  "rule": "eitc_income_single_2",
+  "household_id": 1131254,
+  "programme": "eitc",
+  "cause": "pre-tax deductions"
+ },
+ {
+  "rule": "eitc_income_single_2",
+  "household_id": 1069595,
+  "programme": "eitc",
+  "cause": "pre-tax deductions"
+ },
+ {
+  "rule": "eitc_income_single_2",
+  "household_id": 60017,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "eitc_income_single_2",
+  "household_id": 1060017,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "eitc_income_single_2",
+  "household_id": 64536,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "eitc_income_single_2",
+  "household_id": 1064536,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "no_earnings_single_2",
+  "household_id": 1006175,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_2",
+  "household_id": 1087839,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_2",
+  "household_id": 1139485,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_2",
+  "household_id": 1004492,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_2",
+  "household_id": 1006175,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_2",
+  "household_id": 1087839,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_2",
+  "household_id": 1139485,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_2",
+  "household_id": 1004492,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "eitc_income_single_3",
+  "household_id": 74094,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "eitc_income_single_3",
+  "household_id": 1074094,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "no_earnings_single_3",
+  "household_id": 1079471,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_3",
+  "household_id": 1152099,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_3",
+  "household_id": 1074782,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_3",
+  "household_id": 1004392,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_3",
+  "household_id": 1079471,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_3",
+  "household_id": 1152099,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_3",
+  "household_id": 1074782,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_3",
+  "household_id": 1004392,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_3",
+  "household_id": 1104318,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "eitc_income_single_4",
+  "household_id": 46298,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "eitc_income_single_4",
+  "household_id": 1046298,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "no_earnings_single_4",
+  "household_id": 1167710,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_4",
+  "household_id": 1130893,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_4",
+  "household_id": 1077975,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_4",
+  "household_id": 1167710,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_4",
+  "household_id": 1130893,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_single_4",
+  "household_id": 1077975,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "eitc_income_joint_0",
+  "household_id": 1130557,
+  "programme": "eitc",
+  "cause": "pre-tax deductions"
+ },
+ {
+  "rule": "no_earnings_joint_0",
+  "household_id": 1102827,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "eitc_income_joint_1",
+  "household_id": 1157786,
+  "programme": "eitc",
+  "cause": "pre-tax deductions"
+ },
+ {
+  "rule": "eitc_income_joint_1",
+  "household_id": 1098657,
+  "programme": "eitc",
+  "cause": "pre-tax deductions"
+ },
+ {
+  "rule": "eitc_income_joint_1",
+  "household_id": 1012336,
+  "programme": "eitc",
+  "cause": "pre-tax deductions"
+ },
+ {
+  "rule": "eitc_income_joint_1",
+  "household_id": 1120932,
+  "programme": "eitc",
+  "cause": "pre-tax deductions"
+ },
+ {
+  "rule": "eitc_income_joint_1",
+  "household_id": 1073896,
+  "programme": "eitc",
+  "cause": "pre-tax deductions"
+ },
+ {
+  "rule": "eitc_income_joint_1",
+  "household_id": 1000294,
+  "programme": "eitc",
+  "cause": "pre-tax deductions"
+ },
+ {
+  "rule": "no_earnings_joint_1",
+  "household_id": 1049156,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_1",
+  "household_id": 1026106,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_1",
+  "household_id": 1067344,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_1",
+  "household_id": 1126904,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_1",
+  "household_id": 1049156,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "eitc_income_joint_2",
+  "household_id": 1126269,
+  "programme": "eitc",
+  "cause": "unexplained"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1000026,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1069338,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1119095,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1084701,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1115067,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1130313,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1000252,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1038826,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1087485,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1006285,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1000026,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1069338,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1119095,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1084701,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1115067,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1130313,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1000252,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1027201,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1038826,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1087485,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_2",
+  "household_id": 1159172,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "eitc_income_joint_3",
+  "household_id": 42114,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "eitc_income_joint_3",
+  "household_id": 1042114,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "no_earnings_joint_3",
+  "household_id": 1014882,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_3",
+  "household_id": 1122144,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_3",
+  "household_id": 1087448,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_3",
+  "household_id": 1068928,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_3",
+  "household_id": 1086171,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_3",
+  "household_id": 1022445,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_3",
+  "household_id": 1014882,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_3",
+  "household_id": 1109026,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_3",
+  "household_id": 1122144,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_3",
+  "household_id": 1087448,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_3",
+  "household_id": 1068928,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_3",
+  "household_id": 1086171,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_3",
+  "household_id": 1022445,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "eitc_income_joint_4",
+  "household_id": 71516,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "eitc_income_joint_4",
+  "household_id": 1071516,
+  "programme": "eitc",
+  "cause": "dependants' wages"
+ },
+ {
+  "rule": "no_earnings_joint_4",
+  "household_id": 1026079,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_4",
+  "household_id": 1149331,
+  "programme": "eitc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_4",
+  "household_id": 1026079,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_4",
+  "household_id": 1037327,
+  "programme": "ctc",
+  "cause": "other earned income"
+ },
+ {
+  "rule": "no_earnings_joint_4",
+  "household_id": 1149331,
+  "programme": "ctc",
+  "cause": "other earned income"
+ }
+]

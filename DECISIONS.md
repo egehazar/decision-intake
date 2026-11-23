@@ -891,3 +891,12 @@ limit) but change the interview or the list in only 55 (clean) and 80 (realistic
 
 So the rules ship. What they cost is concentrated where answers are wrong, which is the case for an
 abstention layer (D33) rather than for looser rules.
+
+**D32 addendum (16:48 UTC): the contradiction ledger** (results/contradiction_ledger.md,
+experiments/contradiction_ledger.py, GPT round 6). Every training household a candidate rule matches but
+where PolicyEngine pays the credit was traced tax unit by tax unit through PolicyEngine-US: 109
+exceptions in 78 households, 108 explained. The two real limits of household-level rules: a dependant's
+wages (14) and pre-tax deductions (14). The rest, including every exception to the six dropped rules,
+is a bug in my adapter: self-employment income from service businesses, partnership earnings and farm
+income were left out of the "earnings from work" and "self-employed" answers, so self-employed people
+were coded as having no earnings. Fix registered as D34.
