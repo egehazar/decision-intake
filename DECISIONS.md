@@ -588,6 +588,29 @@ half the questions. GPT round 4's headline condition ("P1/P2 confirm and P3/P4 f
 with P3 and P4 confirmed outright, not only within noise. The realistic-answer result is the limit:
 under noisy answers no question policy separates.
 
+## D28 secondary: mistakes against number of questions (2026-11-23, 10:02 UTC; asked for by GPT round 4)
+
+To separate question choice from prediction everywhere along the budget, not only at 8 questions:
+the v2 engine forced to ask exactly k questions against the best fixed set of k questions (beam
+search on the training population), both deciding with the same v2 model, on 600 of D28's 2,000
+households (seed 2030), clean answers (experiments/curve_v2.py, results/curve_v2_600_curve.json).
+
+| questions | engine, adaptive | best fixed set | engine minus fixed [95% CI] |
+|---|---|---|---|
+| 3 | $3,381 | $3,515 | -$133 [-1,050, +858] |
+| 5 | $2,386 | $3,225 | **-$840** [-1,298, -426] |
+| 7 | $1,462 | $2,485 | **-$1,024** [-2,192, -78] |
+| 9 | $1,318 | $2,146 | **-$828** [-1,891, -54] |
+| 12 | $1,258 | $1,307 | -$49 [-217, +123] |
+
+(decision loss, survey-weighted. On these 600 households the full questionnaire's loss is $1,231
+and the engine with its own stopping asks 8.1 questions for $1,482.)
+
+Adaptive questioning is worth $800-1,000 a household in the middle of the budget, where it matters:
+the engine reaches the fixed form's 12-question accuracy in about 9 questions. At 3 questions
+neither has enough to go on; at 12 the fixed set has asked nearly everything that matters, so the
+two converge.
+
 ## D29. Pre-registered: does the engine make a real AI assistant better? (2026-11-23, 09:30 UTC, before any test run)
 
 Everything so far simulated the person's answers as typed options. D29 puts a real language model in the
