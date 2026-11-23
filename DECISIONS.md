@@ -836,3 +836,35 @@ too), and its instructions say never to send two calls with the same state. Re-r
 development households, same harness and prompt. Passes if (a) as before, and (b) fewer than 2% of
 engine calls carry a stale state, and no record_facts call starts from anything but the latest
 state. If it fails, the hosted service gets server-side sessions.
+
+## D32. Rules the model may not break (2026-11-23 16:12 UTC)
+
+Testing the screener by hand turned up answers no benefits worker would give: a lone parent of one
+child with no income at all, or earning $78,000, got the EITC as "likely" (v2's probability 0.81 and
+0.59). PolicyEngine's data says 0 and 1.5% for those groups.
+
+First attempt, kept as history: multicalibration, one penalised logit offset per cell for six groups
+the rules are built on (household make-up x income, state x income, SSI's, WIC's and the ACA credit's
+inputs, self-employment), fitted on v2's out-of-fold logits (experiments/multicalibrate.py). It made
+validation log loss worse at every penalty (+1.1% at the strongest, +43% at the weakest), and on
+validation households in clear-cut groups v2 was already right (wrong side of 50% in 0.1-2.4%). So
+v2's errors are not in the households the data has; they are in answer combinations it barely has,
+where the network extrapolates.
+
+So: statutory limits on top of the model (src/decisionintake/guards.py, bundles/guards_2026.json).
+Where the answers pin the household to one tax unit (one adult, or a married couple, with the stated
+children; no college student, no disability, no self-employment), the EITC is capped at 2% above its
+2026 phase-out end (PolicyEngine-US 2.152.15 parameters, 26 U.S.C. 32), and the EITC and refundable
+child credit are capped with no earnings. Of 20 candidate rules, 14 ship: a rule ships only if
+PolicyEngine finds the programme in no more than 2% of the training households it matches (the cap,
+so a capped probability is never below the data; a first 1% gate was arbitrary and is replaced by
+this one before any test household is looked at). Six are contradicted by the data (12-60% of matched
+households get the credit) and are dropped. On 50,000 random valid profiles, v2 calls a ruled-out
+EITC likely in 4.5% and a ruled-out child credit in 20.4%; with the rules, 0%, and no other
+probability changes.
+
+Registered test: 2,000 fresh test households (seed 2034; none used by D21-D31), the engine with the
+rules against without, same model, same simulated answers (experiments/run_guard.py). Primary, clean
+answers: survey-weighted total cost difference; the rules pass if the upper 95% bound is below +$25
+(non-inferiority: they should change little for real households and must not cost anything).
+Secondary: realistic answers; how many households a rule touches.
