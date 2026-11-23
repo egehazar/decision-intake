@@ -968,3 +968,12 @@ candidate stays.
 income in 4,809 households (8.4%, 9.5% survey-weighted) and the self-employed answer in 4,061 (7.1%).
 One household in twelve had been answering a different question from the one a person would. The old
 table and model caches are kept in data/cache/d28/. Retraining with D28's settings now.
+
+**D34 retrain and rules (17:09 UTC).** v2.1 retrained with D28's settings on the corrected answers (3,688 of
+48,657 training households answer differently; mean change in predicted probability 0.014) and exported
+as bundles/benefits_v2_1.npz. The candidate rules, re-checked on the corrected data with the same gate:
+every "no earnings" rule now has zero exceptions (before the fix: 1 to 21 each), confirming the
+ledger. 19 of 20 rules pass (before: 14); the one that fails (one adult with four children, above the
+EITC limit: 2 of 6 households) is the dependants'-wages limit. The retrained model still extrapolates
+on random valid profiles (a ruled-out EITC called likely 5.7%, a ruled-out child credit 13.2%), so the
+rules stay; with them, 0%.

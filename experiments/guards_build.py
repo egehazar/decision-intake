@@ -84,7 +84,7 @@ def main():
     for d, name in enumerate(pop.decisions):
         m = ruled[:, d]
         if m.sum():
-            print(f"  {name:13s} {m.sum():6d} profiles: called likely (p>=0.5) by v2 {np.mean(p0[m, d] >= 0.5):6.1%}, "
+            print(f"  {name:13s} {m.sum():6d} profiles: called likely (p>=0.5) by the model {np.mean(p0[m, d] >= 0.5):6.1%}, "
                   f"worth checking or likely (p>=0.2) {np.mean(p0[m, d] >= 0.2):6.1%}; with the rules "
                   f"{np.mean(p1[m, d] >= 0.2):.1%}")
     untouched = ~ruled
