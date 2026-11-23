@@ -800,3 +800,22 @@ predictor. With the predictor held equal, the decision layer still cuts the cost
 more than the predictor alone adds over Claude's own judgement. Of D29's -$1,591, the part that is
 attributable to the engine's question choice and stopping is the larger part, and it is the part that
 is statistically confirmed.
+
+## D31. Production: a hosted, stateless service, checked against the agent results (2026-11-23 15:55 UTC)
+
+The work moves from showing the engine helps to running it as a service. To be hosted it must keep
+nothing about the person between calls: no database, no session table, no answers in logs. So every
+result now carries `state`, a short readable string holding the facts so far (state.py, with a
+check digit so a mangled copy is refused, not misread), and each call rebuilds the belief from it
+(about 0.13 s). Built: the state string, a stateless MCP server, and one standard-library WSGI app
+(web.py) serving a JSON API (/v1/step, /v1/assessment, /v1/questions), MCP over Streamable HTTP
+(/mcp), health, an OpenAPI description and the screener's files. Tests: 48 pass, including that a
+rebuilt intake gives the same steps and assessment as one held in memory, corrections included, and
+that Claude Code connects to /mcp over HTTP as a real client.
+
+The risk the tests can't cover is the assistant: it must pass back the latest state every time.
+Engineering check, criteria fixed before the run: Claude Haiku, the 100 development households, the
+D29 harness with a new arm "stateless" (same prompt as the engine arm, the stateless server, its own
+instructions say to pass the latest state). Passes if (a) the paired 95% interval of stateless minus
+engine total cost includes zero or lies below it, and (b) fewer than 2% of engine calls carry a stale
+or damaged state. Fails otherwise, and then the hosted service needs server-side sessions.

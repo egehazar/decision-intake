@@ -25,6 +25,7 @@ from .bundle import Bundle
 from .core import Session
 from .language import PERIOD_PER_YEAR, StructuredReader
 from .policies import VOIPolicy
+from .state import canonical, decode, encode
 
 YES = {"yes", "y", "true", "yeah", "yep"}
 NO = {"no", "n", "false", "nope", "none"}
@@ -52,6 +53,7 @@ class Intake:
         self.qi = {q.id: j for j, q in enumerate(bundle.pop.questions)}
         self.policy = VOIPolicy(question_cost=self.cfg.question_cost, budget=self.cfg.max_questions)
         self.facts: dict[str, dict] = {}  # question id -> {"evidence", "reading"}, in the order given
+        self.raw: dict[str, dict] = {}  # question id -> the fact as the state stores it (see state.py)
         self.history: list[dict] = []
         self.s = self._session()
 
@@ -132,8 +134,8 @@ class Intake:
         Valid facts go in even when others in the same call are rejected."""
         out, new, replaced = [], [], False
         for f in facts:
-            qid = f.get("question")
-            if qid not in self.qi:
+            qid = f.get("question") if isinstance(f, dict) else None
+            if not isinstance(qid, str) or qid not in self.qi:
                 out.append({"question": qid, "error": f"unknown question; use an id from: {', '.join(self.qi)}"})
                 continue
             try:
@@ -141,11 +143,15 @@ class Intake:
             except FactError as e:
                 out.append({"question": qid, "error": str(e)})
                 continue
+            q = self.b.pop.questions[self.qi[qid]]
+            canon = canonical(q, f, int(np.argmax(ev)))
             r = {"question": qid, "reading": reading}
             if qid in self.facts:
                 replaced = True
                 r["replaces"] = self.facts.pop(qid)["reading"]
+                self.raw.pop(qid)
             self.facts[qid] = {"evidence": ev, "reading": reading}
+            self.raw[qid] = canon
             new.append(qid)
             out.append(r)
         before = self.s.risk()
@@ -163,6 +169,21 @@ class Intake:
         if new:
             self.history.append({"facts": new, "cost_before": round(before), "cost_after": round(self.s.risk())})
         return out
+
+    # ------------------------------------------------------------------------------- state
+    def state(self) -> str:
+        """Everything this intake knows, as a short string (state.py); from_state rebuilds it exactly."""
+        return encode(list(self.raw.values()))
+
+    @classmethod
+    def from_state(cls, bundle: Bundle, token: str, settings: Settings | None = None) -> "Intake":
+        it = cls(bundle, settings)
+        facts = decode(bundle.pop.questions, token)
+        if facts:
+            bad = [r for r in it.record(facts) if "error" in r]
+            if bad:  # only possible if the bundle changed under a state written for another one
+                raise FactError(f"state no longer reads: {bad[0]['error']}")
+        return it
 
     # ------------------------------------------------------------------------------- what next
     def question_view(self, j: int) -> dict:

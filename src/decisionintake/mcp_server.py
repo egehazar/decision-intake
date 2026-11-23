@@ -10,7 +10,11 @@ The assistant keeps the conversation; the engine keeps the decision. Four tools:
 Transport: JSON-RPC 2.0 over stdio, one message per line (the MCP stdio transport). No dependencies
 beyond numpy; nothing but protocol messages is written to stdout.
 
-usage: python -m decisionintake.mcp_server [--bundle bundles/benefits_v2.npz]
+Two ways to keep an intake between calls. The default keeps sessions in memory (a local server for one
+assistant). --stateless keeps nothing: every result carries `state`, a short string holding the facts so far
+(state.py), and every call passes it back. That is how the hosted service runs (web.py).
+
+usage: python -m decisionintake.mcp_server [--bundle bundles/benefits_v2.npz] [--stateless]
 """
 
 from __future__ import annotations
@@ -24,11 +28,12 @@ from collections import OrderedDict
 from pathlib import Path
 
 from . import bundle as bundle_mod
-from .service import Intake, Settings
+from .service import FactError, Intake, Settings
+from .state import StateError
 
-PROTOCOLS = ["2025-06-18", "2025-03-26", "2024-11-05"]
+PROTOCOLS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"]
 DEFAULT_BUNDLE = Path(__file__).resolve().parents[2] / "bundles" / "benefits_v2.npz"
-VERSION = "0.3.0"
+VERSION = "1.0.0"
 
 INSTRUCTIONS = """\
 DecisionIntake decides what to ask in a benefits screening, how far to trust each answer, and when it knows
@@ -88,7 +93,29 @@ TOOLS = [
 ]
 
 
+READ_ONLY = {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False}
+for _t in TOOLS:
+    _t["annotations"] = READ_ONLY
+
+INSTRUCTIONS_STATELESS = INSTRUCTIONS.replace(
+    "1. Call start_intake.",
+    "0. This server keeps nothing between calls. Every result carries `state`, a short string holding the facts "
+    "so far; pass the state from the MOST RECENT result to every call, exactly as given.\n1. Call start_intake.")
+STATE = {"state": {"type": "string", "description": "the state string from the most recent result, exactly as given"}}
+TOOLS_STATELESS = [
+    {**TOOLS[0], "description": TOOLS[0]["description"] + " Also returns the first `state`."},
+    {**TOOLS[1], "description": TOOLS[1]["description"] + " Returns the new `state`; use it from now on.",
+     "inputSchema": {"type": "object", "properties": {**STATE, "facts": {"type": "array", "items": FACT}},
+                     "required": ["state", "facts"]}},
+    {**TOOLS[2], "inputSchema": {"type": "object", "properties": STATE, "required": ["state"]}},
+    {**TOOLS[3], "inputSchema": {"type": "object", "properties": STATE, "required": ["state"]}},
+]
+
+
 class Server:
+    TOOLS = TOOLS
+    INSTRUCTIONS = INSTRUCTIONS
+
     def __init__(self, b, settings: Settings, max_sessions: int = 200):
         self.b, self.settings, self.max_sessions = b, settings, max_sessions
         self.sessions: OrderedDict[str, Intake] = OrderedDict()
@@ -135,11 +162,11 @@ class Server:
                 result = {"protocolVersion": want if want in PROTOCOLS else PROTOCOLS[0],
                           "capabilities": {"tools": {"listChanged": False}},
                           "serverInfo": {"name": "decisionintake", "version": VERSION},
-                          "instructions": INSTRUCTIONS}
+                          "instructions": self.INSTRUCTIONS}
             elif method == "ping":
                 result = {}
             elif method == "tools/list":
-                result = {"tools": TOOLS}
+                result = {"tools": self.TOOLS}
             elif method == "tools/call":
                 try:
                     out = self.call(params.get("name"), params.get("arguments") or {})
@@ -156,6 +183,43 @@ class Server:
 
 class ToolError(Exception):
     pass
+
+
+class StatelessServer(Server):
+    """Keeps nothing: the facts travel in `state` (state.py) and each call rebuilds the belief (~0.1 s)."""
+    TOOLS = TOOLS_STATELESS
+    INSTRUCTIONS = INSTRUCTIONS_STATELESS
+
+    def __init__(self, b, settings: Settings):
+        super().__init__(b, settings, max_sessions=0)
+
+    def _restore(self, args) -> Intake:
+        try:
+            return Intake.from_state(self.b, args.get("state"), self.settings)
+        except (StateError, FactError) as e:
+            raise ToolError(str(e)) from None
+
+    def call(self, name: str, args: dict) -> dict:
+        if name == "start_intake":
+            it = Intake(self.b, self.settings)
+            return {"state": it.state(), "programmes": list(self.b.labels.values()), "questions": it.catalogue(),
+                    "next": it.next_step()}
+        if name == "record_facts":
+            it = self._restore(args)
+            facts = args.get("facts")
+            if not isinstance(facts, list):
+                raise ToolError("facts must be a list")
+            if len(facts) > 40:
+                raise ToolError("at most 40 facts in one call")
+            readings = it.record(facts)
+            return {"state": it.state(), "readings": readings, "next": it.next_step()}
+        if name == "next_step":
+            it = self._restore(args)
+            return {"state": it.state(), **it.next_step()}
+        if name == "get_assessment":
+            it = self._restore(args)
+            return {"state": it.state(), **it.assessment()}
+        raise ToolError(f"unknown tool {name!r}")
 
 
 def serve(server: Server, inp=None, out=None) -> None:
@@ -185,13 +249,15 @@ def main(argv=None):
                     help="engine bundle (.npz); default: the v2 benefits bundle shipped in the repo")
     ap.add_argument("--question-cost", type=float, default=Settings.question_cost)
     ap.add_argument("--handoff-cost", type=float, default=Settings.handoff_cost)
+    ap.add_argument("--stateless", action="store_true", help="keep nothing; the facts travel in `state`")
     a = ap.parse_args(argv)
     t0 = time.time()
     b = bundle_mod.load(a.bundle)
     Intake(b)  # warm the model's cache of initial scores before the first client call
     print(f"decisionintake: {len(b.pop):,} households, {len(b.pop.questions)} questions, "
           f"{len(b.pop.decisions)} programmes, ready in {time.time() - t0:.1f}s", file=sys.stderr, flush=True)
-    serve(Server(b, Settings(question_cost=a.question_cost, handoff_cost=a.handoff_cost)))
+    settings = Settings(question_cost=a.question_cost, handoff_cost=a.handoff_cost)
+    serve(StatelessServer(b, settings) if a.stateless else Server(b, settings))
 
 
 if __name__ == "__main__":

@@ -126,7 +126,8 @@ def prep(which: str, n: int):
 # ------------------------------------------------------------------------------------------- the MCP server
 def serve(arm: str, persona_path: str, trace_path: str):
     from decisionintake import bundle
-    from decisionintake.mcp_server import TOOLS, Server, Settings, ToolError, serve as serve_stdio
+    from decisionintake.mcp_server import (TOOLS, TOOLS_STATELESS, Server, Settings, StatelessServer, ToolError,
+                                           serve as serve_stdio)
 
     persona = json.load(open(persona_path, encoding="utf-8"))
     trace = open(trace_path, "a", encoding="utf-8")
@@ -153,7 +154,9 @@ def serve(arm: str, persona_path: str, trace_path: str):
              "hand_off": {"type": "boolean"}, "summary": {"type": "string"}}, "required": ["programmes", "hand_off"]}},
     ]
 
-    class Sim(Server):
+    last_state = [None]  # stateless arm: the state the last result handed back, to spot stale or mangled copies
+
+    class Sim(StatelessServer if arm == "stateless" else Server):
         def call(self, name, args):
             if name == "ask_person":
                 ids = [q for q in args.get("about") or [] if q in persona["utterances"]]
@@ -174,24 +177,34 @@ def serve(arm: str, persona_path: str, trace_path: str):
                 return {"ok": True, "recorded": recs, "unrecognised": unknown}
             if arm == "alone" or (arm == "predictor" and name == "next_step"):
                 raise ToolError(f"unknown tool {name!r}")
-            out = super().call(name, args)
+            stale = arm == "stateless" and name != "start_intake" and args.get("state") != last_state[0]
+            try:
+                out = super().call(name, args)
+            except ToolError as e:
+                log("engine", tool=name, args=args, error=str(e), stale=stale)
+                raise
+            if arm == "stateless":
+                last_state[0] = out.get("state")
+                out_log = {"stale": stale}
+            else:
+                out_log = {}
             if arm == "predictor":  # same model and decision rule, but no advice on what to ask or when to stop
                 it = self.sessions[out["session_id"] if name == "start_intake" else args["session_id"]]
                 if name == "start_intake":
                     out = {k: v for k, v in out.items() if k != "next"} | {"assessment": it.assessment()}
                 elif name == "record_facts":
                     out = {"readings": out["readings"], "assessment": it.assessment()}
-            log("engine", tool=name, args=args, result=out)
+            log("engine", tool=name, args=args, result=out, **out_log)
             return out
 
         def handle(self, msg):
             if msg.get("method") == "tools/list" and msg.get("id") is not None:
-                tools = person_tools + ([] if arm == "alone" else TOOLS if arm == "engine" else PREDICTOR_TOOLS)
+                tools = person_tools + {"alone": [], "engine": TOOLS, "stateless": TOOLS_STATELESS}.get(arm, PREDICTOR_TOOLS)
                 return {"jsonrpc": "2.0", "id": msg["id"], "result": {"tools": tools}}
             out = super().handle(msg)
             if msg.get("method") == "initialize" and out and "result" in out:
                 out["result"]["serverInfo"]["name"] = "screening"
-                if arm != "engine":
+                if arm not in ("engine", "stateless"):
                     out["result"].pop("instructions", None)
             return out
 
@@ -205,7 +218,7 @@ def serve(arm: str, persona_path: str, trace_path: str):
          "inputSchema": TOOLS[1]["inputSchema"]},
         {"name": "get_assessment", "description": TOOLS[3]["description"], "inputSchema": TOOLS[3]["inputSchema"]},
     ]
-    b = bundle.load(BUNDLE) if arm in ("engine", "predictor") else None
+    b = bundle.load(BUNDLE) if arm in ("engine", "predictor", "stateless") else None
     serve_stdio(Sim(b, Settings(question_cost=QCOST)))
 
 
@@ -275,7 +288,7 @@ def run_one(arm: str, model: str, persona_path: str, out_dir: str) -> dict:
     json.dump(cfg, open(cfg_path, "w"))
     progs = ", ".join(f"{p} ({persona['labels'][p]})" for p in PROGRAMMES)
     system = COMMON.format(programmes=progs, catalogue=catalogue_text(persona), opener=persona["opener"])
-    system += {"engine": ENGINE, "alone": ALONE, "predictor": PREDICTOR}[arm]
+    system += {"engine": ENGINE, "stateless": ENGINE, "alone": ALONE, "predictor": PREDICTOR}[arm]
     cmd = ["claude", "-p", "Please start the screening.", "--model", model, "--system-prompt", system,
            "--strict-mcp-config", "--mcp-config", cfg_path, "--tools", "", "--allowedTools", "mcp__di",
            "--setting-sources", "", "--no-session-persistence", "--output-format", "stream-json", "--verbose",
@@ -322,7 +335,7 @@ def score_one(persona, trace_path):
     recs = set(sub["programmes"])
     final = None  # the engine's own last verdict, to see whether the agent passed it on faithfully
     for e in events:
-        if e["kind"] == "engine":
+        if e["kind"] == "engine" and "result" in e:
             step = e["result"].get("next", e["result"])
             if "assessment" in e["result"]:  # predictor arm: the latest assessment is the model's verdict
                 final = e["result"]["assessment"]
@@ -338,7 +351,9 @@ def score_one(persona, trace_path):
     return {"k": persona["k"], "loss": miss + false, "missed": miss, "false_recs": false, "questions": len(asked),
             "messages": sum(e["kind"] == "ask" for e in events), "hand_off": sub["hand_off"],
             "recs": sorted(recs), "engine_calls": sum(e["kind"] == "engine" for e in events), "failed": bool(sub.get("failed")),
-            "engine_list": engine_list, "deviates": engine_list is not None and engine_list != sorted(recs)}
+            "engine_list": engine_list, "deviates": engine_list is not None and engine_list != sorted(recs),
+            "engine_errors": sum(e["kind"] == "engine" and "error" in e for e in events),
+            "stale_state": sum(e["kind"] == "engine" and bool(e.get("stale")) for e in events)}
 
 
 def analyse(which: str, model: str, a: str = "engine", b: str = "alone"):
