@@ -962,3 +962,9 @@ Three primary criteria, clean answers, all must pass for the release to ship:
 Secondary: the same with realistic answers; per programme; whether thin support still separates wrong
 negatives from right ones on fresh households. If any primary fails, the release does not ship and the
 candidate stays.
+
+**D34 rebuild (17:05 UTC).** All 30 chunks rebuilt through PolicyEngine-US with the corrected adapter. Same
+57,240 households; every outcome and every other answer identical; exactly two columns differ: earned
+income in 4,809 households (8.4%, 9.5% survey-weighted) and the self-employed answer in 4,061 (7.1%).
+One household in twelve had been answering a different question from the one a person would. The old
+table and model caches are kept in data/cache/d28/. Retraining with D28's settings now.
