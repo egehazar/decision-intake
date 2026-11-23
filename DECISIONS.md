@@ -735,3 +735,35 @@ after GPT round 5 asked for them next to the dollar loss (they are computed from
   to three quarters, at the same precision. The stronger model does not close the gap on its own:
   Sonnet alone misses Medicaid in 13 of 100 households (engine arm 4) and school meals in 10 (1).
 - The agent passed the engine's verdict on exactly in all 100 Sonnet interviews.
+
+## D30. Pre-registered: is it the question choice, or only the predictor? (2026-11-23, 10:22 UTC, before any test run)
+
+GPT round 5's main objection to D29 (notes/gpt_reply_build_r5.md): the engine arm had a PolicyEngine-
+trained predictor and Claude alone had only its own knowledge, so D29 shows the system helps but not
+that the engine's decision-theoretic question choice does. The control: a third arm with the same
+predictor.
+
+- **predictor arm**: Claude Haiku 5.5 with DecisionIntake's model and decision rule but none of its
+  advice on what to ask. Tools: start_intake and record_facts, which return the model's full
+  assessment after every fact (each programme's probability, tier and value range, the recommend
+  list, the expected cost of mistakes left), and get_assessment; no next_step. Claude chooses each
+  question and when to stop; at the end it submits the assessment's recommend list and hands off when
+  the expected cost left is above $2,500, the engine's own rule. So the only difference from the
+  engine arm is who chooses the questions and when to stop.
+- Development on the same 100 development households as D29 (results/agent/dev/haiku_engine_vs_predictor.txt, haiku_predictor_vs_alone.txt): engine minus predictor
+  -$693 [-1,343, -107]; predictor minus alone -$875 [-2,358, +318]. The predictor arm stopped early (4.0 questions against
+  7.0) and missed more programmes (recall 65% against 77%).
+
+Frozen now (commit a02ad1a): experiments/agent_e2e.py as committed, prompts as in D29 plus the
+predictor arm's.
+
+Pre-registered test:
+- Households: the 200 D29 test households. The engine arm's D29 interviews are reused (same frozen
+  engine-arm code, same model, same households and words); only the predictor arm runs now.
+- Primary: engine arm minus predictor arm, total cost (decision loss + $15 per question beyond the
+  volunteered facts), unweighted mean, paired bootstrap 95% CI (4,000 resamples). Confirmed if the
+  whole interval is below zero.
+- Secondary: predictor arm minus alone arm (what the predictor alone is worth); questions, precision
+  and recall, hand-offs, survey-weighted versions; runs without a submission rerun once, then scored
+  as recommending nothing.
+- Prediction: the engine arm costs less than the predictor arm.
