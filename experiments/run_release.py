@@ -33,7 +33,7 @@ from decisionintake.guards import GuardedOutcome, Rules  # noqa: E402
 from decisionintake.simulate import UserModel, run_one  # noqa: E402
 
 OUT = os.path.join(ROOT, "results", "release_d35.jsonl")
-ARMS = {"candidate": ("benefits_v2.npz", "guards_2026_d32.json"), "release": ("benefits_v2_1.npz", "guards_2026.json")}
+ARMS = {"candidate": ("benefits_v2.npz", "guards_2026_d32.json"), "release": ("benefits_v2_1.npz", "guards_2026_v2_1.json")}  # renamed after D35
 QCOST, MIN_ESS, ABSTAIN_BELOW, UNSURE_FLOOR = 15.0, 10.0, 10.0, 0.05
 G = {}
 

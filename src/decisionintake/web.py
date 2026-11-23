@@ -26,7 +26,7 @@ from pathlib import Path
 from urllib.parse import parse_qs
 
 from . import bundle as bundle_mod
-from .mcp_server import DEFAULT_BUNDLE, PROTOCOLS, VERSION, StatelessServer
+from .mcp_server import ABSTAIN_BELOW, DEFAULT_BUNDLE, PROTOCOLS, VERSION, StatelessServer
 from .guards import DEFAULT_RULES, attach
 from .service import FactError, Intake, Settings
 from .state import StateError
@@ -63,7 +63,7 @@ class App:
         self.b = bundle_mod.load(bundle_path or DEFAULT_BUNDLE)
         if rules:
             attach(self.b, rules)
-        self.settings = settings or Settings()
+        self.settings = settings or Settings(abstain_below=ABSTAIN_BELOW)
         Intake(self.b)  # warm the model's cache of initial scores before the first call
         self.mcp = StatelessServer(self.b, self.settings)
         self.static = Path(static_dir).resolve() if static_dir else None

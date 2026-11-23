@@ -33,7 +33,8 @@ from .service import FactError, Intake, Settings
 from .state import StateError
 
 PROTOCOLS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"]
-DEFAULT_BUNDLE = Path(__file__).resolve().parents[2] / "bundles" / "benefits_v2.npz"
+DEFAULT_BUNDLE = Path(__file__).resolve().parents[2] / "bundles" / "benefits_v2.npz"  # v2.1 did not pass D35
+ABSTAIN_BELOW = 10.0  # D33/D35: under 10 households like the person, uncertain negatives are "can't tell"
 VERSION = "1.0.0"
 
 INSTRUCTIONS = """\
@@ -48,7 +49,9 @@ enough. You handle the conversation; it handles the decisions.
    If a reading comes back with an error, fix the fact; with a warning, check it with the person.
 3. Follow the step it returns. "ask": ask that one question in plain, friendly words (you may say why,
    using why.mostly_settles). "finish": present the recommendations, "likely" ones first, "worth checking"
-   ones as worth a look, with the yearly value ranges, and the note. "hand_off": say a caseworker should
+   ones as worth a look, with the yearly value ranges, and the note. Programmes in "unsure" are ones the
+   engine can't call from these answers: say so, and that the person can apply or ask 211; never call them
+   unlikely. "hand_off": say a caseworker should
    review, and why.
 4. Never decide eligibility yourself and never ask questions the engine didn't ask for, unless the person
    needs something clarified.
@@ -250,6 +253,7 @@ def main(argv=None):
     ap.add_argument("--question-cost", type=float, default=Settings.question_cost)
     ap.add_argument("--handoff-cost", type=float, default=Settings.handoff_cost)
     ap.add_argument("--stateless", action="store_true", help="keep nothing; the facts travel in `state`")
+    ap.add_argument("--no-abstain", action="store_true", help="always call negatives (no can't-tell tier, D33)")
     ap.add_argument("--rules", default=str(DEFAULT_RULES), help="statutory limits on the model ('' for none)")
     a = ap.parse_args(argv)
     t0 = time.time()
@@ -259,7 +263,8 @@ def main(argv=None):
     Intake(b)  # warm the model's cache of initial scores before the first client call
     print(f"decisionintake: {len(b.pop):,} households, {len(b.pop.questions)} questions, "
           f"{len(b.pop.decisions)} programmes, ready in {time.time() - t0:.1f}s", file=sys.stderr, flush=True)
-    settings = Settings(question_cost=a.question_cost, handoff_cost=a.handoff_cost)
+    settings = Settings(question_cost=a.question_cost, handoff_cost=a.handoff_cost,
+                        abstain_below=None if a.no_abstain else ABSTAIN_BELOW)
     serve(StatelessServer(b, settings) if a.stateless else Server(b, settings))
 
 

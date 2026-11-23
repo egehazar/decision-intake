@@ -977,3 +977,30 @@ ledger. 19 of 20 rules pass (before: 14); the one that fails (one adult with fou
 EITC limit: 2 of 6 households) is the dependants'-wages limit. The retrained model still extrapolates
 on random valid profiles (a ruled-out EITC called likely 5.7%, a ruled-out child credit 13.2%), so the
 rules stay; with them, 0%.
+
+**D35 result (17:38 UTC): the release does not ship; the abstention layer does.** All 2,183 households,
+8,732 interviews, both arms finished.
+
+| clean answers | candidate (v2 + D32 rules) | release (v2.1 + 19 rules + abstention) | criterion |
+|---|---|---|---|
+| total cost a household | $1,530 | $1,440 | -$90 [-288, +59]: bound above +$25, **FAIL** |
+| "doesn't look likely" that is wrong | 2.17% | **0.62%** | -1.55 points [-1.76, -1.35], **PASS** |
+| "can't tell" labels a household | - | 1.06 | at most 1.25, **PASS** |
+
+- The cost criterion failed, and the failure is partly mine: the +$25 margin was copied from D32, where
+  both arms were the same model and the interval was +-$5. Two different models on 2,183 households
+  give an interval of about +-$170, so even an equal model could not have passed. Lesson: size a
+  non-inferiority margin to the comparison before registering it. Realistic answers point the other
+  way for cost (+$220 [-117, +673]), so v2.1 is not shown to be as good, and the rule written before
+  the run stands: v2.1 does not ship. It stays as the next candidate (bundles/benefits_v2_1.npz with
+  bundles/guards_2026_v2_1.json, renamed from guards_2026.json after the run).
+- Safety and caution passed, and thin support separates on fresh households: a negative is wrong
+  2.52% of the time where support is thin and 0.42% where it is supported; wrong negatives fall for every
+  programme (EITC 5.0% -> 0.8%, refundable CTC 2.8% -> 0.3%, SNAP 3.6% -> 1.3%). 282 of the 378
+  programmes the release missed get "can't tell" instead. Realistic answers: 2.77% -> 0.97%.
+- The abstention layer changes no recommendation, so it costs nothing in the loss, and it does not
+  depend on v2.1. On the candidate arm of the same run (an analysis chosen after the result, the rule
+  itself fixed in D33): wrong "doesn't look likely" 2.17% -> 0.71% [-1.66, -1.27], 1.05 labels a
+  household (realistic: 2.77% -> 0.90%, 1.19). So production becomes v2 + the D32 rules + abstention
+  (support under 10 and probability at least 5% -> "can't tell"), in the hosted service and the MCP
+  server; experiment harnesses are unchanged.

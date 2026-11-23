@@ -251,3 +251,17 @@ def test_the_service_answers_over_a_real_socket(app):
         assert e.value.code == 404
     finally:
         srv.shutdown()
+
+
+def test_thin_profiles_say_cant_tell_instead_of_unlikely(app):
+    """D33/D35: under 10 training households like the person, an uncertain negative is "can't tell"."""
+    thin = [{"question": "state", "choice": "TX"}, {"question": "household_size", "choice": "2"},
+            {"question": "children", "choice": "1"}, {"question": "earned_income", "choice": "none"},
+            {"question": "other_income", "choice": "none"}, {"question": "social_security", "choice": "none"}]
+    state = call(app, "POST", "/v1/step", {"facts": thin})["json"]["state"]
+    a = call(app, "POST", "/v1/assessment", {"state": state})["json"]
+    assert a["support"]["level"] == "thin" and a["unsure"]
+    for r in a["all_programmes"]:
+        assert not (r["tier"] in ("unlikely", "not recommended") and r["probability"] >= 0.05), r
+    supported = call(app, "POST", "/v1/assessment", {"state": call(app, "POST", "/v1/step", {})["json"]["state"]})["json"]
+    assert supported["support"]["level"] == "supported" and "unsure" not in supported
