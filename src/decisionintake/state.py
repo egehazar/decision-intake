@@ -40,22 +40,6 @@ def _check(body: str) -> str:
     return f"{zlib.crc32(body.encode()) & 0xFFFF:04x}"
 
 
-def canonical(q, fact: dict, option: int | None = None) -> dict:
-    """The fact as the state stores it: the option chosen, or the amount as stated, or don't know."""
-    if fact.get("dont_know"):
-        return {"question": q.id, "dont_know": True}
-    if fact.get("amount") is not None:
-        a = fact["amount"] if isinstance(fact["amount"], dict) else {"value": fact["amount"]}
-        low = a.get("low", a.get("value"))
-        high = a.get("high", a.get("value"))
-        low = float(low if low is not None else high)
-        high = float(high if high is not None else low)
-        out = {"low": low, "high": high, "period": str(a.get("period") or "none").lower(),
-               "approximate": bool(a.get("approximate"))}
-        return {"question": q.id, "amount": out}
-    return {"question": q.id, "choice": q.options[option]}
-
-
 def encode(facts: list[dict]) -> str:
     parts = []
     for f in facts:

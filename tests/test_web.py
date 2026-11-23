@@ -144,6 +144,32 @@ def test_the_api_refuses_bad_input_cleanly(app):
     assert call(app, "GET", "/../pyproject.toml")["status"] == 404  # no escaping the static folder
 
 
+HOSTILE = [
+    {"question": "earned_income", "amount": {"value": float("inf")}},
+    {"question": "earned_income", "amount": {"value": -500, "period": "month"}},
+    {"question": "earned_income", "amount": {"value": "lots"}},
+    {"question": "earned_income", "amount": {"value": 100, "period": "decade"}},
+    {"question": "assets", "amount": [1, 2]}, {"question": "assets", "amount": {"value": True}},
+    {"question": "assets", "amount": {"value": 1e15}}, {"question": ["state"]}, {"question": None},
+    {"question": "children", "choice": None}, {"question": "children", "choice": [1, 2]},
+    {"question": "state", "choice": {"x": 1}}, {"question": "state", "choice": "Tëxas‮"},
+    {"question": "married", "amount": {"value": 1}}, "TX", 3, None,
+]
+
+
+def test_hostile_input_is_refused_cleanly_and_the_state_always_reads_back(app):
+    for f in HOSTILE:
+        raw = json.dumps({"facts": [f]}).replace("Infinity", "1e400").encode()
+        r = call(app, "POST", "/v1/step", raw=raw)
+        assert r["status"] == 200 and "error" in r["json"]["readings"][0], f
+        assert r["json"]["state"].startswith("di1;#")  # nothing went in
+    r = call(app, "POST", "/v1/step", {"facts": [
+        {"question": "earned_income", "amount": {"value": "2,400", "period": "month"}},
+        {"question": "housing_cost", "amount": {"low": 1300, "high": 1100, "period": "month"}}]})["json"]
+    assert "earned_income=2400/month" in r["state"] and "housing_cost=1100..1300/month" in r["state"]
+    assert call(app, "POST", "/v1/step", {"state": r["state"]})["status"] == 200
+
+
 def test_vercel_rewrites_route_by_query(app):
     assert call(app, "GET", "/api/index?route=healthz")["json"]["ok"]
 

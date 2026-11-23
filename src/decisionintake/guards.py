@@ -90,6 +90,9 @@ class Rules:
         self.compiled = []
         for r in rules:
             conds = []
+            unknown = [k for k in r["when"] if k not in qi] + [d for d in r["decisions"] if d not in di]
+            if unknown:
+                raise ValueError(f"rule {r['id']}: this bundle has no {unknown[0]!r}")
             for qid, opts in r["when"].items():
                 options = list(questions[qi[qid]].options)
                 missing = [o for o in opts if o not in options]
@@ -134,3 +137,18 @@ class GuardedOutcome:
 
     def __getattr__(self, name):  # features, n_features, ... come from the wrapped model
         return getattr(self.model, name)
+
+
+def attach(b, path=DEFAULT_RULES, strict: bool | None = None):
+    """Wrap a bundle's model in its rules file, in place; returns the bundle. Records the rules in its info.
+    The default rules file only applies to bundles it fits; a file named explicitly must fit (ValueError)."""
+    strict = Path(path).resolve() != DEFAULT_RULES if strict is None else strict
+    try:
+        rules = Rules.load(path, b.pop.questions, b.pop.decisions)
+    except ValueError:
+        if strict:
+            raise
+        return b
+    b.model = GuardedOutcome(b.model, rules)
+    b.info = {**b.info, "rules": f"{len(rules.rules)} statutory limits ({Path(path).name}, DECISIONS D32)"}
+    return b

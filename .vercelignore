@@ -1,0 +1,10 @@
+results/
+experiments/
+tests/
+demo/
+data/
+adapters/
+.venv/
+*.log
+DECISIONS.md
+WRITEUP.md

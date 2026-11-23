@@ -25,7 +25,7 @@ from .bundle import Bundle
 from .core import Session
 from .language import PERIOD_PER_YEAR, StructuredReader
 from .policies import VOIPolicy
-from .state import canonical, decode, encode
+from .state import decode, encode
 
 YES = {"yes", "y", "true", "yeah", "yep"}
 NO = {"no", "n", "false", "nope", "none"}
@@ -45,6 +45,21 @@ class FactError(ValueError):
 
 def _money(x: float) -> str:
     return f"${x:,.0f}"
+
+
+def _dollars(q, x) -> float:
+    """A stated amount as a number of dollars: finite, not negative, not absurd."""
+    if isinstance(x, bool) or not isinstance(x, (int, float, str)):
+        raise FactError(f"amount for {q.id} must be a number of dollars, like 2400")
+    try:
+        v = float(str(x).replace(",", "").replace("$", "").strip()) if isinstance(x, str) else float(x)
+    except ValueError:
+        raise FactError(f"amount for {q.id} must be a number of dollars, like 2400 (got {x!r})") from None
+    if not np.isfinite(v) or v < 0:
+        raise FactError(f"amount for {q.id} must be zero or more")
+    if v > 1e9:
+        raise FactError(f"amount for {q.id} is implausibly large ({v:,.0f})")
+    return v
 
 
 class Intake:
@@ -95,8 +110,10 @@ class Intake:
         high = a.get("high", a.get("value"))
         if low is None and high is None:
             raise FactError(f'amount for {q.id} needs "value" or "low"/"high"')
-        low = float(low if low is not None else high)
-        high = float(high if high is not None else low)
+        low = _dollars(q, low if low is not None else high)
+        high = _dollars(q, high if high is not None else low)
+        if low > high:  # "between 30 and 20 thousand": the person means the range
+            low, high = high, low
         period = str(a.get("period") or "none").lower()
         if period not in PERIOD_PER_YEAR and period != "none":
             raise FactError(f'period must be one of year, month, week, none (got "{period}")')
@@ -113,20 +130,23 @@ class Intake:
         conv = _money(lo) + unit if lo == hi else f"{_money(lo)}-{_money(hi)}{unit}"
         top = np.argsort(-ev)[:2]
         spread = ", ".join(f'"{q.options[k]}" {ev[k] / ev.sum():.0%}' for k in top if ev[k] / ev.sum() >= 0.1)
+        canon = {"question": q.id, "amount": {"low": low, "high": high, "period": period,
+                                              "approximate": slots["approximate"]}}
         if factor == 1.0 and not slots["approximate"]:
-            return ev, f"{stated} -> {spread}"
-        return ev, f"{stated} -> {conv} -> {spread}"
+            return ev, f"{stated} -> {spread}", canon
+        return ev, f"{stated} -> {conv} -> {spread}", canon
 
-    def _evidence(self, q, f: dict) -> tuple[np.ndarray, str]:
+    def _evidence(self, q, f: dict) -> tuple[np.ndarray, str, dict]:
+        """(likelihood over the options, how it was read, the fact as the state stores it)"""
         if f.get("dont_know"):
-            return np.ones(len(q.options)), "don't know (no evidence; the belief is unchanged)"
+            return np.ones(len(q.options)), "don't know (no evidence; the belief is unchanged)",                 {"question": q.id, "dont_know": True}
         if f.get("amount") is not None:
             return self._amount(q, f["amount"])
         if f.get("choice") is not None:
             k = self._choice(q, f["choice"])
             ev = np.zeros(len(q.options))
             ev[k] = 1.0
-            return ev, q.options[k]
+            return ev, q.options[k], {"question": q.id, "choice": q.options[k]}
         raise FactError('give one of "choice", "amount" or "dont_know"')
 
     def record(self, facts: list[dict]) -> list[dict]:
@@ -139,12 +159,11 @@ class Intake:
                 out.append({"question": qid, "error": f"unknown question; use an id from: {', '.join(self.qi)}"})
                 continue
             try:
-                ev, reading = self._evidence(self.b.pop.questions[self.qi[qid]], f)
+                ev, reading, canon = self._evidence(self.b.pop.questions[self.qi[qid]], f)
             except FactError as e:
                 out.append({"question": qid, "error": str(e)})
                 continue
             q = self.b.pop.questions[self.qi[qid]]
-            canon = canonical(q, f, int(np.argmax(ev)))
             r = {"question": qid, "reading": reading}
             if qid in self.facts:
                 replaced = True
@@ -164,7 +183,7 @@ class Intake:
                 self.s.observe(self.qi[qid], self.facts[qid]["evidence"], source="fact")
         conflicts = {e["q"] for e in self.s.log if e.get("conflict")}
         for r in out:
-            if r.get("question") in conflicts and "reading" in r:
+            if "reading" in r and r["question"] in conflicts:
                 r["warning"] = "no household on record fits this together with the earlier answers; check it with the person"
         if new:
             self.history.append({"facts": new, "cost_before": round(before), "cost_after": round(self.s.risk())})

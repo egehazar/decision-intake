@@ -27,6 +27,7 @@ from urllib.parse import parse_qs
 
 from . import bundle as bundle_mod
 from .mcp_server import DEFAULT_BUNDLE, PROTOCOLS, VERSION, StatelessServer
+from .guards import DEFAULT_RULES, attach
 from .service import FactError, Intake, Settings
 from .state import StateError
 
@@ -57,9 +58,11 @@ class App:
     """The WSGI application. One instance serves every route; it holds the engine and nothing else."""
 
     def __init__(self, bundle_path=None, settings: Settings | None = None, static_dir=None,
-                 allowed_origins: list[str] | None = None, log=sys.stderr):
+                 allowed_origins: list[str] | None = None, log=sys.stderr, rules=DEFAULT_RULES):
         t0 = time.perf_counter()
         self.b = bundle_mod.load(bundle_path or DEFAULT_BUNDLE)
+        if rules:
+            attach(self.b, rules)
         self.settings = settings or Settings()
         Intake(self.b)  # warm the model's cache of initial scores before the first call
         self.mcp = StatelessServer(self.b, self.settings)
@@ -148,13 +151,14 @@ class App:
 
     def health(self, environ, log):
         return _json(200, {"ok": True, "version": VERSION, "engine": self.b.info.get("name"),
+                           "rules": self.b.info.get("rules"),
                            "households": len(self.b.pop), "questions": len(self.b.pop.questions),
                            "programmes": len(self.b.pop.decisions), "boot_seconds": round(self.boot_s, 2),
                            "uptime_seconds": round(time.time() - self.started)})
 
     def questions(self, environ, log):
         it = Intake(self.b, self.settings)
-        about = {k: self.b.info.get(k) for k in ("name", "data", "model", "loss", "caveat")}
+        about = {k: self.b.info.get(k) for k in ("name", "data", "model", "rules", "loss", "caveat")}
         return _json(200, {"version": VERSION, "about": about, "state": it.state(),
                            "programmes": [{"id": k, "label": v} for k, v in self.b.labels.items()],
                            "questions": it.catalogue()})

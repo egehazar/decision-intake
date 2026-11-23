@@ -28,6 +28,7 @@ from collections import OrderedDict
 from pathlib import Path
 
 from . import bundle as bundle_mod
+from .guards import DEFAULT_RULES, attach
 from .service import FactError, Intake, Settings
 from .state import StateError
 
@@ -249,9 +250,12 @@ def main(argv=None):
     ap.add_argument("--question-cost", type=float, default=Settings.question_cost)
     ap.add_argument("--handoff-cost", type=float, default=Settings.handoff_cost)
     ap.add_argument("--stateless", action="store_true", help="keep nothing; the facts travel in `state`")
+    ap.add_argument("--rules", default=str(DEFAULT_RULES), help="statutory limits on the model ('' for none)")
     a = ap.parse_args(argv)
     t0 = time.time()
     b = bundle_mod.load(a.bundle)
+    if a.rules:
+        attach(b, a.rules)
     Intake(b)  # warm the model's cache of initial scores before the first client call
     print(f"decisionintake: {len(b.pop):,} households, {len(b.pop.questions)} questions, "
           f"{len(b.pop.decisions)} programmes, ready in {time.time() - t0:.1f}s", file=sys.stderr, flush=True)

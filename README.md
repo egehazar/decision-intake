@@ -100,7 +100,9 @@ pip install -e .                                                  # numpy is the
 claude mcp add decisionintake -- python -m decisionintake.mcp_server
 ```
 
-Any other MCP client takes the same command (`python -m decisionintake.mcp_server`, stdio transport).
+Any other MCP client takes the same command (`python -m decisionintake.mcp_server`, stdio transport),
+or the hosted endpoint over HTTP (see below), where the same tools carry a `state` string instead of a
+session and `next_step` is folded into `record_facts`.
 
 | tool | what it does |
 |---|---|
@@ -121,6 +123,38 @@ interview takes about 30 seconds and half a cent of model use. Where the engine 
 households that qualify for nothing, where its "worth checking" calls cost $200 more than Claude's
 caution, and the survey-weighted difference (−$294 [−1,831, +1,146]) is not significant. Details in
 DECISIONS D29.
+
+## Run it as a service
+
+One process serves a public screener, a JSON API and a remote MCP endpoint, on the standard library
+and numpy:
+
+```bash
+python -m decisionintake.web --port 8080      # screener at /, API at /v1/*, MCP at /mcp, /openapi.json
+```
+
+| route | what |
+|---|---|
+| `GET /` | the screener: one question at a time, results with yearly value ranges and the official place to apply, answers you can change |
+| `POST /v1/step` | `{"state"?, "facts"?}` → `{"state", "readings", "next"}`: record what the person said, get ask / finish / hand off |
+| `POST /v1/assessment` | every programme's probability, tier and value range, and the facts so far |
+| `GET /v1/questions` | the programmes, every question and its options, the starting state |
+| `POST /mcp` | MCP over Streamable HTTP (2025-11-25 back to 2024-11-05): add the URL as a connector in Claude or any MCP client |
+| `GET /healthz`, `GET /openapi.json` | liveness; the API, described |
+
+- **Keeps nothing.** The facts travel with each call as a short readable string
+  (`di1;state=TX;household_size=3;earned_income=~2400/month;#6f0c`, with a check so a mangled copy
+  is refused) and the service rebuilds the belief from it in about 0.13 s. No database, no sessions,
+  no answers in logs. Any instance answers any call, so it scales to zero (D31).
+- **Rules the model may not break.** Statutory limits on top of the network (`bundles/guards_2026.json`):
+  where the answers pin down one tax unit, no EITC above its 2026 phase-out end and no EITC or
+  refundable child credit without earnings. Every rule names its source and was checked against
+  PolicyEngine's own results before shipping (D32).
+- **Deploys as is** to Vercel (`vercel.json`, `api/index.py`): the screener from the CDN, everything
+  else from one Python function. CI runs the tests on Python 3.11 to 3.13 and smoke-tests the service
+  over a real socket.
+- **Documented** in a [model card](MODEL_CARD.md): data, tests, where it is wrong, what it must not be
+  used for.
 
 ## Results
 
@@ -163,7 +197,7 @@ py -m uv pip install --python .venv/Scripts/python.exe policyengine-us==2.152.15
 #    into data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)
 bash adapters/benefits/build_all.sh 30 5
 
-# 3. tests (37), and tuning on the validation split only
+# 3. tests (52), and tuning on the validation split only
 .venv/Scripts/python.exe -m pytest -q
 .venv/Scripts/python.exe experiments/outcome_v2.py            # outcome models, validation
 .venv/Scripts/python.exe experiments/val_v2.py 400 WORKERS     # engine with each model, validation
@@ -180,7 +214,13 @@ bash adapters/benefits/build_all.sh 30 5
 .venv/Scripts/python.exe experiments/agent_e2e.py run test alone haiku 200 3
 .venv/Scripts/python.exe experiments/agent_e2e.py analyse test haiku
 
-# 6. the browser demo
+# 6. the service, its rules file and their tests (D31, D32)
+.venv/Scripts/python.exe experiments/guards_build.py          # rebuilds bundles/guards_2026.json, checks each rule
+.venv/Scripts/python.exe experiments/run_guard.py 2000 WORKERS && .venv/Scripts/python.exe experiments/run_guard.py 2000 1 analyse
+.venv/Scripts/python.exe experiments/agent_e2e.py run dev stateless haiku 100 5
+.venv/Scripts/python.exe -m decisionintake.web --port 8080
+
+# 7. the browser demo
 .venv/Scripts/python.exe experiments/export_demo_v2.py 1500 demo/population.json
 cd demo && ../.venv/Scripts/python.exe -m http.server 8765    # then open http://127.0.0.1:8765
 ```

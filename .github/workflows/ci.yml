@@ -1,0 +1,30 @@
+name: ci
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: pip install -r requirements.txt pytest
+      - name: Tests (engine, typed intake, rules, stateless service, MCP over stdio and HTTP)
+        run: pytest -q
+      - name: Smoke test the service over a real socket
+        run: |
+          PYTHONPATH=src python -m decisionintake.web --port 8080 &
+          for i in $(seq 1 30); do curl -sf localhost:8080/healthz && break; sleep 1; done
+          curl -sf -X POST localhost:8080/v1/step -H 'Content-Type: application/json' \
+            -d '{"facts":[{"question":"state","choice":"TX"},{"question":"household_size","choice":"2"}]}' \
+            | python -c "import json,sys; r=json.load(sys.stdin); assert r['next']['action']=='ask', r; print('next:', r['next']['question']['id'])"
+          curl -sf -X POST localhost:8080/mcp -H 'Content-Type: application/json' \
+            -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
+            | python -c "import json,sys; t=json.load(sys.stdin)['result']['tools']; print('mcp tools:', [x['name'] for x in t]); assert len(t)==3"

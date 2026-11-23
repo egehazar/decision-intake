@@ -868,3 +868,11 @@ rules against without, same model, same simulated answers (experiments/run_guard
 answers: survey-weighted total cost difference; the rules pass if the upper 95% bound is below +$25
 (non-inferiority: they should change little for real households and must not cost anything).
 Secondary: realistic answers; how many households a rule touches.
+
+**D31b result (16:24 UTC): passes.** Same 100 development households, the three-tool stateless server. All
+100 finished with a submission; 945 engine calls (100 start_intake, 845 record_facts). (a) Stateless
+minus engine, total cost: -$49 [-286, +137] unweighted (weighted -$217 [-861, +70]); recall 78%
+against 77%, precision 45% against 46%. (b) 2 stale calls of 945 (0.21%), and no record_facts call
+dropped a fact. Both stale calls are Claude miscopying the state string; the check digit refused
+them ("state is damaged ... pass the exact state string") and Claude resent the right one. So the
+hosted service keeps nothing, and the assistant using it does as well as with sessions in memory.

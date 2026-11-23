@@ -1,0 +1,4525 @@
+{
+ "set": "dev",
+ "model": "haiku",
+ "arms": [
+  "stateless",
+  "engine"
+ ],
+ "households": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19,
+  20,
+  21,
+  22,
+  23,
+  24,
+  25,
+  26,
+  27,
+  28,
+  29,
+  30,
+  31,
+  32,
+  33,
+  34,
+  35,
+  36,
+  37,
+  38,
+  39,
+  40,
+  41,
+  42,
+  43,
+  44,
+  45,
+  46,
+  47,
+  48,
+  49,
+  50,
+  51,
+  52,
+  53,
+  54,
+  55,
+  56,
+  57,
+  58,
+  59,
+  60,
+  61,
+  62,
+  63,
+  64,
+  65,
+  66,
+  67,
+  68,
+  69,
+  70,
+  71,
+  72,
+  73,
+  74,
+  75,
+  76,
+  77,
+  78,
+  79,
+  80,
+  81,
+  82,
+  83,
+  84,
+  85,
+  86,
+  87,
+  88,
+  89,
+  90,
+  91,
+  92,
+  93,
+  94,
+  95,
+  96,
+  97,
+  98,
+  99
+ ],
+ "rows": {
+  "0": {
+   "stateless": {
+    "k": 0,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 9,
+    "messages": 11,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 0,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 9,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 13,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "1": {
+   "stateless": {
+    "k": 1,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 0,
+    "messages": 0,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 2,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 1,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 0,
+    "messages": 0,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 2,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "2": {
+   "stateless": {
+    "k": 2,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 3,
+    "messages": 2,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 4,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 2,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 5,
+    "messages": 5,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "3": {
+   "stateless": {
+    "k": 3,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 1,
+    "messages": 1,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 3,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 3,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 1,
+    "messages": 1,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 3,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "4": {
+   "stateless": {
+    "k": 4,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 10,
+    "messages": 11,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "eitc"
+    ],
+    "engine_calls": 13,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "eitc"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 4,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 9,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "eitc"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "eitc"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "5": {
+   "stateless": {
+    "k": 5,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 6,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 5,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 6,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "6": {
+   "stateless": {
+    "k": 6,
+    "loss": 2009.640380859375,
+    "missed": 1009.640380859375,
+    "false_recs": 1000.0,
+    "questions": 4,
+    "messages": 4,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 6,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 6,
+    "loss": 2009.640380859375,
+    "missed": 1009.640380859375,
+    "false_recs": 1000.0,
+    "questions": 4,
+    "messages": 5,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "7": {
+   "stateless": {
+    "k": 7,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 7,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 7,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 5,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "8": {
+   "stateless": {
+    "k": 8,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 11,
+    "messages": 14,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 15,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 8,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 11,
+    "messages": 14,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 13,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "9": {
+   "stateless": {
+    "k": 9,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 10,
+    "messages": 13,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 9,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 10,
+    "messages": 11,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "10": {
+   "stateless": {
+    "k": 10,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 6,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 10,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 5,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "11": {
+   "stateless": {
+    "k": 11,
+    "loss": 3458.425537109375,
+    "missed": 1458.425537109375,
+    "false_recs": 2000.0,
+    "questions": 8,
+    "messages": 8,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "chip",
+     "ctc",
+     "eitc",
+     "medicaid"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "chip",
+     "ctc",
+     "eitc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 11,
+    "loss": 3458.425537109375,
+    "missed": 1458.425537109375,
+    "false_recs": 2000.0,
+    "questions": 8,
+    "messages": 8,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "chip",
+     "ctc",
+     "eitc",
+     "medicaid"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "chip",
+     "ctc",
+     "eitc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "12": {
+   "stateless": {
+    "k": 12,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 9,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 12,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 9,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "13": {
+   "stateless": {
+    "k": 13,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 10,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 13,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 10,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "14": {
+   "stateless": {
+    "k": 14,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 13,
+    "messages": 14,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 15,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 14,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 6,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "15": {
+   "stateless": {
+    "k": 15,
+    "loss": 5726.4423828125,
+    "missed": 5726.4423828125,
+    "false_recs": 0,
+    "questions": 9,
+    "messages": 11,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 15,
+    "loss": 5726.4423828125,
+    "missed": 5726.4423828125,
+    "false_recs": 0,
+    "questions": 9,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "16": {
+   "stateless": {
+    "k": 16,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 3,
+    "messages": 5,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 5,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 16,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 3,
+    "messages": 3,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 5,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "17": {
+   "stateless": {
+    "k": 17,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 1,
+    "messages": 1,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 3,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 17,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 3,
+    "messages": 4,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 5,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "18": {
+   "stateless": {
+    "k": 18,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 4,
+    "messages": 4,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 6,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 18,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 4,
+    "messages": 5,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "19": {
+   "stateless": {
+    "k": 19,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 5,
+    "messages": 4,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 6,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 19,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 5,
+    "messages": 5,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "20": {
+   "stateless": {
+    "k": 20,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 12,
+    "messages": 12,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 14,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 20,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 12,
+    "messages": 12,
+    "hand_off": true,
+    "recs": [
+     "chip"
+    ],
+    "engine_calls": 14,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid"
+    ],
+    "deviates": true,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "21": {
+   "stateless": {
+    "k": 21,
+    "loss": 2030.0999755859375,
+    "missed": 1030.0999755859375,
+    "false_recs": 1000.0,
+    "questions": 11,
+    "messages": 11,
+    "hand_off": false,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "tanf"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "tanf"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 21,
+    "loss": 1030.0999755859375,
+    "missed": 1030.0999755859375,
+    "false_recs": 0,
+    "questions": 11,
+    "messages": 12,
+    "hand_off": false,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "engine_calls": 13,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "tanf"
+    ],
+    "deviates": true,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "22": {
+   "stateless": {
+    "k": 22,
+    "loss": 3000.0,
+    "missed": 0,
+    "false_recs": 3000.0,
+    "questions": 5,
+    "messages": 5,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 22,
+    "loss": 3000.0,
+    "missed": 0,
+    "false_recs": 3000.0,
+    "questions": 5,
+    "messages": 5,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "23": {
+   "stateless": {
+    "k": 23,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 5,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 23,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 6,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "24": {
+   "stateless": {
+    "k": 24,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 8,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "wic"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "wic"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 24,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 9,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "wic"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "wic"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "25": {
+   "stateless": {
+    "k": 25,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 6,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 25,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 5,
+    "messages": 5,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "26": {
+   "stateless": {
+    "k": 26,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 10,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 26,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 10,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "27": {
+   "stateless": {
+    "k": 27,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 6,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 27,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 5,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "28": {
+   "stateless": {
+    "k": 28,
+    "loss": 1291.0,
+    "missed": 291.0,
+    "false_recs": 1000.0,
+    "questions": 10,
+    "messages": 11,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 28,
+    "loss": 291.0,
+    "missed": 291.0,
+    "false_recs": 0,
+    "questions": 3,
+    "messages": 4,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 5,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "29": {
+   "stateless": {
+    "k": 29,
+    "loss": 1175.0840606689453,
+    "missed": 175.0840606689453,
+    "false_recs": 1000.0,
+    "questions": 7,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 29,
+    "loss": 1175.0840606689453,
+    "missed": 175.0840606689453,
+    "false_recs": 1000.0,
+    "questions": 7,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "30": {
+   "stateless": {
+    "k": 30,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 5,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 30,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 9,
+    "messages": 9,
+    "hand_off": true,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "31": {
+   "stateless": {
+    "k": 31,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 7,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 31,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 8,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "32": {
+   "stateless": {
+    "k": 32,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 5,
+    "messages": 5,
+    "hand_off": false,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "tanf"
+    ],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "tanf"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 32,
+    "loss": 8478.6083984375,
+    "missed": 8478.6083984375,
+    "false_recs": 0,
+    "questions": 5,
+    "messages": 5,
+    "hand_off": false,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "tanf"
+    ],
+    "deviates": true,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "33": {
+   "stateless": {
+    "k": 33,
+    "loss": 3000.0,
+    "missed": 0,
+    "false_recs": 3000.0,
+    "questions": 11,
+    "messages": 12,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "chip",
+     "medicaid",
+     "school_meals"
+    ],
+    "engine_calls": 13,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "chip",
+     "medicaid",
+     "school_meals"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 33,
+    "loss": 3000.0,
+    "missed": 0,
+    "false_recs": 3000.0,
+    "questions": 11,
+    "messages": 14,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "chip",
+     "medicaid",
+     "school_meals"
+    ],
+    "engine_calls": 13,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "chip",
+     "medicaid",
+     "school_meals"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "34": {
+   "stateless": {
+    "k": 34,
+    "loss": 3000.0,
+    "missed": 0,
+    "false_recs": 3000.0,
+    "questions": 11,
+    "messages": 13,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "engine_calls": 15,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 34,
+    "loss": 3000.0,
+    "missed": 0,
+    "false_recs": 3000.0,
+    "questions": 6,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "35": {
+   "stateless": {
+    "k": 35,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 2,
+    "messages": 2,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 4,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 35,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 2,
+    "messages": 3,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 5,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "36": {
+   "stateless": {
+    "k": 36,
+    "loss": 4000.0,
+    "missed": 0,
+    "false_recs": 4000.0,
+    "questions": 8,
+    "messages": 9,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 36,
+    "loss": 4000.0,
+    "missed": 0,
+    "false_recs": 4000.0,
+    "questions": 8,
+    "messages": 8,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "37": {
+   "stateless": {
+    "k": 37,
+    "loss": 2292.9541015625,
+    "missed": 2292.9541015625,
+    "false_recs": 0,
+    "questions": 4,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 6,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 37,
+    "loss": 2292.9541015625,
+    "missed": 2292.9541015625,
+    "false_recs": 0,
+    "questions": 4,
+    "messages": 4,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 6,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "38": {
+   "stateless": {
+    "k": 38,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 7,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 38,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 8,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "39": {
+   "stateless": {
+    "k": 39,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 6,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 39,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 6,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "40": {
+   "stateless": {
+    "k": 40,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 8,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 40,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 8,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "41": {
+   "stateless": {
+    "k": 41,
+    "loss": 7575.555419921875,
+    "missed": 7575.555419921875,
+    "false_recs": 0,
+    "questions": 15,
+    "messages": 19,
+    "hand_off": true,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid"
+    ],
+    "engine_calls": 19,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 41,
+    "loss": 7846.3426513671875,
+    "missed": 6846.3426513671875,
+    "false_recs": 1000.0,
+    "questions": 7,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "snap",
+     "wic"
+    ],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "snap",
+     "wic"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "42": {
+   "stateless": {
+    "k": 42,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 9,
+    "messages": 13,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc"
+    ],
+    "engine_calls": 14,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc"
+    ],
+    "deviates": false,
+    "engine_errors": 1,
+    "stale_state": 1
+   },
+   "engine": {
+    "k": 42,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 10,
+    "messages": 12,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc"
+    ],
+    "engine_calls": 13,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "43": {
+   "stateless": {
+    "k": 43,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 7,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 43,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 7,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "44": {
+   "stateless": {
+    "k": 44,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 6,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 44,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 7,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "45": {
+   "stateless": {
+    "k": 45,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 8,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 45,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 8,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "46": {
+   "stateless": {
+    "k": 46,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 8,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [
+     "snap"
+    ],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 46,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 9,
+    "messages": 11,
+    "hand_off": false,
+    "recs": [
+     "snap"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "47": {
+   "stateless": {
+    "k": 47,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 1,
+    "messages": 2,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 3,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 47,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 1,
+    "messages": 1,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 3,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "48": {
+   "stateless": {
+    "k": 48,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 13,
+    "messages": 17,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "tanf"
+    ],
+    "engine_calls": 15,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "tanf"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 48,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 14,
+    "messages": 15,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "tanf"
+    ],
+    "engine_calls": 16,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "tanf"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "49": {
+   "stateless": {
+    "k": 49,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 7,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 49,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 7,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "50": {
+   "stateless": {
+    "k": 50,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 13,
+    "messages": 14,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 15,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 50,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 13,
+    "messages": 13,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 15,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "51": {
+   "stateless": {
+    "k": 51,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 6,
+    "messages": 7,
+    "hand_off": true,
+    "recs": [
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 51,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 6,
+    "messages": 7,
+    "hand_off": true,
+    "recs": [
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "52": {
+   "stateless": {
+    "k": 52,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 9,
+    "messages": 11,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "snap"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 52,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 10,
+    "messages": 11,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "snap"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "53": {
+   "stateless": {
+    "k": 53,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 6,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 53,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 6,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "54": {
+   "stateless": {
+    "k": 54,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 1,
+    "messages": 2,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 3,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 54,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 1,
+    "messages": 1,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 3,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "55": {
+   "stateless": {
+    "k": 55,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 8,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 55,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 8,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "56": {
+   "stateless": {
+    "k": 56,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 2,
+    "messages": 2,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 4,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 56,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 3,
+    "messages": 3,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 5,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "57": {
+   "stateless": {
+    "k": 57,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 13,
+    "messages": 15,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc"
+    ],
+    "engine_calls": 16,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 57,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 13,
+    "messages": 14,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc"
+    ],
+    "engine_calls": 15,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "58": {
+   "stateless": {
+    "k": 58,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 8,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 58,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 8,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "59": {
+   "stateless": {
+    "k": 59,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 10,
+    "messages": 11,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 59,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 7,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "60": {
+   "stateless": {
+    "k": 60,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 3,
+    "messages": 3,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 5,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 60,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 2,
+    "messages": 2,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 4,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "61": {
+   "stateless": {
+    "k": 61,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 9,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 61,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 9,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "62": {
+   "stateless": {
+    "k": 62,
+    "loss": 3996.2710571289062,
+    "missed": 996.2710571289062,
+    "false_recs": 3000.0,
+    "questions": 12,
+    "messages": 12,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "tanf"
+    ],
+    "engine_calls": 14,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "tanf"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 62,
+    "loss": 3996.2710571289062,
+    "missed": 996.2710571289062,
+    "false_recs": 3000.0,
+    "questions": 12,
+    "messages": 12,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "tanf"
+    ],
+    "engine_calls": 14,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "tanf"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "63": {
+   "stateless": {
+    "k": 63,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 9,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 63,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 9,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "64": {
+   "stateless": {
+    "k": 64,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 4,
+    "messages": 4,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 6,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 64,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 4,
+    "messages": 4,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 6,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "65": {
+   "stateless": {
+    "k": 65,
+    "loss": 1664.0,
+    "missed": 664.0,
+    "false_recs": 1000.0,
+    "questions": 6,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 9,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 65,
+    "loss": 1664.0,
+    "missed": 664.0,
+    "false_recs": 1000.0,
+    "questions": 7,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "66": {
+   "stateless": {
+    "k": 66,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 1,
+    "messages": 1,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 3,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 66,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 1,
+    "messages": 1,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 3,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "67": {
+   "stateless": {
+    "k": 67,
+    "loss": 5000.0,
+    "missed": 0,
+    "false_recs": 5000.0,
+    "questions": 12,
+    "messages": 12,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "chip",
+     "ctc",
+     "medicaid",
+     "school_meals"
+    ],
+    "engine_calls": 14,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "chip",
+     "ctc",
+     "medicaid",
+     "school_meals"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 67,
+    "loss": 5000.0,
+    "missed": 0,
+    "false_recs": 5000.0,
+    "questions": 12,
+    "messages": 12,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "chip",
+     "ctc",
+     "medicaid",
+     "school_meals"
+    ],
+    "engine_calls": 14,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "chip",
+     "ctc",
+     "medicaid",
+     "school_meals"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "68": {
+   "stateless": {
+    "k": 68,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 3,
+    "messages": 4,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "engine_calls": 5,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 68,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 6,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "69": {
+   "stateless": {
+    "k": 69,
+    "loss": 6000.0,
+    "missed": 0,
+    "false_recs": 6000.0,
+    "questions": 13,
+    "messages": 14,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "snap",
+     "wic"
+    ],
+    "engine_calls": 15,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "snap",
+     "wic"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 69,
+    "loss": 6000.0,
+    "missed": 0,
+    "false_recs": 6000.0,
+    "questions": 13,
+    "messages": 14,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "snap",
+     "wic"
+    ],
+    "engine_calls": 15,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "snap",
+     "wic"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "70": {
+   "stateless": {
+    "k": 70,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 12,
+    "messages": 14,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "snap"
+    ],
+    "engine_calls": 16,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 70,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 12,
+    "messages": 15,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 15,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "71": {
+   "stateless": {
+    "k": 71,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 1,
+    "messages": 1,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 3,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 71,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 1,
+    "messages": 1,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 3,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "72": {
+   "stateless": {
+    "k": 72,
+    "loss": 15860.726593017578,
+    "missed": 15860.726593017578,
+    "false_recs": 0,
+    "questions": 1,
+    "messages": 3,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 3,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 72,
+    "loss": 15860.726593017578,
+    "missed": 15860.726593017578,
+    "false_recs": 0,
+    "questions": 1,
+    "messages": 1,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 3,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "73": {
+   "stateless": {
+    "k": 73,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 9,
+    "messages": 11,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "snap"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 73,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 8,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "snap"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "74": {
+   "stateless": {
+    "k": 74,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 4,
+    "messages": 4,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 6,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 74,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 4,
+    "messages": 4,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 6,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "75": {
+   "stateless": {
+    "k": 75,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 6,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 75,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 6,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "76": {
+   "stateless": {
+    "k": 76,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 8,
+    "messages": 8,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 76,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 8,
+    "messages": 10,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "77": {
+   "stateless": {
+    "k": 77,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 4,
+    "messages": 7,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 6,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 77,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 6,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "78": {
+   "stateless": {
+    "k": 78,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 9,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc"
+    ],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 78,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 5,
+    "messages": 5,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc"
+    ],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "79": {
+   "stateless": {
+    "k": 79,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 12,
+    "messages": 12,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 14,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 79,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 12,
+    "messages": 13,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "engine_calls": 14,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "80": {
+   "stateless": {
+    "k": 80,
+    "loss": 4344.251708984375,
+    "missed": 3344.251708984375,
+    "false_recs": 1000.0,
+    "questions": 6,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 80,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 10,
+    "messages": 12,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "81": {
+   "stateless": {
+    "k": 81,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 4,
+    "messages": 4,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "snap"
+    ],
+    "engine_calls": 6,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 81,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 5,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "snap"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "82": {
+   "stateless": {
+    "k": 82,
+    "loss": 4000.0,
+    "missed": 0,
+    "false_recs": 4000.0,
+    "questions": 5,
+    "messages": 7,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 82,
+    "loss": 4000.0,
+    "missed": 0,
+    "false_recs": 4000.0,
+    "questions": 5,
+    "messages": 6,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "engine_calls": 7,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "83": {
+   "stateless": {
+    "k": 83,
+    "loss": 8911.92578125,
+    "missed": 8911.92578125,
+    "false_recs": 0,
+    "questions": 3,
+    "messages": 3,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 5,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 83,
+    "loss": 8911.92578125,
+    "missed": 8911.92578125,
+    "false_recs": 0,
+    "questions": 3,
+    "messages": 3,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 6,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "84": {
+   "stateless": {
+    "k": 84,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 9,
+    "messages": 12,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "snap",
+     "wic"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "snap",
+     "wic"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 84,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 9,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "snap",
+     "wic"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "snap",
+     "wic"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "85": {
+   "stateless": {
+    "k": 85,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 12,
+    "messages": 13,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 14,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 85,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 11,
+    "messages": 12,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 13,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "86": {
+   "stateless": {
+    "k": 86,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 11,
+    "messages": 11,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "engine_calls": 13,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 86,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 10,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "engine_calls": 13,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "87": {
+   "stateless": {
+    "k": 87,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 11,
+    "messages": 12,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "snap"
+    ],
+    "engine_calls": 13,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 87,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 11,
+    "messages": 12,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "snap"
+    ],
+    "engine_calls": 13,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "88": {
+   "stateless": {
+    "k": 88,
+    "loss": 15307.590942382812,
+    "missed": 15307.590942382812,
+    "false_recs": 0,
+    "questions": 4,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 1,
+    "stale_state": 1
+   },
+   "engine": {
+    "k": 88,
+    "loss": 15307.590942382812,
+    "missed": 15307.590942382812,
+    "false_recs": 0,
+    "questions": 4,
+    "messages": 5,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 6,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "89": {
+   "stateless": {
+    "k": 89,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 7,
+    "messages": 9,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 89,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 7,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [
+     "medicaid"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "90": {
+   "stateless": {
+    "k": 90,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 7,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 90,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 7,
+    "messages": 8,
+    "hand_off": false,
+    "recs": [
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [
+     "medicaid",
+     "snap",
+     "ssi"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "91": {
+   "stateless": {
+    "k": 91,
+    "loss": 1000.0,
+    "missed": 0,
+    "false_recs": 1000.0,
+    "questions": 10,
+    "messages": 10,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 91,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 12,
+    "messages": 14,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 16,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "92": {
+   "stateless": {
+    "k": 92,
+    "loss": 13328.640625,
+    "missed": 13328.640625,
+    "false_recs": 0,
+    "questions": 3,
+    "messages": 3,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 5,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 92,
+    "loss": 13328.640625,
+    "missed": 13328.640625,
+    "false_recs": 0,
+    "questions": 4,
+    "messages": 4,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 6,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "93": {
+   "stateless": {
+    "k": 93,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 10,
+    "messages": 12,
+    "hand_off": false,
+    "recs": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 93,
+    "loss": 4789.4951171875,
+    "missed": 4789.4951171875,
+    "false_recs": 0,
+    "questions": 10,
+    "messages": 10,
+    "hand_off": true,
+    "recs": [
+     "eitc",
+     "medicaid",
+     "snap"
+    ],
+    "engine_calls": 12,
+    "failed": false,
+    "engine_list": [
+     "eitc",
+     "medicaid",
+     "snap"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "94": {
+   "stateless": {
+    "k": 94,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 3,
+    "messages": 3,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 5,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 94,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 3,
+    "messages": 3,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 5,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "95": {
+   "stateless": {
+    "k": 95,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 6,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 95,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 1,
+    "messages": 1,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 3,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "96": {
+   "stateless": {
+    "k": 96,
+    "loss": 5000.0,
+    "missed": 0,
+    "false_recs": 5000.0,
+    "questions": 14,
+    "messages": 14,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "chip",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "wic"
+    ],
+    "engine_calls": 16,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "chip",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "wic"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 96,
+    "loss": 5000.0,
+    "missed": 0,
+    "false_recs": 5000.0,
+    "questions": 13,
+    "messages": 14,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "chip",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "wic"
+    ],
+    "engine_calls": 15,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "chip",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "wic"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "97": {
+   "stateless": {
+    "k": 97,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 13,
+    "messages": 14,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "wic"
+    ],
+    "engine_calls": 15,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "wic"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 97,
+    "loss": 2000.0,
+    "missed": 0,
+    "false_recs": 2000.0,
+    "questions": 13,
+    "messages": 13,
+    "hand_off": true,
+    "recs": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "wic"
+    ],
+    "engine_calls": 15,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "ctc",
+     "eitc",
+     "medicaid",
+     "school_meals",
+     "snap",
+     "wic"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "98": {
+   "stateless": {
+    "k": 98,
+    "loss": 1507.4153442382812,
+    "missed": 507.41534423828125,
+    "false_recs": 1000.0,
+    "questions": 6,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 98,
+    "loss": 1507.4153442382812,
+    "missed": 507.41534423828125,
+    "false_recs": 1000.0,
+    "questions": 6,
+    "messages": 6,
+    "hand_off": false,
+    "recs": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "engine_calls": 8,
+    "failed": false,
+    "engine_list": [
+     "aca_ptc",
+     "medicaid"
+    ],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  },
+  "99": {
+   "stateless": {
+    "k": 99,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 8,
+    "messages": 11,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 11,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   },
+   "engine": {
+    "k": 99,
+    "loss": 0,
+    "missed": 0,
+    "false_recs": 0,
+    "questions": 8,
+    "messages": 13,
+    "hand_off": false,
+    "recs": [],
+    "engine_calls": 10,
+    "failed": false,
+    "engine_list": [],
+    "deviates": false,
+    "engine_errors": 0,
+    "stale_state": 0
+   }
+  }
+ },
+ "diff": {
+  "unweighted": [
+   -49.24639038085939,
+   -286.2619997558594,
+   137.04156408691412
+  ],
+  "weighted": [
+   -216.91321711339742,
+   -860.8987920858411,
+   69.59497716239386
+  ]
+ }
+}

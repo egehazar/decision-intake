@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quick Benefits Check</title>
+<meta name="description" content="Find out in a few minutes which of ten US benefit programmes your household should apply for. Free, private, nothing stored.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&display=swap">
+<style>
+:root {
+  --bg: #f5f4ef; --surface: #ffffff; --ink: #18232c; --muted: #56636e; --line: #d9d6cc; --line-strong: #b9b4a6;
+  --accent: #1d5c88; --accent-ink: #ffffff; --accent-soft: #e4eef6; --focus: #f2a900;
+  --likely: #1b744b; --likely-soft: #e2f1e8; --check: #8a5800; --check-soft: #faefd8;
+  --alert: #8f2d1f; --alert-soft: #fbe9e5; --shadow: 0 1px 2px rgba(24, 35, 44, .06), 0 4px 16px rgba(24, 35, 44, .05);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10161b; --surface: #182129; --ink: #e7edf1; --muted: #9aa8b3; --line: #2a3641; --line-strong: #3d4b57;
+    --accent: #82b8e2; --accent-ink: #0c1620; --accent-soft: #1b2d3c; --focus: #f2c14e;
+    --likely: #73d1a2; --likely-soft: #17352a; --check: #e8bb6a; --check-soft: #3a2c13;
+    --alert: #f0a090; --alert-soft: #3b1d18; --shadow: none; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10161b; --surface: #182129; --ink: #e7edf1; --muted: #9aa8b3; --line: #2a3641; --line-strong: #3d4b57;
+  --accent: #82b8e2; --accent-ink: #0c1620; --accent-soft: #1b2d3c; --focus: #f2c14e;
+  --likely: #73d1a2; --likely-soft: #17352a; --check: #e8bb6a; --check-soft: #3a2c13;
+  --alert: #f0a090; --alert-soft: #3b1d18; --shadow: none; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink);
+  font: 17px/1.55 "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+[hidden] { display: none !important; }
+a { color: var(--accent); text-underline-offset: 2px; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+.wrap { max-width: 44rem; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.skip { position: absolute; left: -9999px; }
+.skip:focus { left: 16px; top: 8px; background: var(--surface); padding: 8px 12px; z-index: 5; }
+
+header.site { border-bottom: 1px solid var(--line); background: var(--surface); }
+header.site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 14px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.05rem; color: var(--ink); text-decoration: none; }
+.brand svg { flex: none; }
+.notgov { font-size: .8rem; color: var(--muted); }
+
+main { padding-block: 28px 48px; }
+h1, h2, h3 { line-height: 1.2; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(1.7rem, 4.5vw, 2.3rem); font-weight: 700; letter-spacing: -.01em; }
+h2 { font-size: 1.35rem; font-weight: 700; }
+h3 { font-size: 1.08rem; font-weight: 600; }
+p { margin: 0; }
+.lede { font-size: 1.12rem; color: var(--muted); max-width: 36rem; }
+.stack { display: flex; flex-direction: column; gap: 16px; }
+.stack-lg { display: flex; flex-direction: column; gap: 28px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 22px; box-shadow: var(--shadow); }
+.facts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.facts div { border-top: 3px solid var(--accent); padding-top: 8px; }
+.facts b { display: block; font-size: 1.25rem; }
+.facts span { color: var(--muted); font-size: .9rem; }
+.programmes { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: .85rem; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--surface); }
+.privacy { display: flex; gap: 12px; align-items: flex-start; font-size: .95rem; color: var(--muted); }
+.privacy svg { flex: none; margin-top: 3px; }
+
+button, .button {
+  font: inherit; font-weight: 600; border-radius: 8px; padding: 12px 22px; cursor: pointer; border: 2px solid var(--accent);
+  background: var(--accent); color: var(--accent-ink); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 48px;
+}
+button.secondary, .button.secondary { background: transparent; color: var(--accent); }
+button.link { background: none; border: none; color: var(--accent); padding: 4px 0; min-height: 0; text-decoration: underline; text-underline-offset: 2px; font-weight: 500; }
+button:disabled { opacity: .55; cursor: progress; }
+.actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+/* question */
+.progress { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; color: var(--muted); font-size: .9rem; flex-wrap: wrap; }
+.bar { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent); border-radius: 3px; transition: width .4s ease; }
+fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+legend { padding: 0; margin-bottom: 14px; }
+.why { font-size: .92rem; color: var(--muted); }
+.options { display: grid; gap: 10px; }
+.options.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.opt { position: relative; }
+.opt input { position: absolute; opacity: 0; pointer-events: none; }
+.opt label {
+  display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 12px 16px; border: 2px solid var(--line-strong);
+  border-radius: 10px; background: var(--surface); cursor: pointer; font-weight: 500;
+}
+.opt label::before { content: ""; flex: none; width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line-strong); background: var(--surface); }
+.opt input:checked + label { border-color: var(--accent); background: var(--accent-soft); }
+.opt input:checked + label::before { border-color: var(--accent); background: radial-gradient(var(--accent) 0 45%, transparent 50%); }
+.opt input:focus-visible + label { outline: 3px solid var(--focus); outline-offset: 2px; }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field label { font-weight: 600; font-size: .95rem; }
+input[type="number"], select {
+  font: inherit; color: var(--ink); background: var(--surface); border: 2px solid var(--line-strong); border-radius: 8px;
+  padding: 10px 12px; min-height: 50px; width: 100%;
+}
+.amount-row { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 11rem); gap: 10px; align-items: end; }
+.money { position: relative; }
+.money span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); }
+.money input { padding-left: 28px; }
+.check { display: flex; gap: 10px; align-items: center; font-size: .95rem; }
+.check input { width: 20px; height: 20px; accent-color: var(--accent); }
+.error { color: var(--alert); background: var(--alert-soft); border-radius: 8px; padding: 10px 14px; font-size: .95rem; }
+details.ranges summary { cursor: pointer; color: var(--accent); font-weight: 500; }
+details.ranges .options { margin-top: 10px; }
+
+/* results */
+.result { border-left: 5px solid var(--line-strong); }
+.result.likely { border-left-color: var(--likely); }
+.result.check { border-left-color: var(--check); }
+.result header { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; flex-wrap: wrap; }
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: .82rem; font-weight: 700; letter-spacing: .02em; padding: 3px 10px; border-radius: 999px; text-transform: uppercase; }
+.badge.likely { background: var(--likely-soft); color: var(--likely); }
+.badge.check { background: var(--check-soft); color: var(--check); }
+.value { font-size: .98rem; }
+.value b { font-variant-numeric: tabular-nums; }
+.result p.desc { color: var(--muted); }
+.handoff { background: var(--check-soft); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+.handoff h2 { font-size: 1.15rem; margin-bottom: 6px; }
+.others { font-size: .95rem; }
+.others summary { cursor: pointer; font-weight: 600; }
+.others ul { margin: 10px 0 0; padding-left: 20px; color: var(--muted); }
+.answers dl { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 16px; margin: 0; }
+.answers dt { color: var(--muted); font-size: .92rem; }
+.answers dd { margin: 0; display: flex; gap: 12px; align-items: baseline; justify-content: flex-end; font-weight: 500; text-align: right; font-size: .95rem; }
+.answers .q { grid-column: 1 / -1; display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--line); padding-top: 8px; }
+.fine { font-size: .88rem; color: var(--muted); }
+
+footer.site { border-top: 1px solid var(--line); background: var(--surface); }
+footer.site .wrap { padding-block: 28px 40px; display: grid; gap: 20px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+footer.site h2 { font-size: 1rem; margin-bottom: 6px; }
+footer.site p, footer.site li { font-size: .9rem; color: var(--muted); }
+footer.site ul { margin: 0; padding-left: 18px; }
+code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: .85em; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.spinner { width: 18px; height: 18px; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } .spinner { animation: none; } }
+@media (max-width: 560px) {
+  body { font-size: 16px; }
+  .facts { grid-template-columns: minmax(0, 1fr); }
+  .options.two { grid-template-columns: minmax(0, 1fr); }
+  .amount-row { grid-template-columns: minmax(0, 1fr); }
+  footer.site .wrap { grid-template-columns: minmax(0, 1fr); }
+  .card { padding: 18px; }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to the check</a>
+<header class="site">
+  <div class="wrap">
+    <a class="brand" href="./" aria-label="Quick Benefits Check, start page">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="7" fill="var(--accent)"/><path d="M8 14.5l4 4 8-9" fill="none" stroke="var(--accent-ink)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Quick Benefits Check
+    </a>
+    <span class="notgov">Not a government website</span>
+  </div>
+</header>
+
+<main id="main" class="wrap" tabindex="-1">
+  <div id="status" class="error" role="alert" hidden></div>
+
+  <!-- start -->
+  <section id="intro" class="stack-lg" aria-labelledby="intro-h">
+    <div class="stack">
+      <h1 id="intro-h">See which benefits your household should apply for</h1>
+      <p class="lede">Answer a few questions about your household. We check ten US programmes and tell you which are worth applying for, and roughly what each is worth a year.</p>
+    </div>
+    <div class="facts" aria-label="At a glance">
+      <div><b>About 8 questions</b><span>only the ones that matter for you</span></div>
+      <div><b>2–3 minutes</b><span>no account, no email</span></div>
+      <div><b>Nothing stored</b><span>your answers are never saved</span></div>
+    </div>
+    <div class="stack">
+      <h2>Programmes we check</h2>
+      <div class="programmes" id="programme-chips"></div>
+    </div>
+    <div id="resume" class="card stack" hidden>
+      <p>You have a check in progress in this tab.</p>
+      <div class="actions"><button id="resume-go" type="button">Continue where I left off</button><button id="resume-new" class="secondary" type="button">Start a new check</button></div>
+    </div>
+    <div class="actions"><button id="start" type="button">Start the check</button></div>
+    <p class="privacy">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+      <span>Your answers are sent with each step so the engine can choose the next question, then forgotten. They are not stored, logged or shared, and closing this tab clears them.</span>
+    </p>
+  </section>
+
+  <!-- one question -->
+  <section id="ask" class="stack-lg" hidden aria-labelledby="q-text">
+    <div class="stack" style="gap:8px">
+      <div class="progress"><span id="q-count"></span><span id="q-remaining"></span></div>
+      <div class="bar" aria-hidden="true"><i id="q-bar" style="width:0%"></i></div>
+    </div>
+    <form id="q-form" class="card stack-lg" novalidate>
+      <fieldset class="stack">
+        <legend><h1 id="q-text" tabindex="-1" style="font-size:clamp(1.35rem,3.6vw,1.75rem)"></h1></legend>
+        <p class="why" id="q-why"></p>
+        <div id="q-input"></div>
+        <div id="q-error" class="error" role="alert" hidden></div>
+      </fieldset>
+      <div class="actions">
+        <button id="q-next" type="submit">Continue</button>
+        <button id="q-dk" class="secondary" type="button">I don't know</button>
+        <button id="q-cancel" class="link" type="button" hidden>Cancel change</button>
+      </div>
+    </form>
+    <details class="answers card" id="sofar" hidden>
+      <summary><b>Your answers so far</b></summary>
+      <dl id="sofar-list" style="margin-top:12px"></dl>
+    </details>
+  </section>
+
+  <!-- results -->
+  <section id="results" class="stack-lg" hidden aria-labelledby="r-h">
+    <div class="stack">
+      <h1 id="r-h" tabindex="-1"></h1>
+      <p class="lede" id="r-lede"></p>
+    </div>
+    <div id="handoff" class="handoff" hidden>
+      <h2>A person should look at this with you</h2>
+      <p id="handoff-text"></p>
+      <p style="margin-top:8px">Free local help: call <b>211</b> or visit <a href="https://211.org/" target="_blank" rel="noopener">211.org</a>. A benefits navigator can check every programme with you.</p>
+    </div>
+    <div id="r-list" class="stack"></div>
+    <details class="others card" id="r-others"><summary>Programmes that don't look likely</summary><ul id="r-others-list"></ul></details>
+    <div class="answers card stack">
+      <h2>Your answers</h2>
+      <p class="fine">Something wrong? Change it and the results update.</p>
+      <dl id="r-answers"></dl>
+    </div>
+    <p class="fine" id="r-note"></p>
+    <div class="actions"><button id="again" class="secondary" type="button">Start a new check</button></div>
+  </section>
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <div>
+      <h2>How it works</h2>
+      <p>The DecisionIntake engine learned from 48,657 households scored by <a href="https://github.com/PolicyEngine/policyengine-us" target="_blank" rel="noopener">PolicyEngine-US</a>, an open model of the 2026 benefit rules. After each answer it asks the question most likely to change what you should apply for, and stops when another question isn't worth your time.</p>
+    </div>
+    <div>
+      <h2>How well it does</h2>
+      <p>On 2,000 households it had never seen, it asked 8 questions on average instead of 18 and was as accurate as asking all 18. It beat the strongest decision tree and the best fixed 8-question form we could build. This is a screening estimate, not a decision: only the programme can tell you for sure.</p>
+    </div>
+    <div>
+      <h2>For developers</h2>
+      <ul>
+        <li>JSON API: <a href="openapi.json">openapi.json</a></li>
+        <li>MCP connector for AI assistants: <code id="mcp-url">/mcp</code></li>
+        <li>Source and evaluation: <a href="https://github.com/egehazar/decision-intake" target="_blank" rel="noopener">github.com/egehazar/decision-intake</a></li>
+      </ul>
+    </div>
+    <div>
+      <h2>Privacy</h2>
+      <p>No cookies, no analytics, no accounts. The server keeps nothing between steps: your answers travel with each request and are dropped when it's answered.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+"use strict";
+const API = "";  // same origin
+const STATES = {AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",CT:"Connecticut",DE:"Delaware",DC:"District of Columbia",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming"};
+const TAX_HELP = "https://www.irs.gov/individuals/free-tax-return-preparation-for-qualifying-taxpayers";
+const INFO = {
+  snap: {name: "SNAP (food stamps)", desc: "Money for groceries each month, on an EBT card.", apply: "https://www.usa.gov/food-stamps", how: "Apply with your state's SNAP office"},
+  wic: {name: "WIC", desc: "Healthy food, formula and nutrition help for pregnant people, new parents and children under 5.", apply: "https://www.usa.gov/food-assistance", how: "Find your local WIC office"},
+  tanf: {name: "TANF (cash assistance)", desc: "Monthly cash help for families with children, run by your state.", apply: "https://www.usa.gov/welfare-benefits", how: "Apply with your state's TANF office"},
+  ssi: {name: "SSI", desc: "Monthly payments for people 65 or older, or with a disability, who have little income.", apply: "https://www.ssa.gov/ssi", how: "Apply with Social Security"},
+  medicaid: {name: "Medicaid", desc: "Free or low-cost health coverage.", apply: "https://www.healthcare.gov/medicaid-chip/getting-medicaid-chip/", how: "Apply through your state or HealthCare.gov"},
+  chip: {name: "CHIP", desc: "Low-cost health coverage for children.", apply: "https://www.insurekidsnow.gov/", how: "Apply through InsureKidsNow.gov"},
+  eitc: {name: "Earned Income Tax Credit", desc: "A tax credit for working people. You get it by filing a tax return, even if you owe no tax.", apply: "https://www.irs.gov/credits-deductions/individuals/earned-income-tax-credit-eitc", how: "Claim it when you file taxes", tax: true},
+  ctc: {name: "Child Tax Credit (refundable part)", desc: "Money back for each child when you file your tax return, even if you owe no tax.", apply: "https://www.irs.gov/credits-deductions/individuals/child-tax-credit-and-credit-for-other-dependents", how: "Claim it when you file taxes", tax: true},
+  aca_ptc: {name: "Health plan premium tax credit", desc: "Lowers the monthly cost of a health plan bought on the Marketplace.", apply: "https://www.healthcare.gov/", how: "Shop and apply at HealthCare.gov"},
+  school_meals: {name: "Free or reduced-price school meals", desc: "Free or cheaper school breakfast and lunch.", apply: "https://www.usa.gov/school-meals", how: "Apply through your child's school"}
+};
+const QLABEL = {state: "State", household_size: "People in household", children: "Children under 18", child_under5: "A child under 5", infant_or_pregnant: "Pregnant or a baby under 1", senior: "Anyone 65 or older", disabled: "Anyone with a disability", married: "Married couple", earned_income: "Earnings from work", self_employed: "Self-employed", social_security: "Social Security", other_income: "Other income", housing_cost: "Rent or mortgage", tenure: "Rent or own", childcare: "Childcare costs", assets: "Savings and investments", employer_insurance: "Health insurance through a job", college: "Full-time college student"};
+
+const $ = id => document.getElementById(id);
+const S = {catalogue: null, byId: {}, state: null, readings: {}, asked: 0, current: null, editing: null, lastNext: null, busy: false};
+
+function store() { try { sessionStorage.setItem("dq", JSON.stringify({state: S.state, readings: S.readings, asked: S.asked})); } catch (e) {} }
+function restore() { try { return JSON.parse(sessionStorage.getItem("dq") || "null"); } catch (e) { return null; } }
+function forget() { try { sessionStorage.removeItem("dq"); } catch (e) {} }
+
+function show(id) {
+  for (const s of ["intro", "ask", "results"]) $(s).hidden = s !== id;
+  window.scrollTo({top: 0});
+}
+function status(msg) { $("status").textContent = msg || ""; $("status").hidden = !msg; }
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c])); }
+function money(x) { return "$" + Math.round(x).toLocaleString("en-US"); }
+
+async function post(path, body) {
+  const r = await fetch(API + path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw Object.assign(new Error(j.error?.message || `The server answered ${r.status}`), {code: j.error?.code});
+  return j;
+}
+
+async function boot() {
+  $("mcp-url").textContent = location.origin + "/mcp";
+  try {
+    const r = await fetch(API + "/v1/questions");
+    if (!r.ok) throw new Error();
+    S.catalogue = await r.json();
+  } catch (e) {
+    status("The check can't reach its server right now. Please try again in a minute.");
+    $("start").disabled = true;
+    return;
+  }
+  for (const q of S.catalogue.questions) S.byId[q.id] = q;
+  $("programme-chips").innerHTML = S.catalogue.programmes.map(p => `<span class="chip">${esc(INFO[p.id]?.name || p.label)}</span>`).join("");
+  const saved = restore();
+  if (saved && saved.state && Object.keys(saved.readings || {}).length) {
+    $("resume").hidden = false;
+    $("resume-go").onclick = () => { Object.assign(S, {state: saved.state, readings: saved.readings, asked: saved.asked || 0}); step([]); };
+    $("resume-new").onclick = () => { forget(); $("resume").hidden = true; };
+  }
+}
+
+async function step(facts) {
+  if (S.busy) return;
+  S.busy = true; status("");
+  const btn = $("q-next"); const label = btn.textContent;
+  btn.disabled = $("q-dk").disabled = true;
+  if (!$("ask").hidden) btn.innerHTML = '<span class="spinner" aria-hidden="true"></span> Checking';
+  try {
+    const r = await post("/v1/step", {state: S.state || undefined, facts});
+    const bad = r.readings.find(x => x.error);
+    if (bad) { showError(bad.error); return; }
+    for (const x of r.readings) S.readings[x.question] = x.reading;
+    if (facts.length && !S.editing) S.asked += 1;
+    S.state = r.state; S.editing = null; S.lastNext = r.next;
+    store();
+    if (r.next.action === "ask") renderQuestion(r.next); else renderResults(r.next);
+  } catch (e) {
+    if (e.code === "bad_state") { forget(); S.state = null; S.readings = {}; S.asked = 0; }
+    status(e.code === "bad_state" ? "That check had expired. Please start again." : "Something went wrong reaching the server. Check your connection and try again.");
+  } finally {
+    S.busy = false; btn.disabled = $("q-dk").disabled = false; btn.textContent = label;
+  }
+}
+
+function showError(msg) {
+  $("q-error").textContent = msg.replace(/^"(.+?)" is not an option.*/, "Please choose one of the options.");
+  $("q-error").hidden = false;
+}
+
+function optionLabel(q, o) {
+  if (q.id === "state") return STATES[o] || o;
+  return o.charAt(0).toUpperCase() + o.slice(1);
+}
+
+function renderQuestion(next, editing) {
+  const q = next.question; S.current = q;
+  $("q-error").hidden = true;
+  $("q-text").textContent = q.text;
+  const settles = (next.why?.mostly_settles || []).map(s => {
+    const id = (S.catalogue.programmes.find(p => p.label === s.programme) || {}).id;
+    return INFO[id]?.name || s.programme;
+  });
+  $("q-why").textContent = editing ? "Change your answer and we'll update the results." :
+    settles.length ? `This helps decide: ${settles.join(", ")}.` : "";
+  const n = Object.keys(S.readings).length;
+  $("q-count").textContent = editing ? "Changing an answer" : `Question ${S.asked + 1}`;
+  $("q-remaining").textContent = editing ? "" : (n < 3 ? "Usually 4 to 12 in all" : "We stop as soon as more questions wouldn't help");
+  $("q-bar").style.width = Math.min(95, 8 + n * 9) + "%";
+  $("q-cancel").hidden = !editing;
+  $("q-dk").hidden = false;
+  const box = $("q-input");
+  if (q.id === "state") {
+    box.innerHTML = `<div class="field"><label for="f-state">State</label><select id="f-state" name="choice" required><option value="">Choose your state</option>${q.options.map(o => `<option value="${o}">${esc(STATES[o] || o)}</option>`).join("")}</select></div>`;
+  } else if (q.kind === "choice") {
+    const two = q.options.length === 2 ? " two" : "";
+    box.innerHTML = `<div class="options${two}">${q.options.map((o, k) => `<div class="opt"><input type="radio" name="choice" id="o${k}" value="${esc(o)}"><label for="o${k}">${esc(optionLabel(q, o))}</label></div>`).join("")}</div>`;
+  } else {
+    const per = q.unit.includes("a year") ? "year" : q.unit.includes("a month") ? "month" : "none";
+    const periodSel = per === "none" ? "" : `<div class="field"><label for="f-period">How often</label><select id="f-period"><option value="year"${per === "year" ? " selected" : ""}>a year</option><option value="month"${per === "month" ? " selected" : ""}>a month</option><option value="week">a week</option></select></div>`;
+    const hasNone = q.ranges[0] === "none";
+    box.innerHTML = `
+      ${hasNone ? `<div class="options two" style="margin-bottom:14px"><div class="opt"><input type="radio" name="mode" id="m-none" value="none"><label for="m-none">None</label></div><div class="opt"><input type="radio" name="mode" id="m-some" value="some" checked><label for="m-some">Some</label></div></div>` : ""}
+      <div id="amount-box" class="stack">
+        <div class="amount-row">
+          <div class="field"><label for="f-amount">Amount in dollars</label><div class="money"><span aria-hidden="true">$</span><input type="number" id="f-amount" inputmode="decimal" min="0" step="any" autocomplete="off"></div></div>
+          ${periodSel}
+        </div>
+        <label class="check"><input type="checkbox" id="f-approx"> This is a rough guess</label>
+        <details class="ranges"><summary>Pick a range instead</summary>
+          <div class="options">${q.ranges.map((o, k) => `<div class="opt"><input type="radio" name="range" id="r${k}" value="${esc(o)}"><label for="r${k}">${esc(optionLabel(q, o))}</label></div>`).join("")}</div>
+        </details>
+      </div>`;
+    if (hasNone) {
+      const sync = () => { $("amount-box").hidden = $("m-none").checked; };
+      $("m-none").onchange = $("m-some").onchange = sync;
+    }
+  }
+  renderSoFar();
+  show("ask");
+  $("q-text").focus({preventScroll: true});
+}
+
+function readFact() {
+  const q = S.current;
+  if (q.id === "state") {
+    const v = $("f-state").value;
+    return v ? {question: q.id, choice: v} : null;
+  }
+  if (q.kind === "choice") {
+    const c = document.querySelector('input[name="choice"]:checked');
+    return c ? {question: q.id, choice: c.value} : null;
+  }
+  if ($("m-none")?.checked) return {question: q.id, choice: "none"};
+  const r = document.querySelector('input[name="range"]:checked');
+  const v = $("f-amount").value.trim();
+  if (v !== "") {
+    const x = Number(v);
+    if (!isFinite(x) || x < 0) return "Please enter an amount of 0 or more.";
+    const period = $("f-period") ? $("f-period").value : "none";
+    return {question: q.id, amount: {value: x, period, approximate: $("f-approx").checked}};
+  }
+  if (r) return {question: q.id, choice: r.value};
+  return null;
+}
+
+$("q-form").addEventListener("submit", e => {
+  e.preventDefault();
+  const f = readFact();
+  if (f === null) { showError("Please answer, or choose “I don't know”."); return; }
+  if (typeof f === "string") { showError(f); return; }
+  step([f]);
+});
+$("q-dk").onclick = () => step([{question: S.current.id, dont_know: true}]);
+$("q-cancel").onclick = () => { S.editing = null; const n = S.lastNext; n.action === "ask" ? renderQuestion(n) : renderResults(n); };
+
+function answersHTML() {
+  return Object.entries(S.readings).map(([qid, reading]) => {
+    let shown = String(reading);
+    if (qid === "state") shown = STATES[reading] || reading;
+    shown = shown.replace(/ -> .*/, "").replace(/^don't know.*/, "Don't know");
+    return `<div class="q"><dt>${esc(QLABEL[qid] || qid)}</dt><dd><span>${esc(shown.charAt(0).toUpperCase() + shown.slice(1))}</span><button class="link" type="button" data-edit="${qid}">Change<span class="skip"> ${esc(QLABEL[qid] || qid)}</span></button></dd></div>`;
+  }).join("");
+}
+function wireEdits(root) {
+  root.querySelectorAll("[data-edit]").forEach(b => b.onclick = () => {
+    S.editing = b.dataset.edit;
+    renderQuestion({action: "ask", question: S.byId[b.dataset.edit], why: {}, progress: {}}, true);
+  });
+}
+function renderSoFar() {
+  const has = Object.keys(S.readings).length > 0;
+  $("sofar").hidden = !has;
+  $("sofar-list").innerHTML = answersHTML();
+  wireEdits($("sofar-list"));
+}
+
+function renderResults(next) {
+  const recs = next.recommend || [];
+  const likely = recs.filter(r => r.tier === "likely").length;
+  $("r-h").textContent = recs.length ? `${recs.length} programme${recs.length > 1 ? "s" : ""} worth applying for` : "Nothing stands out from these answers";
+  $("r-lede").textContent = recs.length
+    ? (likely ? `${likely} look${likely === 1 ? "s" : ""} likely. ` : "") + "Values are rough yearly ranges if you qualify. Only the programme can confirm it."
+    : "From what you told us, none of the ten programmes looks likely. If your situation changes, or you think an answer is off, change it below.";
+  $("handoff").hidden = next.action !== "hand_off";
+  $("handoff-text").textContent = "Your answers fit households that turn out very differently, so a short check can't call it with confidence.";
+  $("r-list").innerHTML = recs.map(r => {
+    const info = INFO[r.id] || {name: r.programme, desc: "", apply: "", how: "Apply"};
+    const tier = r.tier === "likely" ? ["likely", "Likely"] : ["check", "Worth checking"];
+    const v = r.value_if_eligible_per_year;
+    const value = Array.isArray(v) ? `Worth about <b>${money(v[0])}–${money(v[1])}</b> a year if you qualify` : v === "small" ? "A small amount a year if you qualify" : "";
+    const tax = info.tax ? `<p class="fine">Filing is free with <a href="${TAX_HELP}" target="_blank" rel="noopener">IRS free tax help (VITA)</a> if your income is modest.</p>` : "";
+    return `<article class="card result ${tier[0]} stack">
+      <header><h2 style="font-size:1.2rem">${esc(info.name)}</h2><span class="badge ${tier[0]}">${tier[0] === "likely" ? "&#10003;" : "?"} ${tier[1]}</span></header>
+      <p class="desc">${esc(info.desc)}</p>
+      ${value ? `<p class="value">${value}</p>` : ""}
+      <div class="actions"><a class="button" href="${info.apply}" target="_blank" rel="noopener">${esc(info.how)} <span aria-hidden="true">&#8599;</span></a></div>
+      ${tax}
+    </article>`;
+  }).join("");
+  const recIds = new Set(recs.map(r => r.id));
+  const others = S.catalogue.programmes.filter(p => !recIds.has(p.id));
+  $("r-others").hidden = !others.length;
+  $("r-others-list").innerHTML = others.map(p => `<li>${esc(INFO[p.id]?.name || p.label)}</li>`).join("");
+  $("r-answers").innerHTML = answersHTML();
+  wireEdits($("r-answers"));
+  $("r-note").textContent = (next.note || "") + " Answers are kept only in this browser tab.";
+  show("results");
+  $("r-h").focus({preventScroll: true});
+}
+
+$("start").onclick = () => { forget(); Object.assign(S, {state: null, readings: {}, asked: 0, editing: null}); step([]); };
+$("again").onclick = () => { forget(); Object.assign(S, {state: null, readings: {}, asked: 0, editing: null}); $("resume").hidden = true; show("intro"); };
+boot();
+</script>
+</body>
+</html>
