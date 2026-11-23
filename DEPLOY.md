@@ -5,6 +5,14 @@ as is: `vercel.json` sends `/v1/*`, `/mcp`, `/healthz` and `/openapi.json` to on
 (`api/index.py`) and serves the screener from the CDN. It keeps nothing between requests, so there is
 no database, no secret and no migration.
 
+## Live staging (D36)
+
+Project `decision-intake` on Vercel, linked to this repository: every push to master deploys.
+Vercel Authentication protects **all** deployments, the production address `decision-intake.vercel.app`
+included (Settings → Deployment Protection → Vercel Authentication: All Deployments). Note: a new
+project starts with standard protection, which leaves the production address public; switch it to all
+deployments before the first build.
+
 ## Staging first
 
 Deploy behind protection until the release gate below passes.
@@ -40,8 +48,10 @@ From GPT's round-6 review; each item is checked in DECISIONS.md or the model car
 - [x] Non-government, informational-use disclaimer; privacy notice
 - [ ] Keyboard, screen reader and phone width checked (axe-core passes in light and dark; no overflow at 375 px; a manual screen-reader pass still to do)
 - [x] No facts in URLs, logs or analytics (state travels in POST bodies only)
-- [ ] Request limits in the app (64 KB body, 40 facts, 2,000-character state); Vercel spend alert set
-- [ ] Cold and warm latency measured on the real deployment (locally: 125 ms median, 253 ms p95 per request)
+- [x] Request limits in the app (64 KB body, 40 facts, 2,000-character state); the Hobby plan has no
+      billing to run up (usage limits cap it)
+- [x] Cold and warm latency measured on the real deployment: engine boot 1.1 s, /v1/step about 300 ms
+      median server time (89 ms to 1.1 s); locally 125 ms median (D36)
 - [ ] Rollback rehearsed (below)
 
 ## Rollback

@@ -1004,3 +1004,22 @@ rules stay; with them, 0%.
   household (realistic: 2.77% -> 0.90%, 1.19). So production becomes v2 + the D32 rules + abstention
   (support under 10 and probability at least 5% -> "can't tell"), in the hosted service and the MCP
   server; experiment harnesses are unchanged.
+
+## D36. Protected staging on Vercel (2026-11-23 18:02 UTC)
+
+Vercel project decision-intake (Hobby, team "egehazar's projects"), linked to this repository: every
+push to master deploys. First deployment from 0f42483 built in 4 s (Python 3.12, numpy from
+pyproject.toml) and booted the engine in 1.1 s.
+
+- **Protection.** Vercel Authentication now covers all deployments, including the production address
+  decision-intake.vercel.app. The project was created with Vercel's standard protection, which leaves
+  the production address open: it answered without a login for about 35 seconds after the first build
+  (17:59:52-18:00:23 UTC), until protection was set to all deployments. In that window the logs show
+  two page loads from Vercel's own region in the first seconds (the dashboard's screenshot) and my
+  own check; the page sends noindex and nothing links to it.
+- **Checks on the live deployment, 13 of 13:** the page, /healthz, /v1/questions, /openapi.json, bad
+  JSON and a damaged state refused, three whole screenings (8-12 questions; the thin ones show "can't
+  tell"), and MCP over HTTP (initialize at 2025-11-25, three tools, record_facts, notification 202).
+- **Server time per request** (from the service's own log lines): /v1/step median about 300 ms, 89 ms
+  to 1.1 s; the first few answers are the slowest (the belief is widest there). Slower than on this
+  machine (125 ms median), fine for a person answering one question at a time.
