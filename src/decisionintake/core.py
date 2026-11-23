@@ -350,6 +350,21 @@ class Session:
         rows.sort(key=lambda r: -r[1])
         return rows
 
+    def voi_by_decision(self, q: int) -> np.ndarray:
+        """voi(q) split by decision: how much of the expected drop in loss falls on each one. Sums to voi(q).
+        Explains a question to the person ("this mostly settles SNAP and school meals")."""
+        qu = self.pop.questions[q]
+        b, total = len(qu.options), self.w.sum()
+        col = self.pop.answers[:, q]
+        block_s = np.stack([np.bincount(col, weights=self.w * self.l_skip[:, d], minlength=b)
+                            for d in range(self.l_skip.shape[1])], 1)
+        block_r = np.stack([np.bincount(col, weights=self.w * self.l_rec[:, d], minlength=b)
+                            for d in range(self.l_rec.shape[1])], 1)
+        rep = qu.report_matrix()
+        post_s, post_r = rep.T @ block_s, rep.T @ block_r  # (reported option, decision)
+        now = np.minimum(self.w @ self.l_skip, self.w @ self.l_rec) / total
+        return now - np.minimum(post_s, post_r).sum(0) / total
+
     def pair_table(self, candidates=None, n_plan: int = 4000, seed: int = 0) -> list[tuple[int, int, float]]:
         """Value of asking two questions, for every pair of candidates, best first.
 
