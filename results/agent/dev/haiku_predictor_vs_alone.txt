@@ -1,0 +1,20 @@
+dev / haiku: 100 households finished in both arms (mean per household; survey-weighted in brackets)
+  predictor questions  4.0 ( 3.0)  mistakes $ 2,595 ($ 2,138)  missed $1,585  wrong recs $1,010  hand-offs 17%
+          recommendations 171, precision 41%, recall 65% of 108 eligible programmes
+  alone   questions  8.2 ( 7.1)  mistakes $ 3,408 ($ 5,295)  missed $2,728  wrong recs $  680  hand-offs 55%
+          recommendations 136, precision 50%, recall 63% of 108 eligible programmes
+  predictor minus alone, total cost, unweighted: $-875 [-2,358, 318]
+  predictor minus alone, total cost, weighted: $-3,219 [-10,075, 562]
+  predictor-arm submissions that differ from the engine's own last list: 0; runs without a submission: {'predictor': 0, 'alone': 0}
+  households neither arm handed off (45): predictor minus alone $-1,157
+  per programme, households where it was missed / wrongly recommended (predictor | alone):
+    snap          missed   4 |   2   wrong  14 |  13
+    wic           missed   4 |   3   wrong   1 |   0
+    tanf          missed   0 |   0   wrong   2 |   1
+    ssi           missed   2 |   2   wrong  12 |   1
+    medicaid      missed   3 |  11   wrong  35 |  11
+    chip          missed   0 |   0   wrong   3 |  11
+    eitc          missed   9 |   7   wrong   4 |   7
+    ctc           missed   4 |   2   wrong   2 |   8
+    aca_ptc       missed   9 |  10   wrong  26 |  14
+    school_meals  missed   3 |   3   wrong   2 |   2
