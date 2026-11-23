@@ -543,6 +543,51 @@ By the reading fixed in D28: v2 is a real improvement, and it beats the old full
 than half the questions. P3 (strongest tree), P4 (best fixed 8-question set) and the secondary
 comparisons still need the run resumed (it continues from the saved interviews).
 
+## D28 result, part 2: all four primary comparisons confirmed (2026-11-23, 09:47 UTC)
+
+With Ege's go after memory freed up, the run resumed at 08:52 UTC from the saved interviews (5
+workers, nothing else changed) and finished all 28,000 interviews at about 09:46 (results/v2_2000.jsonl,
+results/v2_2000_analysis.txt).
+
+Clean answers, 2,000 fresh test households, survey-weighted, $/household/year:
+
+| policy (all deciding with v2 unless marked) | questions | decision loss | total |
+|---|---|---|---|
+| **v2 engine** | 8.4 | $1,017 | **$1,144** |
+| v2 full questionnaire | 18 | $953 | $1,223 |
+| strongest tree (D27: falls back to broader data, min leaf 100) | 11.1 | $1,270 | $1,437 |
+| D25 tree | 7.2 | $1,809 | $1,916 |
+| best fixed 8-question form | 8 | $1,791 | $1,911 |
+| v1 engine (linear model) | 8.5 | $1,297 | $1,424 |
+| v1 full questionnaire (linear model) | 18 | $1,356 | $1,626 |
+
+Primary, v2 engine minus each, total cost [95% CI], Holm over the four:
+- P1 v1 engine: -$281 [-437, -142], Holm p < 0.002.
+- P2 v1 full questionnaire: -$483 [-667, -317], Holm p < 0.002.
+- P3 strongest tree: **-$293 [-485, -136]**, Holm p < 0.002; loss alone -$253 [-446, -95], with 2.6
+  fewer questions. The tree that came within noise of v1's engine (D27) is beaten once both decide
+  with v2.
+- P4 best fixed 8-question form: **-$768 [-1,241, -398]**, Holm p < 0.002; the same number of
+  questions, so this is question choice alone.
+- Every interval is the same within $40 when whole source households are resampled.
+
+Secondary:
+- S1, v2 engine against v2 asking all 18: -$79 [-188, +37] in total cost, +$64 [-44, +180] in loss
+  alone. Asking 9.6 fewer questions costs no detectable accuracy.
+- S2, against the D25 tree on v2: -$773 [-1,234, -392]. S3, the v2 model against v1 with all 18
+  answers: -$403 [-598, -224], the prediction gain on its own.
+- Realistic answers (two volunteered facts, misreports, 10% "don't know"): no comparison is
+  distinguishable from zero (P1 +$131 [-173, +472], P2 -$259 [-747, +233], P3 +$94 [-352, +532],
+  P4 -$160 [-629, +286]). Misreported answers wash out the differences between policies, as they did
+  in D21. The engine's estimate of its own mistakes is 28% low under misreports (0.72), against 19%
+  high on clean answers.
+
+By the reading fixed in D28: v2 is confirmed against every primary alternative, including the
+strongest tree and the best fixed form, and it matches its own full questionnaire with fewer than
+half the questions. GPT round 4's headline condition ("P1/P2 confirm and P3/P4 favour v2") is met
+with P3 and P4 confirmed outright, not only within noise. The realistic-answer result is the limit:
+under noisy answers no question policy separates.
+
 ## D29. Pre-registered: does the engine make a real AI assistant better? (2026-11-23, 09:30 UTC, before any test run)
 
 Everything so far simulated the person's answers as typed options. D29 puts a real language model in the

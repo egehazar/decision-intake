@@ -54,15 +54,32 @@ total cost fell by $377 [−744, −55]. Then everything was frozen and the test
 **The pre-registered test.** 2,000 test households that no earlier run had touched, clean answers,
 Holm correction over the primary comparisons:
 
-| policy | questions | mistakes | mistakes + $15 a question |
-|---|---|---|---|
-| **v2 engine** | **8.4** | **$1,017** | **$1,144** |
-| v1 engine | 8.5 | $1,297 | $1,424 |
-| v1 full questionnaire | 18 | $1,356 | $1,626 |
+| policy | questions | mistakes | mistakes + $15 a question | v2 engine minus it [95% CI] |
+|---|---|---|---|---|
+| **v2 engine** | **8.4** | **$1,017** | **$1,144** | |
+| v1 engine | 8.5 | $1,297 | $1,424 | **−$281** [−437, −142] |
+| v1 full questionnaire | 18 | $1,356 | $1,626 | **−$483** [−667, −317] |
+| strongest tree, deciding with v2 | 11.1 | $1,270 | $1,437 | **−$293** [−485, −136] |
+| best fixed 8-question form, deciding with v2 | 8 | $1,791 | $1,911 | **−$768** [−1,241, −398] |
+| v2 asking all 18 (secondary) | 18 | $953 | $1,223 | −$79 [−188, +37] |
 
-v2 minus v1 engine: −$281 [−437, −142]; v2 minus the v1 full questionnaire: −$483 [−667, −317],
-−$339 [−523, −173] in mistakes alone. Both p < 0.002 after Holm. Resampling whole source households
-(82 of the 1,918 source households contribute two test records) moves the intervals by under $5.
+All four registered comparisons (bold) hold with Holm p < 0.002. Resampling whole source households
+(82 of the 1,918 source households contribute two test records) moves the intervals by under $40.
+Against the v1 full questionnaire the gain is also in mistakes alone (−$339 [−523, −173]), not only
+in questions saved. Two comparisons isolate the two halves of the system:
+
+- **Question choice.** The best fixed 8-question form, chosen by beam search on the training
+  population and deciding with the same v2 model, costs $768 more at the same number of questions.
+  The strongest tree, which falls back to broader data where its branches run thin, costs $293 more
+  with 2.6 more questions. Asking the right questions for this person, in this order, is worth
+  hundreds of dollars a household.
+- **Prediction.** With every answer known, v2's model beats v1's by $403 [−598, −224]. And v2's
+  engine against v2 asking all 18: −$79 [−188, +37], so the 9.6 questions it skips cost no detectable
+  accuracy.
+
+The limit: with realistic answers (misreports, "don't know", facts volunteered up front) none of the
+comparisons separates from zero. When a tenth of the answers carry no information and others are
+misreported, every policy's mistakes are dominated by the noise in what it is told.
 
 **What it does with what it knows.**
 - Recommendations at 50% or more ("likely") are right 78% of the time and find two thirds of all
@@ -251,6 +268,40 @@ reading accuracy, not about benefits found.
 The browser demo uses the same structured design but with Claude filling the slots, because a page
 can't run the 4B models. The numbers above are for the 4B models, so they don't measure the demo's
 exact pipeline.
+
+## An engine any assistant can use
+
+A decision engine that only runs inside its own experiments is a study, not a product. Version 2 ships
+in three layers, each tested against the one below it:
+
+- **One file.** `decisionintake.bundle` packs everything a live intake needs into a 1.5 MB `.npz`: the
+  questions with their misreport models and amount ranges, the 48,657 training households the belief
+  runs over, the loss, and the outcome network. The network's wide features are stored as data (each
+  is an offset plus a stride-weighted sum of answers), so serving needs numpy and nothing else: no
+  PolicyEngine, no pandas, no adapter code. The exported file reproduces the training run's
+  probabilities exactly.
+- **A typed interface.** `decisionintake.service.Intake` is what an assistant talks to. It takes facts
+  in three shapes: an option ("yes", "CA", "3", and a number such as 6 maps onto "4 or more"), an
+  amount as the person said it ({"value": 2400, "period": "month", "approximate": true}), or "don't
+  know". Code does the arithmetic and reports how it read each fact
+  (`$2,400 a month -> $24,480-$33,120 a year -> "$20,000 to $30,000" 63%, "$30,000 to $40,000" 36%`).
+  A bad fact comes back with the valid options while the rest go in; a fact for a question already
+  answered replaces it, and every fact is replayed on a fresh belief. Each step says what to do: ask
+  (which question, what it is worth in dollars of mistakes prevented, and which programmes it mostly
+  settles, from the value of information split by programme), finish with tiered recommendations, or
+  hand off with the reason. A test drives it with each household's answers and checks that it asks
+  exactly the questions the simulated interviews asked and reaches the same decisions.
+- **A standard protocol.** `decisionintake.mcp_server` serves it over the Model Context Protocol, the
+  interface Claude, ChatGPT, Cursor and most agent frameworks use for tools: JSON-RPC over stdio, four
+  tools (`start_intake`, `record_facts`, `next_step`, `get_assessment`), and instructions that tell the
+  assistant to do the language and leave the decisions to the engine. It has no dependencies beyond
+  numpy, starts in about a second, and answers each step in about 0.1 s. A test runs it as a real
+  subprocess and speaks the protocol to it over a pipe.
+
+The demo page has the same contract in JavaScript. In "Talk to Claude" mode Claude holds the
+conversation, calls `record_facts` and `next_step` against the engine running in the page, and the
+page shows each call as it happens: what Claude sent, how the code read it, and what the engine said
+to do next.
 
 ## What this is not
 

@@ -15,9 +15,10 @@ On 2,000 households it had never seen, in a test registered before it ran (DECIS
 | cost of mistakes per household per year | **$1,017** | $1,356 |
 | difference [95% CI] | **−$339** [−523, −173] | |
 
-**About half the questions, 25% fewer costly mistakes.** Against the previous engine, with the same
-questioning, it cuts mistakes by 22% (−$280 [−437, −140]). Both results hold after Holm correction
-(p < 0.002) and with source households resampled as clusters.
+**About half the questions, 25% fewer costly mistakes.** It beat every alternative registered
+against it: the previous engine (−22% mistakes), the strongest decision tree we could build, and the
+best fixed 8-question form. All four comparisons hold after Holm correction (p < 0.002) and with
+source households resampled as clusters, and it matches its own 18-question form with 8.4 questions.
 
 > Built by AI agents (Claude, with reviews by GPT and Fable) under Ege Hazar's direction. Every
 > design choice, every result, and every idea that didn't make it is logged in [DECISIONS.md](DECISIONS.md).
@@ -60,6 +61,25 @@ person's words ──► LLM reader ──► typed evidence (amount, period, ap
 - **Runs in a browser.** The demo page runs the whole engine and the neural model in JavaScript; its
   probabilities match numpy to 5×10⁻⁶ and it scores 1,500 households in well under a second.
 
+## Plug it into any assistant (MCP)
+
+The engine ships as one 1.5 MB file and a Model Context Protocol server with no dependencies beyond
+numpy. Any MCP client (Claude Code, Claude Desktop, Cursor, an agent framework) can run an intake:
+the assistant does the talking and reads the person's words into typed facts; the engine decides
+what to ask, how far to trust it, and when to stop or hand off.
+
+```bash
+python experiments/export_bundle.py data/bundle/benefits_v2.npz           # once, from the trained model
+claude mcp add decisionintake -- python -m decisionintake.mcp_server --bundle data/bundle/benefits_v2.npz
+```
+
+| tool | what it does |
+|---|---|
+| `start_intake` | opens an intake; returns every question (so volunteered facts can be recorded) and the first step |
+| `record_facts` | typed facts from anything the person said: an option, an amount as said (`{"value": 2400, "period": "month", "approximate": true}`) or "don't know"; returns how code read each one and the next step |
+| `next_step` | ask (which question, what it's worth in dollars of mistakes prevented, which programmes it settles), finish with tiered recommendations, or hand off with the reason |
+| `get_assessment` | every programme's probability, tier and yearly value range, and the facts so far |
+
 ## Results
 
 Held-out test, settings frozen on a validation split first, $/household/year, 95% paired bootstrap
@@ -70,14 +90,22 @@ $1,000. Full tables in [WRITEUP.md](WRITEUP.md) and `results/`.
 |---|---|---|
 | v1 engine, same questioning (8.5 questions) | **−$281** [−437, −142] | −$280 [−437, −140] |
 | v1 full questionnaire (18 questions) | **−$483** [−667, −317] | −$339 [−523, −173] |
+| strongest decision tree, deciding with v2 (11.1 questions) | **−$293** [−485, −136] | −$253 [−446, −95] |
+| best fixed 8-question form, deciding with v2 | **−$768** [−1,241, −398] | −$774 [−1,251, −405] |
+| v2 asking all 18 questions (secondary) | −$79 [−188, +37] | +$64 [−44, +180] |
+
+The four bold rows were registered before the run (D28) and all hold after Holm correction. The last
+row is the trade-off in one line: asking 9.6 fewer questions costs no detectable accuracy. With noisy
+answers (misreports, "don't know") no question policy separates from another (D28 part 2).
 
 - **Tiered verdicts.** Recommendations it calls "likely" (50% or more) are right 78% of the time and
   find two thirds of all eligible programmes. Lower-probability ones are shown as "worth checking":
   the dollar-weighted objective recommends a $10,000 programme at a 9% chance, which is the right
   call for the person but should be labelled as such.
-- **Against decision trees** (v1, pre-registered, D25): a cost-sensitive greedy tree on the same loss
-  cost $700 a household more (−$707 [−1,252, −233]). A tree we then rebuilt to fall back to broader
-  data comes within noise of the engine but needs about 11 questions to its 8 (D27).
+- **Against decision trees.** A cost-sensitive greedy tree on the same loss cost $700 a household
+  more than the v1 engine (D25). The strongest tree we then built, which falls back to broader data
+  where its branches run thin, came within noise of v1 (D27); deciding with the same v2 model, v2's
+  engine beats it by $293 with 2.6 fewer questions.
 - **The biggest gain came from prediction, not question choice.** Even with every answer, the old
   linear model left most of the mistakes; the outcome model was the ceiling every question policy
   worked against. Replacing it is what moved the numbers (D28).
@@ -93,7 +121,7 @@ py -m uv pip install --python .venv/Scripts/python.exe policyengine-us==2.152.15
 #    into data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)
 bash adapters/benefits/build_all.sh 30 5
 
-# 3. tests (30), and tuning on the validation split only
+# 3. tests (36), and tuning on the validation split only
 .venv/Scripts/python.exe -m pytest -q
 .venv/Scripts/python.exe experiments/outcome_v2.py            # outcome models, validation
 .venv/Scripts/python.exe experiments/val_v2.py 400 WORKERS     # engine with each model, validation
@@ -102,7 +130,15 @@ bash adapters/benefits/build_all.sh 30 5
 .venv/Scripts/python.exe experiments/run_v2.py 2000 WORKERS
 .venv/Scripts/python.exe experiments/run_v2.py 2000 1 analyse
 
-# 5. the browser demo
+# 5. the engine as one file, its MCP server, and the end-to-end agent test (D29; needs Claude Code)
+.venv/Scripts/python.exe experiments/export_bundle.py data/bundle/benefits_v2.npz
+.venv/Scripts/python.exe -m decisionintake.mcp_server --bundle data/bundle/benefits_v2.npz   # speaks MCP on stdio
+.venv/Scripts/python.exe experiments/agent_e2e.py prep test 200
+.venv/Scripts/python.exe experiments/agent_e2e.py run test engine haiku 200 3
+.venv/Scripts/python.exe experiments/agent_e2e.py run test alone haiku 200 3
+.venv/Scripts/python.exe experiments/agent_e2e.py analyse test haiku
+
+# 6. the browser demo
 .venv/Scripts/python.exe experiments/export_demo_v2.py 1500 demo/population.json
 cd demo && ../.venv/Scripts/python.exe -m http.server 8765    # then open http://127.0.0.1:8765
 ```

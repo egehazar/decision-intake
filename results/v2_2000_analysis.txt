@@ -1,16 +1,40 @@
-PARTIAL: the run was stopped by the system (low memory) after P1 and P2 finished; P3, P4 and the secondary comparisons are not yet run.
 2000 fresh test households (seed 2029), survey-weighted $/household/year; total = decision loss + $15 per question
 user      model   policy     questions    loss   total  claimed  found wrong recs s/interview
 clean     neural  engine          8.44    1017    1144     1208    85%        43%        1.24
+clean     neural  ask_all        18.00     953    1223     1186    86%        43%        0.42
+clean     neural  deep_tree      11.08    1270    1437     1315    83%        45%        0.86
+clean     neural  tree            7.15    1809    1916     1559    80%        49%        0.87
+clean     neural  fixed8          8.00    1791    1911     1711    80%        51%        0.62
 clean     linear  engine          8.49    1297    1424     1411    81%        46%        0.70
 clean     linear  ask_all        18.00    1356    1626     1399    82%        46%        0.36
+realistic neural  engine          8.09    1997    2118     1431    81%        50%        1.06
+realistic neural  ask_all        16.00    1814    2054     1427    80%        50%        0.80
+realistic neural  deep_tree       9.64    1880    2024     1511    80%        51%        0.78
+realistic neural  tree            6.50    2114    2211     1660    77%        54%        0.76
+realistic neural  fixed8          7.04    2173    2279     1823    77%        55%        0.78
+realistic linear  engine          7.90    1869    1987     1572    78%        52%        0.74
+realistic linear  ask_all        16.00    2137    2377     1600    77%        53%        0.55
 
 Descriptive (v2 engine): verdict tiers, self-assessment, hand-off
   clean     neural   'likely' tier: 2022 recs, 78% eligible, finds 67% of eligible programmes | 'worth checking': 1442 recs, 28% eligible | claimed/actual loss 1.19 | top 10% least sure carry 27% of mistake cost, top 20% 45%
   clean     linear   'likely' tier: 1950 recs, 77% eligible, finds 64% of eligible programmes | 'worth checking': 1545 recs, 26% eligible | claimed/actual loss 1.09 | top 10% least sure carry 19% of mistake cost, top 20% 44%
+  realistic neural   'likely' tier: 2073 recs, 71% eligible, finds 63% of eligible programmes | 'worth checking': 1753 recs, 25% eligible | claimed/actual loss 0.72 | top 10% least sure carry 18% of mistake cost, top 20% 31%
+  realistic linear   'likely' tier: 1890 recs, 71% eligible, finds 58% of eligible programmes | 'worth checking': 1888 recs, 25% eligible | claimed/actual loss 0.84 | top 10% least sure carry 13% of mistake cost, top 20% 30%
 
 clean: difference in total cost [95% CI] (negative = first is cheaper), Holm over P1-P4
   P1 v2 engine vs v1 engine                  total   -281 [  -437,   -142]  Holm p 0.000   loss only   -280 [  -437,   -140]  by source household [  -441,   -138]
   P2 v2 engine vs v1 full questionnaire      total   -483 [  -667,   -317]  Holm p 0.000   loss only   -339 [  -523,   -173]  by source household [  -669,   -318]
+  P3 v2 engine vs strongest tree             total   -293 [  -485,   -136]  Holm p 0.000   loss only   -253 [  -446,    -95]  by source household [  -474,   -131]
+  P4 v2 engine vs best fixed 8-question form total   -768 [ -1241,   -398]  Holm p 0.000   loss only   -774 [ -1251,   -405]  by source household [ -1208,   -389]
+  S1 v2 engine vs v2 full questionnaire      total    -79 [  -188,     37]  p 0.172        loss only     64 [   -44,    180]  by source household [  -184,     45]
+  S2 v2 engine vs D25 tree                   total   -773 [ -1234,   -392]  p 0.000        loss only   -792 [ -1254,   -411]  by source household [ -1223,   -387]
+  S3 v2 vs v1 model, all 18 answers          total   -403 [  -598,   -224]  p 0.000        loss only   -403 [  -598,   -224]  by source household [  -605,   -219]
 
 realistic: difference in total cost [95% CI] (negative = first is cheaper), Holm over P1-P4
+  P1 v2 engine vs v1 engine                  total    131 [  -173,    472]  Holm p 1.000   loss only    128 [  -176,    471]  by source household [  -169,    486]
+  P2 v2 engine vs v1 full questionnaire      total   -259 [  -747,    233]  Holm p 1.000   loss only   -140 [  -627,    350]  by source household [  -756,    227]
+  P3 v2 engine vs strongest tree             total     94 [  -352,    532]  Holm p 1.000   loss only    117 [  -329,    555]  by source household [  -353,    551]
+  P4 v2 engine vs best fixed 8-question form total   -160 [  -629,    286]  Holm p 1.000   loss only   -176 [  -646,    270]  by source household [  -637,    316]
+  S1 v2 engine vs v2 full questionnaire      total     65 [  -367,    493]  p 0.793        loss only    183 [  -250,    613]  by source household [  -368,    502]
+  S2 v2 engine vs D25 tree                   total    -93 [  -623,    391]  p 0.732        loss only   -117 [  -651,    367]  by source household [  -629,    424]
+  S3 v2 vs v1 model, all 18 answers          total   -324 [  -737,     67]  p 0.104        loss only   -324 [  -737,     67]  by source household [  -729,     69]
