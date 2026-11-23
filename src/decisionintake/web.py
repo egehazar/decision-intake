@@ -5,7 +5,8 @@
     POST /v1/step          {"state"?, "facts"?} -> {"state", "readings", "next"}
     POST /v1/assessment    {"state"} -> every programme's probability, tier and value range
     GET  /openapi.json     this API, described
-    POST /mcp              the Model Context Protocol over Streamable HTTP (2025-06-18, 2025-03-26)
+    POST /mcp              the Model Context Protocol over Streamable HTTP (2026-07-28, 2025-11-25, 2025-06-18,
+                           2025-03-26)
     GET  /...              the screener's static files (local runs; on Vercel the CDN serves them)
 
 Nothing is kept between calls. The facts travel in `state` (state.py) and each call rebuilds the belief
@@ -26,8 +27,7 @@ from pathlib import Path
 from urllib.parse import parse_qs
 
 from . import bundle as bundle_mod
-from .mcp_server import (ABSTAIN_BELOW, DEFAULT_BUNDLE, K_VERSION, MODERN, PROTOCOLS, SUPPORTED, VERSION,
-                         StatelessServer)
+from .mcp_server import ABSTAIN_BELOW, DEFAULT_BUNDLE, K_VERSION, MODERN, VERSION, StatelessServer
 from .guards import DEFAULT_RULES, attach
 from .service import FactError, Intake, Settings
 from .state import StateError
@@ -38,8 +38,7 @@ ROOT = Path(__file__).resolve().parents[2]
 STATUS = {200: "200 OK", 202: "202 Accepted", 204: "204 No Content", 400: "400 Bad Request", 403: "403 Forbidden",
           404: "404 Not Found", 405: "405 Method Not Allowed", 413: "413 Payload Too Large",
           415: "415 Unsupported Media Type", 500: "500 Internal Server Error"}
-CORS = [("Access-Control-Allow-Origin", "*"),
-        ("Access-Control-Allow-Methods", "GET, POST, OPTIONS"),
+CORS = [("Access-Control-Allow-Methods", "GET, POST, OPTIONS"),
         ("Access-Control-Allow-Headers", "Content-Type, Accept, Mcp-Session-Id, MCP-Protocol-Version, Mcp-Method, Mcp-Name"),
         ("Access-Control-Max-Age", "86400")]
 SECURITY = [("X-Content-Type-Options", "nosniff"), ("Referrer-Policy", "no-referrer")]
@@ -62,6 +61,20 @@ def _decode_header(value):
     return value
 
 
+def _sha256(path) -> str:
+    import hashlib
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def _base_url(environ) -> str | None:
+    """This deployment's own origin, from the request (Vercel passes the public host and scheme along)."""
+    host = environ.get("HTTP_X_FORWARDED_HOST") or environ.get("HTTP_HOST")
+    if not host:
+        return None
+    scheme = environ.get("HTTP_X_FORWARDED_PROTO") or environ.get("wsgi.url_scheme") or "https"
+    return f"{scheme.split(',')[0].strip()}://{host.split(',')[0].strip()}"
+
+
 def _json(status: int, obj, headers=()) -> tuple[int, list, bytes]:
     return status, [("Content-Type", "application/json; charset=utf-8"), *headers], json.dumps(obj).encode()
 
@@ -72,17 +85,22 @@ class App:
     def __init__(self, bundle_path=None, settings: Settings | None = None, static_dir=None,
                  allowed_origins: list[str] | None = None, log=sys.stderr, rules=DEFAULT_RULES):
         t0 = time.perf_counter()
-        self.b = bundle_mod.load(bundle_path or DEFAULT_BUNDLE)
+        path = Path(bundle_path or DEFAULT_BUNDLE).resolve()
+        self.b = bundle_mod.load(path)
         if rules:
-            attach(self.b, rules)
+            # the production bundle must get its rules: if the file doesn't fit it, refuse to start
+            attach(self.b, rules, strict=True if path == Path(DEFAULT_BUNDLE).resolve() else None)
+        self.provenance = {"commit": (os.environ.get("VERCEL_GIT_COMMIT_SHA") or "")[:7] or None,
+                           "bundle_sha256": _sha256(path)[:12],
+                           "rules_sha256": _sha256(rules)[:12] if rules and self.b.info.get("rules") else None}
         self.settings = settings or Settings(abstain_below=ABSTAIN_BELOW)
         Intake(self.b)  # warm the model's cache of initial scores before the first call
         self.mcp = StatelessServer(self.b, self.settings)
         self.static = Path(static_dir).resolve() if static_dir else None
-        # Browsers send Origin; the MCP spec asks servers to check it against DNS rebinding. This service
-        # holds no data and touches nothing local, so by default any origin may call it; set
-        # DI_ALLOWED_ORIGINS (comma-separated) to restrict browser callers anyway.
-        self.origins = allowed_origins
+        # /mcp checks Origin, as the MCP transport requires (DNS rebinding). Server-side clients send none and
+        # pass; browsers may call from this site, from localhost (MCP Inspector and other dev tools) and from
+        # DI_ALLOWED_ORIGINS (comma-separated; "*" accepts any). The JSON API under /v1 is open to any origin.
+        self.origins = set(allowed_origins or ())
         self.log_to = log
         self.boot_s = time.perf_counter() - t0
         self.started = time.time()
@@ -100,11 +118,18 @@ class App:
         except HTTPError as e:
             status, headers, body = _json(e.status, {"error": {"code": e.code, "message": e.message}}, e.headers)
             log["error"] = e.code
-        except Exception as e:  # never leak a traceback to the caller; the log keeps the type
+        except Exception as e:  # never leak a traceback to the caller; the server log keeps it
             status, headers, body = _json(500, {"error": {"code": "internal", "message": "internal error"}})
             log["error"] = type(e).__name__
-        if path.startswith(("/v1/", "/mcp", "/healthz", "/openapi.json")):
-            headers += CORS + [("Cache-Control", "no-store")]
+            import traceback
+            traceback.print_exception(e, file=sys.stderr)
+        origin = environ.get("HTTP_ORIGIN")
+        if path == "/mcp":
+            headers += CORS + [("Cache-Control", "no-store"), ("Vary", "Origin")]
+            if origin and self.origin_ok(origin, environ):
+                headers.append(("Access-Control-Allow-Origin", origin))
+        elif path.startswith(("/v1/", "/healthz", "/openapi.json")):
+            headers += CORS + [("Cache-Control", "no-store"), ("Access-Control-Allow-Origin", "*")]
         headers += SECURITY + [("Content-Length", str(len(body)))]
         log.update(status=status, ms=round((time.perf_counter() - t0) * 1000, 1))
         if self.log_to is not None:
@@ -162,7 +187,7 @@ class App:
 
     def health(self, environ, log):
         return _json(200, {"ok": True, "version": VERSION, "engine": self.b.info.get("name"),
-                           "rules": self.b.info.get("rules"),
+                           "rules": self.b.info.get("rules"), **self.provenance,
                            "households": len(self.b.pop), "questions": len(self.b.pop.questions),
                            "programmes": len(self.b.pop.decisions), "boot_seconds": round(self.boot_s, 2),
                            "uptime_seconds": round(time.time() - self.started)})
@@ -196,10 +221,22 @@ class App:
         log.update(facts=len(it.facts))
         return _json(200, {"state": it.state(), **it.assessment()})
 
+    def origin_ok(self, origin: str, environ) -> bool:
+        if "*" in self.origins or origin in self.origins or origin == _base_url(environ):
+            return True
+        from urllib.parse import urlsplit
+        try:
+            host = urlsplit(origin).hostname
+        except ValueError:
+            return False
+        return host in ("localhost", "127.0.0.1", "::1") or bool(host and host.endswith(".localhost"))
+
     def mcp_post(self, environ, log):
         origin = environ.get("HTTP_ORIGIN")
-        if origin and self.origins is not None and origin not in self.origins:
-            raise HTTPError(403, "forbidden_origin", f"origin {origin} may not call this server")
+        if origin and not self.origin_ok(origin, environ):
+            log["error"] = "forbidden_origin"
+            return _json(403, {"jsonrpc": "2.0", "id": None, "error": {
+                "code": -32600, "message": f"Forbidden: browser origin {origin} may not call this server"}})
         version = environ.get("HTTP_MCP_PROTOCOL_VERSION")
         log["protocol"] = version
         try:
@@ -215,11 +252,13 @@ class App:
         # Legacy (2025-11-25 and earlier): an initialize handshake, then requests that name their version in the
         # header. A version we don't speak gets the modern error body, which lists what we do speak.
         is_init = isinstance(msg, dict) and msg.get("method") == "initialize"
-        if version and version not in PROTOCOLS and not is_init:
+        if version and version not in self.mcp.PROTOCOLS and not is_init:
             mid = msg.get("id") if isinstance(msg, dict) else None
             return _json(400, {"jsonrpc": "2.0", "id": mid, "error": {
                 "code": -32022, "message": "Unsupported protocol version",
-                "data": {"supported": SUPPORTED, "requested": version}}})
+                "data": {"supported": self.mcp.supported, "requested": version}}})
+        if isinstance(msg, list) and not msg:  # JSON-RPC: an empty batch is an invalid request
+            return _json(400, {"jsonrpc": "2.0", "id": None, "error": {"code": -32600, "message": "empty batch"}})
         msgs = msg if isinstance(msg, list) else [msg]
         replies = []
         for m in msgs:
@@ -227,8 +266,8 @@ class App:
                 replies.append({"jsonrpc": "2.0", "id": m.get("id") if isinstance(m, dict) else None,
                                 "error": {"code": -32600, "message": "invalid request"}})
                 continue
-            if m.get("method") == "tools/call":
-                log["tool"] = (m.get("params") or {}).get("name")
+            if m.get("method") == "tools/call" and isinstance(m.get("params"), dict):
+                log["tool"] = m["params"].get("name")
             elif m.get("method"):
                 log["rpc"] = m.get("method")
             r = self.mcp.handle(m)
@@ -265,13 +304,14 @@ class App:
             return fail(400, -32020, f"Header mismatch: Mcp-Method header value '{header_method}' does not match "
                                      f"body value '{method}'")
         if method == "tools/call":
-            name = (msg.get("params") or {}).get("name")
+            p = msg.get("params")
+            name = p.get("name") if isinstance(p, dict) else None
             log["tool"] = name
             header_name = _decode_header(environ.get("HTTP_MCP_NAME"))
             if header_name != name:
                 return fail(400, -32020, f"Header mismatch: Mcp-Name header value '{header_name}' does not match "
                                          f"body value '{name}'")
-        r = self.mcp.handle(msg)
+        r = self.mcp.handle(msg, modern=True)
         if r is None:
             return 202, [], b""
         code = (r.get("error") or {}).get("code")
@@ -292,53 +332,191 @@ class App:
 
     # -------------------------------------------------------------------------------- the API, described
     def openapi(self, environ, log):
-        return _json(200, openapi_doc())
+        return _json(200, openapi_doc(_base_url(environ)))
 
 
-def openapi_doc() -> dict:
-    fact = {"type": "object", "required": ["question"], "properties": {
-        "question": {"type": "string", "description": "a question id from /v1/questions"},
-        "choice": {"type": ["string", "number", "boolean"], "description": "the option's text, e.g. \"yes\", \"3\", \"rent\", \"CA\""},
-        "amount": {"type": "object", "properties": {
-            "value": {"type": "number"}, "low": {"type": "number"}, "high": {"type": "number"},
-            "period": {"type": "string", "enum": ["year", "month", "week", "none"]},
-            "approximate": {"type": "boolean"}}},
-        "dont_know": {"type": "boolean"}}}
-    state = {"type": "string", "description": "the facts so far, from the previous response (state.py); omit to start",
-             "example": "di1;state=TX;household_size=3;#1a2b"}
-    err = {"description": "error", "content": {"application/json": {"schema": {"type": "object", "properties": {
-        "error": {"type": "object", "properties": {"code": {"type": "string"}, "message": {"type": "string"}}}}}}}}
-    ok = {"description": "ok", "content": {"application/json": {"schema": {"type": "object"}}}}
-    return {
+def openapi_doc(base: str | None = None) -> dict:
+    """The JSON API and the MCP endpoint, described with full response schemas. Examples are real: the state
+    example is produced by the same encoder the service uses, and tests/test_web.py checks it decodes."""
+    from .state import encode
+    example_state = encode([{"question": "state", "choice": "TX"}, {"question": "household_size", "choice": "3"},
+                            {"question": "earned_income", "amount": {"low": 2400, "high": 2400, "period": "month",
+                                                                     "approximate": True}}])
+
+    def ref(name):
+        return {"$ref": f"#/components/schemas/{name}"}
+
+    def body(schema, example=None):
+        c = {"schema": schema}
+        if example is not None:
+            c["example"] = example
+        return {"required": True, "content": {"application/json": c}}
+
+    def resp(desc, schema):
+        return {"description": desc, "content": {"application/json": {"schema": schema}}}
+
+    err = {"$ref": "#/components/responses/Error"}
+    tiers = ["likely", "worth checking", "can't tell", "not recommended", "unlikely"]
+    schemas = {
+        "State": {"type": "string", "maxLength": 2000, "example": example_state,
+                  "description": "Every fact recorded so far, readable, ending in a 16-bit checksum. Send the state "
+                                 "from the most recent response with the next call; omit it (or send \"\") to start. "
+                                 "The server keeps nothing between calls."},
+        "Amount": {"type": "object", "additionalProperties": False, "properties": {
+            "value": {"type": "number", "minimum": 0, "description": "the number as the person said it"},
+            "low": {"type": "number", "minimum": 0}, "high": {"type": "number", "minimum": 0},
+            "period": {"type": "string", "enum": ["year", "month", "week", "none"],
+                       "description": "what the number is per; the engine converts to the question's unit"},
+            "approximate": {"type": "boolean", "description": "true for \"about\", \"around\", ranges"}},
+            "description": "Give value, or low and high. Do no arithmetic: send the number and its period."},
+        "Fact": {"type": "object", "required": ["question"], "additionalProperties": False,
+                 "description": "One fact the person stated: exactly one of choice, amount or dont_know. A fact for "
+                                "an already answered question replaces it.",
+                 "properties": {
+                     "question": {"type": "string", "description": "a question id from /v1/questions"},
+                     "choice": {"type": ["string", "number", "boolean"],
+                                "description": "the option's text (\"yes\", \"3\", \"rent\", \"CA\"); on amount "
+                                               "questions a range's text (\"$20,000 to $30,000\") also works"},
+                     "amount": ref("Amount"),
+                     "dont_know": {"type": "boolean", "const": True}}},
+        "Reading": {"type": "object", "required": ["question"], "properties": {
+            "question": {"type": "string"},
+            "reading": {"type": "string", "description": "how the fact was understood, for the person to check"},
+            "replaces": {"type": "string", "description": "the earlier reading this fact replaced"},
+            "warning": {"type": "string", "description": "no household on record fits this with the earlier answers; "
+                                                         "check it with the person"},
+            "error": {"type": "string", "description": "the fact was not recorded, and how to fix it; the other "
+                                                       "facts in the call were"}}},
+        "Question": {"type": "object", "required": ["id", "text", "kind"], "properties": {
+            "id": {"type": "string"}, "text": {"type": "string"},
+            "kind": {"type": "string", "enum": ["choice", "amount"]},
+            "options": {"type": "array", "items": {"type": "string"}, "description": "choice questions"},
+            "unit": {"type": "string", "description": "amount questions: \"dollars a year\", \"dollars a month\" "
+                                                      "or \"dollars in total\""},
+            "ranges": {"type": "array", "items": {"type": "string"}, "description": "amount questions: the brackets "
+                                                                                    "the engine reasons in"}}},
+        "Support": {"type": "object", "properties": {
+            "households_like_this": {"type": "number", "description": "effective number of training households "
+                                                                      "that fit the answers (a weighted count)"},
+            "level": {"type": "string", "enum": ["supported", "thin"],
+                      "description": "thin: fewer than 10; the model is extrapolating"},
+            "conflicting_answers": {"type": "integer"}}},
+        "Progress": {"type": "object", "properties": {
+            "facts_recorded": {"type": "integer"},
+            "expected_mistake_cost": {"type": "integer", "description": "dollars a year the remaining doubt is "
+                                                                         "expected to cost in wrong recommendations"},
+            "similar_households": {"type": "integer", "description": "effective number of households the belief "
+                                                                     "rests on, after the support floor"},
+            "support": ref("Support")}},
+        "Programme": {"type": "object", "required": ["id", "programme", "tier", "probability"], "properties": {
+            "id": {"type": "string", "example": "snap"}, "programme": {"type": "string", "example": "SNAP (food)"},
+            "tier": {"type": "string", "enum": tiers,
+                     "description": "likely / worth checking: recommended. can't tell: too few households like this "
+                                    "to call a negative; never present it as unlikely"},
+            "probability": {"type": "number", "minimum": 0, "maximum": 1},
+            "value_if_eligible_per_year": {"type": "array", "items": {"type": "integer"}, "minItems": 2,
+                                           "maxItems": 2, "description": "[low, high] dollars a year if eligible "
+                                                                         "(health coverage: its value, not cash)"}}},
+        "Assessment": {"type": "object", "required": ["recommend", "note"], "properties": {
+            "recommend": {"type": "array", "items": ref("Programme"), "description": "worth applying for, "
+                                                                                     "most likely first"},
+            "unsure": {"type": "array", "items": ref("Programme")},
+            "note": {"type": "string", "description": "the caveat; show it with any result"}}},
+        "Ask": {"type": "object", "required": ["action", "question", "why", "progress"], "properties": {
+            "action": {"const": "ask"}, "question": ref("Question"), "progress": ref("Progress"),
+            "why": {"type": "object", "properties": {
+                "worth_per_year": {"type": "integer", "description": "dollars of expected mistakes it prevents"},
+                "question_cost": {"type": "number", "description": "what a question costs the person, in dollars"},
+                "mostly_settles": {"type": "array", "items": {"type": "object", "properties": {
+                    "id": {"type": "string"}, "programme": {"type": "string"}, "share": {"type": "number"}}}},
+                "note": {"type": "string"}}}}},
+        "Finish": {"allOf": [ref("Assessment"), {"type": "object", "required": ["action", "progress"], "properties": {
+            "action": {"const": "finish"}, "progress": ref("Progress")}}]},
+        "HandOff": {"allOf": [ref("Assessment"), {"type": "object", "required": ["action", "progress",
+                                                                                 "hand_off_reason"], "properties": {
+            "action": {"const": "hand_off"}, "progress": ref("Progress"),
+            "hand_off_reason": {"type": "string", "description": "why a person should review; advice to show, "
+                                                                 "not a referral"}}}]},
+        "Step": {"type": "object", "required": ["state", "readings", "next"], "properties": {
+            "state": ref("State"), "readings": {"type": "array", "items": ref("Reading")},
+            "next": {"oneOf": [ref("Ask"), ref("Finish"), ref("HandOff")],
+                     "discriminator": {"propertyName": "action", "mapping": {
+                         "ask": "#/components/schemas/Ask", "finish": "#/components/schemas/Finish",
+                         "hand_off": "#/components/schemas/HandOff"}}}}},
+        "FullAssessment": {"allOf": [ref("Assessment"), {"type": "object", "properties": {
+            "state": ref("State"), "all_programmes": {"type": "array", "items": ref("Programme")},
+            "facts": {"type": "array", "items": {"type": "object", "properties": {
+                "question": {"type": "string"}, "reading": {"type": "string"}}}},
+            "expected_mistake_cost": {"type": "integer"}, "support": ref("Support")}}]},
+        "Catalogue": {"type": "object", "properties": {
+            "version": {"type": "string"}, "state": ref("State"),
+            "about": {"type": "object", "additionalProperties": {"type": ["string", "null"]}},
+            "programmes": {"type": "array", "items": {"type": "object", "properties": {
+                "id": {"type": "string"}, "label": {"type": "string"}}}},
+            "questions": {"type": "array", "items": ref("Question")}}},
+        "Health": {"type": "object", "properties": {
+            "ok": {"type": "boolean"}, "version": {"type": "string"}, "engine": {"type": "string"},
+            "rules": {"type": ["string", "null"]}, "commit": {"type": ["string", "null"]},
+            "bundle_sha256": {"type": "string"}, "households": {"type": "integer"}}},
+        "Error": {"type": "object", "required": ["error"], "properties": {"error": {"type": "object", "properties": {
+            "code": {"type": "string", "enum": ["bad_json", "bad_request", "bad_state", "unsupported_media_type",
+                                                "too_large", "not_found", "method_not_allowed", "forbidden_origin",
+                                                "internal"]},
+            "message": {"type": "string"}}}}},
+    }
+    doc = {
         "openapi": "3.1.0",
         "info": {"title": "DecisionIntake", "version": VERSION,
-                 "description": "Decides what to ask next in a US benefits screening, how far to trust each answer, "
-                                "and when it knows enough to recommend or should hand off to a person. Stateless: "
-                                "every response carries `state`; send it back with the next call."},
+                 "license": {"name": "MIT", "identifier": "MIT"},
+                 "description": "Decides what to ask next in a US benefits screening (ten federal programmes, 2026 "
+                                "rules from PolicyEngine-US), how far to trust each answer, and when it knows enough "
+                                "to recommend or should suggest a person review. A screening estimate, not an "
+                                "eligibility decision. Stateless: every response carries `state`; send it back with "
+                                "the next call. No authentication; requests are not logged with their content."},
         "paths": {
-            "/v1/questions": {"get": {"summary": "The programmes, every question, and the starting state",
-                                      "responses": {"200": ok}}},
+            "/v1/questions": {"get": {"operationId": "getQuestions",
+                                      "summary": "The programmes, every question, and the starting state",
+                                      "responses": {"200": resp("the catalogue", ref("Catalogue"))}}},
             "/v1/step": {"post": {
+                "operationId": "step",
                 "summary": "Record facts (any questions, asked or not) and get the next step: ask, finish or hand_off",
-                "requestBody": {"content": {"application/json": {"schema": {"type": "object", "properties": {
-                    "state": state, "facts": {"type": "array", "maxItems": MAX_FACTS, "items": fact}}}}}},
-                "responses": {"200": ok, "400": err, "413": err}}},
+                "requestBody": body({"type": "object", "additionalProperties": False, "properties": {
+                    "state": ref("State"), "facts": {"type": "array", "maxItems": MAX_FACTS, "items": ref("Fact")}}},
+                    {"state": example_state, "facts": [{"question": "children", "choice": "2"}]}),
+                "responses": {"200": resp("the new state, how each fact was read, and the next step", ref("Step")),
+                              "400": err, "413": err, "415": err}}},
             "/v1/assessment": {"post": {
+                "operationId": "assessment",
                 "summary": "Every programme's probability, tier and yearly value range; the facts so far",
-                "requestBody": {"content": {"application/json": {"schema": {"type": "object", "properties": {
-                    "state": state}}}}},
-                "responses": {"200": ok, "400": err}}},
-            "/mcp": {"post": {"summary": "Model Context Protocol (Streamable HTTP, JSON responses, stateless): "
-                                         "tools start_intake, record_facts, next_step, get_assessment",
-                              "responses": {"200": ok, "202": {"description": "notification accepted"}}}},
-            "/healthz": {"get": {"summary": "Liveness and the engine loaded", "responses": {"200": ok}}},
+                "requestBody": body({"type": "object", "additionalProperties": False, "required": ["state"],
+                                     "properties": {"state": ref("State")}}, {"state": example_state}),
+                "responses": {"200": resp("the assessment", ref("FullAssessment")), "400": err, "413": err,
+                              "415": err}}},
+            "/mcp": {"post": {
+                "operationId": "mcp",
+                "summary": "Model Context Protocol over Streamable HTTP (JSON responses, no SSE, stateless). "
+                           "Revisions 2026-07-28 (no handshake; _meta plus MCP-Protocol-Version, Mcp-Method and "
+                           "Mcp-Name headers) and 2025-11-25, 2025-06-18, 2025-03-26 (initialize handshake). Tools: "
+                           "start_intake, record_facts, get_assessment.",
+                "requestBody": body({"type": "object", "description": "a JSON-RPC 2.0 request"}),
+                "responses": {"200": resp("a JSON-RPC response", {"type": "object"}),
+                              "202": {"description": "notification accepted"},
+                              "400": resp("a JSON-RPC error (bad version, header mismatch, missing _meta)",
+                                          {"type": "object"}),
+                              "403": resp("a browser Origin this server does not accept", {"type": "object"})}}},
+            "/healthz": {"get": {"operationId": "health", "summary": "Liveness and exactly what is deployed",
+                                 "responses": {"200": resp("ok", ref("Health"))}}},
         },
+        "components": {"schemas": schemas, "responses": {"Error": resp("error", ref("Error"))}},
     }
+    if base:
+        doc["servers"] = [{"url": base}]
+    return doc
 
 
 def create_app(**kw) -> App:
     origins = os.environ.get("DI_ALLOWED_ORIGINS")
-    kw.setdefault("allowed_origins", [o.strip() for o in origins.split(",")] if origins else None)
+    kw.setdefault("allowed_origins", [o.strip() for o in origins.split(",") if o.strip()] if origins else None)
     return App(**kw)
 
 

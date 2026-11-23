@@ -1,0 +1,37 @@
+After D35, not registered: 2183 households, 144 whose answers D34's bug changed (8.2% weighted); 472 answer 'self-employed: yes'.
+
+clean answers
+  changed by the bug (144):
+    production without can't-tell: 'doesn't look likely' wrong 3.00%, eligible programmes called unlikely 19.6%, can't-tell 0.00/household, cost $2,334
+    production: 'doesn't look likely' wrong 1.40%, eligible programmes called unlikely 7.8%, can't-tell 1.16/household, cost $2,334
+    v2.1: 'doesn't look likely' wrong 1.12%, eligible programmes called unlikely 6.1%, can't-tell 1.15/household, cost $1,900
+  not changed (2039):
+    production without can't-tell: 'doesn't look likely' wrong 2.11%, eligible programmes called unlikely 14.2%, can't-tell 0.00/household, cost $1,459
+    production: 'doesn't look likely' wrong 0.66%, eligible programmes called unlikely 3.9%, can't-tell 1.04/household, cost $1,459
+    v2.1: 'doesn't look likely' wrong 0.59%, eligible programmes called unlikely 3.4%, can't-tell 1.06/household, cost $1,399
+  say self-employed (472):
+    production without can't-tell: 'doesn't look likely' wrong 3.03%, eligible programmes called unlikely 16.7%, can't-tell 0.00/household, cost $1,928
+    production: 'doesn't look likely' wrong 1.03%, eligible programmes called unlikely 4.8%, can't-tell 1.17/household, cost $1,928
+    v2.1: 'doesn't look likely' wrong 0.82%, eligible programmes called unlikely 3.8%, can't-tell 1.19/household, cost $1,873
+  say not self-employed (1711):
+    production without can't-tell: 'doesn't look likely' wrong 1.94%, eligible programmes called unlikely 13.8%, can't-tell 0.00/household, cost $1,330
+    production: 'doesn't look likely' wrong 0.62%, eligible programmes called unlikely 3.9%, can't-tell 1.02/household, cost $1,330
+    v2.1: 'doesn't look likely' wrong 0.57%, eligible programmes called unlikely 3.5%, can't-tell 1.03/household, cost $1,222
+
+realistic answers
+  changed by the bug (144):
+    production without can't-tell: 'doesn't look likely' wrong 3.30%, eligible programmes called unlikely 21.2%, can't-tell 0.00/household, cost $1,675
+    production: 'doesn't look likely' wrong 1.44%, eligible programmes called unlikely 7.8%, can't-tell 1.24/household, cost $1,675
+    v2.1: 'doesn't look likely' wrong 1.16%, eligible programmes called unlikely 6.1%, can't-tell 1.33/household, cost $1,510
+  not changed (2039):
+    production without can't-tell: 'doesn't look likely' wrong 2.73%, eligible programmes called unlikely 18.0%, can't-tell 0.00/household, cost $1,863
+    production: 'doesn't look likely' wrong 0.87%, eligible programmes called unlikely 4.9%, can't-tell 1.19/household, cost $1,863
+    v2.1: 'doesn't look likely' wrong 0.96%, eligible programmes called unlikely 5.3%, can't-tell 1.22/household, cost $2,117
+  say self-employed (472):
+    production without can't-tell: 'doesn't look likely' wrong 3.85%, eligible programmes called unlikely 21.0%, can't-tell 0.00/household, cost $2,204
+    production: 'doesn't look likely' wrong 1.23%, eligible programmes called unlikely 5.6%, can't-tell 1.31/household, cost $2,204
+    v2.1: 'doesn't look likely' wrong 1.09%, eligible programmes called unlikely 4.8%, can't-tell 1.42/household, cost $2,130
+  say not self-employed (1711):
+    production without can't-tell: 'doesn't look likely' wrong 2.47%, eligible programmes called unlikely 17.2%, can't-tell 0.00/household, cost $1,668
+    production: 'doesn't look likely' wrong 0.82%, eligible programmes called unlikely 4.9%, can't-tell 1.16/household, cost $1,668
+    v2.1: 'doesn't look likely' wrong 0.94%, eligible programmes called unlikely 5.6%, can't-tell 1.17/household, cost $2,035

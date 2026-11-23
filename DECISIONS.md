@@ -1034,8 +1034,8 @@ pyproject.toml) and booted the engine in 1.1 s.
   separate local tool server plays the person), so the same test can run against the deployed service.
   Against a local copy of the production server: 10 of 10 development households finished with a
   submission and the same outcomes as the in-memory run ($2 apart, one tenth of a question). Pointing it
-  at Vercel needs either a public site or an automation bypass secret; creating the secret was refused by
-  the safety layer, so the live run waits for the site to open.
+  at Vercel needs either a public site or an automation bypass secret; creating the secret was declined
+  as a protection change, so the live run waited for the site to open.
 - **MCP 2026-07-28.** That run showed Claude Code opening with protocol 2026-07-28, which the server
   refused, before falling back to the handshake. The revision makes MCP stateless (no initialize, version
   and capabilities in each request's _meta, a mandatory server/discover), which is how this server already
@@ -1059,3 +1059,33 @@ finished with a submission; recall 73% and precision 38%, against 73% and 36% fo
 the same households; total cost -$58 a household [-172, +1]. Vercel logged 572 requests in the window and
 no error-level line; record_facts took 150-660 ms of server time. Monitoring: a GitHub Actions job every
 30 minutes (page, health, a step, MCP in both eras).
+
+## D39. Launch audit: what the earnings bug costs the people it touched (2026-11-23 21:18 UTC)
+
+Before announcing, two independent reviews (a fresh Claude reviewer with the files, and GPT round 7 on the
+live site and the public repo) read every public part. Both said not yet. GPT's sharpest point: production
+serves v2, trained before D34 fixed the earnings answers, and nothing said what protects the households
+the bug touched. Answered with D35's saved interviews (experiments/affected_d35.py, results/affected_d35.*;
+**an analysis after D35, not registered**):
+
+- 144 of D35's 2,183 households had answers the bug changed (8.2% survey-weighted). In the question
+  brackets three answers moved, not two: earnings (2,391 of 57,240 households), self-employed (3,623),
+  and other income (1,831), which is market income minus earnings and so shifted with it.
+- Clean answers, a "doesn't look likely" that is wrong: on the touched households, production without
+  the can't-tell layer 3.00%, production as served 1.40%, the corrected v2.1 1.12%; on the others 0.66%
+  and 0.59%. Eligible programmes called unlikely on the touched households: 19.6% -> 7.8% as served (v2.1
+  6.1%). These households are harder for both models; the old training answers cost production about a
+  quarter of a point on them, and the abstention layer is what already protects them.
+- A targeted guard was tried and not shipped: for anyone self-employed, any negative at 5% or more as
+  "can't tell". It moved wrong negatives among the self-employed from 1.03% to 0.97% (realistic 1.23% to
+  1.10%): the misses that remain are confident ones, which no caution layer reaches.
+- v2.1 stays unshipped, as D35's rule says. It is better on the touched households under both answer
+  styles but worse on realistic answers for everyone else ($2,117 against $1,863 a household). The next
+  candidate needs that weakness explained, and a fresh test: every held-out household is now used, so
+  its release test needs new data (a later Populace release) rather than another look at these.
+
+The same audit tightened the public contract (JSON-RPC errors for bad params, arguments and unknown tools
+with no exception text; Origin checked on /mcp; 2024-11-05 offered over stdio only, since over HTTP it
+meant the old SSE transport; a complete OpenAPI document with a real state example; /healthz reports the
+commit and the bundle and rules hashes, and the production bundle refuses to start without its rules) and
+corrected public claims that ran ahead of this log. tests/test_contract.py covers each point.

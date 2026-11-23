@@ -241,7 +241,7 @@ footer p { margin: 0; max-width: 95ch; }
   <div class="sechead">
     <span class="kicker">Live engine · runs entirely in this page</span>
     <h2>Watch it decide, one question at a time.</h2>
-    <p>Pick an answer, describe your household in your own words, or play a real held-out household. On the right is everything the engine believes, recomputed after every answer: the chance of each programme, and how much each remaining question is worth.</p>
+    <p>Answer the questions yourself, or play a real held-out household. On the right is everything the engine believes, recomputed after every answer: the chance of each programme, and how much each remaining question is worth.</p>
   </div>
   <div class="cockpit">
     <div class="panel" aria-labelledby="iv-h">
@@ -255,7 +255,7 @@ footer p { margin: 0; max-width: 95ch; }
         </div>
       </div>
       <div class="pb">
-        <div class="seg" role="tablist" aria-label="How to answer">
+        <div class="seg" role="tablist" aria-label="How to answer" id="mode-switch" hidden>
           <button type="button" role="tab" id="mode-form" aria-selected="true">Answer the questions</button>
           <button type="button" role="tab" id="mode-talk" aria-selected="false" disabled title="Needs Claude in this viewer"><span class="dot" aria-hidden="true"></span>Talk to Claude</button>
         </div>
@@ -311,7 +311,7 @@ footer p { margin: 0; max-width: 95ch; }
     <div class="card"><span class="n">02 · BELIEVE</span><h4>A belief over real households</h4><p>Weights over 48,657 households from PolicyEngine's Populace data, updated through each question's model of how people misreport. A support floor stops it from becoming certain by ruling almost everyone out.</p></div>
     <div class="card"><span class="n">03 · PREDICT</span><h4>A neural outcome model</h4><p>A wide-and-deep network, written in plain numpy and calibrated out of fold, learns PolicyEngine's eligibility and dollar amounts for all ten programmes at once. Each candidate household is scored on the person's own answers.</p></div>
     <div class="card"><span class="n">04 · DECIDE</span><h4>Value of information</h4><p>Every unasked question is priced by the expected drop in the cost of mistakes across all ten programmes, with one matrix product per turn. It asks while a question is worth its cost, then acts, or hands off when doubt stays high.</p></div>
-    <div class="card"><span class="n">05 · SERVE</span><h4>One file, four tools, any assistant</h4><p>The engine ships as a 1.5 MB file and a Model Context Protocol server: <code>start_intake</code>, <code>record_facts</code>, <code>next_step</code>, <code>get_assessment</code>. The assistant talks; the engine decides. “Talk to Claude” above runs the same contract in this page.</p></div>
+    <div class="card"><span class="n">05 · SERVE</span><h4>One file, three tools, any assistant</h4><p>The engine ships as a 1.5 MB file behind a Model Context Protocol connector at <code>decision-intake.vercel.app/mcp</code>: <code>start_intake</code>, <code>record_facts</code>, <code>get_assessment</code>. The assistant talks; the engine decides. The server keeps nothing: each answer comes back with a short state string the assistant passes on.</p></div>
   </div>
 </div></section>
 
@@ -683,7 +683,7 @@ function start() {
   if (MODE === "talk") {
     bubbleQ(GREETING, "Claude · the engine decides what to ask next");
   } else {
-    sys(S.example ? `Answering as held-out household ${+ex + 1}. Its true answers are outlined; PolicyEngine's verdict appears at the end.` : "Answer below, or switch to Talk to Claude and describe your household in your own words.");
+    sys(S.example ? `Answering as held-out household ${+ex + 1}. Its true answers are outlined; PolicyEngine's verdict appears at the end.` : (SAMPLE ? "Answer below, or switch to Talk to Claude and describe your household in your own words." : "Answer below. Each answer updates everything on the right."));
   }
   render();
 }
@@ -928,7 +928,7 @@ function nextStep() {
 if (window.claude && window.claude.use) {
   window.claude.use("sample").then(sm => {
     SAMPLE = sm;
-    if (sm) { $("mode-talk").disabled = false; $("mode-talk").title = "Claude talks; the engine decides"; }
+    if (sm) { $("mode-talk").disabled = false; $("mode-talk").title = "Claude talks; the engine decides"; $("mode-switch").hidden = false; }
   }).catch(() => {});
 }
 function setMode(m) {

@@ -1,0 +1,204 @@
+{
+ "households": 2183,
+ "changed_by_bug": 144,
+ "changed_share_weighted": 0.08188177517013905,
+ "says_self_employed": 472,
+ "groups": {
+  "clean": {
+   "changed by the bug": {
+    "n": 144,
+    "production without can't-tell": {
+     "wrong_negative": 0.030017152658662092,
+     "wrong_recommendation": 0.4744525547445255,
+     "eligible_called_unlikely": 0.19553072625698323,
+     "cant_tell_per_household": 0.0,
+     "cost": 2333.9272310413
+    },
+    "production": {
+     "wrong_negative": 0.014014014014014014,
+     "wrong_recommendation": 0.4744525547445255,
+     "eligible_called_unlikely": 0.0782122905027933,
+     "cant_tell_per_household": 1.1597222222222223,
+     "cost": 2333.9272310413
+    },
+    "v2.1": {
+     "wrong_negative": 0.011156186612576065,
+     "wrong_recommendation": 0.4844290657439446,
+     "eligible_called_unlikely": 0.061452513966480445,
+     "cant_tell_per_household": 1.1458333333333333,
+     "cost": 1899.669712790827
+    }
+   },
+   "not changed": {
+    "n": 2039,
+    "production without can't-tell": {
+     "wrong_negative": 0.021125074805505684,
+     "wrong_recommendation": 0.42038043478260867,
+     "eligible_called_unlikely": 0.1419951729686243,
+     "cant_tell_per_household": 0.0,
+     "cost": 1458.609732365816
+    },
+    "production": {
+     "wrong_negative": 0.0065821049022968805,
+     "wrong_recommendation": 0.42038043478260867,
+     "eligible_called_unlikely": 0.038616251005631534,
+     "cant_tell_per_household": 1.0421775380088278,
+     "cost": 1458.609732365816
+    },
+    "v2.1": {
+     "wrong_negative": 0.0058823529411764705,
+     "wrong_recommendation": 0.43543702138896223,
+     "eligible_called_unlikely": 0.03419147224456959,
+     "cant_tell_per_household": 1.0559097596861207,
+     "cost": 1399.0446646952703
+    }
+   },
+   "say self-employed": {
+    "n": 472,
+    "production without can't-tell": {
+     "wrong_negative": 0.03027084439723845,
+     "wrong_recommendation": 0.4056603773584906,
+     "eligible_called_unlikely": 0.16740088105726872,
+     "cant_tell_per_household": 0.0,
+     "cost": 1927.8142963177982
+    },
+    "production": {
+     "wrong_negative": 0.01027077497665733,
+     "wrong_recommendation": 0.4056603773584906,
+     "eligible_called_unlikely": 0.048458149779735685,
+     "cant_tell_per_household": 1.1716101694915255,
+     "cost": 1927.8142963177982
+    },
+    "v2.1": {
+     "wrong_negative": 0.008201892744479496,
+     "wrong_recommendation": 0.4262626262626263,
+     "eligible_called_unlikely": 0.0381791483113069,
+     "cant_tell_per_household": 1.1864406779661016,
+     "cost": 1873.0904632454176
+    }
+   },
+   "say not self-employed": {
+    "n": 1711,
+    "production without can't-tell": {
+     "wrong_negative": 0.019418851878100638,
+     "wrong_recommendation": 0.43,
+     "eligible_called_unlikely": 0.1381048387096774,
+     "cant_tell_per_household": 0.0,
+     "cost": 1330.3343947120338
+    },
+    "production": {
+     "wrong_negative": 0.006224234095869372,
+     "wrong_recommendation": 0.43,
+     "eligible_called_unlikely": 0.03881048387096774,
+     "cant_tell_per_household": 1.016364699006429,
+     "cost": 1330.3343947120338
+    },
+    "v2.1": {
+     "wrong_negative": 0.005706831893037665,
+     "wrong_recommendation": 0.4429682436811406,
+     "eligible_called_unlikely": 0.03528225806451613,
+     "cant_tell_per_household": 1.0274693161893629,
+     "cost": 1222.2223774885883
+    }
+   }
+  },
+  "realistic": {
+   "changed by the bug": {
+    "n": 144,
+    "production without can't-tell": {
+     "wrong_negative": 0.03295750216825672,
+     "wrong_recommendation": 0.5087108013937283,
+     "eligible_called_unlikely": 0.2122905027932961,
+     "cant_tell_per_household": 0.0,
+     "cost": 1674.9404677567268
+    },
+    "production": {
+     "wrong_negative": 0.014358974358974359,
+     "wrong_recommendation": 0.5087108013937283,
+     "eligible_called_unlikely": 0.0782122905027933,
+     "cant_tell_per_household": 1.2361111111111112,
+     "cost": 1674.9404677567268
+    },
+    "v2.1": {
+     "wrong_negative": 0.011554621848739496,
+     "wrong_recommendation": 0.5084175084175084,
+     "eligible_called_unlikely": 0.061452513966480445,
+     "cant_tell_per_household": 1.3263888888888888,
+     "cost": 1510.0115987100544
+    }
+   },
+   "not changed": {
+    "n": 2039,
+    "production without can't-tell": {
+     "wrong_negative": 0.027279384840717687,
+     "wrong_recommendation": 0.49075924075924077,
+     "eligible_called_unlikely": 0.17980691874497184,
+     "cant_tell_per_household": 0.0,
+     "cost": 1862.712950362615
+    },
+    "production": {
+     "wrong_negative": 0.00866203736845873,
+     "wrong_recommendation": 0.49075924075924077,
+     "eligible_called_unlikely": 0.048672566371681415,
+     "cant_tell_per_household": 1.1853849926434528,
+     "cost": 1862.712950362615
+    },
+    "v2.1": {
+     "wrong_negative": 0.009580061946265216,
+     "wrong_recommendation": 0.4970164097463948,
+     "eligible_called_unlikely": 0.05349959774738536,
+     "cant_tell_per_household": 1.218734673859735,
+     "cost": 2116.7930036382777
+    }
+   },
+   "say self-employed": {
+    "n": 472,
+    "production without can't-tell": {
+     "wrong_negative": 0.03847188592951305,
+     "wrong_recommendation": 0.46360917248255235,
+     "eligible_called_unlikely": 0.20998531571218795,
+     "cant_tell_per_household": 0.0,
+     "cost": 2203.6171206162003
+    },
+    "production": {
+     "wrong_negative": 0.012254111576910674,
+     "wrong_recommendation": 0.46360917248255235,
+     "eligible_called_unlikely": 0.055800293685756244,
+     "cant_tell_per_household": 1.305084745762712,
+     "cost": 2203.6171206162003
+    },
+    "v2.1": {
+     "wrong_negative": 0.010855263157894738,
+     "wrong_recommendation": 0.46936758893280633,
+     "eligible_called_unlikely": 0.048458149779735685,
+     "cant_tell_per_household": 1.4152542372881356,
+     "cost": 2130.171646283799
+    }
+   },
+   "say not self-employed": {
+    "n": 1711,
+    "production without can't-tell": {
+     "wrong_negative": 0.02474316307336131,
+     "wrong_recommendation": 0.5006082725060828,
+     "eligible_called_unlikely": 0.17237903225806453,
+     "cant_tell_per_household": 0.0,
+     "cost": 1668.1389135484326
+    },
+    "production": {
+     "wrong_negative": 0.008190492273917082,
+     "wrong_recommendation": 0.5006082725060828,
+     "eligible_called_unlikely": 0.04889112903225806,
+     "cant_tell_per_household": 1.1566335476329632,
+     "cost": 1668.1389135484326
+    },
+    "v2.1": {
+     "wrong_negative": 0.009410767274268757,
+     "wrong_recommendation": 0.5065013607499244,
+     "eligible_called_unlikely": 0.05594758064516129,
+     "cant_tell_per_household": 1.173582700175336,
+     "cost": 2035.3896852032365
+    }
+   }
+  }
+ }
+}

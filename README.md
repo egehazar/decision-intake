@@ -8,8 +8,8 @@ programmes, a JSON API and an MCP connector any AI assistant can add by URL
 (https://decision-intake.vercel.app/mcp). [Developer guide](https://decision-intake.vercel.app/docs.html).
 Monitored every 30 minutes.
 
-**Interactive walkthrough:** https://claude.ai/artifact/R4AEXkghaed3zDZFiwxufi (watch a held-out household's
-interview, with everything the engine believes shown as it decides).
+**Walkthrough:** https://decision-intake.vercel.app/walkthrough/ (watch a held-out household's interview,
+with everything the engine believes shown as it decides; the whole engine runs in the page).
 
 First use: US public-benefits screening across ten programmes, with rules from
 [PolicyEngine-US](https://github.com/PolicyEngine/policyengine-us) and 57,240 households from
@@ -247,9 +247,8 @@ bash adapters/benefits/build_all.sh 30 5
 .venv/Scripts/python.exe experiments/agent_e2e.py run dev stateless haiku 100 5
 .venv/Scripts/python.exe -m decisionintake.web --port 8080
 
-# 7. the browser demo
-.venv/Scripts/python.exe experiments/export_demo_v2.py 1500 demo/population.json
-cd demo && ../.venv/Scripts/python.exe -m http.server 8765    # then open http://127.0.0.1:8765
+# 7. the walkthrough (the whole engine in the browser, served at /walkthrough/)
+.venv/Scripts/python.exe experiments/export_demo_v2.py 1500 public/walkthrough/population.json
 ```
 
 Earlier experiments (D21-D27: v1 test, trees, run-time adaptation, the language layer) have their

@@ -243,7 +243,8 @@ class Intake:
             v = single.get(j, 0.0)
             by = np.maximum(s.voi_by_decision(j), 0)
             share = by / by.sum() if by.sum() > 0 else by
-            settles = [{"programme": self.b.labels[self.b.pop.decisions[d]], "share": round(float(share[d]), 2)}
+            settles = [{"id": self.b.pop.decisions[d], "programme": self.b.labels[self.b.pop.decisions[d]],
+                        "share": round(float(share[d]), 2)}
                        for d in np.argsort(-share)[:3] if share[d] >= 0.1]
             why = {"worth_per_year": round(v), "question_cost": self.cfg.question_cost, "mostly_settles": settles}
             if v <= self.cfg.question_cost:
@@ -253,7 +254,8 @@ class Intake:
         out = {"action": "hand_off" if hand_off else "finish", "progress": progress, **self.assessment(brief=True)}
         if hand_off:
             out["hand_off_reason"] = (f"No remaining question is worth asking, but the doubt that is left would still cost "
-                                      f"about {_money(risk)} a year in mistakes. A caseworker should review.")
+                                      f"about {_money(risk)} a year in mistakes. A benefits navigator or caseworker "
+                                      f"should go through it with the person.")
         return out
 
     def support(self) -> dict:
@@ -272,7 +274,7 @@ class Intake:
             row = {"id": dv.decision, "programme": self.b.labels[dv.decision], "tier": tier, "probability": round(p, 2)}
             if dv.recommend or not brief:
                 lo, hi = max(dv.value_low, 0), max(dv.value_high, 0)
-                row["value_if_eligible_per_year"] = "small" if hi < 120 else [round(lo, -1), round(hi, -1)]
+                row["value_if_eligible_per_year"] = [int(round(lo, -1)), int(round(hi, -1))]  # whole dollars
             rows.append(row)
         if self.cfg.abstain_below is not None and self.s.support()["raw_ess"] < self.cfg.abstain_below:
             for r in rows:  # too few households like this person to call these negatives

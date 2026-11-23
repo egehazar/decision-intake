@@ -1,6 +1,7 @@
 """DecisionIntake as an MCP server: any assistant that speaks the Model Context Protocol can run an intake.
 
-The assistant keeps the conversation; the engine keeps the decision. Four tools:
+The assistant keeps the conversation; the engine keeps the decision. Four tools (three in --stateless mode,
+which has no next_step: record_facts returns the next step):
 
     start_intake    open an intake; returns every question (so volunteered facts can be recorded) and the first step
     record_facts    typed facts from what the person said, asked for or not; returns how each was read, and the next step
@@ -32,7 +33,10 @@ from .guards import DEFAULT_RULES, attach
 from .service import FactError, Intake, Settings
 from .state import StateError
 
-PROTOCOLS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"]  # legacy: an initialize handshake
+# Legacy revisions (an initialize handshake). 2024-11-05 is stdio only: over HTTP that revision used the old
+# HTTP+SSE transport, which the hosted service does not serve, so it is not offered there.
+PROTOCOLS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"]
+HTTP_PROTOCOLS = PROTOCOLS[:3]
 MODERN = ["2026-07-28"]  # stateless: version and capabilities in every request's _meta, server/discover
 SUPPORTED = MODERN + PROTOCOLS
 K_VERSION, K_CAPS = "io.modelcontextprotocol/protocolVersion", "io.modelcontextprotocol/clientCapabilities"
@@ -41,6 +45,7 @@ LIST_TTL_MS = 3_600_000  # tools/list and server/discover change only with a dep
 DEFAULT_BUNDLE = Path(__file__).resolve().parents[2] / "bundles" / "benefits_v2.npz"  # v2.1 did not pass D35
 ABSTAIN_BELOW = 10.0  # D33/D35: under 10 households like the person, uncertain negatives are "can't tell"
 VERSION = "1.0.0"
+MAX_FACTS = 40  # facts in one record_facts call (the HTTP API uses the same limit)
 
 INSTRUCTIONS = """\
 DecisionIntake decides what to ask in a benefits screening, how far to trust each answer, and when it knows
@@ -54,12 +59,14 @@ enough. You handle the conversation; it handles the decisions.
    If a reading comes back with an error, fix the fact; with a warning, check it with the person.
 3. Follow the step it returns. "ask": ask that one question in plain, friendly words (you may say why,
    using why.mostly_settles). "finish": present the recommendations, "likely" ones first, "worth checking"
-   ones as worth a look, with the yearly value ranges, and the note. Programmes in "unsure" are ones the
-   engine can't call from these answers: say so, and that the person can apply or ask 211; never call them
-   unlikely. "hand_off": say a caseworker should
-   review, and why.
+   ones as worth a look, with the yearly value ranges, and always the note. Programmes in "unsure" are ones
+   the engine can't call from these answers: say so, and that the person can still apply or call 211; never
+   call them unlikely. "hand_off": say a caseworker or benefits navigator should review, using
+   hand_off_reason, and still share the recommendations so far.
 4. Never decide eligibility yourself and never ask questions the engine didn't ask for, unless the person
-   needs something clarified.
+   needs something clarified. This is a screening estimate from 2026 US federal rules (PolicyEngine-US), not
+   an eligibility decision; only the programme decides.
+5. Speak the person's language; the engine's ids and options stay in English.
 """
 
 FACT = {
@@ -82,29 +89,32 @@ FACT = {
 }
 SID = {"session_id": {"type": "string"}}
 TOOLS = [
-    {"name": "start_intake",
-     "description": "Open a new benefits-screening intake. Returns a session_id, the ten programmes, every question "
-                    "the engine can use (ids, options, amount units), and the first step.",
+    {"name": "start_intake", "title": "Start a benefits screening",
+     "description": "Open a new US benefits-screening intake (ten federal programmes, 2026 rules). Use it when a "
+                    "person wants to know which benefits to apply for. Returns a session_id, the ten programmes, "
+                    "every question the engine can use (ids, options, amount units), and the first step.",
      "inputSchema": {"type": "object", "properties": {}}},
-    {"name": "record_facts",
+    {"name": "record_facts", "title": "Record what the person said",
      "description": "Record what the person said as typed facts (any questions, asked or volunteered; a fact for an "
                     "answered question replaces it). Returns how each fact was read and the next step.",
      "inputSchema": {"type": "object", "properties": {**SID, "facts": {"type": "array", "items": FACT}},
                      "required": ["session_id", "facts"]}},
-    {"name": "next_step",
+    {"name": "next_step", "title": "What to do next",
      "description": "What to do now: ask a question (with what it is worth and which programmes it settles), "
                     "finish with recommendations, or hand off to a person.",
      "inputSchema": {"type": "object", "properties": SID, "required": ["session_id"]}},
-    {"name": "get_assessment",
+    {"name": "get_assessment", "title": "Current assessment",
      "description": "The current assessment: every programme's probability, tier and yearly value range, the facts "
-                    "recorded so far, and the expected cost of mistakes.",
+                    "recorded so far, and the expected cost of mistakes. A screening estimate, not an eligibility "
+                    "decision.",
      "inputSchema": {"type": "object", "properties": SID, "required": ["session_id"]}},
 ]
 
 
 READ_ONLY = {"readOnlyHint": True, "destructiveHint": False, "idempotentHint": True, "openWorldHint": False}
-for _t in TOOLS:
-    _t["annotations"] = READ_ONLY
+WRITES_SESSION = {"readOnlyHint": False, "destructiveHint": False, "idempotentHint": False, "openWorldHint": False}
+for _t in TOOLS:  # in-memory sessions: opening one and recording into it change what the server holds
+    _t["annotations"] = WRITES_SESSION if _t["name"] in ("start_intake", "record_facts") else READ_ONLY
 
 INSTRUCTIONS_STATELESS = INSTRUCTIONS.replace(
     "1. Call start_intake.",
@@ -123,11 +133,18 @@ TOOLS_STATELESS = [
                      "required": ["state", "facts"]}},
     {**TOOLS[3], "inputSchema": {"type": "object", "properties": STATE, "required": ["state"]}},
 ]  # no next_step: record_facts returns it, and a next_step sent alongside answers for an older state (D31)
+for _t in TOOLS_STATELESS:  # nothing is kept: every call is a pure function of its arguments
+    _t["annotations"] = READ_ONLY
 
 
 class Server:
     TOOLS = TOOLS
     INSTRUCTIONS = INSTRUCTIONS
+    PROTOCOLS = PROTOCOLS  # what initialize may agree to
+
+    @property
+    def supported(self) -> list[str]:
+        return MODERN + self.PROTOCOLS
 
     def __init__(self, b, settings: Settings, max_sessions: int = 200):
         self.b, self.settings, self.max_sessions = b, settings, max_sessions
@@ -164,25 +181,45 @@ class Server:
 
     # JSON-RPC -----------------------------------------------------------------------------------
     def _tool_result(self, params) -> dict:
+        name, args = params.get("name"), params.get("arguments")
+        if args is None:
+            args = {}
+        if not isinstance(name, str) or name not in {t["name"] for t in self.TOOLS}:
+            raise InvalidParams(f"unknown tool: {name!r}")
+        if not isinstance(args, dict):
+            raise InvalidParams("arguments must be an object")
         try:
-            out = self.call(params.get("name"), params.get("arguments") or {})
+            out = self.call(name, args)
             return {"content": [{"type": "text", "text": json.dumps(out)}], "structuredContent": out, "isError": False}
         except ToolError as e:
             return {"content": [{"type": "text", "text": str(e)}], "isError": True}
 
-    def handle(self, msg: dict) -> dict | None:
-        mid, method, params = msg.get("id"), msg.get("method"), msg.get("params") or {}
+    def _internal(self, e: Exception) -> dict:
+        """An unexpected failure: the caller gets a fixed message; the traceback goes to stderr (the server log)."""
+        import traceback
+        traceback.print_exception(e, file=sys.stderr)
+        return {"code": -32603, "message": "internal error"}
+
+    def handle(self, msg: dict, modern: bool = False) -> dict | None:
+        """One JSON-RPC message. modern=True when the transport already knows it is 2026-07-28 (the HTTP header),
+        so a request without _meta is refused instead of being answered the old way."""
+        mid, method, params = msg.get("id"), msg.get("method"), msg.get("params")
         if method is None:  # a response from the client; we never send requests
             return None
-        meta = params.get("_meta") if isinstance(params, dict) else None
-        if (isinstance(meta, dict) and K_VERSION in meta) or method == "server/discover":
+        if params is None:
+            params = {}
+        if not isinstance(params, dict):
+            return None if mid is None else {"jsonrpc": "2.0", "id": mid,
+                                             "error": {"code": -32602, "message": "params must be an object"}}
+        meta = params.get("_meta")
+        if modern or (isinstance(meta, dict) and K_VERSION in meta) or method == "server/discover":
             return self.handle_modern(mid, method, params, meta if isinstance(meta, dict) else {})
         if mid is None:  # notification (initialized, cancelled): nothing to answer
             return None
         try:
             if method == "initialize":
                 want = params.get("protocolVersion")
-                result = {"protocolVersion": want if want in PROTOCOLS else PROTOCOLS[0],
+                result = {"protocolVersion": want if want in self.PROTOCOLS else self.PROTOCOLS[0],
                           "capabilities": {"tools": {"listChanged": False}},
                           "serverInfo": {"name": "decisionintake", "version": VERSION},
                           "instructions": self.INSTRUCTIONS}
@@ -194,8 +231,10 @@ class Server:
                 result = self._tool_result(params)
             else:
                 return {"jsonrpc": "2.0", "id": mid, "error": {"code": -32601, "message": f"method not found: {method}"}}
+        except InvalidParams as e:
+            return {"jsonrpc": "2.0", "id": mid, "error": {"code": -32602, "message": str(e)}}
         except Exception as e:  # never let one bad call take the server down
-            return {"jsonrpc": "2.0", "id": mid, "error": {"code": -32603, "message": f"{type(e).__name__}: {e}"}}
+            return {"jsonrpc": "2.0", "id": mid, "error": self._internal(e)}
         return {"jsonrpc": "2.0", "id": mid, "result": result}
 
     def handle_modern(self, mid, method, params, meta) -> dict | None:
@@ -212,13 +251,13 @@ class Server:
         if version is None:
             return error(-32602, f"request is missing _meta[{K_VERSION!r}]")
         if version not in MODERN:
-            return error(-32022, "Unsupported protocol version", {"supported": SUPPORTED, "requested": version})
+            return error(-32022, "Unsupported protocol version", {"supported": self.supported, "requested": version})
         if not isinstance(meta.get(K_CAPS), dict):
             return error(-32602, f"request is missing _meta[{K_CAPS!r}]")
         server = {K_SERVER: {"name": "decisionintake", "version": VERSION}}
         try:
             if method == "server/discover":
-                result = {"supportedVersions": SUPPORTED, "capabilities": {"tools": {"listChanged": False}},
+                result = {"supportedVersions": self.supported, "capabilities": {"tools": {"listChanged": False}},
                           "instructions": self.INSTRUCTIONS, "ttlMs": LIST_TTL_MS, "cacheScope": "public"}
             elif method == "tools/list":
                 result = {"tools": self.TOOLS, "ttlMs": LIST_TTL_MS, "cacheScope": "public"}
@@ -226,19 +265,26 @@ class Server:
                 result = self._tool_result(params)
             else:  # initialize, ping and logging/setLevel are gone in this revision
                 return error(-32601, f"method not found: {method}")
+        except InvalidParams as e:
+            return error(-32602, str(e))
         except Exception as e:  # never let one bad call take the server down
-            return error(-32603, f"{type(e).__name__}: {e}")
+            return error(**self._internal(e))
         return {"jsonrpc": "2.0", "id": mid, "result": {"resultType": "complete", **result, "_meta": server}}
 
 
 class ToolError(Exception):
-    pass
+    """A tool ran but the input was wrong (bad state, bad fact): reported in the result with isError."""
+
+
+class InvalidParams(Exception):
+    """The request itself is wrong (unknown tool, arguments not an object): a JSON-RPC -32602 error."""
 
 
 class StatelessServer(Server):
     """Keeps nothing: the facts travel in `state` (state.py) and each call rebuilds the belief (~0.1 s)."""
     TOOLS = TOOLS_STATELESS
     INSTRUCTIONS = INSTRUCTIONS_STATELESS
+    PROTOCOLS = HTTP_PROTOCOLS  # the hosted server: Streamable HTTP only
 
     def __init__(self, b, settings: Settings):
         super().__init__(b, settings, max_sessions=0)
@@ -261,8 +307,8 @@ class StatelessServer(Server):
             facts = args.get("facts")
             if not isinstance(facts, list):
                 raise ToolError("facts must be a list")
-            if len(facts) > 40:
-                raise ToolError("at most 40 facts in one call")
+            if len(facts) > MAX_FACTS:
+                raise ToolError(f"at most {MAX_FACTS} facts in one call")
             it, readings = self._restore(args, facts)
             return {"state": it.state(), "readings": readings, "next": it.next_step()}
         if name == "get_assessment":

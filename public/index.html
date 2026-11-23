@@ -37,6 +37,8 @@ body {
 [hidden] { display: none !important; }
 a { color: var(--accent); text-underline-offset: 2px; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+/* headings and main receive focus only from script (tabindex="-1"), to announce a new step to screen readers */
+[tabindex="-1"]:focus, [tabindex="-1"]:focus-visible { outline: none; }
 .wrap { max-width: 44rem; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .skip { position: absolute; left: -9999px; }
 .skip:focus { left: 16px; top: 8px; background: var(--surface); padding: 8px 12px; z-index: 5; }
@@ -234,6 +236,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
       <p style="margin-top:8px" data-i18n="handoff_help">Free local help: call <b>211</b> or visit <a href="https://211.org/" target="_blank" rel="noopener">211.org</a>. A benefits navigator can check every programme with you.</p>
     </div>
     <div id="r-list" class="stack"></div>
+    <p class="fine" id="r-tax" hidden></p>
     <p class="fine" id="r-hunger" hidden></p>
     <div id="r-unsure" class="card stack" hidden>
       <h2 style="font-size:1.2rem" data-i18n="unsure_h">We couldn't tell from these answers</h2>
@@ -266,6 +269,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
     <div>
       <h2 data-i18n="dev_h">For developers</h2>
       <ul>
+        <li><a href="walkthrough/" data-i18n="walk">See how it decides, step by step</a></li>
         <li><a href="docs.html" data-i18n="dev_guide">Developer guide</a></li>
         <li><span data-i18n="dev_api">JSON API:</span> <a href="openapi.json">openapi.json</a></li>
         <li><span data-i18n="dev_mcp">MCP connector for AI assistants:</span> <code id="mcp-url">/mcp</code></li>
@@ -370,6 +374,7 @@ const STATIC_ES = {
   well_h: "Qué tan bien funciona",
   well_p: "En 2,000 hogares que nunca había visto, hizo 8 preguntas en promedio en lugar de 18 y fue tan preciso como hacer las 18. Superó al mejor árbol de decisión y al mejor formulario fijo de 8 preguntas que pudimos construir. Es una estimación, no una decisión: solo el programa puede decírselo con certeza.",
   dev_h: "Para desarrolladores",
+  walk: "Vea cómo decide, paso a paso (en inglés)",
   dev_guide: "Guía para desarrolladores (en inglés)",
   dev_api: "API JSON:",
   dev_mcp: "Conector MCP para asistentes de IA:",
@@ -391,7 +396,7 @@ const T = {
     state_label: "State", state_choose: "Choose your state", none_opt: "None", some_opt: "Some", amount_label: "Amount in dollars",
     how_often: "How often", per_year: "a year", per_month: "a month", per_week: "a week", rough: "This is a rough guess", pick_range: "Pick a range instead",
     r_h: n => `${n} programme${n > 1 ? "s" : ""} worth applying for`, r_none: "Nothing stands out from these answers",
-    lede_likely: k => `${k} look${k === 1 ? "s" : ""} likely. `, lede_values: "Values are rough yearly ranges if you qualify. Only the programme can confirm it.",
+    lede_likely: (k, n) => k === n ? (n === 1 ? "It looks likely. " : `All ${n} look likely. `) : `${k} look${k === 1 ? "s" : ""} likely. `, lede_values: "Values are rough yearly ranges if you qualify. Only the programme can confirm it.",
     lede_none: "From what you told us, none of the ten programmes looks likely. If your situation changes, or you think an answer is off, change it below.",
     handoff_text: "Your answers fit households that turn out very differently, so a short check can't call it with confidence.",
     badge_likely: "Likely", badge_check: "Worth checking",
@@ -414,7 +419,7 @@ const T = {
     state_label: "Estado", state_choose: "Elija su estado", none_opt: "Nada", some_opt: "Algo", amount_label: "Cantidad en dólares",
     how_often: "Con qué frecuencia", per_year: "al año", per_month: "al mes", per_week: "a la semana", rough: "Es un cálculo aproximado", pick_range: "Mejor elegir un rango",
     r_h: n => n > 1 ? `${n} programas que vale la pena solicitar` : "1 programa que vale la pena solicitar", r_none: "Con estas respuestas no se destaca ningún programa",
-    lede_likely: k => k === 1 ? "1 parece probable. " : `${k} parecen probables. `, lede_values: "Los valores son rangos anuales aproximados si califica. Solo el programa puede confirmarlo.",
+    lede_likely: (k, n) => k === n ? (n === 1 ? "Parece probable. " : `Los ${n} parecen probables. `) : (k === 1 ? "1 parece probable. " : `${k} parecen probables. `), lede_values: "Los valores son rangos anuales aproximados si califica. Solo el programa puede confirmarlo.",
     lede_none: "Según lo que nos dijo, ninguno de los diez programas parece probable. Si su situación cambia o cree que alguna respuesta está mal, cámbiela abajo.",
     handoff_text: "Sus respuestas coinciden con hogares que terminan en situaciones muy distintas, así que una revisión breve no puede decidirlo con confianza.",
     badge_likely: "Probable", badge_check: "Vale la pena revisar",
@@ -570,7 +575,7 @@ function renderQuestion(next, editing) {
   $("q-error").hidden = true;
   $("q-text").textContent = qtext(q);
   const settles = (next.why?.mostly_settles || []).map(s => {
-    const id = (S.catalogue.programmes.find(p => p.label === s.programme) || {}).id;
+    const id = s.id || (S.catalogue.programmes.find(p => p.label === s.programme) || {}).id;
     return info(id)?.name || s.programme;
   });
   $("q-why").textContent = editing ? t("why_edit") : settles.length ? t("why")(settles.join(", ")) : "";
@@ -669,24 +674,24 @@ function renderResults(next) {
   const recs = next.recommend || [];
   const likely = recs.filter(r => r.tier === "likely").length;
   $("r-h").textContent = recs.length ? t("r_h")(recs.length) : t("r_none");
-  $("r-lede").textContent = recs.length ? (likely ? t("lede_likely")(likely) : "") + t("lede_values") : t("lede_none");
+  $("r-lede").textContent = recs.length ? (likely ? t("lede_likely")(likely, recs.length) : "") + t("lede_values") : t("lede_none");
   $("handoff").hidden = next.action !== "hand_off";
   $("handoff-text").textContent = t("handoff_text");
   $("r-list").innerHTML = recs.map(r => {
     const i = info(r.id) || {name: r.programme, desc: "", apply: "", how: "Apply"};
     const tier = r.tier === "likely" ? ["likely", t("badge_likely")] : ["check", t("badge_check")];
     const v = r.value_if_eligible_per_year;
-    const value = Array.isArray(v) ? t("value")(`${money(v[0])}–${money(v[1])}`, esc(i.when || t("per_year"))) : v === "small" ? t("small") : "";
-    const tax = i.tax ? `<p class="fine">${t("tax")(TAX_HELP[LANG])}</p>` : "";
+    const value = !Array.isArray(v) ? "" : v[1] < 120 ? t("small") : t("value")(v[0] === v[1] ? money(v[0]) : `${money(v[0])}–${money(v[1])}`, esc(i.when || t("per_year")));
     return `<article class="card result ${tier[0]} stack">
       <header><h2 style="font-size:1.2rem">${esc(i.name)}</h2><span class="badge ${tier[0]}"><span aria-hidden="true">${tier[0] === "likely" ? "&#10003;" : "?"}</span> ${esc(tier[1])}</span></header>
       <p class="desc">${esc(i.desc)}</p>
       ${value ? `<p class="value">${value}</p>` : ""}
       <div class="actions"><a class="button" href="${i.apply}" target="_blank" rel="noopener">${esc(i.how)}${i.enPage ? esc(t("en_page")) : ""} <span aria-hidden="true">&#8599;</span><span class="skip"> ${esc(t("new_tab"))}</span></a></div>
-      ${tax}
     </article>`;
   }).join("");
   const unsure = next.unsure || [];
+  $("r-tax").hidden = ![...recs, ...unsure].some(r => info(r.id)?.tax);
+  $("r-tax").innerHTML = t("tax")(TAX_HELP[LANG]);
   $("r-hunger").hidden = ![...recs, ...unsure].some(r => info(r.id)?.hunger);
   $("r-hunger").textContent = t("hunger");
   $("r-unsure").hidden = !unsure.length;
