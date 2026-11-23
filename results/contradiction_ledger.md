@@ -29,7 +29,7 @@ Other earned income, by largest source: sstb_self_employment_income 73, partners
 
 ## What it says
 
-- **The shipped rules (14):** 47 exceptions among 16,301 matched households (0.29%).
+- **The shipped rules (14):** 51 exceptions among 16,301 matched households (0.31%).
   - 22 are self-employment the data coded as "no earnings, not self-employed" (below): a bug in the
     adapter, not in the rules.
   - 14 are a dependant's wages, which count in the household's earnings but not in the filer's earned
