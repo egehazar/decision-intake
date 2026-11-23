@@ -64,7 +64,7 @@ def exceptions():
 def trace(hh_ids):
     from policyengine_us import Microsimulation
     from policyengine_us.data.dataset_schema import USSingleYearDataset
-    from build_table import ENTITIES, TAKEUP_TRUE
+    from benefits.build_table import ENTITIES, TAKEUP_TRUE
 
     frames = {e: pd.read_hdf(RAW, e) for e in ENTITIES}
     keep = frames["household"][frames["household"]["household_id"].isin(hh_ids)]

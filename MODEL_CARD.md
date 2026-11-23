@@ -45,6 +45,8 @@ All on held-out households the model never saw, registered before running:
 | D28, "likely" tier | 78% of "likely" calls are right; the least-sure 20% of households carry 45% of the mistake cost |
 | D29, Claude Haiku interviewing 200 households in everyday sentences | 41% fewer costly mistakes with the engine ($2,305 against $3,884); recall 68% against 51% at the same precision; hand-offs 20% against 60% |
 | D30, same, predictor given to Claude but not the question choice | the engine's question choice alone is worth −$891 a household [−1,538, −324] |
+| D31b, Claude Haiku through the stateless hosted tools, 100 development households | as good as sessions in memory: −$49 [−286, +137]; no dropped facts; 2 miscopied states refused by the check digit and resent |
+| D32, 2,000 fresh households, the rules file on and off | costs nothing: −$3.7 [−9.4, +0.0] with clean answers, −$15 [−33, −1] with realistic ones; with clean answers no eligible programme suppressed |
 
 Calibration on the training population (mean predicted probability against PolicyEngine's rate,
 survey-weighted) is within 0.005 for every programme. On validation households in clear-cut groups
@@ -58,7 +60,9 @@ the wrong side of 50% for 0.1% to 2.4% of them, depending on the programme (D32)
   the EITC as "likely". Across 50,000 random valid profiles, v2 called a statutorily ruled-out EITC
   likely in 4.5% and a ruled-out refundable child credit in 20.4%; the rules bring both to 0% and
   change nothing else (D32). Rules exist only where they hold in PolicyEngine's own results; six
-  candidate rules failed that check and are not used.
+  candidate rules failed that check and are not used. When answers are misreported a rule can fire
+  wrongly: on 2,000 households with realistic answers the rules suppressed 8 recommendations the
+  household should have had, and removed 23 wrong ones.
 - **Messy answers.** With simulated realistic answers (people who misremember, volunteer, or don't
   know), the engine and the alternatives do not separate (D28 secondary). The AI-assistant tests
   (D29, D30) use everyday-sentence answers and do separate.
