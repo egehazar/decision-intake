@@ -100,16 +100,18 @@ for _t in TOOLS:
 INSTRUCTIONS_STATELESS = INSTRUCTIONS.replace(
     "1. Call start_intake.",
     "0. This server keeps nothing between calls. Every result carries `state`, a short string holding the facts "
-    "so far; pass the state from the MOST RECENT result to every call, exactly as given.\n1. Call start_intake.")
+    "so far; pass the state from the MOST RECENT result to every call, exactly as given, and never send two calls "
+    "at once with the same state. record_facts returns the next step (with no facts, it only returns the next "
+    "step).\n1. Call start_intake.")
 STATE = {"state": {"type": "string", "description": "the state string from the most recent result, exactly as given"}}
 TOOLS_STATELESS = [
     {**TOOLS[0], "description": TOOLS[0]["description"] + " Also returns the first `state`."},
-    {**TOOLS[1], "description": TOOLS[1]["description"] + " Returns the new `state`; use it from now on.",
+    {**TOOLS[1], "description": TOOLS[1]["description"] + " Returns the new `state`; use it from now on. With an "
+                                                          "empty facts list it only returns the next step.",
      "inputSchema": {"type": "object", "properties": {**STATE, "facts": {"type": "array", "items": FACT}},
                      "required": ["state", "facts"]}},
-    {**TOOLS[2], "inputSchema": {"type": "object", "properties": STATE, "required": ["state"]}},
     {**TOOLS[3], "inputSchema": {"type": "object", "properties": STATE, "required": ["state"]}},
-]
+]  # no next_step: record_facts returns it, and a next_step sent alongside answers for an older state (D31)
 
 
 class Server:
@@ -213,9 +215,6 @@ class StatelessServer(Server):
                 raise ToolError("at most 40 facts in one call")
             readings = it.record(facts)
             return {"state": it.state(), "readings": readings, "next": it.next_step()}
-        if name == "next_step":
-            it = self._restore(args)
-            return {"state": it.state(), **it.next_step()}
         if name == "get_assessment":
             it = self._restore(args)
             return {"state": it.state(), **it.assessment()}

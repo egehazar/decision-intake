@@ -160,16 +160,19 @@ def test_mcp_over_http_runs_an_intake_statelessly(app):
     assert "Mcp-Session-Id" not in init["headers"]
     assert rpc(app, "notifications/initialized", id=None)["status"] == 202
     tools = rpc(app, "tools/list")["json"]["result"]["tools"]
-    assert {t["name"] for t in tools} == {"start_intake", "record_facts", "next_step", "get_assessment"}
+    assert {t["name"] for t in tools} == {"start_intake", "record_facts", "get_assessment"}  # no next_step (D31)
     assert all(t["annotations"]["readOnlyHint"] for t in tools)
     assert "state" in tools[1]["inputSchema"]["required"]
     start = rpc(app, "tools/call", {"name": "start_intake", "arguments": {}})["json"]["result"]["structuredContent"]
     rec = rpc(app, "tools/call", {"name": "record_facts", "arguments": {"state": start["state"], "facts": FACTS}})
     out = rec["json"]["result"]["structuredContent"]
     assert out["state"].count(";") == len(FACTS) + 1 and out["next"]["action"] in ("ask", "finish", "hand_off")
-    nxt = rpc(app, "tools/call", {"name": "next_step", "arguments": {"state": out["state"]}})["json"]["result"]
-    assert nxt["structuredContent"]["state"] == out["state"]
-    bad = rpc(app, "tools/call", {"name": "next_step", "arguments": {"state": "di1;#0000"}})["json"]["result"]
+    again = rpc(app, "tools/call", {"name": "record_facts", "arguments": {"state": out["state"], "facts": []}})
+    again = again["json"]["result"]["structuredContent"]
+    assert again["state"] == out["state"] and again["next"] == out["next"]  # no facts: only the next step
+    a = rpc(app, "tools/call", {"name": "get_assessment", "arguments": {"state": out["state"]}})["json"]["result"]
+    assert len(a["structuredContent"]["all_programmes"]) == 10
+    bad = rpc(app, "tools/call", {"name": "get_assessment", "arguments": {"state": "di1;#0000"}})["json"]["result"]
     assert bad["isError"] and "damaged" in bad["content"][0]["text"]
 
 

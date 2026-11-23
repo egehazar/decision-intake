@@ -819,3 +819,20 @@ D29 harness with a new arm "stateless" (same prompt as the engine arm, the state
 instructions say to pass the latest state). Passes if (a) the paired 95% interval of stateless minus
 engine total cost includes zero or lies below it, and (b) fewer than 2% of engine calls carry a stale
 or damaged state. Fails otherwise, and then the hosted service needs server-side sessions.
+
+**D31 result (16:07 UTC): criterion (a) passes, (b) fails as registered.** All 100 households finished,
+none without a submission, no tool errors, no damaged state. Stateless minus engine, total cost:
+-$113 [-364, +101] unweighted (passes (a)); weighted -$658 [-1,410, -23]; precision 46% in both,
+recall 80% against 77%. But 23 of 961 engine calls (2.39%) carried a stale state, above the 2% bar.
+All 23 are in one household (048): there Claude sent record_facts and next_step in the same turn with
+the same state, so next_step answered for the state before the new fact. No fact was lost (every
+record_facts chained from the latest record_facts result) and household 048 ended identically in both
+arms (same recommendations, same $2,000, 13 against 14 questions). Still a fail by the rule written
+before the run.
+
+**D31b, registered now.** Fix: the stateless server no longer offers next_step, which record_facts
+already makes redundant (its result carries the next step; record_facts with no facts returns it
+too), and its instructions say never to send two calls with the same state. Re-run on the same 100
+development households, same harness and prompt. Passes if (a) as before, and (b) fewer than 2% of
+engine calls carry a stale state, and no record_facts call starts from anything but the latest
+state. If it fails, the hosted service gets server-side sessions.

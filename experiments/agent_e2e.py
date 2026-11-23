@@ -155,6 +155,7 @@ def serve(arm: str, persona_path: str, trace_path: str):
     ]
 
     last_state = [None]  # stateless arm: the state the last result handed back, to spot stale or mangled copies
+    chain = [None]  # the latest state from start_intake or record_facts: a record_facts from anything else drops facts
 
     class Sim(StatelessServer if arm == "stateless" else Server):
         def call(self, name, args):
@@ -178,6 +179,7 @@ def serve(arm: str, persona_path: str, trace_path: str):
             if arm == "alone" or (arm == "predictor" and name == "next_step"):
                 raise ToolError(f"unknown tool {name!r}")
             stale = arm == "stateless" and name != "start_intake" and args.get("state") != last_state[0]
+            dropped = arm == "stateless" and name == "record_facts" and args.get("state") != chain[0]
             try:
                 out = super().call(name, args)
             except ToolError as e:
@@ -185,7 +187,9 @@ def serve(arm: str, persona_path: str, trace_path: str):
                 raise
             if arm == "stateless":
                 last_state[0] = out.get("state")
-                out_log = {"stale": stale}
+                if name in ("start_intake", "record_facts"):
+                    chain[0] = out.get("state")
+                out_log = {"stale": stale, "dropped": dropped}
             else:
                 out_log = {}
             if arm == "predictor":  # same model and decision rule, but no advice on what to ask or when to stop
