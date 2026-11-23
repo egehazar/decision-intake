@@ -542,3 +542,63 @@ answers. Those three give P1 and P2 (results/v2_2000_analysis.txt):
 By the reading fixed in D28: v2 is a real improvement, and it beats the old full form with fewer
 than half the questions. P3 (strongest tree), P4 (best fixed 8-question set) and the secondary
 comparisons still need the run resumed (it continues from the saved interviews).
+
+## D29. Pre-registered: does the engine make a real AI assistant better? (2026-11-23, 09:30 UTC, before any test run)
+
+Everything so far simulated the person's answers as typed options. D29 puts a real language model in the
+loop, end to end, through the product's own interface:
+
+- **The product.** `decisionintake.bundle` packs the D28 engine (questions, 48,657 training households,
+  loss, the v2 network with its features stored as data) into one 1.5 MB file that needs only numpy.
+  `decisionintake.service.Intake` takes typed facts from any assistant (an option, an amount with its
+  period and "approximate", or "don't know"; amount arithmetic in code; a correction replays every
+  fact) and answers ask / finish / hand off, with what the next question is worth and which programmes
+  it mostly settles. `decisionintake.mcp_server` serves it over the Model Context Protocol (stdio,
+  JSON-RPC, four tools). Tests show the typed intake asks exactly the questions the simulated
+  interviews asked and reaches the same decisions.
+- **The assistant.** Claude Haiku 5.5 through Claude Code in print mode (`claude -p`, version 2.1.330),
+  with no built-in tools, only the MCP server of its arm.
+- **The person.** Each household speaks in templated sentences generated from its own record (the
+  generator and seeds of D23: exact figures, round numbers, monthly figures for yearly questions,
+  ranges, vague words, implied facts, "I'm not sure"), and opens by volunteering three facts. The
+  assistant reaches the person only through an `ask_person` tool (a message plus the ids of the
+  catalogue questions it asks, so the template can answer) and ends with `submit_recommendations`.
+- **Two arms, same model, same households, same words.** *engine*: the assistant has DecisionIntake's
+  tools and is told to follow them (it reads the person's words into typed facts; the engine decides
+  what to ask, when to stop and what to recommend). *alone*: the assistant decides everything itself,
+  from its own knowledge of the 2026 rules, with the same question catalogue and the same costs.
+
+Development, on 100 fresh test households set aside for it (seed 2032; not used below), with the
+prompts before the two fixes listed next: engine arm 7.0 questions, $1,857 of mistakes, 16% handed off;
+alone 8.2 questions, $3,408, 55% handed off; engine minus alone, total cost, -$1,568 [-3,119, -187]
+(results/agent/dev/haiku_analysis.txt). Medicaid explains most of it: the alone arm missed it in 11
+households, the engine in 1; the engine recommended it wrongly more often, 32 against 11, which its
+dollar-weighted threshold accepts.
+
+Fixed after development, before the test: (1) the engine's final recommendations carry programme ids,
+because in 3 of the dev households the agent mistyped the engine's list (one submitted CHIP for four
+other programmes and said so itself); (2) both arms are told to list what they would recommend even
+when they hand off, because the alone arm often handed off with an empty list, which would have
+counted against it.
+
+Frozen now (commit e9f3af7): experiments/agent_e2e.py as committed (prompts, tools, scoring), the D28
+bundle (data/bundle/benefits_v2.npz from experiments/export_bundle.py), question cost $15, $1,000 per
+wrong recommendation, hand-off above $2,500 of expected mistakes.
+
+Pre-registered test:
+- Households: 200 fresh test households (the test split minus D21-D28's 4,100 and the 100 development
+  households), seed 2033.
+- Primary: engine arm minus alone arm, total cost (realised decision loss against PolicyEngine + $15 for
+  each distinct catalogue question the assistant asked beyond the three volunteered facts),
+  $/household/year, unweighted mean over households, paired bootstrap 95% CI (4,000 resamples).
+  Confirmed if the whole interval is below zero. Unweighted because survey weights vary about a
+  hundredfold and, at 200 households, a few heavy ones would decide the result; development showed it
+  (the weighted interval was almost four times wider).
+- A run that ends without a submission is rerun once; if it fails again it counts as recommending
+  nothing, with the questions it asked.
+- Secondary, reported in full: survey-weighted difference; questions; cost of missed programmes and of
+  wrong recommendations; hand-off rate; the difference on households neither arm handed off;
+  per-programme misses and wrong recommendations; how often the engine-arm agent's submission differs
+  from the engine's own list.
+- Exploratory: the same two arms with Claude Sonnet 5.5 on the first 100 test households.
+- Prediction: the engine arm costs less, and the interval excludes zero.
