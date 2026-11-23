@@ -46,7 +46,10 @@ From GPT's round-6 review; each item is checked in DECISIONS.md or the model car
 - [x] Rules year, engine version and benefit timing shown on the page
 - [x] No definitive ineligibility claim; an official application path for every programme, including unlikely ones
 - [x] Non-government, informational-use disclaimer; privacy notice
-- [ ] Keyboard, screen reader and phone width checked (axe-core passes in light and dark; no overflow at 375 px; a manual screen-reader pass still to do)
+- [x] Keyboard and phone width checked: a screening done with real key presses only on the live site (Tab,
+      arrows, typing, Enter; focus moves to each new question), axe-core clean in light and dark, no
+      overflow at 375 px
+- [ ] A manual screen-reader pass (NVDA or VoiceOver)
 - [x] No facts in URLs, logs or analytics (state travels in POST bodies only)
 - [x] Request limits in the app (64 KB body, 40 facts, 2,000-character state); the Hobby plan has no
       billing to run up (usage limits cap it)
