@@ -1,0 +1,37 @@
+name: monitor
+# The live service, every 30 minutes: the page, health, a real screening step, and the MCP connector in both
+# protocol eras. A failure fails the run, and GitHub emails the repository owner.
+on:
+  schedule:
+    - cron: "17,47 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      BASE: https://decision-intake.vercel.app
+    steps:
+      - name: Screener page
+        run: curl -sf --max-time 20 -o /dev/null "$BASE/" && echo "page ok"
+      - name: Health
+        run: |
+          curl -sf --max-time 20 "$BASE/healthz" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['ok'], d; print('healthz', d['version'], '|', d['rules'], '| boot', d['boot_seconds'], 's')"
+      - name: A screening step
+        run: |
+          curl -sf --max-time 30 -X POST "$BASE/v1/step" -H 'Content-Type: application/json' \
+            -d '{"facts":[{"question":"state","choice":"TX"},{"question":"children","choice":"2"}]}' \
+            | python3 -c "import json,sys; r=json.load(sys.stdin); assert r['next']['action']=='ask', r; print('step ok, next:', r['next']['question']['id'])"
+      - name: MCP, handshake era (2025-11-25)
+        run: |
+          curl -sf --max-time 30 -X POST "$BASE/mcp" -H 'Content-Type: application/json' \
+            -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
+            | python3 -c "import json,sys; t=json.load(sys.stdin)['result']['tools']; assert len(t)==3, t; print('mcp tools:', [x['name'] for x in t])"
+      - name: MCP, stateless era (2026-07-28)
+        run: |
+          curl -sf --max-time 30 -X POST "$BASE/mcp" -H 'Content-Type: application/json' \
+            -H 'MCP-Protocol-Version: 2026-07-28' -H 'Mcp-Method: server/discover' \
+            -d '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{"_meta":{"io.modelcontextprotocol/protocolVersion":"2026-07-28","io.modelcontextprotocol/clientCapabilities":{}}}}' \
+            | python3 -c "import json,sys; r=json.load(sys.stdin)['result']; assert r['resultType']=='complete' and '2026-07-28' in r['supportedVersions'], r; print('discover ok:', r['supportedVersions'])"

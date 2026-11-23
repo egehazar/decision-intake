@@ -3,8 +3,13 @@
 **A decision engine for AI assistants: what to ask next, how far to trust each answer, and when it
 knows enough to act or should hand off to a person.**
 
-**Live demo:** https://claude.ai/artifact/R4AEXkghaed3zDZFiwxufi (talk to it through Claude, or watch a
-held-out household's interview, with everything the engine believes shown as it decides).
+**Live:** https://decision-intake.vercel.app, a free screener in English and Spanish for ten US
+programmes, a JSON API and an MCP connector any AI assistant can add by URL
+(https://decision-intake.vercel.app/mcp). [Developer guide](https://decision-intake.vercel.app/docs.html).
+Monitored every 30 minutes.
+
+**Interactive walkthrough:** https://claude.ai/artifact/R4AEXkghaed3zDZFiwxufi (watch a held-out household's
+interview, with everything the engine believes shown as it decides).
 
 First use: US public-benefits screening across ten programmes, with rules from
 [PolicyEngine-US](https://github.com/PolicyEngine/policyengine-us) and 57,240 households from

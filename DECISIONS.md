@@ -1044,3 +1044,18 @@ pyproject.toml) and booted the engine in 1.1 s.
   (-32022 with the supported versions, -32020 header mismatch, -32602 missing metadata, 404 for unknown
   methods). Legacy clients are unchanged. Re-run with Claude Code: 39 of 39 requests in the 2026-07-28
   revision answered 200, no refusals or fallbacks; 5 of 5 households finished.
+
+## D38. In production (2026-11-23 20:26 UTC)
+
+Ege: "let me have something in the real world. Something in production." The release gate was complete
+(D32, ledger, D33/D35, timing and apply paths, keyboard and screen-reader pass, accessibility, rollback),
+except a native speaker's read of the Spanish, which the page labels as AI-assisted. Vercel protection now
+covers preview deployments only; production is public at https://decision-intake.vercel.app since
+20:21 UTC: screener (English and Spanish), JSON API, developer guide, MCP connector.
+
+**First real-world run.** Claude Haiku interviewed 20 development households through the public connector
+over the internet (the D37 remote arm, pointed at https://decision-intake.vercel.app/mcp): 20 of 20
+finished with a submission; recall 73% and precision 38%, against 73% and 36% for the in-memory run on
+the same households; total cost -$58 a household [-172, +1]. Vercel logged 572 requests in the window and
+no error-level line; record_facts took 150-660 ms of server time. Monitoring: a GitHub Actions job every
+30 minutes (page, health, a step, MCP in both eras).

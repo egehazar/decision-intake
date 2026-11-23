@@ -5,6 +5,14 @@ as is: `vercel.json` sends `/v1/*`, `/mcp`, `/healthz` and `/openapi.json` to on
 (`api/index.py`) and serves the screener from the CDN. It keeps nothing between requests, so there is
 no database, no secret and no migration.
 
+## Production (D38)
+
+Public since 2026-11-23 20:21 UTC at https://decision-intake.vercel.app: Vercel Authentication now
+protects preview deployments only (Settings → Deployment Protection → Standard, previews). Every push to
+master deploys to production. `.github/workflows/monitor.yml` checks the page, health, a screening step
+and the MCP connector (both protocol eras) every 30 minutes; a failure fails the run and GitHub emails the
+owner.
+
 ## Live staging (D36)
 
 Project `decision-intake` on Vercel, linked to this repository: every push to master deploys.
