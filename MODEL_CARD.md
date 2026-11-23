@@ -83,3 +83,8 @@ The hosted service keeps nothing. Each call carries the facts so far as a short 
 service rebuilds the belief from it, answers, and forgets it. No database, no sessions, no answers or
 states in logs (route, status and timing only), no cookies, no analytics. Checked against the agent
 tests in D31.
+
+## Accessibility
+
+The public screener has no WCAG 2.1 A/AA violations by axe-core 4.10.2 on any screen, in light and
+dark mode. That is an automated check, not a test with screen-reader users.

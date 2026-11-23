@@ -150,6 +150,9 @@ python -m decisionintake.web --port 8080      # screener at /, API at /v1/*, MCP
   where the answers pin down one tax unit, no EITC above its 2026 phase-out end and no EITC or
   refundable child credit without earnings. Every rule names its source and was checked against
   PolicyEngine's own results before shipping (D32).
+- **Accessible.** axe-core 4.10.2 finds no WCAG 2.1 A/AA violations on any screen (start, question,
+  results), in light and dark mode; one question per screen, labelled controls, focus moved to each
+  new question, no colour-only meaning.
 - **Deploys as is** to Vercel (`vercel.json`, `api/index.py`): the screener from the CDN, everything
   else from one Python function. CI runs the tests on Python 3.11 to 3.13 and smoke-tests the service
   over a real socket.
