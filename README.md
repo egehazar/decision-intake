@@ -163,6 +163,11 @@ python -m decisionintake.web --port 8080      # screener at /, API at /v1/*, MCP
   "we couldn't tell, you can still apply" rather than "unlikely". That cut wrong "doesn't look likely"
   answers from 2.17% to 0.71% [−1.66, −1.27 points] at about one such label a household, and changes
   no recommendation (D33, D35).
+- **English and Spanish.** One switch in the header (Spanish is picked automatically for browsers that
+  prefer it): every question, option, answer and result, with each agency's official Spanish page where
+  it has one (Social Security, the IRS, CuidadoDeSalud.gov, InsureKidsNow), USA.gov's pages marked as
+  English-only, and the National Hunger Hotline's Spanish line. AI-assisted translation, not yet
+  reviewed by a native speaker.
 - **Accessible.** axe-core 4.10.2 finds no WCAG 2.1 A/AA violations on any screen (start, question,
   results), in light and dark mode; one question per screen, labelled controls, focus moved to each
   new question, no colour-only meaning.

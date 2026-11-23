@@ -56,6 +56,7 @@ From GPT's round-6 review; each item is checked in DECISIONS.md or the model car
       new tab. Fixed on the way: the badge symbol is no longer read ("check mark Likely"), the apply
       buttons announce the new tab, the question's number and purpose are tied to it.
 - [ ] Optional: a two-minute listen with a real screen reader (Narrator: Win+Ctrl+Enter) to hear it
+- [ ] Spanish: a native speaker reads the Spanish screens (the translation is AI-assisted; the page says so)
 - [x] No facts in URLs, logs or analytics (state travels in POST bodies only)
 - [x] Request limits in the app (64 KB body, 40 facts, 2,000-character state); the Hobby plan has no
       billing to run up (usage limits cap it)

@@ -42,6 +42,7 @@ a { color: var(--accent); text-underline-offset: 2px; }
 .skip:focus { left: 16px; top: 8px; background: var(--surface); padding: 8px 12px; z-index: 5; }
 
 header.site { border-bottom: 1px solid var(--line); background: var(--surface); }
+.hdr-right { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
 header.site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 14px; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.05rem; color: var(--ink); text-decoration: none; }
 .brand svg { flex: none; }
@@ -152,14 +153,17 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
 </style>
 </head>
 <body>
-<a class="skip" href="#main">Skip to the check</a>
+<a class="skip" href="#main" data-i18n="skip">Skip to the check</a>
 <header class="site">
   <div class="wrap">
     <a class="brand" href="./" aria-label="Quick Benefits Check, start page">
       <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect x="1" y="1" width="26" height="26" rx="7" fill="var(--accent)"/><path d="M8 14.5l4 4 8-9" fill="none" stroke="var(--accent-ink)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      Quick Benefits Check
+      <span data-i18n="brand">Quick Benefits Check</span>
     </a>
-    <span class="notgov">Not a government website</span>
+    <div class="hdr-right">
+      <span class="notgov" data-i18n="notgov">Not a government website</span>
+      <button id="lang-toggle" class="link" type="button" lang="es">Español</button>
+    </div>
   </div>
 </header>
 
@@ -169,26 +173,26 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
   <!-- start -->
   <section id="intro" class="stack-lg" aria-labelledby="intro-h">
     <div class="stack">
-      <h1 id="intro-h">See which benefits your household should apply for</h1>
-      <p class="lede">Answer a few questions about your household. We check ten US programmes and tell you which are worth applying for, and roughly what each is worth a year.</p>
+      <h1 id="intro-h" data-i18n="intro_h">See which benefits your household should apply for</h1>
+      <p class="lede" data-i18n="lede">Answer a few questions about your household. We check ten US programmes and tell you which are worth applying for, and roughly what each is worth a year.</p>
     </div>
     <div class="facts" aria-label="At a glance">
-      <div><b>About 8 questions</b><span>only the ones that matter for you</span></div>
-      <div><b>2–3 minutes</b><span>no account, no email</span></div>
-      <div><b>Nothing stored</b><span>your answers are never saved</span></div>
+      <div data-i18n="fact1"><b>About 8 questions</b><span>only the ones that matter for you</span></div>
+      <div data-i18n="fact2"><b>2–3 minutes</b><span>no account, no email</span></div>
+      <div data-i18n="fact3"><b>Nothing stored</b><span>your answers are never saved</span></div>
     </div>
     <div class="stack">
-      <h2>Programmes we check</h2>
+      <h2 data-i18n="prog_h">Programmes we check</h2>
       <div class="programmes" id="programme-chips"></div>
     </div>
     <div id="resume" class="card stack" hidden>
-      <p>You have a check in progress in this tab.</p>
-      <div class="actions"><button id="resume-go" type="button">Continue where I left off</button><button id="resume-new" class="secondary" type="button">Start a new check</button></div>
+      <p data-i18n="resume_p">You have a check in progress in this tab.</p>
+      <div class="actions"><button id="resume-go" type="button" data-i18n="resume_go">Continue where I left off</button><button id="resume-new" class="secondary" type="button" data-i18n="resume_new">Start a new check</button></div>
     </div>
-    <div class="actions"><button id="start" type="button">Start the check</button></div>
+    <div class="actions"><button id="start" type="button" data-i18n="start">Start the check</button></div>
     <p class="privacy">
       <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l8 3v6c0 5-3.4 9.4-8 11-4.6-1.6-8-6-8-11V5l8-3z" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-      <span>Your answers are sent with each step so the engine can choose the next question, then forgotten. They are not stored, logged or shared, and closing this tab clears them.</span>
+      <span data-i18n="privacy">Your answers are sent with each step so the engine can choose the next question, then forgotten. They are not stored, logged or shared, and closing this tab clears them.</span>
     </p>
   </section>
 
@@ -206,14 +210,14 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
         <div id="q-error" class="error" role="alert" hidden></div>
       </fieldset>
       <div class="actions">
-        <button id="q-next" type="submit">Continue</button>
-        <button id="q-dk" class="secondary" type="button">I don't know</button>
-        <button id="q-cancel" class="link" type="button" hidden>Cancel change</button>
-        <button id="q-clear" class="link" type="button">Clear my answers</button>
+        <button id="q-next" type="submit" data-i18n="q_next">Continue</button>
+        <button id="q-dk" class="secondary" type="button" data-i18n="q_dk">I don't know</button>
+        <button id="q-cancel" class="link" type="button" hidden data-i18n="q_cancel">Cancel change</button>
+        <button id="q-clear" class="link" type="button" data-i18n="q_clear">Clear my answers</button>
       </div>
     </form>
     <details class="answers card" id="sofar" hidden>
-      <summary><b>Your answers so far</b></summary>
+      <summary><b data-i18n="sofar">Your answers so far</b></summary>
       <dl id="sofar-list" style="margin-top:12px"></dl>
     </details>
   </section>
@@ -225,51 +229,53 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
       <p class="lede" id="r-lede"></p>
     </div>
     <div id="handoff" class="handoff" hidden>
-      <h2>A person should look at this with you</h2>
+      <h2 data-i18n="handoff_h">A person should look at this with you</h2>
       <p id="handoff-text"></p>
-      <p style="margin-top:8px">Free local help: call <b>211</b> or visit <a href="https://211.org/" target="_blank" rel="noopener">211.org</a>. A benefits navigator can check every programme with you.</p>
+      <p style="margin-top:8px" data-i18n="handoff_help">Free local help: call <b>211</b> or visit <a href="https://211.org/" target="_blank" rel="noopener">211.org</a>. A benefits navigator can check every programme with you.</p>
     </div>
     <div id="r-list" class="stack"></div>
+    <p class="fine" id="r-hunger" hidden></p>
     <div id="r-unsure" class="card stack" hidden>
-      <h2 style="font-size:1.2rem">We couldn't tell from these answers</h2>
-      <p class="fine">Few households in our data look like yours, so we won't guess about these. You can apply, or a free benefits navigator can check them with you: call <b>211</b> or visit <a href="https://211.org/" target="_blank" rel="noopener">211.org</a>.</p>
+      <h2 style="font-size:1.2rem" data-i18n="unsure_h">We couldn't tell from these answers</h2>
+      <p class="fine" data-i18n="unsure_p">Few households in our data look like yours, so we won't guess about these. You can apply, or a free benefits navigator can check them with you: call <b>211</b> or visit <a href="https://211.org/" target="_blank" rel="noopener">211.org</a>.</p>
       <ul id="r-unsure-list"></ul>
     </div>
-    <details class="others card" id="r-others"><summary>Programmes that don't look likely from these answers</summary>
-      <p class="fine" style="margin-top:10px">This is a short screen, not a decision. If you think you might qualify, you can still apply: only the programme can tell you for sure.</p>
+    <details class="others card" id="r-others"><summary data-i18n="others_s">Programmes that don't look likely from these answers</summary>
+      <p class="fine" style="margin-top:10px" data-i18n="others_p">This is a short screen, not a decision. If you think you might qualify, you can still apply: only the programme can tell you for sure.</p>
       <ul id="r-others-list"></ul></details>
     <div class="answers card stack">
-      <h2>Your answers</h2>
-      <p class="fine">Something wrong? Change it and the results update.</p>
+      <h2 data-i18n="answers_h">Your answers</h2>
+      <p class="fine" data-i18n="answers_p">Something wrong? Change it and the results update.</p>
       <dl id="r-answers"></dl>
     </div>
     <p class="fine" id="r-note"></p>
-    <div class="actions"><button id="again" class="secondary" type="button">Clear my answers and start again</button></div>
+    <div class="actions"><button id="again" class="secondary" type="button" data-i18n="again">Clear my answers and start again</button></div>
   </section>
 </main>
 
 <footer class="site">
   <div class="wrap">
     <div>
-      <h2>How it works</h2>
-      <p>The DecisionIntake engine learned from 48,657 households scored by <a href="https://github.com/PolicyEngine/policyengine-us" target="_blank" rel="noopener">PolicyEngine-US</a>, an open model of the 2026 benefit rules. After each answer it asks the question most likely to change what you should apply for, and stops when another question isn't worth your time.</p>
+      <h2 data-i18n="how_h">How it works</h2>
+      <p data-i18n="how_p">The DecisionIntake engine learned from 48,657 households scored by <a href="https://github.com/PolicyEngine/policyengine-us" target="_blank" rel="noopener">PolicyEngine-US</a>, an open model of the 2026 benefit rules. After each answer it asks the question most likely to change what you should apply for, and stops when another question isn't worth your time.</p>
     </div>
     <div>
-      <h2>How well it does</h2>
-      <p>On 2,000 households it had never seen, it asked 8 questions on average instead of 18 and was as accurate as asking all 18. It beat the strongest decision tree and the best fixed 8-question form we could build. This is a screening estimate, not a decision: only the programme can tell you for sure.</p>
+      <h2 data-i18n="well_h">How well it does</h2>
+      <p data-i18n="well_p">On 2,000 households it had never seen, it asked 8 questions on average instead of 18 and was as accurate as asking all 18. It beat the strongest decision tree and the best fixed 8-question form we could build. This is a screening estimate, not a decision: only the programme can tell you for sure.</p>
     </div>
     <div>
-      <h2>For developers</h2>
+      <h2 data-i18n="dev_h">For developers</h2>
       <ul>
-        <li>JSON API: <a href="openapi.json">openapi.json</a></li>
-        <li>MCP connector for AI assistants: <code id="mcp-url">/mcp</code></li>
-        <li>Source and evaluation: <a href="https://github.com/egehazar/decision-intake" target="_blank" rel="noopener">github.com/egehazar/decision-intake</a></li>
+        <li><span data-i18n="dev_api">JSON API:</span> <a href="openapi.json">openapi.json</a></li>
+        <li><span data-i18n="dev_mcp">MCP connector for AI assistants:</span> <code id="mcp-url">/mcp</code></li>
+        <li><span data-i18n="dev_src">Source and evaluation:</span> <a href="https://github.com/egehazar/decision-intake" target="_blank" rel="noopener">github.com/egehazar/decision-intake</a></li>
         <li id="version-line">Rules year 2026</li>
+        <li id="tr-note" hidden data-i18n="tr_note"></li>
       </ul>
     </div>
     <div>
-      <h2>Privacy</h2>
-      <p>No cookies, no analytics, no accounts. The server keeps nothing between steps: your answers travel with each request and are dropped when it's answered.</p>
+      <h2 data-i18n="priv_h">Privacy</h2>
+      <p data-i18n="priv_p">No cookies, no analytics, no accounts. The server keeps nothing between steps: your answers travel with each request and are dropped when it's answered.</p>
     </div>
   </div>
 </footer>
@@ -278,10 +284,12 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
 "use strict";
 const API = "";  // same origin
 const STATES = {AL:"Alabama",AK:"Alaska",AZ:"Arizona",AR:"Arkansas",CA:"California",CO:"Colorado",CT:"Connecticut",DE:"Delaware",DC:"District of Columbia",FL:"Florida",GA:"Georgia",HI:"Hawaii",ID:"Idaho",IL:"Illinois",IN:"Indiana",IA:"Iowa",KS:"Kansas",KY:"Kentucky",LA:"Louisiana",ME:"Maine",MD:"Maryland",MA:"Massachusetts",MI:"Michigan",MN:"Minnesota",MS:"Mississippi",MO:"Missouri",MT:"Montana",NE:"Nebraska",NV:"Nevada",NH:"New Hampshire",NJ:"New Jersey",NM:"New Mexico",NY:"New York",NC:"North Carolina",ND:"North Dakota",OH:"Ohio",OK:"Oklahoma",OR:"Oregon",PA:"Pennsylvania",RI:"Rhode Island",SC:"South Carolina",SD:"South Dakota",TN:"Tennessee",TX:"Texas",UT:"Utah",VT:"Vermont",VA:"Virginia",WA:"Washington",WV:"West Virginia",WI:"Wisconsin",WY:"Wyoming"};
-const TAX_HELP = "https://www.irs.gov/individuals/free-tax-return-preparation-for-qualifying-taxpayers";
+const STATES_ES = {DC:"Distrito de Columbia",HI:"Hawái",LA:"Luisiana",MS:"Misisipi",MO:"Misuri",NH:"Nuevo Hampshire",NJ:"Nueva Jersey",NM:"Nuevo México",NY:"Nueva York",NC:"Carolina del Norte",ND:"Dakota del Norte",PA:"Pensilvania",SC:"Carolina del Sur",SD:"Dakota del Sur",WV:"Virginia Occidental"};
+const TAX_HELP = {en: "https://www.irs.gov/individuals/free-tax-return-preparation-for-qualifying-taxpayers",
+                  es: "https://www.irs.gov/es/individuals/free-tax-return-preparation-for-qualifying-taxpayers"};
 const INFO = {
-  snap: {name: "SNAP (food stamps)", desc: "Money for groceries each month, on an EBT card.", apply: "https://www.usa.gov/food-stamps", how: "Apply with your state's SNAP office", when: "a year, paid monthly"},
-  wic: {name: "WIC", desc: "Healthy food, formula and nutrition help for pregnant people, new parents and children under 5.", apply: "https://www.usa.gov/food-assistance", how: "Find your local WIC office", when: "a year in food and formula"},
+  snap: {name: "SNAP (food stamps)", desc: "Money for groceries each month, on an EBT card.", apply: "https://www.usa.gov/food-stamps", how: "Apply with your state's SNAP office", when: "a year, paid monthly", hunger: true},
+  wic: {name: "WIC", desc: "Healthy food, formula and nutrition help for pregnant people, new parents and children under 5.", apply: "https://www.usa.gov/food-assistance", how: "Find your local WIC office", when: "a year in food and formula", hunger: true},
   tanf: {name: "TANF (cash assistance)", desc: "Monthly cash help for families with children, run by your state.", apply: "https://www.usa.gov/welfare-benefits", how: "Apply with your state's TANF office", when: "a year, paid monthly"},
   ssi: {name: "SSI", desc: "Monthly payments for people 65 or older, or with a disability, who have little income.", apply: "https://www.ssa.gov/ssi", how: "Apply with Social Security", when: "a year, paid monthly"},
   medicaid: {name: "Medicaid", desc: "Free or low-cost health coverage.", apply: "https://www.healthcare.gov/medicaid-chip/getting-medicaid-chip/", how: "Apply through your state or HealthCare.gov", when: "a year in health coverage (its value, not cash)"},
@@ -289,12 +297,142 @@ const INFO = {
   eitc: {name: "Earned Income Tax Credit", desc: "A tax credit for working people. You get it by filing a tax return, even if you owe no tax.", apply: "https://www.irs.gov/credits-deductions/individuals/earned-income-tax-credit-eitc", how: "Claim it when you file taxes", tax: true, when: "paid once, when you file your 2026 tax return in early 2027"},
   ctc: {name: "Child Tax Credit (refundable part)", desc: "Money back for each child when you file your tax return, even if you owe no tax.", apply: "https://www.irs.gov/credits-deductions/individuals/child-tax-credit-and-credit-for-other-dependents", how: "Claim it when you file taxes", tax: true, when: "paid once, when you file your 2026 tax return in early 2027"},
   aca_ptc: {name: "Health plan premium tax credit", desc: "Lowers the monthly cost of a health plan bought on the Marketplace.", apply: "https://www.healthcare.gov/", how: "Shop and apply at HealthCare.gov", when: "a year, as lower monthly premiums"},
-  school_meals: {name: "Free or reduced-price school meals", desc: "Free or cheaper school breakfast and lunch.", apply: "https://www.usa.gov/school-meals", how: "Apply through your child's school", when: "a school year, as free or cheaper meals"}
+  school_meals: {name: "Free or reduced-price school meals", desc: "Free or cheaper school breakfast and lunch.", apply: "https://www.usa.gov/school-meals", how: "Apply through your child's school", when: "a school year, as free or cheaper meals", hunger: true}
+};
+// Official Spanish pages where the agency has one (checked 2026-11-23); USA.gov's pages are English only (enPage).
+const INFO_ES = {
+  snap: {name: "SNAP (cupones de alimentos)", desc: "Dinero cada mes para comprar alimentos, en una tarjeta EBT.", how: "Solicite en la oficina de SNAP de su estado", when: "al año, pagado cada mes", enPage: true},
+  wic: {name: "WIC", desc: "Alimentos saludables, fórmula y apoyo nutricional para embarazadas, madres y padres de bebés, y niños menores de 5 años.", how: "Busque su oficina local de WIC", when: "al año en alimentos y fórmula", enPage: true},
+  tanf: {name: "TANF (asistencia en efectivo)", desc: "Ayuda mensual en efectivo para familias con niños, administrada por su estado.", how: "Solicite en la oficina de TANF de su estado", when: "al año, pagado cada mes", enPage: true},
+  ssi: {name: "SSI (Seguridad de Ingreso Suplementario)", desc: "Pagos mensuales para personas de 65 años o más, o con una discapacidad, que tienen pocos ingresos.", apply: "https://www.ssa.gov/es/ssi", how: "Solicite con el Seguro Social", when: "al año, pagado cada mes"},
+  medicaid: {name: "Medicaid", desc: "Cobertura médica gratuita o de bajo costo.", apply: "https://www.cuidadodesalud.gov/es/medicaid-chip/", how: "Solicite en su estado o en CuidadoDeSalud.gov", when: "al año en cobertura médica (su valor, no dinero en efectivo)"},
+  chip: {name: "CHIP", desc: "Cobertura médica de bajo costo para niños.", apply: "https://espanol.insurekidsnow.gov/", how: "Solicite en InsureKidsNow.gov", when: "al año en cobertura médica (su valor, no dinero en efectivo)"},
+  eitc: {name: "Crédito tributario por ingreso del trabajo (EITC)", desc: "Un crédito tributario para personas que trabajan. Lo recibe al presentar su declaración de impuestos, aunque no deba impuestos.", apply: "https://www.irs.gov/es/credits-deductions/individuals/earned-income-tax-credit-eitc", how: "Reclámelo al presentar sus impuestos", when: "una sola vez, al presentar su declaración de impuestos de 2026 a principios de 2027"},
+  ctc: {name: "Crédito tributario por hijos (parte reembolsable)", desc: "Dinero por cada hijo al presentar su declaración de impuestos, aunque no deba impuestos.", apply: "https://www.irs.gov/es/credits-deductions/individuals/child-tax-credit-and-credit-for-other-dependents", how: "Reclámelo al presentar sus impuestos", when: "una sola vez, al presentar su declaración de impuestos de 2026 a principios de 2027"},
+  aca_ptc: {name: "Crédito tributario para la prima del seguro médico", desc: "Reduce el costo mensual de un plan médico comprado en el Mercado de Seguros Médicos.", apply: "https://www.cuidadodesalud.gov/es/", how: "Compare planes y solicite en CuidadoDeSalud.gov", when: "al año, en primas mensuales más bajas"},
+  school_meals: {name: "Comidas escolares gratis o a precio reducido", desc: "Desayuno y almuerzo escolar gratis o más baratos.", how: "Solicite en la escuela de su hijo", when: "por año escolar, en comidas gratis o más baratas", enPage: true}
 };
 const QLABEL = {state: "State", household_size: "People in household", children: "Children under 18", child_under5: "A child under 5", infant_or_pregnant: "Pregnant or a baby under 1", senior: "Anyone 65 or older", disabled: "Anyone with a disability", married: "Married couple", earned_income: "Earnings from work", self_employed: "Self-employed", social_security: "Social Security", other_income: "Other income", housing_cost: "Rent or mortgage", tenure: "Rent or own", childcare: "Childcare costs", assets: "Savings and investments", employer_insurance: "Health insurance through a job", college: "Full-time college student"};
+const QLABEL_ES = {state: "Estado", household_size: "Personas en el hogar", children: "Niños menores de 18 años", child_under5: "Un niño menor de 5 años", infant_or_pregnant: "Embarazo o bebé menor de 1 año", senior: "Alguien de 65 años o más", disabled: "Alguien con una discapacidad", married: "Pareja casada", earned_income: "Ingresos del trabajo", self_employed: "Trabajo por cuenta propia", social_security: "Seguro Social", other_income: "Otros ingresos", housing_cost: "Renta o hipoteca", tenure: "Alquila o es propietario", childcare: "Gastos de cuidado de niños", assets: "Ahorros e inversiones", employer_insurance: "Seguro médico del trabajo", college: "Estudiante universitario de tiempo completo"};
+const QTEXT_ES = {
+  state: "¿En qué estado vive?",
+  household_size: "¿Cuántas personas viven en su hogar, incluido usted?",
+  children: "¿Cuántos niños menores de 18 años viven con usted?",
+  child_under5: "¿Alguno de los niños tiene menos de 5 años?",
+  infant_or_pregnant: "¿Hay alguien embarazada o un bebé menor de 1 año?",
+  senior: "¿Hay alguien de 65 años o más?",
+  disabled: "¿Alguien tiene una discapacidad?",
+  married: "¿Hay una pareja casada en el hogar?",
+  earned_income: "Aproximadamente, ¿cuánto gana el hogar por su trabajo al año, antes de impuestos?",
+  self_employed: "¿Alguien trabaja por cuenta propia?",
+  social_security: "¿Cuánto recibe el hogar del Seguro Social al año?",
+  other_income: "¿Algún otro ingreso al año (pensiones, desempleo, intereses, manutención de hijos)?",
+  housing_cost: "¿Cuánto paga de renta o hipoteca al mes?",
+  tenure: "¿Alquila, es propietario o ninguna de las dos?",
+  childcare: "¿Cuánto gasta en cuidado de niños al año?",
+  employer_insurance: "¿Alguien tiene seguro médico a través de un empleo?",
+  assets: "Aproximadamente, ¿cuánto hay en cuentas bancarias e inversiones?",
+  college: "¿Alguien es estudiante universitario de tiempo completo?"
+};
+// Static text: English lives in the HTML; Spanish here (trusted markup, written by us).
+const STATIC_ES = {
+  skip: "Ir a la revisión",
+  brand: "Revisión rápida de beneficios",
+  notgov: "No es un sitio web del gobierno",
+  intro_h: "Vea qué beneficios le conviene solicitar a su hogar",
+  lede: "Responda unas preguntas sobre su hogar. Revisamos diez programas de EE. UU. y le decimos cuáles vale la pena solicitar y cuánto vale cada uno, aproximadamente, al año.",
+  fact1: "<b>Unas 8 preguntas</b><span>solo las que importan en su caso</span>",
+  fact2: "<b>2 a 3 minutos</b><span>sin cuenta ni correo electrónico</span>",
+  fact3: "<b>Nada se guarda</b><span>sus respuestas nunca se guardan</span>",
+  prog_h: "Programas que revisamos",
+  resume_p: "Tiene una revisión en curso en esta pestaña.",
+  resume_go: "Continuar donde lo dejé",
+  resume_new: "Empezar una nueva revisión",
+  start: "Empezar la revisión",
+  privacy: "Sus respuestas se envían en cada paso para que el sistema elija la siguiente pregunta, y luego se olvidan. No se guardan, no se registran ni se comparten, y al cerrar esta pestaña se borran.",
+  q_next: "Continuar",
+  q_dk: "No sé",
+  q_cancel: "Cancelar el cambio",
+  q_clear: "Borrar mis respuestas",
+  sofar: "Sus respuestas hasta ahora",
+  handoff_h: "Conviene que una persona revise esto con usted",
+  handoff_help: 'Ayuda local gratuita: llame al <b>211</b> o visite <a href="https://211.org/" target="_blank" rel="noopener">211.org</a>. Un orientador de beneficios puede revisar todos los programas con usted.',
+  unsure_h: "No pudimos saberlo con estas respuestas",
+  unsure_p: 'Pocos hogares en nuestros datos se parecen al suyo, así que no vamos a adivinar sobre estos programas. Puede solicitarlos, o un orientador de beneficios gratuito puede revisarlos con usted: llame al <b>211</b> o visite <a href="https://211.org/" target="_blank" rel="noopener">211.org</a>.',
+  others_s: "Programas que no parecen probables con estas respuestas",
+  others_p: "Esta es una revisión breve, no una decisión. Si cree que podría calificar, igual puede solicitarlo: solo el programa puede decírselo con certeza.",
+  answers_h: "Sus respuestas",
+  answers_p: "¿Algo está mal? Cámbielo y los resultados se actualizan.",
+  again: "Borrar mis respuestas y empezar de nuevo",
+  how_h: "Cómo funciona",
+  how_p: 'El sistema DecisionIntake aprendió de 48,657 hogares evaluados con <a href="https://github.com/PolicyEngine/policyengine-us" target="_blank" rel="noopener">PolicyEngine-US</a>, un modelo abierto de las reglas de beneficios de 2026. Después de cada respuesta hace la pregunta que más probablemente cambie lo que le conviene solicitar, y se detiene cuando otra pregunta ya no vale su tiempo.',
+  well_h: "Qué tan bien funciona",
+  well_p: "En 2,000 hogares que nunca había visto, hizo 8 preguntas en promedio en lugar de 18 y fue tan preciso como hacer las 18. Superó al mejor árbol de decisión y al mejor formulario fijo de 8 preguntas que pudimos construir. Es una estimación, no una decisión: solo el programa puede decírselo con certeza.",
+  dev_h: "Para desarrolladores",
+  dev_api: "API JSON:",
+  dev_mcp: "Conector MCP para asistentes de IA:",
+  dev_src: "Código y evaluación:",
+  tr_note: "Traducción al español preparada con ayuda de IA; todavía no la ha revisado un hablante nativo.",
+  priv_h: "Privacidad",
+  priv_p: "Sin cookies, sin analíticas, sin cuentas. El servidor no guarda nada entre pasos: sus respuestas viajan con cada solicitud y se descartan en cuanto se responde."
+};
+const T = {
+  en: {
+    title: "Quick Benefits Check", brand_label: "Quick Benefits Check, start page", toggle: "Español", toggle_lang: "es",
+    cant_reach: "The check can't reach its server right now. Please try again in a minute.",
+    expired: "That check had expired. Please start again.",
+    net_error: "Something went wrong reaching the server. Check your connection and try again.",
+    checking: "Checking", err_option: "Please choose one of the options.", err_answer: "Please answer, or choose “I don't know”.",
+    err_amount: "Please enter an amount in dollars, 0 or more.", why_edit: "Change your answer and we'll update the results.",
+    why: x => `This helps decide: ${x}.`, q_changing: "Changing an answer", q_n: n => `Question ${n}`,
+    q_usual: "Usually 4 to 12 in all", q_stop: "We stop as soon as more questions wouldn't help",
+    state_label: "State", state_choose: "Choose your state", none_opt: "None", some_opt: "Some", amount_label: "Amount in dollars",
+    how_often: "How often", per_year: "a year", per_month: "a month", per_week: "a week", rough: "This is a rough guess", pick_range: "Pick a range instead",
+    r_h: n => `${n} programme${n > 1 ? "s" : ""} worth applying for`, r_none: "Nothing stands out from these answers",
+    lede_likely: k => `${k} look${k === 1 ? "s" : ""} likely. `, lede_values: "Values are rough yearly ranges if you qualify. Only the programme can confirm it.",
+    lede_none: "From what you told us, none of the ten programmes looks likely. If your situation changes, or you think an answer is off, change it below.",
+    handoff_text: "Your answers fit households that turn out very differently, so a short check can't call it with confidence.",
+    badge_likely: "Likely", badge_check: "Worth checking",
+    value: (r, w) => `If you qualify, worth about <b>${r}</b> ${w}`, small: "A small amount if you qualify",
+    tax: u => `Filing is free with <a href="${u}" target="_blank" rel="noopener">IRS free tax help (VITA)</a> if your income is modest.`,
+    hunger: "Need food now? National Hunger Hotline: 1-866-3-HUNGRY (1-866-348-6479), Monday to Friday, 8 a.m. to 8 p.m. Eastern.",
+    new_tab: "(opens in a new tab)", en_page: "", change: "Change", dont_know: "Don't know",
+    note: n => `This is a free screener, not an application and not an eligibility decision; you can apply for any programme whatever it says here. ${n} Your answers are kept only in this browser tab until you clear them or close it.`,
+    version: (v, r) => `Engine ${v}; 2026 rules (PolicyEngine-US 2.152.15); ${r || "no extra rules"}`
+  },
+  es: {
+    title: "Revisión rápida de beneficios", brand_label: "Revisión rápida de beneficios, página de inicio", toggle: "English", toggle_lang: "en",
+    cant_reach: "La revisión no puede conectarse con su servidor en este momento. Inténtelo de nuevo en un minuto.",
+    expired: "Esa revisión venció. Empiece de nuevo, por favor.",
+    net_error: "Algo salió mal al conectar con el servidor. Revise su conexión e inténtelo de nuevo.",
+    checking: "Revisando", err_option: "Elija una de las opciones.", err_answer: "Responda, o elija «No sé».",
+    err_amount: "Escriba una cantidad en dólares, de 0 o más.", why_edit: "Cambie su respuesta y actualizaremos los resultados.",
+    why: x => `Esto ayuda a decidir: ${x}.`, q_changing: "Cambiando una respuesta", q_n: n => `Pregunta ${n}`,
+    q_usual: "Normalmente entre 4 y 12 en total", q_stop: "Paramos en cuanto más preguntas ya no ayudarían",
+    state_label: "Estado", state_choose: "Elija su estado", none_opt: "Nada", some_opt: "Algo", amount_label: "Cantidad en dólares",
+    how_often: "Con qué frecuencia", per_year: "al año", per_month: "al mes", per_week: "a la semana", rough: "Es un cálculo aproximado", pick_range: "Mejor elegir un rango",
+    r_h: n => n > 1 ? `${n} programas que vale la pena solicitar` : "1 programa que vale la pena solicitar", r_none: "Con estas respuestas no se destaca ningún programa",
+    lede_likely: k => k === 1 ? "1 parece probable. " : `${k} parecen probables. `, lede_values: "Los valores son rangos anuales aproximados si califica. Solo el programa puede confirmarlo.",
+    lede_none: "Según lo que nos dijo, ninguno de los diez programas parece probable. Si su situación cambia o cree que alguna respuesta está mal, cámbiela abajo.",
+    handoff_text: "Sus respuestas coinciden con hogares que terminan en situaciones muy distintas, así que una revisión breve no puede decidirlo con confianza.",
+    badge_likely: "Probable", badge_check: "Vale la pena revisar",
+    value: (r, w) => `Si califica, vale aproximadamente <b>${r}</b> ${w}`, small: "Una cantidad pequeña si califica",
+    tax: u => `Puede presentar gratis con la <a href="${u}" target="_blank" rel="noopener">ayuda tributaria gratuita del IRS (VITA)</a> si sus ingresos son moderados.`,
+    hunger: "¿Necesita alimentos ahora? Línea Nacional contra el Hambre: 1-877-8-HAMBRE (1-877-842-6273), de lunes a viernes, de 8 a. m. a 8 p. m., hora del Este.",
+    new_tab: "(se abre en una pestaña nueva)", en_page: " (página en inglés)", change: "Cambiar", dont_know: "No sé",
+    note: () => "Esta es una revisión gratuita, no una solicitud ni una decisión de elegibilidad; puede solicitar cualquier programa sin importar lo que diga aquí. Es una estimación basada en las reglas de PolicyEngine, no una decisión de elegibilidad: solicite en el programa oficial para obtenerla. La condición migratoria no se pregunta y puede cambiar la elegibilidad. Sus respuestas se guardan solo en esta pestaña del navegador hasta que las borre o la cierre.",
+    version: (v, r) => `Sistema ${v}; reglas de 2026 (PolicyEngine-US 2.152.15); ${(r || "sin reglas adicionales").replace(/(\d+) statutory limits/, "$1 límites legales")}`
+  }
+};
 
 const $ = id => document.getElementById(id);
 const S = {catalogue: null, byId: {}, state: null, readings: {}, asked: 0, current: null, editing: null, lastNext: null, busy: false};
+let LANG = (() => {
+  try { const v = localStorage.getItem("lang"); if (v === "en" || v === "es") return v; } catch (e) {}
+  return (navigator.language || "").toLowerCase().startsWith("es") ? "es" : "en";
+})();
+const STATIC_EN = {};
+const t = key => T[LANG][key];
 
 function store() { try { sessionStorage.setItem("dq", JSON.stringify({state: S.state, readings: S.readings, asked: S.asked})); } catch (e) {} }
 function restore() { try { return JSON.parse(sessionStorage.getItem("dq") || "null"); } catch (e) { return null; } }
@@ -307,6 +445,60 @@ function show(id) {
 function status(msg) { $("status").textContent = msg || ""; $("status").hidden = !msg; }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c])); }
 function money(x) { return "$" + Math.round(x).toLocaleString("en-US"); }
+function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function info(id) { return LANG === "es" && INFO_ES[id] ? {...INFO[id], ...INFO_ES[id]} : INFO[id]; }
+function stateName(code) { return (LANG === "es" && STATES_ES[code]) || STATES[code] || code; }
+function qtext(q) { return (LANG === "es" && QTEXT_ES[q.id]) || q.text; }
+function qlabel(qid) { return (LANG === "es" ? QLABEL_ES : QLABEL)[qid] || qid; }
+function optionLabel(q, o) {
+  if (q.id === "state") return stateName(o);
+  if (LANG !== "es") return cap(o);
+  const fixed = {yes: "Sí", no: "No", rent: "Alquilo", own: "Soy propietario", neither: "Ninguna de las dos"};
+  if (o in fixed) return fixed[o];
+  if (o === "none") return q.kind === "amount" ? "Nada" : "Ninguno";
+  return cap(o.replace(/^under /, "menos de ").replace(/ or more$/, " o más").replace(/ to /, " a "));
+}
+function shownReading(qid, reading) {
+  let s = String(reading).replace(/ -> .*/, "");
+  if (/^don't know/.test(s)) return t("dont_know");
+  if (qid === "state") return stateName(s);
+  const q = S.byId[qid];
+  if (q && (q.options || q.ranges || []).includes(s)) return optionLabel(q, s);
+  if (LANG === "es") s = s.replace(/ a year$/, " al año").replace(/ a month$/, " al mes").replace(/ a week$/, " a la semana");
+  return cap(s);
+}
+function link(href, text, enPage) {
+  return `<a href="${href}" target="_blank" rel="noopener">${esc(text)}${enPage ? esc(t("en_page")) : ""}<span class="skip"> ${esc(t("new_tab"))}</span></a>`;
+}
+
+function applyStatic() {
+  document.documentElement.lang = LANG;
+  document.title = t("title");
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const k = el.dataset.i18n;
+    if (!(k in STATIC_EN)) STATIC_EN[k] = el.innerHTML;
+    el.innerHTML = LANG === "es" && STATIC_ES[k] ? STATIC_ES[k] : STATIC_EN[k];
+  });
+  $("tr-note").hidden = LANG !== "es";
+  document.querySelector(".brand").setAttribute("aria-label", t("brand_label"));
+  const b = $("lang-toggle");
+  b.textContent = t("toggle");
+  b.lang = t("toggle_lang");
+  if (S.catalogue) {
+    $("version-line").textContent = t("version")(S.catalogue.version, S.catalogue.about?.rules);
+    $("programme-chips").innerHTML = S.catalogue.programmes.map(p => `<span class="chip">${esc(info(p.id)?.name || p.label)}</span>`).join("");
+  }
+}
+function setLang(l) {
+  LANG = l;
+  try { localStorage.setItem("lang", l); } catch (e) {}
+  applyStatic();
+  if (!$("ask").hidden && S.current) {
+    renderQuestion(S.editing ? {action: "ask", question: S.byId[S.editing], why: {}, progress: {}} : S.lastNext, !!S.editing);
+  } else if (!$("results").hidden && S.lastNext) {
+    renderResults(S.lastNext);
+  }
+}
 
 async function post(path, body) {
   const r = await fetch(API + path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
@@ -317,18 +509,19 @@ async function post(path, body) {
 
 async function boot() {
   $("mcp-url").textContent = location.origin + "/mcp";
+  applyStatic();
+  $("lang-toggle").onclick = () => setLang(LANG === "es" ? "en" : "es");
   try {
     const r = await fetch(API + "/v1/questions");
     if (!r.ok) throw new Error();
     S.catalogue = await r.json();
   } catch (e) {
-    status("The check can't reach its server right now. Please try again in a minute.");
+    status(t("cant_reach"));
     $("start").disabled = true;
     return;
   }
   for (const q of S.catalogue.questions) S.byId[q.id] = q;
-  $("version-line").textContent = `Engine ${S.catalogue.version}; 2026 rules (PolicyEngine-US 2.152.15); ${S.catalogue.about?.rules || "no extra rules"}`;
-  $("programme-chips").innerHTML = S.catalogue.programmes.map(p => `<span class="chip">${esc(INFO[p.id]?.name || p.label)}</span>`).join("");
+  applyStatic();
   const saved = restore();
   if (saved && saved.state && Object.keys(saved.readings || {}).length) {
     $("resume").hidden = false;
@@ -342,7 +535,7 @@ async function step(facts) {
   S.busy = true; status("");
   const btn = $("q-next"); const label = btn.textContent;
   btn.disabled = $("q-dk").disabled = true;
-  if (!$("ask").hidden) btn.innerHTML = '<span class="spinner" aria-hidden="true"></span> Checking';
+  if (!$("ask").hidden) btn.innerHTML = `<span class="spinner" aria-hidden="true"></span> ${esc(t("checking"))}`;
   try {
     const r = await post("/v1/step", {state: S.state || undefined, facts});
     const bad = r.readings.find(x => x.error);
@@ -354,57 +547,57 @@ async function step(facts) {
     if (r.next.action === "ask") renderQuestion(r.next); else renderResults(r.next);
   } catch (e) {
     if (e.code === "bad_state") { forget(); S.state = null; S.readings = {}; S.asked = 0; }
-    status(e.code === "bad_state" ? "That check had expired. Please start again." : "Something went wrong reaching the server. Check your connection and try again.");
+    status(e.code === "bad_state" ? t("expired") : t("net_error"));
   } finally {
     S.busy = false; btn.disabled = $("q-dk").disabled = false; btn.textContent = label;
   }
 }
 
-function showError(msg) {
-  $("q-error").textContent = msg.replace(/^"(.+?)" is not an option.*/, "Please choose one of the options.");
+function showError(msg, ours = false) {
+  // our own messages are already in the page's language; the server's are mapped to friendly ones
+  let m = msg;
+  if (!ours && /is not an option/.test(msg)) m = t("err_option");
+  else if (!ours && /amount|dollars|zero or more|implausibly/.test(msg)) m = t("err_amount");
+  else if (!ours && LANG === "es") m = t("err_option");
+  $("q-error").textContent = m;
   $("q-error").hidden = false;
-}
-
-function optionLabel(q, o) {
-  if (q.id === "state") return STATES[o] || o;
-  return o.charAt(0).toUpperCase() + o.slice(1);
 }
 
 function renderQuestion(next, editing) {
   const q = next.question; S.current = q;
   $("q-error").hidden = true;
-  $("q-text").textContent = q.text;
+  $("q-text").textContent = qtext(q);
   const settles = (next.why?.mostly_settles || []).map(s => {
     const id = (S.catalogue.programmes.find(p => p.label === s.programme) || {}).id;
-    return INFO[id]?.name || s.programme;
+    return info(id)?.name || s.programme;
   });
-  $("q-why").textContent = editing ? "Change your answer and we'll update the results." :
-    settles.length ? `This helps decide: ${settles.join(", ")}.` : "";
+  $("q-why").textContent = editing ? t("why_edit") : settles.length ? t("why")(settles.join(", ")) : "";
   const n = Object.keys(S.readings).length;
-  $("q-count").textContent = editing ? "Changing an answer" : `Question ${S.asked + 1}`;
-  $("q-remaining").textContent = editing ? "" : (n < 3 ? "Usually 4 to 12 in all" : "We stop as soon as more questions wouldn't help");
+  $("q-count").textContent = editing ? t("q_changing") : t("q_n")(S.asked + 1);
+  $("q-remaining").textContent = editing ? "" : (n < 3 ? t("q_usual") : t("q_stop"));
   $("q-bar").style.width = Math.min(95, 8 + n * 9) + "%";
   $("q-cancel").hidden = !editing;
   $("q-dk").hidden = false;
   const box = $("q-input");
   if (q.id === "state") {
-    box.innerHTML = `<div class="field"><label for="f-state">State</label><select id="f-state" name="choice" required><option value="">Choose your state</option>${q.options.map(o => `<option value="${o}">${esc(STATES[o] || o)}</option>`).join("")}</select></div>`;
+    const opts = q.options.map(o => [o, stateName(o)]).sort((a, b) => a[1].localeCompare(b[1], LANG));
+    box.innerHTML = `<div class="field"><label for="f-state">${esc(t("state_label"))}</label><select id="f-state" name="choice" required><option value="">${esc(t("state_choose"))}</option>${opts.map(([o, name]) => `<option value="${o}">${esc(name)}</option>`).join("")}</select></div>`;
   } else if (q.kind === "choice") {
     const two = q.options.length === 2 ? " two" : "";
     box.innerHTML = `<div class="options${two}">${q.options.map((o, k) => `<div class="opt"><input type="radio" name="choice" id="o${k}" value="${esc(o)}"><label for="o${k}">${esc(optionLabel(q, o))}</label></div>`).join("")}</div>`;
   } else {
     const per = q.unit.includes("a year") ? "year" : q.unit.includes("a month") ? "month" : "none";
-    const periodSel = per === "none" ? "" : `<div class="field"><label for="f-period">How often</label><select id="f-period"><option value="year"${per === "year" ? " selected" : ""}>a year</option><option value="month"${per === "month" ? " selected" : ""}>a month</option><option value="week">a week</option></select></div>`;
+    const periodSel = per === "none" ? "" : `<div class="field"><label for="f-period">${esc(t("how_often"))}</label><select id="f-period"><option value="year"${per === "year" ? " selected" : ""}>${esc(t("per_year"))}</option><option value="month"${per === "month" ? " selected" : ""}>${esc(t("per_month"))}</option><option value="week">${esc(t("per_week"))}</option></select></div>`;
     const hasNone = q.ranges[0] === "none";
     box.innerHTML = `
-      ${hasNone ? `<div class="options two" style="margin-bottom:14px"><div class="opt"><input type="radio" name="mode" id="m-none" value="none"><label for="m-none">None</label></div><div class="opt"><input type="radio" name="mode" id="m-some" value="some" checked><label for="m-some">Some</label></div></div>` : ""}
+      ${hasNone ? `<div class="options two" style="margin-bottom:14px"><div class="opt"><input type="radio" name="mode" id="m-none" value="none"><label for="m-none">${esc(t("none_opt"))}</label></div><div class="opt"><input type="radio" name="mode" id="m-some" value="some" checked><label for="m-some">${esc(t("some_opt"))}</label></div></div>` : ""}
       <div id="amount-box" class="stack">
         <div class="amount-row">
-          <div class="field"><label for="f-amount">Amount in dollars</label><div class="money"><span aria-hidden="true">$</span><input type="number" id="f-amount" inputmode="decimal" min="0" step="any" autocomplete="off"></div></div>
+          <div class="field"><label for="f-amount">${esc(t("amount_label"))}</label><div class="money"><span aria-hidden="true">$</span><input type="number" id="f-amount" inputmode="decimal" min="0" step="any" autocomplete="off"></div></div>
           ${periodSel}
         </div>
-        <label class="check"><input type="checkbox" id="f-approx"> This is a rough guess</label>
-        <details class="ranges"><summary>Pick a range instead</summary>
+        <label class="check"><input type="checkbox" id="f-approx"> ${esc(t("rough"))}</label>
+        <details class="ranges"><summary>${esc(t("pick_range"))}</summary>
           <div class="options">${q.ranges.map((o, k) => `<div class="opt"><input type="radio" name="range" id="r${k}" value="${esc(o)}"><label for="r${k}">${esc(optionLabel(q, o))}</label></div>`).join("")}</div>
         </details>
       </div>`;
@@ -433,7 +626,7 @@ function readFact() {
   const v = $("f-amount").value.trim();
   if (v !== "") {
     const x = Number(v);
-    if (!isFinite(x) || x < 0) return "Please enter an amount of 0 or more.";
+    if (!isFinite(x) || x < 0) return t("err_amount");
     const period = $("f-period") ? $("f-period").value : "none";
     return {question: q.id, amount: {value: x, period, approximate: $("f-approx").checked}};
   }
@@ -444,8 +637,8 @@ function readFact() {
 $("q-form").addEventListener("submit", e => {
   e.preventDefault();
   const f = readFact();
-  if (f === null) { showError("Please answer, or choose “I don't know”."); return; }
-  if (typeof f === "string") { showError(f); return; }
+  if (f === null) { showError(t("err_answer"), true); return; }
+  if (typeof f === "string") { showError(f, true); return; }
   step([f]);
 });
 $("q-dk").onclick = () => step([{question: S.current.id, dont_know: true}]);
@@ -453,10 +646,8 @@ $("q-cancel").onclick = () => { S.editing = null; const n = S.lastNext; n.action
 
 function answersHTML() {
   return Object.entries(S.readings).map(([qid, reading]) => {
-    let shown = String(reading);
-    if (qid === "state") shown = STATES[reading] || reading;
-    shown = shown.replace(/ -> .*/, "").replace(/^don't know.*/, "Don't know");
-    return `<div class="q"><dt>${esc(QLABEL[qid] || qid)}</dt><dd><span>${esc(shown.charAt(0).toUpperCase() + shown.slice(1))}</span><button class="link" type="button" data-edit="${qid}">Change<span class="skip"> ${esc(QLABEL[qid] || qid)}</span></button></dd></div>`;
+    const label = qlabel(qid);
+    return `<div class="q"><dt>${esc(label)}</dt><dd><span>${esc(shownReading(qid, reading))}</span><button class="link" type="button" data-edit="${qid}">${esc(t("change"))}<span class="skip"> ${esc(label)}</span></button></dd></div>`;
   }).join("");
 }
 function wireEdits(root) {
@@ -475,37 +666,36 @@ function renderSoFar() {
 function renderResults(next) {
   const recs = next.recommend || [];
   const likely = recs.filter(r => r.tier === "likely").length;
-  $("r-h").textContent = recs.length ? `${recs.length} programme${recs.length > 1 ? "s" : ""} worth applying for` : "Nothing stands out from these answers";
-  $("r-lede").textContent = recs.length
-    ? (likely ? `${likely} look${likely === 1 ? "s" : ""} likely. ` : "") + "Values are rough yearly ranges if you qualify. Only the programme can confirm it."
-    : "From what you told us, none of the ten programmes looks likely. If your situation changes, or you think an answer is off, change it below.";
+  $("r-h").textContent = recs.length ? t("r_h")(recs.length) : t("r_none");
+  $("r-lede").textContent = recs.length ? (likely ? t("lede_likely")(likely) : "") + t("lede_values") : t("lede_none");
   $("handoff").hidden = next.action !== "hand_off";
-  $("handoff-text").textContent = "Your answers fit households that turn out very differently, so a short check can't call it with confidence.";
+  $("handoff-text").textContent = t("handoff_text");
   $("r-list").innerHTML = recs.map(r => {
-    const info = INFO[r.id] || {name: r.programme, desc: "", apply: "", how: "Apply"};
-    const tier = r.tier === "likely" ? ["likely", "Likely"] : ["check", "Worth checking"];
+    const i = info(r.id) || {name: r.programme, desc: "", apply: "", how: "Apply"};
+    const tier = r.tier === "likely" ? ["likely", t("badge_likely")] : ["check", t("badge_check")];
     const v = r.value_if_eligible_per_year;
-    const when = info.when || "a year";
-    const value = Array.isArray(v) ? `If you qualify, worth about <b>${money(v[0])}–${money(v[1])}</b> ${esc(when.replace(/^a year/, "a year"))}` : v === "small" ? "A small amount if you qualify" : "";
-    const tax = info.tax ? `<p class="fine">Filing is free with <a href="${TAX_HELP}" target="_blank" rel="noopener">IRS free tax help (VITA)</a> if your income is modest.</p>` : "";
+    const value = Array.isArray(v) ? t("value")(`${money(v[0])}–${money(v[1])}`, esc(i.when || t("per_year"))) : v === "small" ? t("small") : "";
+    const tax = i.tax ? `<p class="fine">${t("tax")(TAX_HELP[LANG])}</p>` : "";
     return `<article class="card result ${tier[0]} stack">
-      <header><h2 style="font-size:1.2rem">${esc(info.name)}</h2><span class="badge ${tier[0]}"><span aria-hidden="true">${tier[0] === "likely" ? "&#10003;" : "?"}</span> ${tier[1]}</span></header>
-      <p class="desc">${esc(info.desc)}</p>
+      <header><h2 style="font-size:1.2rem">${esc(i.name)}</h2><span class="badge ${tier[0]}"><span aria-hidden="true">${tier[0] === "likely" ? "&#10003;" : "?"}</span> ${esc(tier[1])}</span></header>
+      <p class="desc">${esc(i.desc)}</p>
       ${value ? `<p class="value">${value}</p>` : ""}
-      <div class="actions"><a class="button" href="${info.apply}" target="_blank" rel="noopener">${esc(info.how)} <span aria-hidden="true">&#8599;</span><span class="skip"> (opens in a new tab)</span></a></div>
+      <div class="actions"><a class="button" href="${i.apply}" target="_blank" rel="noopener">${esc(i.how)}${i.enPage ? esc(t("en_page")) : ""} <span aria-hidden="true">&#8599;</span><span class="skip"> ${esc(t("new_tab"))}</span></a></div>
       ${tax}
     </article>`;
   }).join("");
   const unsure = next.unsure || [];
+  $("r-hunger").hidden = ![...recs, ...unsure].some(r => info(r.id)?.hunger);
+  $("r-hunger").textContent = t("hunger");
   $("r-unsure").hidden = !unsure.length;
-  $("r-unsure-list").innerHTML = unsure.map(r => { const i = INFO[r.id] || {}; return `<li>${esc(i.name || r.programme)}${i.apply ? ` · <a href="${i.apply}" target="_blank" rel="noopener">${esc(i.how)}<span class="skip"> (opens in a new tab)</span></a>` : ""}</li>`; }).join("");
+  $("r-unsure-list").innerHTML = unsure.map(r => { const i = info(r.id) || {}; return `<li>${esc(i.name || r.programme)}${i.apply ? " · " + link(i.apply, i.how, i.enPage) : ""}</li>`; }).join("");
   const recIds = new Set(recs.map(r => r.id).concat(unsure.map(r => r.id)));
   const others = S.catalogue.programmes.filter(p => !recIds.has(p.id));
   $("r-others").hidden = !others.length;
-  $("r-others-list").innerHTML = others.map(p => { const i = INFO[p.id] || {}; return `<li>${esc(i.name || p.label)}${i.apply ? ` · <a href="${i.apply}" target="_blank" rel="noopener">${esc(i.how)}<span class="skip"> (opens in a new tab)</span></a>` : ""}</li>`; }).join("");
+  $("r-others-list").innerHTML = others.map(p => { const i = info(p.id) || {}; return `<li>${esc(i.name || p.label)}${i.apply ? " · " + link(i.apply, i.how, i.enPage) : ""}</li>`; }).join("");
   $("r-answers").innerHTML = answersHTML();
   wireEdits($("r-answers"));
-  $("r-note").textContent = "This is a free screener, not an application and not an eligibility decision; you can apply for any programme whatever it says here. " + (next.note || "") + " Your answers are kept only in this browser tab until you clear them or close it.";
+  $("r-note").textContent = t("note")(next.note || "");
   show("results");
   $("r-h").focus({preventScroll: true});
 }
