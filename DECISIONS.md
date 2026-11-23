@@ -876,3 +876,18 @@ against 77%, precision 45% against 46%. (b) 2 stale calls of 945 (0.21%), and no
 dropped a fact. Both stale calls are Claude miscopying the state string; the check digit refused
 them ("state is damaged ... pass the exact state string") and Claude resent the right one. So the
 hosted service keeps nothing, and the assistant using it does as well as with sessions in memory.
+
+**D32 result (16:43 UTC): passes.** 2,000 fresh households, both arms on the same simulated answers. The
+rules match the own answers of 681 households (34%, mostly single adults above the childless EITC
+limit) but change the interview or the list in only 55 (clean) and 80 (realistic).
+- **Primary, clean answers: -$3.7 a household [-9.4, +0.0], survey-weighted; non-inferior (bound
+  +$25).** Unweighted -$0.5 [-3.5, +2.5].
+- Realistic answers: -$15.0 [-33.1, -0.8] weighted, -$11.8 [-30.2, +6.0] unweighted.
+- What the rules took away (GPT round 6 asked for this count): with clean answers they suppressed no
+  recommendation of a programme the household gets, and removed 4 wrong EITC recommendations (and 2
+  wrong ACA ones through different questions). With realistic answers, where a misreported answer
+  can trip a rule, they suppressed 8 recommendations the household should have had (EITC 3,
+  refundable CTC 2, and 3 through a changed question path) and removed 23 wrong ones.
+
+So the rules ship. What they cost is concentrated where answers are wrong, which is the case for an
+abstention layer (D33) rather than for looser rules.

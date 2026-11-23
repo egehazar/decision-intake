@@ -1,0 +1,4 @@
+D32: engine with the rules file minus engine without, 2000 fresh households (seed 2034)
+households whose own answers match a rule: 681 (34.1%)
+clean: weighted total cost v2 $1,416, with rules $1,412; difference $-3.7 [-9.4, +0.0] (non-inferior if the upper bound < +$25: PASS); unweighted $-0.5 [-3.5, +2.5]; households where anything changed: 55
+realistic: weighted total cost v2 $1,854, with rules $1,840; difference $-15.0 [-33.1, -0.8] (non-inferior if the upper bound < +$25: PASS); unweighted $-11.8 [-30.2, +6.0]; households where anything changed: 80
