@@ -900,3 +900,21 @@ wages (14) and pre-tax deductions (14). The rest, including every exception to t
 is a bug in my adapter: self-employment income from service businesses, partnership earnings and farm
 income were left out of the "earnings from work" and "self-employed" answers, so self-employed people
 were coded as having no earnings. Fix registered as D34.
+
+## D34. The earnings answers count all self-employment (2026-11-23 16:51 UTC)
+
+The contradiction ledger (D32 addendum) found that the adapter built "earnings from work" and "anyone
+self-employed" from PolicyEngine's self_employment_income alone. PolicyEngine-US keeps service-business
+self-employment (sstb_self_employment_income), partnership earnings and farm income in separate
+variables, and counts all of them as earned income for the EITC. A person with that income would say
+they are self-employed and earn money; the data said they earned nothing. On a 161-household test chunk
+the fix changes earned income in 11 households (7%) and the self-employed answer in 7 (4%); PolicyEngine's
+outcomes are unchanged, only the answers.
+
+Plan, fixed now: rebuild the outcome table with the corrected answers (old chunks kept in
+data/cache/chunks_d28/), retrain the outcome model with D28's frozen settings and no tuning, export it
+as the shipped bundle (v2.1), and re-check every candidate rule on the corrected data with the same
+gate (the six dropped rules get a second look). The test split is by source household, so test
+households keep their identity; what they report changes where the old coding was wrong. v2.1 then
+goes into one registered release test against the current production candidate (v2 + rules) on the
+last unused test households.

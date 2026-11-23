@@ -17,6 +17,8 @@ import pandas as pd
 RAW = "data/raw/populace_us_2024.h5"
 YEAR = 2026
 ENTITIES = ["person", "household", "tax_unit", "spm_unit", "family", "marital_unit"]
+SELF_EMPLOYMENT = ["self_employment_income", "sstb_self_employment_income", "partnership_self_employment_net_earnings",
+                   "farm_operations_income"]  # every self-employment source the EITC counts (D34)
 TAKEUP_TRUE = {
     "spm_unit": ["takes_up_snap_if_eligible", "takes_up_tanf_if_eligible", "takes_up_housing_assistance_if_eligible"],
     "person": ["takes_up_ssi_if_eligible", "takes_up_medicaid_if_eligible", "would_claim_wic", "takes_up_head_start_if_eligible"],
@@ -65,6 +67,7 @@ def main():
         return np.asarray(sim.calculate(var, YEAR).values)
 
     age = person("age")
+    self_emp = sum(person(v).astype(float) for v in SELF_EMPLOYMENT)
     res = pd.DataFrame(
         {
             "household_id": np.asarray(sim.calculate("household_id", YEAR).values),
@@ -77,8 +80,11 @@ def main():
             "n_65plus": hh_any((age >= 65).astype(float)),
             "n_disabled": hh_any(person("is_disabled").astype(float)),
             "n_married": hh_any(np.asarray(sim.calculate("is_married", YEAR, map_to="person").values).astype(float)),
-            "earned_income": hh_sum("employment_income") + hh_sum("self_employment_income"),
-            "self_employed": hh_any((person("self_employment_income") != 0).astype(float)),
+            # Earnings from work as a person would report them: wages plus every kind of self-employment
+            # PolicyEngine keeps separately (service businesses, partnerships, farms). Before D34 only
+            # self_employment_income counted, so some self-employed households looked like non-earners.
+            "earned_income": hh_sum("employment_income") + hh_any(self_emp),
+            "self_employed": hh_any((self_emp != 0).astype(float)),
             "social_security": hh_sum("social_security"),
             "market_income": hh_sum("household_market_income"),
             "housing_cost": hh_sum("housing_cost"),
