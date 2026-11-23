@@ -942,3 +942,23 @@ households, which had been used only for D32's primary.
   programmes per household.
 
 This goes into the release test (D35) with D34's corrected data, registered before it runs.
+
+## D35. The release test (registered 2026-11-23 16:58 UTC, before v2.1 exists)
+
+One test on the last 2,183 test households no experiment has used (every test household not in
+D21-D32's samples), experiments/run_release.py:
+
+- **candidate**, the current production configuration: v2 + the D32 rules (bundles/guards_2026_d32.json).
+- **release**: v2.1, the D28 model settings retrained on D34's corrected answers with no tuning, + the
+  rules re-checked on that data by guards_build.py with the same gate, + D33's abstention (support under
+  10 households and probability at least 5% -> "can't tell").
+
+Both answer from the corrected coding (what a person would report) with the same simulated answers.
+Three primary criteria, clean answers, all must pass for the release to ship:
+1. **Cost:** survey-weighted total cost, release minus candidate, upper 95% bound below +$25.
+2. **Safety:** the share of "doesn't look likely" programmes the household actually qualifies for is at
+   most half the candidate's, with the 95% interval of the difference below zero.
+3. **Caution has a price:** at most 1.25 "can't tell" labels a household on average.
+Secondary: the same with realistic answers; per programme; whether thin support still separates wrong
+negatives from right ones on fresh households. If any primary fails, the release does not ship and the
+candidate stays.
