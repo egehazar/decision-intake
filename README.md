@@ -30,8 +30,16 @@ source households resampled as clusters, and it matches its own 18-question form
 | questions asked | 8.0 | **7.2** |
 | cases handed to a caseworker | 60% | **20%** |
 
-Total cost −$1,591 a household [−2,469, −775]. On households that qualify for something, the gain is
-$4,335: Claude alone misses the expensive programmes (Medicaid in 26 households against 8).
+Total cost −$1,591 a household [−2,469, −775]. It isn't recommending more to find more: at the same
+precision (41% against 40%) it finds 68% of the programmes people qualify for, against 51%. Claude
+alone misses the expensive ones (Medicaid in 26 households against 8). A smaller exploratory run with
+Claude Sonnet 5.5 points the same way: 76% of eligible programmes found against 50%, 32% fewer
+mistakes.
+
+**It's the decisions, not only the data (D30).** Given the same PolicyEngine-trained predictor and
+decision rule but left to choose its own questions, Claude stopped after 3.6 questions and made $3,249
+of mistakes. With the engine choosing what to ask and when to stop: $2,305, a further −$891 a
+household [−1,538, −324], registered and confirmed.
 
 > Built by AI agents (Claude, with reviews by GPT and Fable) under Ege Hazar's direction. Every
 > design choice, every result, and every idea that didn't make it is logged in [DECISIONS.md](DECISIONS.md).

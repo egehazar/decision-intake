@@ -767,3 +767,35 @@ Pre-registered test:
   and recall, hand-offs, survey-weighted versions; runs without a submission rerun once, then scored
   as recommending nothing.
 - Prediction: the engine arm costs less than the predictor arm.
+
+## D30 result: confirmed. The question choice itself is worth $891 a household (2026-11-23, 10:36 UTC)
+
+The predictor arm ran on all 200 test households from 10:23 UTC with the frozen harness (commit
+a02ad1a); every run ended with a submission (results/agent/test/haiku_engine_vs_predictor.txt,
+haiku_predictor_vs_alone.txt).
+
+| per household, 200 households, Claude Haiku 5.5 | alone | + predictor only | + full engine |
+|---|---|---|---|
+| questions | 8.0 | 3.6 | 7.2 |
+| costly mistakes | $3,884 | $3,249 | **$2,305** |
+| of which missed programmes | $3,084 | $2,214 | $1,300 |
+| of which wrong recommendations | $800 | $1,035 | $1,005 |
+| precision / recall of recommendations | 40% / 51% | 35% / 53% | **41% / 68%** |
+| handed to a caseworker | 60% | 20% | 20% |
+
+- **Primary: engine arm minus predictor arm, total cost: -$891 [-1,538, -324].** Confirmed. Same
+  model, same predictor, same decision rule, same hand-off rule; the only difference is who chooses
+  the questions and when to stop.
+- Why: left to choose, Claude stops after 3.6 questions on average, and its recall drops to 53%. The
+  engine keeps asking while a question is worth more than it costs (7.2), which is where the missed
+  programmes are found: fewer misses on every programme but TANF (equal).
+- Secondary: predictor minus alone -$700 [-1,553, +134], not distinguishable from zero; the predictor
+  mainly fixes hand-offs (60% to 20%) and lowers misses, but at lower precision. Survey-weighted:
+  engine minus predictor -$516 [-1,441, +359], predictor minus alone +$222 [-1,612, +2,095]. On the
+  148 households neither arm handed off, engine minus predictor -$601.
+
+Reading: GPT round 5's objection was that D29 might only show the value of a PolicyEngine-trained
+predictor. With the predictor held equal, the decision layer still cuts the cost by $891 a household,
+more than the predictor alone adds over Claude's own judgement. Of D29's -$1,591, the part that is
+attributable to the engine's question choice and stopping is the larger part, and it is the part that
+is statistically confirmed.

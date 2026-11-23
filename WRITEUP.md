@@ -13,11 +13,13 @@ Context Protocol server that any assistant can call. Two tests were registered b
   mistakes than version 1's full questionnaire (−$339 a household a year [−523, −173]). It beat all
   four registered alternatives, including the strongest decision tree we could build (−$293) and the
   best fixed 8-question form (−$768), and matched its own 18-question form with half the questions.
-- **An AI assistant with and without it (D29).** Claude Haiku interviewed 200 fresh households that
-  answer in everyday sentences, once deciding alone and once through DecisionIntake's tools. With the
-  engine it made 41% fewer costly mistakes ($2,305 against $3,884 a household), asked fewer questions
-  (7.2 against 8.0) and handed a third as many cases to a caseworker (20% against 60%); total cost
-  −$1,591 a household [−2,469, −775].
+- **An AI assistant with and without it (D29, D30).** Claude Haiku interviewed 200 fresh households
+  that answer in everyday sentences, once deciding alone and once through DecisionIntake's tools.
+  With the engine it made 41% fewer costly mistakes ($2,305 against $3,884 a household), asked fewer
+  questions (7.2 against 8.0) and handed a third as many cases to a caseworker (20% against 60%);
+  total cost −$1,591 a household [−2,469, −775]. Given only the engine's predictor and left to
+  choose its own questions, Claude stopped early and did $891 worse [−1,538, −324]: the question
+  choice itself is worth most of the gain.
 
 Both halves of the system earn their place: better prediction (the outcome model was the ceiling
 every question policy worked against) and better question choice (worth $800-1,000 a household over
@@ -334,6 +336,32 @@ checking" calls that turn out wrong, the trade its loss is built to make. The su
 difference, a secondary, is −$294 [−1,831, +1,146]: the heavily weighted households mostly qualify
 for nothing. The agent passed the engine's verdict on exactly in all 200 interviews; each took about
 30 seconds and half a cent of model use.
+
+Precision and recall tell the same story without the dollar weights: the engine arm's
+recommendations are as precise as Claude's own (41% against 40% turn out eligible), and they find
+68% of the 208 eligible programmes against 51%. An exploratory replication with Claude Sonnet 5.5 on
+100 of the households gives 76% against 50% at equal precision (44% and 45%) and 32% fewer mistakes;
+Sonnet alone asks fewer questions than Haiku alone (5.9), so its total-cost gap, −$1,082
+[−2,412, +185], is not distinguishable from zero at that size.
+
+**Is it the question choice, or only the predictor? (D30)** GPT's review of D29 raised the obvious
+objection: the engine arm had a PolicyEngine-trained predictor and Claude alone had only its own
+knowledge of the rules. So a third arm got the same predictor and decision rule, through tools that
+return the model's full assessment after every fact, but no advice on what to ask or when to stop.
+Registered on development households first, then run on the same 200 test households:
+
+| per household, Claude Haiku 5.5 | alone | + predictor only | + full engine |
+|---|---|---|---|
+| questions | 8.0 | 3.6 | 7.2 |
+| costly mistakes | $3,884 | $3,249 | **$2,305** |
+| precision / recall | 40% / 51% | 35% / 53% | **41% / 68%** |
+| handed to a caseworker | 60% | 20% | 20% |
+
+Engine arm minus predictor arm: −$891 a household [−1,538, −324], confirmed. Left to choose, Claude
+stops after 3.6 questions and finds 53% of the programmes; the engine keeps asking while a question is
+worth more than it costs, and misses fewer on every programme but one (TANF, equal). The predictor on
+its own is worth −$700 [−1,553, +134] over Claude's judgement, not distinguishable from zero. Of the
+whole D29 gain, the larger and the confirmed part is the decision layer.
 
 The demo page has the same contract in JavaScript. In "Talk to Claude" mode Claude holds the
 conversation, calls `record_facts` and `next_step` against the engine running in the page, and the
