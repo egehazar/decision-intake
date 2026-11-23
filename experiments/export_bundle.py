@@ -33,10 +33,11 @@ def main():
     rows = np.random.default_rng(0).choice(len(train), 5000, replace=False)
     assert np.array_equal(tf(train, train.answers[rows]), features(train, train.answers[rows])), "terms != features"
     info = {
-        "name": "DecisionIntake v2, US benefits screening",
+        "name": sys.argv[2] if len(sys.argv) > 2 else "DecisionIntake v2, US benefits screening",
         "data": "PolicyEngine-US 2.152.15 rules (2026) on Populace 2024 (populace-us-2024-spm-20260915), a "
                 "calibrated synthetic population; 48,657 training households",
-        "model": "wide-and-deep outcome network, settings frozen in DECISIONS D28",
+        "model": "wide-and-deep outcome network, settings frozen in DECISIONS D28"
+                 + (f"; {sys.argv[3]}" if len(sys.argv) > 3 else ""),
         "loss": f"a missed programme costs its yearly value (at least $120); a wrong recommendation costs ${FR:,.0f}",
         "caveat": "A screening estimate from PolicyEngine's rules, not an eligibility decision. Apply through the "
                   "official programme to get one. Immigration status is not asked and can change eligibility.",

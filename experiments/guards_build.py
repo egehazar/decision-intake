@@ -4,7 +4,7 @@ A rule ships only if, among the training households it matches, PolicyEngine fin
 more than the rule's cap (2%, survey-weighted), so a capped probability is never below what the data shows. Then an audit on random valid profiles (every combination of answers a person
 could give, not only common ones): how often v2 calls a ruled-out programme likely, with and without.
 
-usage: python experiments/guards_build.py
+usage: python experiments/guards_build.py [BUNDLE] [OUT.json]   # default: the v2 bundle -> bundles/guards_2026.json
 """
 from __future__ import annotations
 
@@ -37,7 +37,9 @@ def random_profiles(questions, n, seed=0):
 
 
 def main():
-    b = bundle.load(os.path.join(ROOT, "bundles", "benefits_v2.npz"))
+    src = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "bundles", "benefits_v2.npz")
+    dest = sys.argv[2] if len(sys.argv) > 2 else str(DEFAULT_RULES)
+    b = bundle.load(src)
     pop = b.pop
     rules = build_rules(pop.questions)
     R = Rules(rules, pop.questions, pop.decisions)
@@ -65,8 +67,8 @@ def main():
                     f"households: kept only if at most {MAX_EXCEPTIONS:.0%} of the households it matches get the "
                     "programme (survey-weighted).",
            "cap": CAP, "rules": kept}
-    DEFAULT_RULES.write_text(json.dumps(out, indent=1), encoding="utf-8")
-    print(f"wrote {DEFAULT_RULES}: {len(kept)} rules")
+    open(dest, "w", encoding="utf-8").write(json.dumps(out, indent=1))
+    print(f"wrote {dest}: {len(kept)} rules, checked on {os.path.basename(src)}")
 
     # audit: random valid profiles
     R2 = Rules(kept, pop.questions, pop.decisions)

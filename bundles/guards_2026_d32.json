@@ -1,0 +1,600 @@
+{
+ "about": "Statutory limits applied on top of the outcome model (src/decisionintake/guards.py, DECISIONS D32). Each rule was checked against PolicyEngine-US results on the training households: kept only if at most 2% of the households it matches get the programme (survey-weighted).",
+ "cap": 0.02,
+ "rules": [
+  {
+   "id": "eitc_income_single_0",
+   "decisions": [
+    "eitc"
+   ],
+   "cap": 0.02,
+   "when": {
+    "household_size": [
+     "1"
+    ],
+    "children": [
+     "none"
+    ],
+    "married": [
+     "no"
+    ],
+    "college": [
+     "no"
+    ],
+    "disabled": [
+     "no"
+    ],
+    "self_employed": [
+     "no"
+    ],
+    "earned_income": [
+     "$20,000 to $30,000",
+     "$30,000 to $40,000",
+     "$40,000 to $50,000",
+     "$50,000 to $60,000",
+     "$60,000 to $80,000",
+     "$80,000 to $100,000",
+     "$100,000 to $150,000",
+     "$150,000 or more"
+    ]
+   },
+   "why": "For one adult with no children, the EITC is zero once earnings reach $19,540 (2026).",
+   "source": "26 U.S.C. 32 and 24(d); PolicyEngine-US 2.152.15 parameters gov.irs.credits (tax year 2026)",
+   "checked": {
+    "eitc": {
+     "households": 2688,
+     "eligible": 3,
+     "weighted_share": 0.0
+    }
+   }
+  },
+  {
+   "id": "no_earnings_single_0",
+   "decisions": [
+    "eitc"
+   ],
+   "cap": 0.02,
+   "when": {
+    "household_size": [
+     "1"
+    ],
+    "children": [
+     "none"
+    ],
+    "married": [
+     "no"
+    ],
+    "college": [
+     "no"
+    ],
+    "disabled": [
+     "no"
+    ],
+    "self_employed": [
+     "no"
+    ],
+    "earned_income": [
+     "none"
+    ]
+   },
+   "why": "For one adult with no children and no earnings, there is no EITC (it needs earned income) and no refundable child tax credit (it needs earnings above $2,500).",
+   "source": "26 U.S.C. 32 and 24(d); PolicyEngine-US 2.152.15 parameters gov.irs.credits (tax year 2026)",
+   "checked": {
+    "eitc": {
+     "households": 1614,
+     "eligible": 4,
+     "weighted_share": 0.0
+    }
+   }
+  },
+  {
+   "id": "eitc_income_single_1",
+   "decisions": [
+    "eitc"
+   ],
+   "cap": 0.02,
+   "when": {
+    "household_size": [
+     "2"
+    ],
+    "children": [
+     "1"
+    ],
+    "married": [
+     "no"
+    ],
+    "college": [
+     "no"
+    ],
+    "disabled": [
+     "no"
+    ],
+    "self_employed": [
+     "no"
+    ],
+    "earned_income": [
+     "$60,000 to $80,000",
+     "$80,000 to $100,000",
+     "$100,000 to $150,000",
+     "$150,000 or more"
+    ]
+   },
+   "why": "For one adult with 1 child, the EITC is zero once earnings reach $51,593 (2026).",
+   "source": "26 U.S.C. 32 and 24(d); PolicyEngine-US 2.152.15 parameters gov.irs.credits (tax year 2026)",
+   "checked": {
+    "eitc": {
+     "households": 161,
+     "eligible": 4,
+     "weighted_share": 0.0151
+    }
+   }
+  },
+  {
+   "id": "no_earnings_single_1",
+   "decisions": [
+    "eitc",
+    "ctc"
+   ],
+   "cap": 0.02,
+   "when": {
+    "household_size": [
+     "2"
+    ],
+    "children": [
+     "1"
+    ],
+    "married": [
+     "no"
+    ],
+    "college": [
+     "no"
+    ],
+    "disabled": [
+     "no"
+    ],
+    "self_employed": [
+     "no"
+    ],
+    "earned_income": [
+     "none"
+    ]
+   },
+   "why": "For one adult with 1 child and no earnings, there is no EITC (it needs earned income) and no refundable child tax credit (it needs earnings above $2,500).",
+   "source": "26 U.S.C. 32 and 24(d); PolicyEngine-US 2.152.15 parameters gov.irs.credits (tax year 2026)",
+   "checked": {
+    "eitc": {
+     "households": 18,
+     "eligible": 4,
+     "weighted_share": 1e-05
+    },
+    "ctc": {
+     "households": 18,
+     "eligible": 2,
+     "weighted_share": 1e-05
+    }
+   }
+  },
+  {
+   "id": "eitc_income_single_2",
+   "decisions": [
+    "eitc"
+   ],
+   "cap": 0.02,
+   "when": {
+    "household_size": [
+     "3"
+    ],
+    "children": [
+     "2"
+    ],
+    "married": [
+     "no"
+    ],
+    "college": [
+     "no"
+    ],
+    "disabled": [
+     "no"
+    ],
+    "self_employed": [
+     "no"
+    ],
+    "earned_income": [
+     "$60,000 to $80,000",
+     "$80,000 to $100,000",
+     "$100,000 to $150,000",
+     "$150,000 or more"
+    ]
+   },
+   "why": "For one adult with 2 children, the EITC is zero once earnings reach $58,629 (2026).",
+   "source": "26 U.S.C. 32 and 24(d); PolicyEngine-US 2.152.15 parameters gov.irs.credits (tax year 2026)",
+   "checked": {
+    "eitc": {
+     "households": 113,
+     "eligible": 8,
+     "weighted_share": 0.0
+    }
+   }
+  },
+  {
+   "id": "eitc_income_single_3",
+   "decisions": [
+    "eitc"
+   ],
+   "cap": 0.02,
+   "when": {
+    "household_size": [
+     "4"
+    ],
+    "children": [
+     "3"
+    ],
+    "married": [
+     "no"
+    ],
+    "college": [
+     "no"
+    ],
+    "disabled": [
+     "no"
+    ],
+    "self_employed": [
+     "no"
+    ],
+    "earned_income": [
+     "$80,000 to $100,000",
+     "$100,000 to $150,000",
+     "$150,000 or more"
+    ]
+   },
+   "why": "For one adult with 3 children, the EITC is zero once earnings reach $62,974 (2026).",
+   "source": "26 U.S.C. 32 and 24(d); PolicyEngine-US 2.152.15 parameters gov.irs.credits (tax year 2026)",
+   "checked": {
+    "eitc": {
+     "households": 19,
+     "eligible": 2,
+     "weighted_share": 0.0
+    }
+   }
+  },
+  {
+   "id": "no_earnings_single_4",
+   "decisions": [
+    "eitc",
+    "ctc"
+   ],
+   "cap": 0.02,
+   "when": {
+    "household_size": [
+     "5"
+    ],
+    "children": [
+     "4 or more"
+    ],
+    "married": [
+     "no"
+    ],
+    "college": [
+     "no"
+    ],
+    "disabled": [
+     "no"
+    ],
+    "self_employed": [
+     "no"
+    ],
+    "earned_income": [
+     "none"
+    ]
+   },
+   "why": "For one adult with 4 children and no earnings, there is no EITC (it needs earned income) and no refundable child tax credit (it needs earnings above $2,500).",
+   "source": "26 U.S.C. 32 and 24(d); PolicyEngine-US 2.152.15 parameters gov.irs.credits (tax year 2026)",
+   "checked": {
+    "eitc": {
+     "households": 6,
+     "eligible": 3,
+     "weighted_share": 0.0
+    },
+    "ctc": {
+     "households": 6,
+     "eligible": 3,
+     "weighted_share": 0.0
+    }
+   }
+  },
+  {
+   "id": "eitc_income_joint_0",
+   "decisions": [
+    "eitc"
+   ],
+   "cap": 0.02,
+   "when": {
+    "household_size": [
+     "2"
+    ],
+    "children": [
+     "none"
+    ],
+    "married": [
+     "yes"
+    ],
+    "college": [
+     "no"
+    ],
+    "disabled": [
+     "no"
+    ],
+    "self_employed": [
+     "no"
+    ],
+    "earned_income": [
+     "$30,000 to $40,000",
+     "$40,000 to $50,000",
+     "$50,000 to $60,000",
+     "$60,000 to $80,000",
+     "$80,000 to $100,000",
+     "$100,000 to $150,000",
+     "$150,000 or more"
+    ]
+   },
+   "why": "For a married couple with no children, the EITC is zero once earnings reach $26,820 (2026).",
+   "source": "26 U.S.C. 32 and 24(d); PolicyEngine-US 2.152.15 parameters gov.irs.credits (tax year 2026)",
+   "checked": {
+    "eitc": {
+     "households": 3962,
+     "eligible": 1,
+     "weighted_share": 0.0
+    }
+   }
+  },
+  {
+   "id": "no_earnings_joint_0",
+   "decisions": [
+    "eitc"
+   ],
+   "cap": 0.02,
+   "when": {
+    "household_size": [
+     "2"
+    ],
+    "children": [
+     "none"
+    ],
+    "married": [
+     "yes"
+    ],
+    "college": [
+     "no"
+    ],
+    "disabled": [
+     "no"
+    ],
+    "self_employed": [
+     "no"
+    ],
+    "earned_income": [
+     "none"
+    ]
+   },
+   "why": "For a married couple with no children and no earnings, there is no EITC (it needs earned income) and no refundable child tax credit (it needs earnings above $2,500).",
+   "source": "26 U.S.C. 32 and 24(d); PolicyEngine-US 2.152.15 parameters gov.irs.credits (tax year 2026)",
+   "checked": {
+    "eitc": {
+     "households": 2960,
+     "eligible": 1,
+     "weighted_share": 0.00162
+    }
+   }
+  },
+  {
+   "id": "eitc_income_joint_1",
+   "decisions": [
+    "eitc"
+   ],
+   "cap": 0.02,
+   "when": {
+    "household_size": [
+     "3"
+    ],
+    "children": [
+     "1"
+    ],
+    "married": [
+     "yes"
+    ],
+    "college": [
+     "no"
+    ],
+    "disabled": [
+     "no"
+    ],
+    "self_employed": [
+     "no"
+    ],
+    "earned_income": [
+     "$60,000 to $80,000",
+     "$80,000 to $100,000",
+     "$100,000 to $150,000",
+     "$150,000 or more"
+    ]
+   },
+   "why": "For a married couple with 1 child, the EITC is zero once earnings reach $58,863 (2026).",
+   "source": "26 U.S.C. 32 and 24(d); PolicyEngine-US 2.152.15 parameters gov.irs.credits (tax year 2026)",
+   "checked": {
+    "eitc": {
+     "households": 1743,
+     "eligible": 6,
+     "weighted_share": 0.00029
+    }
+   }
+  },
+  {
+   "id": "eitc_income_joint_2",
+   "decisions": [
+    "eitc"
+   ],
+   "cap": 0.02,
+   "when": {
+    "household_size": [
+     "4"
+    ],
+    "children": [
+     "2"
+    ],
+    "married": [
+     "yes"
+    ],
+    "college": [
+     "no"
+    ],
+    "disabled": [
+     "no"
+    ],
+    "self_employed": [
+     "no"
+    ],
+    "earned_income": [
+     "$80,000 to $100,000",
+     "$100,000 to $150,000",
+     "$150,000 or more"
+    ]
+   },
+   "why": "For a married couple with 2 children, the EITC is zero once earnings reach $65,899 (2026).",
+   "source": "26 U.S.C. 32 and 24(d); PolicyEngine-US 2.152.15 parameters gov.irs.credits (tax year 2026)",
+   "checked": {
+    "eitc": {
+     "households": 1969,
+     "eligible": 1,
+     "weighted_share": 0.00365
+    }
+   }
+  },
+  {
+   "id": "eitc_income_joint_3",
+   "decisions": [
+    "eitc"
+   ],
+   "cap": 0.02,
+   "when": {
+    "household_size": [
+     "5"
+    ],
+    "children": [
+     "3"
+    ],
+    "married": [
+     "yes"
+    ],
+    "college": [
+     "no"
+    ],
+    "disabled": [
+     "no"
+    ],
+    "self_employed": [
+     "no"
+    ],
+    "earned_income": [
+     "$80,000 to $100,000",
+     "$100,000 to $150,000",
+     "$150,000 or more"
+    ]
+   },
+   "why": "For a married couple with 3 children, the EITC is zero once earnings reach $70,244 (2026).",
+   "source": "26 U.S.C. 32 and 24(d); PolicyEngine-US 2.152.15 parameters gov.irs.credits (tax year 2026)",
+   "checked": {
+    "eitc": {
+     "households": 789,
+     "eligible": 2,
+     "weighted_share": 0.0022
+    }
+   }
+  },
+  {
+   "id": "eitc_income_joint_4",
+   "decisions": [
+    "eitc"
+   ],
+   "cap": 0.02,
+   "when": {
+    "household_size": [
+     "6"
+    ],
+    "children": [
+     "4 or more"
+    ],
+    "married": [
+     "yes"
+    ],
+    "college": [
+     "no"
+    ],
+    "disabled": [
+     "no"
+    ],
+    "self_employed": [
+     "no"
+    ],
+    "earned_income": [
+     "$80,000 to $100,000",
+     "$100,000 to $150,000",
+     "$150,000 or more"
+    ]
+   },
+   "why": "For a married couple with 4 children, the EITC is zero once earnings reach $70,244 (2026).",
+   "source": "26 U.S.C. 32 and 24(d); PolicyEngine-US 2.152.15 parameters gov.irs.credits (tax year 2026)",
+   "checked": {
+    "eitc": {
+     "households": 250,
+     "eligible": 2,
+     "weighted_share": 0.01168
+    }
+   }
+  },
+  {
+   "id": "no_earnings_joint_4",
+   "decisions": [
+    "eitc",
+    "ctc"
+   ],
+   "cap": 0.02,
+   "when": {
+    "household_size": [
+     "6"
+    ],
+    "children": [
+     "4 or more"
+    ],
+    "married": [
+     "yes"
+    ],
+    "college": [
+     "no"
+    ],
+    "disabled": [
+     "no"
+    ],
+    "self_employed": [
+     "no"
+    ],
+    "earned_income": [
+     "none"
+    ]
+   },
+   "why": "For a married couple with 4 children and no earnings, there is no EITC (it needs earned income) and no refundable child tax credit (it needs earnings above $2,500).",
+   "source": "26 U.S.C. 32 and 24(d); PolicyEngine-US 2.152.15 parameters gov.irs.credits (tax year 2026)",
+   "checked": {
+    "eitc": {
+     "households": 9,
+     "eligible": 2,
+     "weighted_share": 0.0
+    },
+    "ctc": {
+     "households": 9,
+     "eligible": 3,
+     "weighted_share": 0.0
+    }
+   }
+  }
+ ]
+}
