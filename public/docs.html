@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DecisionIntake Developer Guide</title>
+<meta name="description" content="Plug the DecisionIntake benefits-screening engine into a screener or an AI assistant: the JSON API, the state string, MCP.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect x='1' y='1' width='26' height='26' rx='7' fill='%231d5c88'/%3E%3Cpath d='M8 14.5l4 4 8-9' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root { --bg: #f5f4ef; --surface: #fff; --ink: #18232c; --muted: #56636e; --line: #d9d6cc; --accent: #1d5c88; --code: #eef2f5; color-scheme: light; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #10161b; --surface: #182129; --ink: #e7edf1; --muted: #9aa8b3; --line: #2a3641; --accent: #82b8e2; --code: #0c1218; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #10161b; --surface: #182129; --ink: #e7edf1; --muted: #9aa8b3; --line: #2a3641; --accent: #82b8e2; --code: #0c1218; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 52rem; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { border-bottom: 1px solid var(--line); background: var(--surface); }
+header .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-block: 14px; }
+header a { font-weight: 700; color: var(--ink); text-decoration: none; }
+main { padding-block: 28px 56px; }
+h1 { font-size: clamp(1.6rem, 4vw, 2.1rem); line-height: 1.2; margin: 0 0 10px; text-wrap: balance; }
+h2 { font-size: 1.3rem; margin: 40px 0 10px; padding-top: 16px; border-top: 1px solid var(--line); }
+h3 { font-size: 1.05rem; margin: 22px 0 6px; }
+p, li { max-width: 44rem; }
+a { color: var(--accent); }
+.lede { color: var(--muted); font-size: 1.08rem; }
+code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: .88em; background: var(--code); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+pre:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+pre { background: var(--code); border: 1px solid var(--line); border-radius: 8px; padding: 14px; overflow-x: auto; font-size: .85rem; line-height: 1.5; }
+pre code { background: none; padding: 0; overflow-wrap: normal; }
+table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+.tbl { overflow-x: auto; }
+th, td { text-align: left; border-bottom: 1px solid var(--line); padding: 8px 10px; vertical-align: top; }
+th { color: var(--muted); font-weight: 600; }
+.note { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--accent); border-radius: 8px; padding: 12px 16px; }
+nav.toc { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 12px 18px; }
+nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
+</style>
+</head>
+<body>
+<header><div class="wrap"><a href="./">Quick Benefits Check</a><span><a href="openapi.json">openapi.json</a> · <a href="https://github.com/egehazar/decision-intake" target="_blank" rel="noopener">source</a></span></div></header>
+<main class="wrap">
+<h1>Developer guide</h1>
+<p class="lede">DecisionIntake decides what to ask next in a US benefits screening, how far to trust each answer, and when it knows enough to recommend programmes or should hand the case to a person. Your product keeps the conversation; the engine keeps the decision. Engine 1.0.0; every example below is a real response from this service.</p>
+
+<nav class="toc" aria-label="Contents"><b>Contents</b><ol>
+<li><a href="#loop">The loop</a></li><li><a href="#facts">Facts</a></li><li><a href="#responses">Responses</a></li>
+<li><a href="#state">The state string</a></li><li><a href="#mcp">AI assistants (MCP)</a></li><li><a href="#code">Code</a></li>
+<li><a href="#limits">Errors and limits</a></li></ol></nav>
+
+<h2 id="loop">1. The loop</h2>
+<p>One endpoint does the work. Send what you know, get back the next step, repeat until the step is <code>finish</code> or <code>hand_off</code>. The service keeps nothing between calls: every response carries a <code>state</code> string, and you send it back with the next call.</p>
+<div class="tbl"><table>
+<tr><th>Call</th><th>Body</th><th>Returns</th></tr>
+<tr><td><code>POST /v1/step</code></td><td><code>{"state"?, "facts"?}</code></td><td>the new <code>state</code>, how each fact was read, and <code>next</code>: ask, finish or hand_off</td></tr>
+<tr><td><code>POST /v1/assessment</code></td><td><code>{"state"}</code></td><td>every programme's probability, tier and yearly value range; the facts so far; how well the data covers this household</td></tr>
+<tr><td><code>GET /v1/questions</code></td><td>-</td><td>the ten programmes and all 18 questions with their options</td></tr>
+<tr><td><code>POST /mcp</code></td><td>JSON-RPC</td><td>the same engine as tools for AI assistants</td></tr>
+</table></div>
+<h3>Start</h3>
+<pre tabindex="0"><code class="json">{
+  &quot;facts&quot;: []
+}</code></pre>
+<pre tabindex="0"><code class="json">{
+  &quot;state&quot;: &quot;di1;#6a3a&quot;,
+  &quot;readings&quot;: [],
+  &quot;next&quot;: {
+    &quot;action&quot;: &quot;ask&quot;,
+    &quot;question&quot;: {
+      &quot;id&quot;: &quot;children&quot;,
+      &quot;text&quot;: &quot;How many children under 18 live with you?&quot;,
+      &quot;kind&quot;: &quot;choice&quot;,
+      &quot;options&quot;: [
+        &quot;none&quot;,
+        &quot;1&quot;,
+        &quot;2&quot;,
+        &quot;3&quot;,
+        &quot;4 or more&quot;
+      ]
+    },
+    &quot;why&quot;: {
+      &quot;worth_per_year&quot;: 874,
+      &quot;question_cost&quot;: 15.0,
+      &quot;mostly_settles&quot;: [
+        {
+          &quot;programme&quot;: &quot;Earned income tax credit&quot;,
+          &quot;share&quot;: 0.35
+        },
+        {
+          &quot;programme&quot;: &quot;SNAP (food)&quot;,
+          &quot;share&quot;: 0.33
+        },
+        {
+          &quot;programme&quot;: &quot;Free or reduced-price school meals&quot;,
+          &quot;share&quot;: 0.17
+        }
+      ]
+    },
+    &quot;progress&quot;: {
+      &quot;facts_recorded&quot;: 0,
+      &quot;expected_mistake_cost&quot;: 4483,
+      &quot;similar_households&quot;: 7816,
+      &quot;support&quot;: {
+        &quot;households_like_this&quot;: 7815.9,
+        &quot;level&quot;: &quot;supported&quot;,
+        &quot;conflicting_answers&quot;: 0
+      }
+    }
+  }
+}</code></pre>
+
+<h2 id="facts">2. Facts</h2>
+<p>Record anything the person said, asked or not: a fact for a question that already has one replaces it (a correction). Three kinds:</p>
+<div class="tbl"><table>
+<tr><th>Kind</th><th>Example</th><th>Notes</th></tr>
+<tr><td>choice</td><td><code>{"question": "children", "choice": "2"}</code></td><td>the option's text; numbers map onto ranges like "4 or more"; true/false onto yes/no</td></tr>
+<tr><td>amount</td><td><code>{"question": "earned_income", "amount": {"value": 2400, "period": "month", "approximate": true}}</code></td><td>as said: a value or <code>low</code>/<code>high</code>, a period (year, month, week, none); the engine does the arithmetic and spreads approximate amounts over neighbouring ranges</td></tr>
+<tr><td>don't know</td><td><code>{"question": "assets", "dont_know": true}</code></td><td>no evidence; the belief is unchanged</td></tr>
+</table></div>
+<h3>Three facts at once</h3>
+<pre tabindex="0"><code class="json">{
+  &quot;state&quot;: &quot;di1;#6a3a&quot;,
+  &quot;facts&quot;: [
+    {
+      &quot;question&quot;: &quot;children&quot;,
+      &quot;choice&quot;: &quot;2&quot;
+    },
+    {
+      &quot;question&quot;: &quot;state&quot;,
+      &quot;choice&quot;: &quot;TX&quot;
+    },
+    {
+      &quot;question&quot;: &quot;earned_income&quot;,
+      &quot;amount&quot;: {
+        &quot;value&quot;: 2400,
+        &quot;period&quot;: &quot;month&quot;,
+        &quot;approximate&quot;: true
+      }
+    }
+  ]
+}</code></pre>
+<pre tabindex="0"><code class="json">{
+  &quot;state&quot;: &quot;di1;children=2;state=TX;earned_income=~2400/month;#d883&quot;,
+  &quot;readings&quot;: [
+    {
+      &quot;question&quot;: &quot;children&quot;,
+      &quot;reading&quot;: &quot;2&quot;
+    },
+    {
+      &quot;question&quot;: &quot;state&quot;,
+      &quot;reading&quot;: &quot;TX&quot;
+    },
+    {
+      &quot;question&quot;: &quot;earned_income&quot;,
+      &quot;reading&quot;: &quot;$2,400 a month -&gt; $24,480-$33,120 a year -&gt; \&quot;$20,000 to $30,000\&quot; 63%, \&quot;$30,000 to $40,000\&quot; 36%&quot;
+    }
+  ],
+  &quot;next&quot;: {
+    &quot;action&quot;: &quot;ask&quot;,
+    &quot;question&quot;: {
+      &quot;id&quot;: &quot;household_size&quot;,
+      &quot;text&quot;: &quot;How many people live in your household, including you?&quot;,
+      &quot;kind&quot;: &quot;choice&quot;,
+      &quot;options&quot;: [
+        &quot;1&quot;,
+        &quot;2&quot;,
+        &quot;3&quot;,
+        &quot;4&quot;,
+        &quot;5&quot;,
+        &quot;6&quot;,
+        &quot;7 or more&quot;
+      ]
+    },
+    &quot;why&quot;: {
+      &quot;worth_per_year&quot;: 1158,
+      &quot;question_cost&quot;: 15.0,
+      &quot;mostly_settles&quot;: [
+        {
+          &quot;programme&quot;: &quot;SSI&quot;,
+          &quot;share&quot;: 0.54
+        },
+        {
+          &quot;programme&quot;: &quot;ACA premium tax credit&quot;,
+          &quot;share&quot;: 0.31
+        },
+        {
+          &quot;programme&quot;: &quot;WIC&quot;,
+          &quot;share&quot;: 0.14
+        }
+      ]
+    }
+  }
+}</code></pre>
+<p><code>why.worth_per_year</code> is the expected cost of mistakes, in dollars a year, that the next question saves; it is asked because that is more than <code>question_cost</code>. <code>mostly_settles</code> says which programmes it is about, useful for telling the person why you ask.</p>
+
+<h2 id="responses">3. Responses</h2>
+<p>When no remaining question is worth asking, <code>next.action</code> is <code>finish</code>, or <code>hand_off</code> when the doubt left is still costly enough that a person should review.</p>
+<pre tabindex="0"><code class="json">{
+  &quot;action&quot;: &quot;finish&quot;,
+  &quot;recommend&quot;: [
+    {
+      &quot;id&quot;: &quot;eitc&quot;,
+      &quot;programme&quot;: &quot;Earned income tax credit&quot;,
+      &quot;tier&quot;: &quot;likely&quot;,
+      &quot;probability&quot;: 0.99,
+      &quot;value_if_eligible_per_year&quot;: [
+        4950.0,
+        7070.0
+      ]
+    },
+    {
+      &quot;id&quot;: &quot;ctc&quot;,
+      &quot;programme&quot;: &quot;Child tax credit (refundable part)&quot;,
+      &quot;tier&quot;: &quot;likely&quot;,
+      &quot;probability&quot;: 0.98,
+      &quot;value_if_eligible_per_year&quot;: [
+        2850.0,
+        3220.0
+      ]
+    },
+    &quot;…&quot;
+  ],
+  &quot;unsure&quot;: [
+    {
+      &quot;id&quot;: &quot;aca_ptc&quot;,
+      &quot;programme&quot;: &quot;ACA premium tax credit&quot;,
+      &quot;tier&quot;: &quot;can&#x27;t tell&quot;,
+      &quot;probability&quot;: 0.05
+    }
+  ],
+  &quot;progress&quot;: {
+    &quot;facts_recorded&quot;: 8,
+    &quot;expected_mistake_cost&quot;: 1081,
+    &quot;similar_households&quot;: 10,
+    &quot;support&quot;: {
+      &quot;households_like_this&quot;: 5.9,
+      &quot;level&quot;: &quot;thin&quot;,
+      &quot;conflicting_answers&quot;: 0
+    }
+  },
+  &quot;note&quot;: &quot;A screening estimate from PolicyEngine&#x27;s rules, not an eligibility decision. Apply through the official programme to get one. Immigration status is not asked and can change eligibility.&quot;
+}</code></pre>
+<div class="tbl"><table>
+<tr><th>Field</th><th>Meaning</th></tr>
+<tr><td><code>recommend</code></td><td>programmes worth applying for; <code>tier</code> is <code>likely</code> (probability at least 0.5) or <code>worth checking</code>; <code>value_if_eligible_per_year</code> a range in dollars</td></tr>
+<tr><td><code>unsure</code></td><td>programmes the engine won't call from these answers: few training households look like this person and the programme keeps a real chance. Show them as "we couldn't tell, you can still apply", never as unlikely</td></tr>
+<tr><td><code>progress.support</code></td><td>how many of the 48,657 training households fit these answers before the support floor; under 10 is <code>thin</code></td></tr>
+<tr><td><code>note</code></td><td>what this is and isn't; show it</td></tr>
+</table></div>
+<p class="note">A screening estimate from PolicyEngine-US's 2026 rules, not an eligibility decision. Always offer the official way to apply, including for programmes that don't look likely. The <a href="https://github.com/egehazar/decision-intake/blob/master/MODEL_CARD.md" target="_blank" rel="noopener">model card</a> says where it is wrong.</p>
+
+<h2 id="state">4. The state string</h2>
+<p>The facts so far, readable, with a check so a mangled copy is refused instead of misread:</p>
+<pre tabindex="0"><code class="text">di1;children=2;state=TX;earned_income=~2400/month;household_size=3;infant_or_pregnant=no;married=no;child_under5=no;social_security=none;#4aa1</code></pre>
+<p>Choices are option text (spaces as <code>_</code>), amounts are <code>~</code>-prefixed when approximate with <code>..</code> for ranges and <code>/period</code>, don't-know is <code>?</code>, and <code>#</code> ends with four hex digits of a CRC. It is not encrypted or signed: it holds what the person said, so treat it like the answers themselves. Send it in POST bodies, never in URLs, and don't log it. The service doesn't: its logs hold route, status and timing only.</p>
+
+<h2 id="mcp">5. AI assistants (MCP)</h2>
+<p>The same engine speaks the Model Context Protocol over Streamable HTTP at <code>{BASE}/mcp</code> (protocol 2025-11-25 back to 2024-11-05). The assistant does the talking and turns the person's words into facts; the engine decides what to ask and when to stop. In a registered test, Claude made 41% fewer costly mistakes with these tools than without them.</p>
+<h3>Claude Code</h3>
+<pre tabindex="0"><code class="text">claude mcp add --transport http decisionintake {BASE}/mcp</code></pre>
+<h3>Claude.ai and other clients</h3>
+<p>Add a custom connector with the URL <code>{BASE}/mcp</code>. Tools:</p>
+<ul><li><code>start_intake</code>: Open a new benefits-screening intake. Returns the first `state` (pass it to every later call), the ten programmes, every question the engine can use (ids, options, amount units), and the first step.</li><li><code>record_facts</code>: Record what the person said as typed facts (any questions, asked or volunteered; a fact for an answered question replaces it). Returns how each fact was read and the next step. Returns the new `state`; use it from now on. With an empty facts list it only returns the next step.</li><li><code>get_assessment</code>: The current assessment: every programme&#x27;s probability, tier and yearly value range, the facts recorded so far, and the expected cost of mistakes.</li></ul>
+
+<h2 id="code">6. Code</h2>
+<h3>JavaScript</h3>
+<pre tabindex="0"><code class="js">const BASE = &quot;{BASE}&quot;;
+async function step(state, facts) {
+  const r = await fetch(BASE + &quot;/v1/step&quot;, {
+    method: &quot;POST&quot;, headers: {&quot;Content-Type&quot;: &quot;application/json&quot;},
+    body: JSON.stringify({state, facts})
+  });
+  if (!r.ok) throw new Error((await r.json()).error.message);
+  return r.json();
+}
+
+let {state, next} = await step(undefined, []);        // start
+while (next.action === &quot;ask&quot;) {
+  const answer = await askThePerson(next.question);  // your UI: a choice, an amount, or &quot;don&#x27;t know&quot;
+  ({state, next} = await step(state, [answer]));
+}
+show(next.recommend, next.unsure, next.action === &quot;hand_off&quot;);</code></pre>
+<h3>Python, standard library only</h3>
+<pre tabindex="0"><code class="python">import json, urllib.request
+
+BASE = &quot;{BASE}&quot;
+
+def step(state=None, facts=()):
+    req = urllib.request.Request(BASE + &quot;/v1/step&quot;, method=&quot;POST&quot;,
+        data=json.dumps({&quot;state&quot;: state, &quot;facts&quot;: list(facts)}).encode(),
+        headers={&quot;Content-Type&quot;: &quot;application/json&quot;})
+    with urllib.request.urlopen(req) as r:
+        return json.load(r)
+
+r = step(facts=[{&quot;question&quot;: &quot;state&quot;, &quot;choice&quot;: &quot;TX&quot;},
+                {&quot;question&quot;: &quot;earned_income&quot;, &quot;amount&quot;: {&quot;value&quot;: 2400, &quot;period&quot;: &quot;month&quot;}}])
+print(r[&quot;next&quot;][&quot;action&quot;], r[&quot;next&quot;].get(&quot;question&quot;, {}).get(&quot;id&quot;))</code></pre>
+<h3>curl</h3>
+<pre tabindex="0"><code class="text">curl -s {BASE}/v1/step -H &#x27;Content-Type: application/json&#x27; \
+  -d &#x27;{&quot;facts&quot;:[{&quot;question&quot;:&quot;children&quot;,&quot;choice&quot;:&quot;2&quot;}]}&#x27;</code></pre>
+
+<h2 id="limits">7. Errors and limits</h2>
+<p>Errors are JSON: <code>{"error": {"code", "message"}}</code>. A fact that can't be read doesn't fail the call: its reading carries an <code>error</code> saying how to fix it, and valid facts in the same call still go in.</p>
+<pre tabindex="0"><code class="json">{
+  &quot;error&quot;: {
+    &quot;code&quot;: &quot;bad_state&quot;,
+    &quot;message&quot;: &quot;state is damaged (its check doesn&#x27;t match); pass the exact state string from the most recent result&quot;
+  }
+}</code></pre>
+<div class="tbl"><table>
+<tr><th>Limit</th><th>Value</th></tr>
+<tr><td>Request body</td><td>64 KB</td></tr>
+<tr><td>Facts in one call</td><td>40</td></tr>
+<tr><td>State string</td><td>2,000 characters</td></tr>
+<tr><td>Amounts</td><td>numbers from 0 to 1,000,000,000</td></tr>
+</table></div>
+<p>Full schema: <a href="openapi.json">openapi.json</a>. Evaluation, decisions and their tests: <a href="https://github.com/egehazar/decision-intake" target="_blank" rel="noopener">the repository</a>.</p>
+</main>
+<script>
+"use strict";
+for (const el of document.querySelectorAll("pre code, p code"))
+  el.textContent = el.textContent.split("{BASE}").join(location.origin);
+</script>
+</body>
+</html>

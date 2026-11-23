@@ -109,7 +109,9 @@ INSTRUCTIONS_STATELESS = INSTRUCTIONS.replace(
     "step).\n1. Call start_intake.")
 STATE = {"state": {"type": "string", "description": "the state string from the most recent result, exactly as given"}}
 TOOLS_STATELESS = [
-    {**TOOLS[0], "description": TOOLS[0]["description"] + " Also returns the first `state`."},
+    {**TOOLS[0], "description": "Open a new benefits-screening intake. Returns the first `state` (pass it to every "
+                                "later call), the ten programmes, every question the engine can use (ids, options, "
+                                "amount units), and the first step."},
     {**TOOLS[1], "description": TOOLS[1]["description"] + " Returns the new `state`; use it from now on. With an "
                                                           "empty facts list it only returns the next step.",
      "inputSchema": {"type": "object", "properties": {**STATE, "facts": {"type": "array", "items": FACT}},
