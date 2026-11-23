@@ -1023,3 +1023,7 @@ pyproject.toml) and booted the engine in 1.1 s.
 - **Server time per request** (from the service's own log lines): /v1/step median about 300 ms, 89 ms
   to 1.1 s; the first few answers are the slowest (the belief is widest there). Slower than on this
   machine (125 ms median), fine for a person answering one question at a time.
+- **Rollback rehearsed (18:06 UTC).** After the push of 1ee8a90 deployed, production was rolled back to the
+  0f42483 deployment (Vercel resolved decision-intake.vercel.app to it within seconds and it answered),
+  then 1ee8a90 was promoted again. Protection stayed on all deployments throughout; CI green on
+  1ee8a90.

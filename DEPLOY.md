@@ -52,12 +52,14 @@ From GPT's round-6 review; each item is checked in DECISIONS.md or the model car
       billing to run up (usage limits cap it)
 - [x] Cold and warm latency measured on the real deployment: engine boot 1.1 s, /v1/step about 300 ms
       median server time (89 ms to 1.1 s); locally 125 ms median (D36)
-- [ ] Rollback rehearsed (below)
+- [x] Rollback rehearsed (D36): production moved back to the previous deployment in seconds, served it,
+      and was promoted forward again
 
 ## Rollback
 
 Every deploy is immutable on Vercel. To roll back: **Deployments → the last good deployment → Promote**
-(or `vercel rollback`). The engine, its rules and the screener ship together in one deployment, so a
+(or `vercel rollback`). After a rollback Vercel stops moving production to new pushes until a deployment
+is promoted again, so finish with **Promote** on the deployment you want live. The engine, its rules and the screener ship together in one deployment, so a
 rollback restores all three at once; `/healthz` shows which version is live.
 
 ## Running it elsewhere
