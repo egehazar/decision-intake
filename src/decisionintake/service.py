@@ -37,6 +37,10 @@ class Settings:
     min_ess: float = 10.0  # support floor (see Session)
     handoff_cost: float = 2500.0  # expected mistakes left at the end above this go to a person
     max_questions: int = 18
+    # Abstention (D33): below this many training households like the person, programmes that aren't
+    # recommended but keep at least `unsure_floor` probability are "can't tell", not "unlikely". None = off.
+    abstain_below: float | None = None
+    unsure_floor: float = 0.02
 
 
 class FactError(ValueError):
@@ -260,9 +264,16 @@ class Intake:
                 lo, hi = max(dv.value_low, 0), max(dv.value_high, 0)
                 row["value_if_eligible_per_year"] = "small" if hi < 120 else [round(lo, -1), round(hi, -1)]
             rows.append(row)
+        if self.cfg.abstain_below is not None and self.s.support()["raw_ess"] < self.cfg.abstain_below:
+            for r in rows:  # too few households like this person to call these negatives
+                if r["tier"] in ("unlikely", "not recommended") and r["probability"] >= self.cfg.unsure_floor:
+                    r["tier"] = "can't tell"
         rows.sort(key=lambda r: (r["tier"] not in ("likely", "worth checking"), -r["probability"]))
         recs = [r for r in rows if r["tier"] in ("likely", "worth checking")]
         out = {"recommend": recs}
+        unsure = [{k: r[k] for k in ("id", "programme", "tier", "probability")} for r in rows if r["tier"] == "can't tell"]
+        if unsure:
+            out["unsure"] = unsure
         if not brief:
             out["all_programmes"] = rows
             out["facts"] = [{"question": k, "reading": f["reading"]} for k, f in self.facts.items()]

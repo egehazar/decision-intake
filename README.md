@@ -149,7 +149,10 @@ python -m decisionintake.web --port 8080      # screener at /, API at /v1/*, MCP
 - **Rules the model may not break.** Statutory limits on top of the network (`bundles/guards_2026.json`):
   where the answers pin down one tax unit, no EITC above its 2026 phase-out end and no EITC or
   refundable child credit without earnings. Every rule names its source and was checked against
-  PolicyEngine's own results before shipping (D32).
+  PolicyEngine's own results before shipping; every exception is traced to its cause
+  ([contradiction ledger](results/contradiction_ledger.md)). On 2,000 fresh households the rules cost
+  nothing (−$3.7 a household [−9.4, +0.0], registered, D32) and, with clean answers, suppressed no
+  programme anyone qualified for.
 - **Accessible.** axe-core 4.10.2 finds no WCAG 2.1 A/AA violations on any screen (start, question,
   results), in light and dark mode; one question per screen, labelled controls, focus moved to each
   new question, no colour-only meaning.

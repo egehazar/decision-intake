@@ -9,6 +9,8 @@ exception gets the first cause that explains it:
     dependants' wages    the household's earnings include a dependant's wages, which are not the filer's
     other earned income  the filer has earned income the question doesn't count (farm, partnership,
                          taxable disability pension, taxable dependent-care benefits, strike benefits)
+    pre-tax deductions   the filer's taxable wages (W-2 box 1, what the credit uses) are below gross wages,
+                         e.g. 401(k) contributions, which can bring earnings under the limit
     another tax unit     the credit goes to a second filer in the household
     unexplained          none of these
 
@@ -81,7 +83,8 @@ def trace(hh_ids):
     calc = lambda v: np.asarray(sim.calculate(v, YEAR).values)  # noqa: E731
     p = pd.DataFrame({"household": calc("person_household_id"), "tax_unit": calc("person_tax_unit_id"),
                       "age": calc("age"), "dependent": calc("is_tax_unit_dependent").astype(bool),
-                      "wages": calc("employment_income"), "self_emp": calc("self_employment_income")})
+                      "wages": calc("employment_income"), "self_emp": calc("self_employment_income"),
+                      "taxable_wages": calc("irs_employment_income")})
     for v in OTHER_EARNED:
         try:
             p[v] = calc(v)
@@ -101,7 +104,9 @@ def classify(hid, programme, p, t):
     if (ph.dependent & ((ph.wages > 0) | (ph.self_emp > 0))).any():
         return "dependants' wages"
     if (filers[OTHER_EARNED].sum(axis=1) > 0).any():
-        return "other earned income"
+        return "other earned income", filers[OTHER_EARNED].sum().idxmax()
+    if ((filers.wages - filers.taxable_wages) > 1).any():
+        return "pre-tax deductions"
     if units.tax_unit.nunique() > 1 and len(paid):
         return "another tax unit"
     return "unexplained"
@@ -113,21 +118,27 @@ def main():
     print(f"{len(rows)} exceptions in {len(hh)} households; tracing through PolicyEngine-US {YEAR}", flush=True)
     p, t = trace(hh)
     ledger = defaultdict(Counter)
+    sources = Counter()
     detail = []
     for rid, hid, d, ok in rows:
         cause = classify(hid, d, p, t)
+        if isinstance(cause, tuple):
+            cause, src = cause
+            sources[src] += 1
         ledger[rid][cause] += 1
         detail.append({"rule": rid, "household_id": hid, "programme": d, "cause": cause})
     lines = ["# Contradiction ledger (D32)", "",
              "Every training household a candidate rule matches but where PolicyEngine-US pays the credit, traced by "
              "tax unit (experiments/contradiction_ledger.py).", "",
              "| rule | shipped | households matched | exceptions | dependants' wages | other earned income | "
-             "another tax unit | unexplained |", "|---|---|---|---|---|---|---|---|"]
+             "pre-tax deductions | another tax unit | unexplained |", "|---|---|---|---|---|---|---|---|---|"]
     for rid in sorted(ledger, key=lambda r: (r not in shipped, r)):
         c = ledger[rid]
-        cells = [c[k] for k in ("dependants' wages", "other earned income", "another tax unit", "unexplained")]
+        cells = [c[k] for k in ("dependants' wages", "other earned income", "pre-tax deductions", "another tax unit",
+                                "unexplained")]
         lines.append(f"| {rid} | {'yes' if rid in shipped else 'no'} | {sizes[rid]} | {sum(c.values())} | "
                      + " | ".join(str(x) for x in cells) + " |")
+    lines += ["", "Other earned income, by largest source: " + ", ".join(f"{k} {v}" for k, v in sources.most_common())]
     text = "\n".join(lines)
     print(text)
     open(os.path.join(ROOT, "results", "contradiction_ledger.md"), "w", encoding="utf-8").write(text + "\n")

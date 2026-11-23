@@ -229,6 +229,11 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
       <p style="margin-top:8px">Free local help: call <b>211</b> or visit <a href="https://211.org/" target="_blank" rel="noopener">211.org</a>. A benefits navigator can check every programme with you.</p>
     </div>
     <div id="r-list" class="stack"></div>
+    <div id="r-unsure" class="card stack" hidden>
+      <h2 style="font-size:1.2rem">We couldn't tell from these answers</h2>
+      <p class="fine">Few households in our data look like yours, so we won't guess about these. You can apply, or a free benefits navigator can check them with you: call <b>211</b> or visit <a href="https://211.org/" target="_blank" rel="noopener">211.org</a>.</p>
+      <ul id="r-unsure-list"></ul>
+    </div>
     <details class="others card" id="r-others"><summary>Programmes that don't look likely from these answers</summary>
       <p class="fine" style="margin-top:10px">This is a short screen, not a decision. If you think you might qualify, you can still apply: only the programme can tell you for sure.</p>
       <ul id="r-others-list"></ul></details>
@@ -490,7 +495,10 @@ function renderResults(next) {
       ${tax}
     </article>`;
   }).join("");
-  const recIds = new Set(recs.map(r => r.id));
+  const unsure = next.unsure || [];
+  $("r-unsure").hidden = !unsure.length;
+  $("r-unsure-list").innerHTML = unsure.map(r => { const i = INFO[r.id] || {}; return `<li>${esc(i.name || r.programme)}${i.apply ? ` · <a href="${i.apply}" target="_blank" rel="noopener">${esc(i.how)}<span class="skip"> (opens in a new tab)</span></a>` : ""}</li>`; }).join("");
+  const recIds = new Set(recs.map(r => r.id).concat(unsure.map(r => r.id)));
   const others = S.catalogue.programmes.filter(p => !recIds.has(p.id));
   $("r-others").hidden = !others.length;
   $("r-others-list").innerHTML = others.map(p => { const i = INFO[p.id] || {}; return `<li>${esc(i.name || p.label)}${i.apply ? ` · <a href="${i.apply}" target="_blank" rel="noopener">${esc(i.how)}<span class="skip"> (opens in a new tab)</span></a>` : ""}</li>`; }).join("");
