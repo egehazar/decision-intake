@@ -13,6 +13,19 @@ master deploys to production. `.github/workflows/monitor.yml` checks the page, h
 and the MCP connector (both protocol eras) every 30 minutes; a failure fails the run and GitHub emails the
 owner.
 
+## Listing in the MCP Registry
+
+`server.json` describes the hosted connector (`io.github.egehazar/decision-intake`, Streamable HTTP at
+https://decision-intake.vercel.app/mcp). `.github/workflows/publish-mcp.yml` publishes it when a version
+tag is pushed: it checks the endpoint answers MCP, verifies the pinned `mcp-publisher` release's signature,
+validates `server.json`, logs in with GitHub OIDC (no secret) and publishes.
+
+```bash
+git tag v1.0.0 && git push origin v1.0.0
+```
+
+To list a new version later: bump `version` in `server.json`, commit, tag `v<version>`, push the tag.
+
 ## Live staging (D36)
 
 Project `decision-intake` on Vercel, linked to this repository: every push to master deploys.

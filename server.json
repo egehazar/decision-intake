@@ -1,0 +1,17 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.egehazar/decision-intake",
+  "title": "DecisionIntake",
+  "description": "US benefits screening: what to ask next, when to stop, which of 10 programmes to apply for.",
+  "repository": {
+    "url": "https://github.com/egehazar/decision-intake",
+    "source": "github"
+  },
+  "version": "1.0.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://decision-intake.vercel.app/mcp"
+    }
+  ]
+}
