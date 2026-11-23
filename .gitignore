@@ -11,3 +11,4 @@ results_*.log
 results/agent/**/*.stream.jsonl
 results/agent/**/*.mcp.json
 results/agent/*.log
+data/bundle/
