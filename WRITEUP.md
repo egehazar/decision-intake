@@ -5,14 +5,25 @@ Everything marked "validation" was used for tuning and is not an independent res
 
 **In brief.** DecisionIntake decides what an AI assistant should ask next, how far to trust each
 answer, and when to act or hand off to a person. Version 2 pairs the decision engine with a
-wide-and-deep outcome network written in plain numpy. In a test registered before it ran, on 2,000
-synthetic households it had never seen, scored against PolicyEngine's benefit rules, it asked 8.4
-questions instead of 18 and made 25% fewer costly mistakes than the full questionnaire of version 1
-(−$339 a household a year [−523, −173]); against version 1's engine with the same questioning, 22%
-fewer (−$280 [−437, −140]). The largest gain came from better prediction, not cleverer questioning:
-the outcome model was the ceiling every question policy worked against. Language is read by an LLM
-that fills typed slots while code does the arithmetic, which cut confidently wrong readings of
-amounts from 10% to 0.8%. The whole engine also runs in a browser.
+wide-and-deep outcome network written in plain numpy, and ships as one 1.5 MB file behind a Model
+Context Protocol server that any assistant can call. Two tests were registered before they ran:
+
+- **The engine (D28).** On 2,000 synthetic households it had never seen, scored against
+  PolicyEngine's benefit rules, it asked 8.4 questions instead of 18 and made 25% fewer costly
+  mistakes than version 1's full questionnaire (−$339 a household a year [−523, −173]). It beat all
+  four registered alternatives, including the strongest decision tree we could build (−$293) and the
+  best fixed 8-question form (−$768), and matched its own 18-question form with half the questions.
+- **An AI assistant with and without it (D29).** Claude Haiku interviewed 200 fresh households that
+  answer in everyday sentences, once deciding alone and once through DecisionIntake's tools. With the
+  engine it made 41% fewer costly mistakes ($2,305 against $3,884 a household), asked fewer questions
+  (7.2 against 8.0) and handed a third as many cases to a caseworker (20% against 60%); total cost
+  −$1,591 a household [−2,469, −775].
+
+Both halves of the system earn their place: better prediction (the outcome model was the ceiling
+every question policy worked against) and better question choice (worth $800-1,000 a household over
+a fixed form of the same length). Language is read by an LLM that fills typed slots while code does
+the arithmetic, which cut confidently wrong readings of amounts from 10% to 0.8%. The whole engine
+also runs in a browser, where Claude can hold the conversation while the engine decides.
 
 ## The problem
 
@@ -297,6 +308,32 @@ in three layers, each tested against the one below it:
   assistant to do the language and leave the decisions to the engine. It has no dependencies beyond
   numpy, starts in about a second, and answers each step in about 0.1 s. A test runs it as a real
   subprocess and speaks the protocol to it over a pipe.
+
+**Does it make a real assistant better? (D29)** Claude Haiku 5.5, in Claude Code's print mode with no
+built-in tools, interviewed 200 fresh test households through one MCP server: DecisionIntake's four
+tools in one arm, none in the other. The person speaks in sentences generated from a held-out
+household's record (exact figures, round numbers, monthly figures for yearly questions, ranges, vague
+words, implied facts, "I'm not sure") and opens with three facts unprompted; both arms reach the
+person through the same `ask_person` tool and end with `submit_recommendations`, scored against
+PolicyEngine. Prompts and scoring were frozen on 100 separate development households first.
+
+| per household, 200 households | Claude Haiku alone | Claude Haiku + DecisionIntake |
+|---|---|---|
+| questions asked | 8.0 | **7.2** |
+| costly mistakes | $3,884 | **$2,305** |
+| of which missed programmes | $3,084 | $1,300 |
+| of which wrong recommendations | $800 | $1,005 |
+| handed to a caseworker | 60% | **20%** |
+
+Total cost, engine minus alone: −$1,591 a household [−2,469, −775], the registered primary. The gain
+sits where it matters: −$4,335 on the 79 households that qualify for something, +$200 on the 121 that
+qualify for nothing. Claude alone misses the expensive programmes (Medicaid in 26 households, the
+engine arm in 8) and over-recommends the child programmes (the child tax credit wrongly in 27
+households against 6); the engine catches the expensive ones and pays for it with more "worth
+checking" calls that turn out wrong, the trade its loss is built to make. The survey-weighted
+difference, a secondary, is −$294 [−1,831, +1,146]: the heavily weighted households mostly qualify
+for nothing. The agent passed the engine's verdict on exactly in all 200 interviews; each took about
+30 seconds and half a cent of model use.
 
 The demo page has the same contract in JavaScript. In "Talk to Claude" mode Claude holds the
 conversation, calls `record_facts` and `next_step` against the engine running in the page, and the

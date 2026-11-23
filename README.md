@@ -20,6 +20,19 @@ against it: the previous engine (−22% mistakes), the strongest decision tree w
 best fixed 8-question form. All four comparisons hold after Holm correction (p < 0.002) and with
 source households resampled as clusters, and it matches its own 18-question form with 8.4 questions.
 
+**And it makes a real AI assistant better.** In a second registered test (D29), Claude Haiku interviewed
+200 fresh households that answer in everyday sentences ("somewhere between 25 and 30 thousand",
+"my dad lives with us, he's 72"), once deciding on its own and once with DecisionIntake's MCP tools:
+
+| per household | Claude alone | Claude + DecisionIntake |
+|---|---|---|
+| costly mistakes | $3,884 | **$2,305** (−41%) |
+| questions asked | 8.0 | **7.2** |
+| cases handed to a caseworker | 60% | **20%** |
+
+Total cost −$1,591 a household [−2,469, −775]. On households that qualify for something, the gain is
+$4,335: Claude alone misses the expensive programmes (Medicaid in 26 households against 8).
+
 > Built by AI agents (Claude, with reviews by GPT and Fable) under Ege Hazar's direction. Every
 > design choice, every result, and every idea that didn't make it is logged in [DECISIONS.md](DECISIONS.md).
 
@@ -79,6 +92,19 @@ claude mcp add decisionintake -- python -m decisionintake.mcp_server --bundle da
 | `record_facts` | typed facts from anything the person said: an option, an amount as said (`{"value": 2400, "period": "month", "approximate": true}`) or "don't know"; returns how code read each one and the next step |
 | `next_step` | ask (which question, what it's worth in dollars of mistakes prevented, which programmes it settles), finish with tiered recommendations, or hand off with the reason |
 | `get_assessment` | every programme's probability, tier and yearly value range, and the facts so far |
+
+**Tested end to end with a real model** (D29, `experiments/agent_e2e.py`). Claude Haiku 5.5 runs in
+Claude Code's print mode with no built-in tools, only one MCP server: DecisionIntake's four tools in
+one arm, nothing in the other. The simulated person speaks in sentences generated from a held-out
+household's record (exact figures, round numbers, monthly figures for yearly questions, ranges, vague
+words, implied facts, "I'm not sure") and opens with three facts unprompted. Both arms reach the
+person through the same `ask_person` tool and end with `submit_recommendations`, scored against
+PolicyEngine. Prompts and scoring were frozen on 100 separate development households before the 200
+test households ran. The agent passed the engine's verdict on exactly in all 200 interviews; an
+interview takes about 30 seconds and half a cent of model use. Where the engine arm is weaker:
+households that qualify for nothing, where its "worth checking" calls cost $200 more than Claude's
+caution, and the survey-weighted difference (−$294 [−1,831, +1,146]) is not significant. Details in
+DECISIONS D29.
 
 ## Results
 

@@ -169,8 +169,10 @@ section.sec .inner { padding-block: 56px; display: grid; gap: 24px; }
 /* how it works */
 .diagram { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 20px; overflow-x: auto; box-shadow: var(--shadow); }
 .diagram svg { display: block; min-width: 860px; width: 100%; height: auto; }
-.cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
-@media (max-width: 980px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.cards { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1100px) { .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.card code { font-family: var(--font-data); font-size: .8em; color: var(--ink); overflow-wrap: anywhere; }
 @media (max-width: 560px) { .cards { grid-template-columns: minmax(0, 1fr); } }
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
 .card .n { font-family: var(--font-data); font-size: .74rem; color: var(--accent); }
@@ -226,7 +228,7 @@ footer p { margin: 0; max-width: 95ch; }
 <section class="hero band"><div class="inner">
   <span class="kicker">Decision theory × language models · US public benefits</span>
   <h1>Half the questions. <em>Fewer mistakes.</em></h1>
-  <p class="lede">DecisionIntake tells an AI assistant what to ask next, how far to trust each answer, and when it knows enough to act or should hand off to a person. A language model reads what people say. A decision engine weighs every possible next question by the mistakes it would prevent across ten benefit programmes at once.</p>
+  <p class="lede">DecisionIntake tells an AI assistant what to ask next, how far to trust each answer, and when it knows enough to act or should hand off to a person. A language model reads what people say. A decision engine weighs every possible next question by the mistakes it would prevent across ten benefit programmes at once. It plugs into any assistant as an MCP server, and in a registered test it cut Claude's costly mistakes by 41%.</p>
   <div class="stats" id="stats"></div>
   <div class="ctas">
     <button class="primary" type="button" id="play-hero">▶ Watch an interview</button>
@@ -308,13 +310,14 @@ footer p { margin: 0; max-width: 95ch; }
     <div class="card"><span class="n">02 · BELIEVE</span><h4>A belief over real households</h4><p>Weights over 48,657 households from PolicyEngine's Populace data, updated through each question's model of how people misreport. A support floor stops it from becoming certain by ruling almost everyone out.</p></div>
     <div class="card"><span class="n">03 · PREDICT</span><h4>A neural outcome model</h4><p>A wide-and-deep network, written in plain numpy and calibrated out of fold, learns PolicyEngine's eligibility and dollar amounts for all ten programmes at once. Each candidate household is scored on the person's own answers.</p></div>
     <div class="card"><span class="n">04 · DECIDE</span><h4>Value of information</h4><p>Every unasked question is priced by the expected drop in the cost of mistakes across all ten programmes, with one matrix product per turn. It asks while a question is worth its cost, then acts, or hands off when doubt stays high.</p></div>
+    <div class="card"><span class="n">05 · SERVE</span><h4>One file, four tools, any assistant</h4><p>The engine ships as a 1.5 MB file and a Model Context Protocol server: <code>start_intake</code>, <code>record_facts</code>, <code>next_step</code>, <code>get_assessment</code>. The assistant talks; the engine decides. “Talk to Claude” above runs the same contract in this page.</p></div>
   </div>
 </div></section>
 
 <section class="sec band" id="evidence"><div class="inner">
   <div class="sechead">
     <span class="kicker">Evidence · pre-registered, held-out</span>
-    <h2 id="ev-title">Tested on households it had never seen.</h2>
+    <h2 id="ev-title">Tested on households it had never seen, and with a real AI assistant.</h2>
     <p id="ev-lede"></p>
   </div>
   <div class="stats" id="evstats"></div>
@@ -382,16 +385,16 @@ const EVIDENCE = {
   heroStats: [
     { v: "8.4", l: "questions instead of 18", s: "on 2,000 households it had never seen" },
     { v: "−25%", l: "costly mistakes vs the full form", s: "−$339 a household a year [−523, −173]" },
-    { v: "78%", l: "of “likely” verdicts are right", s: "and they find two thirds of eligible programmes" },
-    { v: "12×", l: "fewer confidently wrong readings", s: "the LLM fills typed slots, code does the maths" },
+    { v: "−41%", l: "mistakes when Claude uses it", s: "200 fresh households, same model, via MCP" },
+    { v: "4 / 4", l: "registered comparisons won", s: "incl. the strongest tree · Holm p < 0.002" },
   ],
   evStats: [
     { v: "−$483", l: "a household a year vs the v1 full form", s: "mistakes + $15 a question · Holm p < 0.002" },
     { v: "−22%", l: "mistakes vs the v1 engine", s: "same questioning, better prediction" },
     { v: "45%", l: "of mistake cost in the 20% it is least sure about", s: "what the hand-off routes to a person" },
-    { v: "1.19", l: "its own estimate ÷ its actual mistakes", s: "it errs on the cautious side" },
+    { v: "78%", l: "of “likely” verdicts are right", s: "and they find two thirds of eligible programmes" },
   ],
-  lede: "A test registered before it ran: 2,000 synthetic households no earlier run had touched, scored against PolicyEngine's rules. Mistakes are priced in dollars a year: a missed programme at its value, a wrong recommendation at $1,000.",
+  lede: "Two tests registered before they ran, on synthetic households no earlier run had touched, scored against PolicyEngine's rules: the engine against every alternative (2,000 households), and Claude with and without it (200). Mistakes are priced in dollars a year: a missed programme at its value, a wrong recommendation at $1,000.",
   forest: [
     { name: "v1 engine", sub: "linear outcome model · 8.5 questions", est: -281, lo: -437, hi: -142, q: "8.5", p: "Holm p < 0.002" },
     { name: "v1 full questionnaire", sub: "all 18 questions, linear model", est: -483, lo: -667, hi: -317, q: "18", p: "Holm p < 0.002" },
@@ -399,6 +402,16 @@ const EVIDENCE = {
     { name: "best fixed 8-question form", sub: "deciding with v2 · 8 questions", est: -768, lo: -1241, hi: -398, q: "8", p: "Holm p < 0.002" },
   ],
   forestNote: "DecisionIntake v2 asked 8.4 questions. All four registered comparisons hold after Holm correction and when whole source households are resampled. The fixed form and the tree decide with the same v2 model, so those two gaps are question choice alone. Against v2 asking all 18 questions: −$79 [−188, +37], the same accuracy with half the questions.",
+  agent: {
+    n: 200, sub: "Claude Haiku 5.5 · 200 fresh households answering in sentences · registered (D29)",
+    diff: [-1591, -2469, -775],
+    note: "The same model, the same households, the same words. With DecisionIntake's tools Claude stops missing the expensive programmes (Medicaid in 8 households instead of 26), and sends a third as many cases to a caseworker. On households that qualify for something the gain is $4,335; on those that qualify for nothing, the engine's “worth checking” calls cost $200 more than Claude's caution.",
+    rows: [
+      { metric: "Costly mistakes", unit: "$ a household a year", alone: 3884, engine: 2305, fmt: "$" },
+      { metric: "Questions asked", unit: "beyond what they volunteered", alone: 8.0, engine: 7.2, fmt: "n" },
+      { metric: "Handed to a caseworker", unit: "% of households", alone: 60, engine: 20, fmt: "%" },
+    ],
+  },
   curve: {
     k: [3, 5, 7, 9, 12],
     engine: [3381, 2386, 1462, 1318, 1258],

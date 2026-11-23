@@ -670,3 +670,45 @@ Pre-registered test:
   from the engine's own list.
 - Exploratory: the same two arms with Claude Sonnet 5.5 on the first 100 test households.
 - Prediction: the engine arm costs less, and the interval excludes zero.
+
+## D29 result: confirmed. With DecisionIntake, Claude makes 41% fewer costly mistakes (2026-11-23, 10:06 UTC)
+
+Both arms ran once on all 200 test households from 09:30 UTC with the frozen harness (commit e9f3af7);
+every run ended with a submission, so the pre-registered rerun pass had nothing to do
+(results/agent/test/haiku_analysis.txt; per-interview traces in results/agent/test/haiku_*/).
+
+| per household, mean of 200 | Claude Haiku alone | Claude Haiku + DecisionIntake |
+|---|---|---|
+| questions asked (beyond the 3 volunteered facts) | 8.0 | **7.2** |
+| costly mistakes | $3,884 | **$2,305** |
+| of which: missed programmes | $3,084 | $1,300 |
+| of which: wrong recommendations | $800 | $1,005 |
+| handed to a caseworker | 60% | **20%** |
+
+- **Primary: engine arm minus alone arm, total cost: -$1,591 [-2,469, -775].** The whole interval is
+  below zero: confirmed.
+- The engine-arm agent passed the engine's recommendations on exactly in all 200 households (the
+  programme-id fix from development worked: 3 slips in dev, none here).
+- Secondary, survey-weighted: -$294 [-1,831, +1,146], not distinguishable from zero. The heavily
+  weighted households are mostly ones that qualify for nothing, where the engine arm does slightly
+  worse (next point).
+- Secondary, where the gain comes from: on the 79 households that qualify for at least one programme
+  the engine arm saves $4,335 a household; on the 121 that qualify for none it costs $200 more (more
+  questions and more wrong "worth checking" recommendations). On the 121 households the alone arm
+  handed to a caseworker, -$2,460; on the rest, -$261. On the 70 households neither arm handed off,
+  +$225 (engine arm slightly worse).
+- Secondary, per programme (households missed / wrongly recommended, engine | alone): Medicaid missed
+  8 | 26, wrongly recommended 71 | 20; ACA credit 12 | 17 and 53 | 32; WIC missed 6 | 11; SSI
+  missed 2 | 6 but wrongly recommended 20 | 3; CHIP wrongly recommended 8 | 21; child tax credit
+  wrongly recommended 6 | 27. Claude alone misses the expensive programmes, Medicaid above all, and
+  over-recommends the child programmes; the engine catches the expensive ones and pays for it with
+  more "worth checking" calls that turn out wrong, which is the trade its loss asks for.
+- Cost: an engine-arm interview took 29 s and $0.0047 of model use on average (Claude Code's own
+  accounting), $0.0031 alone.
+
+Reading: the pre-registered claim holds. The same model makes 41% fewer costly mistakes, asks fewer
+questions and sends a third as many cases to a caseworker when the decisions are the engine's. The
+gain is concentrated where it matters, households that qualify for something; on households that
+qualify for nothing, the alone arm's caution is slightly cheaper. What this does not show: real
+speech (the person is templated), and a frontier model (Haiku; the Sonnet replication is next and
+exploratory).
