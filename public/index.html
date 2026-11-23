@@ -200,7 +200,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
     </div>
     <form id="q-form" class="card stack-lg" novalidate>
       <fieldset class="stack">
-        <legend><h1 id="q-text" tabindex="-1" style="font-size:clamp(1.35rem,3.6vw,1.75rem)"></h1></legend>
+        <legend><h1 id="q-text" tabindex="-1" aria-describedby="q-count q-why" style="font-size:clamp(1.35rem,3.6vw,1.75rem)"></h1></legend>
         <p class="why" id="q-why"></p>
         <div id="q-input"></div>
         <div id="q-error" class="error" role="alert" hidden></div>
@@ -489,10 +489,10 @@ function renderResults(next) {
     const value = Array.isArray(v) ? `If you qualify, worth about <b>${money(v[0])}–${money(v[1])}</b> ${esc(when.replace(/^a year/, "a year"))}` : v === "small" ? "A small amount if you qualify" : "";
     const tax = info.tax ? `<p class="fine">Filing is free with <a href="${TAX_HELP}" target="_blank" rel="noopener">IRS free tax help (VITA)</a> if your income is modest.</p>` : "";
     return `<article class="card result ${tier[0]} stack">
-      <header><h2 style="font-size:1.2rem">${esc(info.name)}</h2><span class="badge ${tier[0]}">${tier[0] === "likely" ? "&#10003;" : "?"} ${tier[1]}</span></header>
+      <header><h2 style="font-size:1.2rem">${esc(info.name)}</h2><span class="badge ${tier[0]}"><span aria-hidden="true">${tier[0] === "likely" ? "&#10003;" : "?"}</span> ${tier[1]}</span></header>
       <p class="desc">${esc(info.desc)}</p>
       ${value ? `<p class="value">${value}</p>` : ""}
-      <div class="actions"><a class="button" href="${info.apply}" target="_blank" rel="noopener">${esc(info.how)} <span aria-hidden="true">&#8599;</span></a></div>
+      <div class="actions"><a class="button" href="${info.apply}" target="_blank" rel="noopener">${esc(info.how)} <span aria-hidden="true">&#8599;</span><span class="skip"> (opens in a new tab)</span></a></div>
       ${tax}
     </article>`;
   }).join("");

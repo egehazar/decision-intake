@@ -49,7 +49,13 @@ From GPT's round-6 review; each item is checked in DECISIONS.md or the model car
 - [x] Keyboard and phone width checked: a screening done with real key presses only on the live site (Tab,
       arrows, typing, Enter; focus moves to each new question), axe-core clean in light and dark, no
       overflow at 375 px
-- [ ] A manual screen-reader pass (NVDA or VoiceOver)
+- [x] Screen-reader pass on the live site, through Chrome's accessibility tree (what NVDA, JAWS, Narrator
+      and VoiceOver read): landmarks and skip link; focus lands on each new question, announced with its
+      number and what it helps decide; options are labelled radio buttons grouped by the question;
+      errors are alerts; results focus their heading; every link says where it goes and that it opens a
+      new tab. Fixed on the way: the badge symbol is no longer read ("check mark Likely"), the apply
+      buttons announce the new tab, the question's number and purpose are tied to it.
+- [ ] Optional: a two-minute listen with a real screen reader (Narrator: Win+Ctrl+Enter) to hear it
 - [x] No facts in URLs, logs or analytics (state travels in POST bodies only)
 - [x] Request limits in the app (64 KB body, 40 facts, 2,000-character state); the Hobby plan has no
       billing to run up (usage limits cap it)
