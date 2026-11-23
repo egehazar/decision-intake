@@ -1027,3 +1027,20 @@ pyproject.toml) and booted the engine in 1.1 s.
   0f42483 deployment (Vercel resolved decision-intake.vercel.app to it within seconds and it answered),
   then 1ee8a90 was promoted again. Protection stayed on all deployments throughout; CI green on
   1ee8a90.
+
+## D37. The connector speaks MCP 2026-07-28, and Claude uses it end to end (2026-11-23 20:17 UTC)
+
+- **Remote arm.** The agent harness gained an arm in which Claude reaches the engine only over HTTP (a
+  separate local tool server plays the person), so the same test can run against the deployed service.
+  Against a local copy of the production server: 10 of 10 development households finished with a
+  submission and the same outcomes as the in-memory run ($2 apart, one tenth of a question). Pointing it
+  at Vercel needs either a public site or an automation bypass secret; creating the secret was refused by
+  the safety layer, so the live run waits for the site to open.
+- **MCP 2026-07-28.** That run showed Claude Code opening with protocol 2026-07-28, which the server
+  refused, before falling back to the handshake. The revision makes MCP stateless (no initialize, version
+  and capabilities in each request's _meta, a mandatory server/discover), which is how this server already
+  worked. Implemented as a dual-era server: server/discover, resultType and serverInfo on every result,
+  ttlMs/cacheScope on lists, Mcp-Method/Mcp-Name header validation with base64 names, and the new errors
+  (-32022 with the supported versions, -32020 header mismatch, -32602 missing metadata, 404 for unknown
+  methods). Legacy clients are unchanged. Re-run with Claude Code: 39 of 39 requests in the 2026-07-28
+  revision answered 200, no refusals or fallbacks; 5 of 5 households finished.

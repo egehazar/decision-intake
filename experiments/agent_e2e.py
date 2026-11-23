@@ -176,7 +176,7 @@ def serve(arm: str, persona_path: str, trace_path: str):
                 log("submit", programmes=recs, unknown=unknown, hand_off=bool(args.get("hand_off")),
                     summary=args.get("summary"), asked=asked)
                 return {"ok": True, "recorded": recs, "unrecognised": unknown}
-            if arm == "alone" or (arm == "predictor" and name == "next_step"):
+            if arm in ("alone", "remote") or (arm == "predictor" and name == "next_step"):
                 raise ToolError(f"unknown tool {name!r}")
             stale = arm == "stateless" and name != "start_intake" and args.get("state") != last_state[0]
             dropped = arm == "stateless" and name == "record_facts" and args.get("state") != chain[0]
@@ -203,7 +203,7 @@ def serve(arm: str, persona_path: str, trace_path: str):
 
         def handle(self, msg):
             if msg.get("method") == "tools/list" and msg.get("id") is not None:
-                tools = person_tools + {"alone": [], "engine": TOOLS, "stateless": TOOLS_STATELESS}.get(arm, PREDICTOR_TOOLS)
+                tools = person_tools + {"alone": [], "remote": [], "engine": TOOLS, "stateless": TOOLS_STATELESS}.get(arm, PREDICTOR_TOOLS)
                 return {"jsonrpc": "2.0", "id": msg["id"], "result": {"tools": tools}}
             out = super().handle(msg)
             if msg.get("method") == "initialize" and out and "result" in out:
@@ -286,15 +286,20 @@ def run_one(arm: str, model: str, persona_path: str, out_dir: str) -> dict:
     trace = os.path.join(out_dir, f"{k:03d}.trace.jsonl")
     if os.path.exists(trace):
         os.remove(trace)
-    cfg = {"mcpServers": {"di": {"command": sys.executable, "args": [os.path.abspath(__file__), "serve", arm,
-                                                                    os.path.abspath(persona_path), trace]}}}
+    local = {"command": sys.executable, "args": [os.path.abspath(__file__), "serve", arm, os.path.abspath(persona_path), trace]}
+    if arm == "remote":  # the engine over HTTP (a deployed service); this process only plays the person
+        remote = {"type": "http", "url": os.environ.get("DI_REMOTE_URL", "http://127.0.0.1:8766/mcp")}
+        cfg = {"mcpServers": {"screening": local, "di": remote}}
+    else:
+        cfg = {"mcpServers": {"di": local}}
     cfg_path = os.path.join(out_dir, f"{k:03d}.mcp.json")
     json.dump(cfg, open(cfg_path, "w"))
     progs = ", ".join(f"{p} ({persona['labels'][p]})" for p in PROGRAMMES)
     system = COMMON.format(programmes=progs, catalogue=catalogue_text(persona), opener=persona["opener"])
-    system += {"engine": ENGINE, "stateless": ENGINE, "alone": ALONE, "predictor": PREDICTOR}[arm]
+    system += {"engine": ENGINE, "stateless": ENGINE, "remote": ENGINE, "alone": ALONE, "predictor": PREDICTOR}[arm]
     cmd = ["claude", "-p", "Please start the screening.", "--model", model, "--system-prompt", system,
-           "--strict-mcp-config", "--mcp-config", cfg_path, "--tools", "", "--allowedTools", "mcp__di",
+           "--strict-mcp-config", "--mcp-config", cfg_path, "--tools", "", "--allowedTools",
+           "mcp__di,mcp__screening" if arm == "remote" else "mcp__di",
            "--setting-sources", "", "--no-session-persistence", "--output-format", "stream-json", "--verbose",
            "--max-turns", "80"]
     t0 = time.time()

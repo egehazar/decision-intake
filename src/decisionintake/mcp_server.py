@@ -32,7 +32,12 @@ from .guards import DEFAULT_RULES, attach
 from .service import FactError, Intake, Settings
 from .state import StateError
 
-PROTOCOLS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"]
+PROTOCOLS = ["2025-11-25", "2025-06-18", "2025-03-26", "2024-11-05"]  # legacy: an initialize handshake
+MODERN = ["2026-07-28"]  # stateless: version and capabilities in every request's _meta, server/discover
+SUPPORTED = MODERN + PROTOCOLS
+K_VERSION, K_CAPS = "io.modelcontextprotocol/protocolVersion", "io.modelcontextprotocol/clientCapabilities"
+K_SERVER = "io.modelcontextprotocol/serverInfo"
+LIST_TTL_MS = 3_600_000  # tools/list and server/discover change only with a deploy
 DEFAULT_BUNDLE = Path(__file__).resolve().parents[2] / "bundles" / "benefits_v2.npz"  # v2.1 did not pass D35
 ABSTAIN_BELOW = 10.0  # D33/D35: under 10 households like the person, uncertain negatives are "can't tell"
 VERSION = "1.0.0"
@@ -158,10 +163,20 @@ class Server:
         raise ToolError(f"unknown tool {name!r}")
 
     # JSON-RPC -----------------------------------------------------------------------------------
+    def _tool_result(self, params) -> dict:
+        try:
+            out = self.call(params.get("name"), params.get("arguments") or {})
+            return {"content": [{"type": "text", "text": json.dumps(out)}], "structuredContent": out, "isError": False}
+        except ToolError as e:
+            return {"content": [{"type": "text", "text": str(e)}], "isError": True}
+
     def handle(self, msg: dict) -> dict | None:
         mid, method, params = msg.get("id"), msg.get("method"), msg.get("params") or {}
         if method is None:  # a response from the client; we never send requests
             return None
+        meta = params.get("_meta") if isinstance(params, dict) else None
+        if (isinstance(meta, dict) and K_VERSION in meta) or method == "server/discover":
+            return self.handle_modern(mid, method, params, meta if isinstance(meta, dict) else {})
         if mid is None:  # notification (initialized, cancelled): nothing to answer
             return None
         try:
@@ -176,17 +191,44 @@ class Server:
             elif method == "tools/list":
                 result = {"tools": self.TOOLS}
             elif method == "tools/call":
-                try:
-                    out = self.call(params.get("name"), params.get("arguments") or {})
-                    result = {"content": [{"type": "text", "text": json.dumps(out)}], "structuredContent": out,
-                              "isError": False}
-                except ToolError as e:
-                    result = {"content": [{"type": "text", "text": str(e)}], "isError": True}
+                result = self._tool_result(params)
             else:
                 return {"jsonrpc": "2.0", "id": mid, "error": {"code": -32601, "message": f"method not found: {method}"}}
         except Exception as e:  # never let one bad call take the server down
             return {"jsonrpc": "2.0", "id": mid, "error": {"code": -32603, "message": f"{type(e).__name__}: {e}"}}
         return {"jsonrpc": "2.0", "id": mid, "result": result}
+
+    def handle_modern(self, mid, method, params, meta) -> dict | None:
+        """MCP 2026-07-28: no handshake; every request names its version and capabilities in _meta."""
+        def error(code, message, data=None):
+            e = {"code": code, "message": message}
+            if data is not None:
+                e["data"] = data
+            return {"jsonrpc": "2.0", "id": mid, "error": e}
+
+        if mid is None:  # this revision defines no client notifications over HTTP; nothing to answer
+            return None
+        version = meta.get(K_VERSION)
+        if version is None:
+            return error(-32602, f"request is missing _meta[{K_VERSION!r}]")
+        if version not in MODERN:
+            return error(-32022, "Unsupported protocol version", {"supported": SUPPORTED, "requested": version})
+        if not isinstance(meta.get(K_CAPS), dict):
+            return error(-32602, f"request is missing _meta[{K_CAPS!r}]")
+        server = {K_SERVER: {"name": "decisionintake", "version": VERSION}}
+        try:
+            if method == "server/discover":
+                result = {"supportedVersions": SUPPORTED, "capabilities": {"tools": {"listChanged": False}},
+                          "instructions": self.INSTRUCTIONS, "ttlMs": LIST_TTL_MS, "cacheScope": "public"}
+            elif method == "tools/list":
+                result = {"tools": self.TOOLS, "ttlMs": LIST_TTL_MS, "cacheScope": "public"}
+            elif method == "tools/call":
+                result = self._tool_result(params)
+            else:  # initialize, ping and logging/setLevel are gone in this revision
+                return error(-32601, f"method not found: {method}")
+        except Exception as e:  # never let one bad call take the server down
+            return error(-32603, f"{type(e).__name__}: {e}")
+        return {"jsonrpc": "2.0", "id": mid, "result": {"resultType": "complete", **result, "_meta": server}}
 
 
 class ToolError(Exception):

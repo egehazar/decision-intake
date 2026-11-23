@@ -265,3 +265,56 @@ def test_thin_profiles_say_cant_tell_instead_of_unlikely(app):
         assert not (r["tier"] in ("unlikely", "not recommended") and r["probability"] >= 0.05), r
     supported = call(app, "POST", "/v1/assessment", {"state": call(app, "POST", "/v1/step", {})["json"]["state"]})["json"]
     assert supported["support"]["level"] == "supported" and "unsure" not in supported
+
+
+# --------------------------------------------------------------------------------- MCP 2026-07-28 (stateless)
+MODERN_META = {"io.modelcontextprotocol/protocolVersion": "2026-07-28",
+               "io.modelcontextprotocol/clientCapabilities": {},
+               "io.modelcontextprotocol/clientInfo": {"name": "test", "version": "0"}}
+
+
+def modern(app, method, params=None, id=1, headers=None, meta=MODERN_META):
+    body = {"jsonrpc": "2.0", "id": id, "method": method, "params": {**(params or {}), "_meta": meta}}
+    h = {"MCP-Protocol-Version": "2026-07-28", "Mcp-Method": method}
+    if method == "tools/call":
+        h["Mcp-Name"] = (params or {}).get("name", "")
+    h.update(headers or {})
+    return call(app, "POST", "/mcp", body, headers=h)
+
+
+def test_mcp_2026_07_28_discover_list_and_call(app):
+    d = modern(app, "server/discover")
+    r = d["json"]["result"]
+    assert d["status"] == 200 and r["resultType"] == "complete" and "2026-07-28" in r["supportedVersions"]
+    assert "2025-11-25" in r["supportedVersions"] and r["capabilities"]["tools"] is not None
+    assert r["_meta"]["io.modelcontextprotocol/serverInfo"]["name"] == "decisionintake"
+    assert r["instructions"] and r["ttlMs"] > 0 and r["cacheScope"] == "public"
+    t = modern(app, "tools/list")["json"]["result"]
+    assert t["resultType"] == "complete" and {x["name"] for x in t["tools"]} == {"start_intake", "record_facts", "get_assessment"}
+    assert t["ttlMs"] > 0 and t["cacheScope"] == "public"
+    s = modern(app, "tools/call", {"name": "start_intake", "arguments": {}})["json"]["result"]
+    assert s["resultType"] == "complete" and s["structuredContent"]["state"].startswith("di1;#")
+    rf = modern(app, "tools/call", {"name": "record_facts", "arguments": {"state": s["structuredContent"]["state"], "facts": FACTS[:2]}})
+    assert rf["status"] == 200 and rf["json"]["result"]["structuredContent"]["next"]["action"] == "ask"
+
+
+def test_mcp_2026_07_28_errors_follow_the_transport_spec(app):
+    bad = modern(app, "tools/list", meta={**MODERN_META, "io.modelcontextprotocol/protocolVersion": "2099-01-01"},
+                 headers={"MCP-Protocol-Version": "2099-01-01"})
+    assert bad["status"] == 400 and bad["json"]["error"]["code"] == -32022
+    assert "2026-07-28" in bad["json"]["error"]["data"]["supported"] and bad["json"]["error"]["data"]["requested"] == "2099-01-01"
+    mismatch = modern(app, "tools/list", headers={"Mcp-Method": "tools/call"})
+    assert mismatch["status"] == 400 and mismatch["json"]["error"]["code"] == -32020
+    wrong_name = modern(app, "tools/call", {"name": "start_intake", "arguments": {}}, headers={"Mcp-Name": "get_assessment"})
+    assert wrong_name["status"] == 400 and wrong_name["json"]["error"]["code"] == -32020
+    import base64
+    encoded = "=?base64?" + base64.b64encode(b"start_intake").decode() + "?="
+    assert modern(app, "tools/call", {"name": "start_intake", "arguments": {}}, headers={"Mcp-Name": encoded})["status"] == 200
+    no_caps = modern(app, "tools/list", meta={"io.modelcontextprotocol/protocolVersion": "2026-07-28"})
+    assert no_caps["status"] == 400 and no_caps["json"]["error"]["code"] == -32602
+    assert modern(app, "ping")["status"] == 404 and modern(app, "initialize")["json"]["error"]["code"] == -32601
+    # a legacy client with a version we don't speak gets the modern error body, so a modern client can retry
+    legacy = rpc(app, "tools/list", headers={"MCP-Protocol-Version": "1999-01-01"})
+    assert legacy["status"] == 400 and legacy["json"]["error"]["code"] == -32022
+    # and the legacy handshake still works alongside
+    assert rpc(app, "initialize", {"protocolVersion": "2025-11-25"})["json"]["result"]["protocolVersion"] == "2025-11-25"

@@ -254,7 +254,7 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
 <p>Choices are option text (spaces as <code>_</code>), amounts are <code>~</code>-prefixed when approximate with <code>..</code> for ranges and <code>/period</code>, don't-know is <code>?</code>, and <code>#</code> ends with four hex digits of a CRC. It is not encrypted or signed: it holds what the person said, so treat it like the answers themselves. Send it in POST bodies, never in URLs, and don't log it. The service doesn't: its logs hold route, status and timing only.</p>
 
 <h2 id="mcp">5. AI assistants (MCP)</h2>
-<p>The same engine speaks the Model Context Protocol over Streamable HTTP at <code>{BASE}/mcp</code> (protocol 2025-11-25 back to 2024-11-05). The assistant does the talking and turns the person's words into facts; the engine decides what to ask and when to stop. In a registered test, Claude made 41% fewer costly mistakes with these tools than without them.</p>
+<p>The same engine speaks the Model Context Protocol over Streamable HTTP at <code>{BASE}/mcp</code> (the stateless 2026-07-28 revision, and 2025-11-25 back to 2024-11-05 for clients that still use the handshake). The assistant does the talking and turns the person's words into facts; the engine decides what to ask and when to stop. In a registered test, Claude made 41% fewer costly mistakes with these tools than without them.</p>
 <h3>Claude Code</h3>
 <pre tabindex="0"><code class="text">claude mcp add --transport http decisionintake {BASE}/mcp</code></pre>
 <h3>Claude.ai and other clients</h3>

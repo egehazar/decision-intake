@@ -26,7 +26,8 @@ from pathlib import Path
 from urllib.parse import parse_qs
 
 from . import bundle as bundle_mod
-from .mcp_server import ABSTAIN_BELOW, DEFAULT_BUNDLE, PROTOCOLS, VERSION, StatelessServer
+from .mcp_server import (ABSTAIN_BELOW, DEFAULT_BUNDLE, K_VERSION, MODERN, PROTOCOLS, SUPPORTED, VERSION,
+                         StatelessServer)
 from .guards import DEFAULT_RULES, attach
 from .service import FactError, Intake, Settings
 from .state import StateError
@@ -39,7 +40,7 @@ STATUS = {200: "200 OK", 202: "202 Accepted", 204: "204 No Content", 400: "400 B
           415: "415 Unsupported Media Type", 500: "500 Internal Server Error"}
 CORS = [("Access-Control-Allow-Origin", "*"),
         ("Access-Control-Allow-Methods", "GET, POST, OPTIONS"),
-        ("Access-Control-Allow-Headers", "Content-Type, Accept, Mcp-Session-Id, MCP-Protocol-Version"),
+        ("Access-Control-Allow-Headers", "Content-Type, Accept, Mcp-Session-Id, MCP-Protocol-Version, Mcp-Method, Mcp-Name"),
         ("Access-Control-Max-Age", "86400")]
 SECURITY = [("X-Content-Type-Options", "nosniff"), ("Referrer-Policy", "no-referrer")]
 
@@ -48,6 +49,17 @@ class HTTPError(Exception):
     def __init__(self, status: int, code: str, message: str, headers=()):
         super().__init__(message)
         self.status, self.code, self.message, self.headers = status, code, message, list(headers)
+
+
+def _decode_header(value):
+    """An Mcp-Name value, decoded from the =?base64?...?= form the 2026-07-28 transport allows."""
+    if isinstance(value, str) and value.startswith("=?base64?") and value.endswith("?="):
+        import base64
+        try:
+            return base64.b64decode(value[9:-2]).decode("utf-8")
+        except (ValueError, UnicodeDecodeError):
+            return None
+    return value
 
 
 def _json(status: int, obj, headers=()) -> tuple[int, list, bytes]:
@@ -190,15 +202,24 @@ class App:
             raise HTTPError(403, "forbidden_origin", f"origin {origin} may not call this server")
         version = environ.get("HTTP_MCP_PROTOCOL_VERSION")
         log["protocol"] = version
-        if version and version not in PROTOCOLS and not self._is_initialize(environ):
-            raise HTTPError(400, "unsupported_protocol_version",
-                            f"MCP-Protocol-Version {version} is not supported; use one of {', '.join(PROTOCOLS)}")
         try:
-            msg = environ.get("decisionintake.body") or self._body(environ)
+            msg = self._body(environ)
         except HTTPError as e:
             if e.code != "bad_json":
                 raise
-            return _json(200, {"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": "parse error"}})
+            return _json(400, {"jsonrpc": "2.0", "id": None, "error": {"code": -32700, "message": "parse error"}})
+        params = msg.get("params") if isinstance(msg, dict) else None
+        meta = params.get("_meta") if isinstance(params, dict) else None
+        if version in MODERN or (isinstance(meta, dict) and K_VERSION in meta):
+            return self.mcp_modern(environ, msg, version, meta, log)
+        # Legacy (2025-11-25 and earlier): an initialize handshake, then requests that name their version in the
+        # header. A version we don't speak gets the modern error body, which lists what we do speak.
+        is_init = isinstance(msg, dict) and msg.get("method") == "initialize"
+        if version and version not in PROTOCOLS and not is_init:
+            mid = msg.get("id") if isinstance(msg, dict) else None
+            return _json(400, {"jsonrpc": "2.0", "id": mid, "error": {
+                "code": -32022, "message": "Unsupported protocol version",
+                "data": {"supported": SUPPORTED, "requested": version}}})
         msgs = msg if isinstance(msg, list) else [msg]
         replies = []
         for m in msgs:
@@ -217,14 +238,45 @@ class App:
             return 202, [], b""
         return _json(200, replies if isinstance(msg, list) else replies[0])
 
-    def _is_initialize(self, environ) -> bool:
-        """Version negotiation happens inside initialize, so its header can't be held against it."""
-        try:
-            msg = self._body(environ)
-        except HTTPError:
-            return False
-        environ["decisionintake.body"] = msg
-        return isinstance(msg, dict) and msg.get("method") == "initialize"
+    def mcp_modern(self, environ, msg, version, meta, log):
+        """MCP 2026-07-28 over Streamable HTTP: one request per POST, its metadata mirrored in headers that must
+        match the body (Mcp-Method always, Mcp-Name for tools/call), errors mapped to HTTP statuses."""
+        mid = msg.get("id") if isinstance(msg, dict) else None
+        log["era"] = "modern"
+
+        def fail(status, code, message, data=None):
+            e = {"code": code, "message": message}
+            if data is not None:
+                e["data"] = data
+            return _json(status, {"jsonrpc": "2.0", "id": mid, "error": e})
+
+        if not isinstance(msg, dict) or msg.get("jsonrpc") != "2.0" or not isinstance(msg.get("method"), str):
+            return fail(400, -32600, "invalid request: one JSON-RPC request per POST")
+        method = msg["method"]
+        log["rpc"] = method
+        body_version = meta.get(K_VERSION) if isinstance(meta, dict) else None
+        if version is None:
+            return fail(400, -32020, "Header mismatch: MCP-Protocol-Version header is missing")
+        if body_version is not None and body_version != version:
+            return fail(400, -32020, f"Header mismatch: MCP-Protocol-Version header value '{version}' does not "
+                                     f"match body value '{body_version}'")
+        header_method = environ.get("HTTP_MCP_METHOD")
+        if header_method != method:
+            return fail(400, -32020, f"Header mismatch: Mcp-Method header value '{header_method}' does not match "
+                                     f"body value '{method}'")
+        if method == "tools/call":
+            name = (msg.get("params") or {}).get("name")
+            log["tool"] = name
+            header_name = _decode_header(environ.get("HTTP_MCP_NAME"))
+            if header_name != name:
+                return fail(400, -32020, f"Header mismatch: Mcp-Name header value '{header_name}' does not match "
+                                         f"body value '{name}'")
+        r = self.mcp.handle(msg)
+        if r is None:
+            return 202, [], b""
+        code = (r.get("error") or {}).get("code")
+        status = 200 if code is None else 404 if code == -32601 else 500 if code == -32603 else 400
+        return _json(status, r)
 
     def static_file(self, path):
         rel = path.lstrip("/") or "index.html"
