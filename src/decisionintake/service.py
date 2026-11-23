@@ -222,7 +222,7 @@ class Intake:
         s = self.s
         risk = s.risk()
         progress = {"facts_recorded": len(self.facts), "expected_mistake_cost": round(risk),
-                    "similar_households": round(s.ess())}
+                    "similar_households": round(s.ess()), "support": self.support()}
         j = self.policy.next_question(s, len(self.facts))
         if j is not None:
             single = dict(s.voi_table())
@@ -242,6 +242,14 @@ class Intake:
                                       f"about {_money(risk)} a year in mistakes. A caseworker should review.")
         return out
 
+    def support(self) -> dict:
+        """How many training households fit these answers before the support floor stepped in. Below the floor
+        the outcome model is extrapolating ("thin"): fewer households like this person than the engine trusts."""
+        sp = self.s.support()
+        return {"households_like_this": round(sp["raw_ess"], 1),
+                "level": "supported" if sp["raw_ess"] >= self.cfg.min_ess else "thin",
+                "conflicting_answers": sp["conflicts"]}
+
     def assessment(self, brief: bool = False) -> dict:
         rows = []
         for dv in self.s.decisions():
@@ -259,6 +267,7 @@ class Intake:
             out["all_programmes"] = rows
             out["facts"] = [{"question": k, "reading": f["reading"]} for k, f in self.facts.items()]
             out["expected_mistake_cost"] = round(self.s.risk())
+            out["support"] = self.support()
         out["note"] = self.b.info.get("caveat", "")
         return out
 
