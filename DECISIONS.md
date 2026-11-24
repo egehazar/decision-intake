@@ -1119,3 +1119,18 @@ a third-party MCP conformance check before the registry listing.
   reproduced exactly: -1.46 points [-1.66, -1.27]); a fact with both a choice and don't-know was silently read
   as don't-know (now refused: exactly one kind); and the walkthrough loaded Google Fonts (now system fonts,
   so no page on the site makes a third-party request).
+
+**D39, conformance (2026-11-24).** The official MCP conformance suite, run by Ege. Against production the
+0.2.0-alpha.12 run hit this service's own rate limit (120 a minute) partway, so it was repeated against a
+local server on the same code. Of 187 checks over 65 server scenarios, 109 pass; every failure is a feature
+this server neither offers nor advertises (resources, prompts, logging, completion, sampling, elicitation,
+tasks, input-required results, custom parameter headers) or a "not testable" check that needs the suite's
+diagnostic tools (test_missing_capability, test_streaming_elicitation, test_logging_tool, test_simple_text,
+...). What applies passes: server-initialize, ping, tools-list, server-stateless 21 of 25 (the 4 are the
+diagnostic-tool checks; three named in the output, the logging one by elimination from the scenario's
+source), http-header-validation 14 of 14, dns-rebinding-protection 2 of 2 (on localhost; it fails by design
+on a public URL), caching 4 of 7 (the 3 are prompts/list and the resources lists, answered -32601 as the spec
+says), resource-not-found, skills-directory, and the input-required checks for unsupported methods, extra
+params and input validation. Two real defects found and fixed on the way: DNS rebinding for local runs
+(above) and whitespace around header values (RFC 9110 5.5), which the first run failed 0 of 5 and the rerun
+passed 14 of 14.

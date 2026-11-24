@@ -162,7 +162,12 @@ revision and the 2025 handshake revisions, three tools (`start_intake`, `record_
 `get_assessment`) that pass a `state` string. About 300 ms of server time a step. No database, no
 sessions, no answers in logs. `/healthz` reports the commit and the model and rules hashes; a GitHub
 Actions job checks the page, a whole screening, the deployed model and rules, and both MCP eras after every
-deploy and on a 30-minute schedule. Per IP, 120 requests a minute on the API and MCP routes.
+deploy and on a 30-minute schedule. Per IP, 120 requests a minute on the API and MCP routes. Against the
+official [MCP conformance suite](https://github.com/modelcontextprotocol/conformance) (0.2.0-alpha.12, all
+65 server scenarios), every check that applies to what this server offers passes: initialize, ping,
+tools/list, the stateless 2026-07-28 core (21 of 21 runnable checks), header validation (14 of 14) and DNS
+rebinding (2 of 2, on localhost). The rest test features it doesn't offer (resources, prompts, logging,
+sampling, elicitation, tasks) or need the suite's own diagnostic tools.
 
 **Local**, from a clone (not on PyPI; the model file ships in the repo, 1.5 MB, numpy only):
 

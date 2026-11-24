@@ -76,6 +76,9 @@ were waived when the site went public (D38): the page labels the Spanish as AI-a
       the page and /healthz unaffected (DECISIONS D39, launch audit)
 - [x] Cold and warm latency measured on the real deployment: engine boot 1.1 s, /v1/step about 300 ms
       median server time (89 ms to 1.1 s); on a desktop CPU 109-125 ms median (D31, D36)
+- [x] MCP conformance suite (D39): 0.1.16 and 0.2.0-alpha.12, run by Ege. Every check that applies to this
+      server's features passes; run it against a local server (no rate limit), e.g.
+      `npx @modelcontextprotocol/conformance@0.2.0-alpha.12 server --url http://localhost:8766/mcp --suite all`
 - [x] Rollback rehearsed (D36): production moved back to the previous deployment in seconds, served it,
       and was promoted forward again
 
