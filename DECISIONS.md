@@ -1296,3 +1296,5 @@ lists are long, so apply now and to more than one agency; the credits come with 
 Not modelled: these links do not change any probability (the population has no "already receives" answer), so
 the plan orders and explains; it does not re-score. The screener shows it for three or more programmes across
 two or more steps, in English and Spanish, after the result cards. axe clean in both themes.
+- The connector carries it too: `get_assessment` returns `plan` (both protocol eras), and the instructions tell
+  the agent to use it when there are several programmes.

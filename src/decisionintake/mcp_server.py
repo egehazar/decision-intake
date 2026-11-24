@@ -62,7 +62,10 @@ enough. You handle the conversation; it handles the decisions.
    ones as worth a look, with the yearly value ranges, and always the note. Programmes in "unsure" are ones
    the engine can't call from these answers: say so, and that the person can still apply or call 211; never
    call them unlikely. "hand_off": say a caseworker or benefits navigator should review, using
-   hand_off_reason, and still share the recommendations so far. After a result, what_would_change says
+   hand_off_reason, and still share the recommendations so far. get_assessment's plan gives the order to
+   apply in (apply now, then, at tax time) and the federal rules by which one approval helps another (SNAP
+   approval letter proves WIC income, for one): use it when there are several programmes. After a result,
+   what_would_change says
    which answers sit near a line (one income bracket away, say): mention those as "check again if this
    changes", never as what the person should report.
 4. Never decide eligibility yourself and never ask questions the engine didn't ask for, unless the person
@@ -108,8 +111,9 @@ TOOLS = [
      "inputSchema": {"type": "object", "properties": SID, "required": ["session_id"]}},
     {"name": "get_assessment", "title": "Current assessment",
      "description": "The current assessment: every programme's probability, tier and yearly value range, the facts "
-                    "recorded so far, and the expected cost of mistakes. A screening estimate, not an eligibility "
-                    "decision.",
+                    "recorded so far, the expected cost of mistakes, and a plan: the recommended programmes in the order to "
+                    "apply, with the federal rules linking them, each cited. A screening estimate, not an "
+                    "eligibility decision.",
      "inputSchema": {"type": "object", "properties": SID, "required": ["session_id"]}},
     {"name": "what_would_change", "title": "What would change the result",
      "description": "For each programme near the line: which single answer, one step different (one bracket of "
@@ -185,7 +189,8 @@ class Server:
         if name == "next_step":
             return self._intake(args).next_step()
         if name == "get_assessment":
-            return self._intake(args).assessment()
+            it = self._intake(args)
+            return {**it.assessment(), "plan": it.plan()["steps"]}
         if name == "what_would_change":
             return self._intake(args).explain()
         raise ToolError(f"unknown tool {name!r}")
@@ -324,7 +329,7 @@ class StatelessServer(Server):
             return {"state": it.state(), "readings": readings, "next": it.next_step()}
         if name == "get_assessment":
             it, _ = self._restore(args)
-            return {"state": it.state(), **it.assessment()}
+            return {"state": it.state(), **it.assessment(), "plan": it.plan()["steps"]}
         if name == "what_would_change":
             it, _ = self._restore(args)
             return {"state": it.state(), **it.explain()}

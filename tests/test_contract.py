@@ -392,3 +392,15 @@ def test_plan_is_empty_when_nothing_is_recommended(app):
                                                    {"question": "earned_income", "amount": {"value": 250000, "period": "year"}}]})["json"]["state"]
     assert call(app, "POST", "/v1/plan", {"state": st})["json"]["steps"] == []
     assert call(app, "POST", "/v1/plan", {"state": "di1;#bad"})["status"] == 400
+
+
+def test_mcp_assessment_carries_the_plan(app):
+    from decisionintake.mcp_server import StatelessServer
+    srv = StatelessServer(app.b, app.settings)
+    st = srv.call("start_intake", {})["state"]
+    st = srv.call("record_facts", {"state": st, "facts": [{"question": "state", "choice": "TX"}, {"question": "household_size", "choice": "4"},
+                                             {"question": "children", "choice": "2"},
+                                             {"question": "earned_income", "amount": {"value": 24000, "period": "year"}}]})["state"]
+    out = srv.call("get_assessment", {"state": st})
+    planned = {p["id"] for s in out["plan"] for p in s["programmes"]}
+    assert planned == {r["id"] for r in out["recommend"]}
