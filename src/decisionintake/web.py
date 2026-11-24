@@ -310,10 +310,17 @@ class App:
     def plan(self, environ, log):
         body = self._body(environ) or {}
         if not isinstance(body, dict):
-            raise HTTPError(400, "bad_request", 'send an object: {"state": "..."}')
+            raise HTTPError(400, "bad_request", 'send an object: {"state": "...", "already"?: ["snap", ...]}')
+        already = body.get("already", [])
+        if not isinstance(already, list) or not all(isinstance(a, str) for a in already) or len(already) > 20:
+            raise HTTPError(400, "bad_request", "already must be a list of programme ids")
         it, _ = self._intake(body.get("state"))
-        log.update(facts=len(it.facts))
-        return _json(200, {"state": it.state(), **it.plan()})
+        try:
+            out = it.plan(already)
+        except FactError as e:
+            raise HTTPError(400, "bad_request", str(e)) from None
+        log.update(facts=len(it.facts), already=len(already))
+        return _json(200, {"state": it.state(), **out})
 
     def cliff(self, environ, log):
         body = self._body(environ) or {}
@@ -649,18 +656,28 @@ def openapi_doc(base: str | None = None) -> dict:
                 "operationId": "plan",
                 "summary": "The programmes worth applying for, in the order to apply (now, then, at tax time), with "
                            "the federal rules by which one approval settles part of another's eligibility",
-                "requestBody": body({"type": "object", "required": ["state"], "properties": {"state": ref("State")}},
-                                    {"state": example_state}),
+                "requestBody": body({"type": "object", "required": ["state"], "properties": {
+                    "state": ref("State"),
+                    "already": {"type": "array", "maxItems": 20, "items": {"type": "string"},
+                                "description": "programme ids the household gets now: they leave the plan, and a "
+                                               "programme whose income test they settle is added as worth checking"}}},
+                    {"state": example_state, "already": ["snap"]}),
                 "responses": {"200": resp("the steps", {"type": "object", "properties": {
                     "state": ref("State"), "note": {"type": "string"},
+                    "already": {"type": "array", "items": {"type": "object", "properties": {
+                        "id": {"type": "string"}, "programme": {"type": "string"}}}},
                     "steps": {"type": "array", "items": {"type": "object", "properties": {
                         "number": {"type": "integer"}, "step": {"type": "string", "enum": ["now", "next", "tax"]},
                         "title": {"type": "string"},
                         "programmes": {"type": "array", "items": {"type": "object", "properties": {
                             "id": {"type": "string"}, "programme": {"type": "string"},
                             "tier": {"type": "string", "enum": ["likely", "worth checking"]},
+                            "added_by_rule": {"type": "boolean", "description": "not recommended from the answers "
+                                              "alone; added because a programme the household gets meets its "
+                                              "income test"},
                             "links": {"type": "array", "items": {"type": "object", "properties": {
                                 "kind": {"type": "string"}, "from": {"type": "array", "items": {"type": "string"}},
+                                "already": {"type": "array", "items": {"type": "string"}},
                                 "text": {"type": "string"}, "source": {"type": "string",
                                                                        "description": "the regulation or statute"}}}}}}},
                         "notes": {"type": "array", "items": {"type": "object", "properties": {

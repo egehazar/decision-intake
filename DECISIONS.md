@@ -1298,3 +1298,10 @@ the plan orders and explains; it does not re-score. The screener shows it for th
 two or more steps, in English and Spanish, after the result cards. axe clean in both themes.
 - The connector carries it too: `get_assessment` returns `plan` (both protocol eras), and the instructions tell
   the agent to use it when there are several programmes.
+- **Already getting** (same day). The plan takes `already` (programme ids the household gets now; the screener asks
+  with checkboxes on the plan card). Those leave the steps; the result card says to keep it renewed. And a
+  programme whose income test one of them settles by the rules above is added as "worth checking"
+  (`added_by_rule`) even where the answers alone don't point to it, if its category can fit: SNAP or TANF adds
+  free school meals when there are children; SNAP, Medicaid or TANF adds WIC, and TANF or SSI adds Head Start and
+  Early Head Start, unless the answers say no children or no child under 5. This is the case broad-based
+  categorical eligibility creates: a household on SNAP above WIC's own income line. Probabilities are untouched.

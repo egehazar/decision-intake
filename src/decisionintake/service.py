@@ -96,6 +96,13 @@ PLAN_NOTES = {  # (kind, English text); shown when one of the programmes is in t
 }
 PLAN_NOTE = ("The order to apply in, for the programmes worth applying for now. The links between programmes are "
              "federal rules; a state or programme office decides each application.")
+# A programme the household already gets can settle another's income test even where the answers alone don't
+# point to it; the target is then added as "worth checking" if its category can fit (who it is for).
+# programme -> [(question, the canonical choices that rule the category out)]
+_YOUNG = [("children", {"none"}), ("child_under5", {"no"})]
+PLAN_CATEGORY = {"wic": _YOUNG, "head_start": _YOUNG, "early_head_start": _YOUNG,
+                 "school_meals": [("children", {"none"})]}
+ALREADY_SOURCES = ["snap", "medicaid", "tanf", "ssi"]
 _SHORT = {"snap": "SNAP", "tanf": "TANF", "ssi": "SSI", "medicaid": "Medicaid"}
 
 
@@ -388,31 +395,50 @@ class Intake:
         return {"expected_value": int(round(ev, -1)), "recommend": recs, "next": ask, "action": nxt["action"],
                 "expected_mistake_cost": round(self.s.risk()), "support": self.support()["level"]}
 
-    def plan(self) -> dict:
+    def _category_fits(self, pid: str) -> bool:
+        for q, ruled_out in PLAN_CATEGORY.get(pid, []):
+            choice = self.raw.get(q, {}).get("choice")
+            if choice is not None and str(choice).lower() in ruled_out:  # unanswered: it may fit
+                return False
+        return True
+
+    def plan(self, already=()) -> dict:
         """The recommended programmes in the order to apply (PLAN_STEPS), with the statutory links between
-        them (PLAN_LINKS) where both ends are recommended, and one practical note per step (PLAN_NOTES)."""
-        recs = {r["id"]: r for r in self.assessment(brief=True)["recommend"]}
+        them (PLAN_LINKS) where both ends are recommended or already received, and one practical note per step
+        (PLAN_NOTES). `already`: programme ids the household gets now; they leave the steps, and a programme
+        whose income test one of them settles is added as "worth checking" when its category can fit."""
+        already = list(dict.fromkeys(already))
+        unknown = [a for a in already if a not in self.b.labels]
+        if unknown:
+            raise FactError(f"unknown programme {unknown[0]!r}; use an id from: {', '.join(self.b.labels)}")
+        recs = {r["id"]: r for r in self.assessment(brief=True)["recommend"] if r["id"] not in already}
         steps = []
         for key, title, ids in PLAN_STEPS:
             items = []
             for pid in ids:
-                if pid not in recs:
+                if pid in already or pid not in self.b.labels:
                     continue
                 links = []
                 for target, sources, kind, text, cite in PLAN_LINKS:
-                    have = [s for s in sources if s in recs and s != pid]
+                    have = [s for s in sources if (s in recs or s in already) and s != pid]
                     if target == pid and have:
                         links.append({"kind": kind, "from": have, "source": cite,
+                                      "already": [s for s in have if s in already],
                                       "text": text.format(src=_either([_SHORT[s] for s in have]))})
-                items.append({"id": pid, "programme": recs[pid]["programme"], "tier": recs[pid]["tier"],
-                              "links": links})
+                if pid in recs:
+                    items.append({"id": pid, "programme": recs[pid]["programme"], "tier": recs[pid]["tier"],
+                                  "links": links})
+                elif any(link["already"] for link in links) and self._category_fits(pid):
+                    items.append({"id": pid, "programme": self.b.labels[pid], "tier": "worth checking",
+                                  "added_by_rule": True, "links": [l for l in links if l["already"]]})
             if items:
                 in_step = {i["id"] for i in items}
                 notes = [{"kind": k, "text": t} for k, (ids_, t) in PLAN_NOTES.items() if in_step & set(ids_)]
                 steps.append({"step": key, "title": title, "programmes": items, "notes": notes})
         for n, s in enumerate(steps, 1):
             s["number"] = n
-        return {"steps": steps, "note": PLAN_NOTE}
+        return {"steps": steps, "already": [{"id": a, "programme": self.b.labels[a]} for a in already],
+                "note": PLAN_NOTE}
 
     def cliff(self, question: str = "earned_income") -> dict:
         """Every option of one amount question (earnings by default), the other answers kept: each programme's

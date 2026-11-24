@@ -404,3 +404,27 @@ def test_mcp_assessment_carries_the_plan(app):
     out = srv.call("get_assessment", {"state": st})
     planned = {p["id"] for s in out["plan"] for p in s["programmes"]}
     assert planned == {r["id"] for r in out["recommend"]}
+
+
+def test_plan_with_programmes_already_received(app):
+    kids = [{"question": "state", "choice": "OH"}, {"question": "children", "choice": "2"},
+            {"question": "child_under5", "choice": "no"},
+            {"question": "earned_income", "amount": {"value": 60000, "period": "year"}}]
+    st = call(app, "POST", "/v1/step", {"facts": kids})["json"]["state"]
+    base = call(app, "POST", "/v1/plan", {"state": st})["json"]
+    have = call(app, "POST", "/v1/plan", {"state": st, "already": ["snap"]})["json"]
+    assert have["already"] == [{"id": "snap", "programme": have["already"][0]["programme"]}]
+    planned = {p["id"]: p for s in have["steps"] for p in s["programmes"]}
+    assert "snap" not in planned
+    meals = planned.get("school_meals")  # SNAP makes school-age children eligible for free meals (7 CFR 245.2)
+    assert meals and any("snap" in l["already"] for l in meals["links"])
+    if "school_meals" not in {p["id"] for s in base["steps"] for p in s["programmes"]}:
+        assert meals["added_by_rule"] and meals["tier"] == "worth checking"
+    for pid in ("wic", "head_start", "early_head_start"):  # no child under 5: the rule never adds these
+        assert not planned.get(pid, {}).get("added_by_rule")
+    st0 = call(app, "POST", "/v1/step", {"facts": [{"question": "state", "choice": "OH"},
+                                                    {"question": "children", "choice": "none"}]})["json"]["state"]
+    alone = call(app, "POST", "/v1/plan", {"state": st0, "already": ["snap", "medicaid"]})["json"]
+    assert not [p for s in alone["steps"] for p in s["programmes"] if p.get("added_by_rule")]
+    assert call(app, "POST", "/v1/plan", {"state": st, "already": ["food stamps"]})["status"] == 400
+    assert call(app, "POST", "/v1/plan", {"state": st, "already": "snap"})["status"] == 400

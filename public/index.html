@@ -61,6 +61,11 @@ li .near { margin-top: 4px; }
 .plan .names { margin: 0; }
 .plan .names a { color: var(--ink); }
 .plan .chk { color: var(--muted); font-size: .85rem; font-style: italic; }
+.plan fieldset { border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px 12px; margin: 0; display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.plan legend { padding: 0 4px; font-weight: 600; font-size: .95rem; }
+.plan fieldset label { display: inline-flex; align-items: center; gap: 6px; font-size: .95rem; cursor: pointer; }
+.plan fieldset input { width: 1.1rem; height: 1.1rem; accent-color: var(--accent); }
+.result .have { margin: 0; font-weight: 600; }
 .plan ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 4px; font-size: .93rem; }
 .cliff table { width: 100%; border-collapse: collapse; font-size: .92rem; }
 .cliff th, .cliff td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
@@ -292,6 +297,8 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
     <div id="r-list" class="stack"></div>
     <section id="r-plan" class="card stack plan" hidden aria-labelledby="plan-h">
       <h2 id="plan-h" style="font-size:1.2rem"></h2>
+      <fieldset id="plan-have"><legend id="plan-have-l"></legend></fieldset>
+      <p class="fine" id="plan-already" hidden></p>
       <ol id="plan-steps"></ol>
       <p class="fine" id="plan-note"></p>
     </section>
@@ -494,7 +501,10 @@ const T = {
     print_head: (d, v) => `Quick Benefits Check summary, ${d}. ${v}. A screening estimate to bring to a benefits office or navigator: not an application or an eligibility decision.`,
     plan_h: "Your plan: the order to apply in",
     plan_steps: {now: "Apply now", next: "Then", tax: "At tax time: your 2026 tax return, filed in early 2027"},
-    plan_check: "worth checking", plan_or: "or",
+    plan_check: "worth checking", plan_or: "or", plan_h_none: "Already getting any help?",
+    plan_have: "Already getting any of these?", plan_added: "worth checking because of what you get now",
+    plan_already: (names, n) => `You get ${names} now, so ${n === 1 ? "it leaves" : "they leave"} the plan. Most benefits have to be renewed: watch for mail from the office.`,
+    have_card: "You already get this. Keep it renewed: watch for mail from the office.",
     plan_link: {
       wic: s => `WIC: getting ${s} counts as meeting WIC's income limit, so bring the approval letter.`,
       school_meals: s => `School meals: children in a household getting ${s} qualify for free meals, and the school is often told directly, with no form to fill in.`,
@@ -543,7 +553,10 @@ const T = {
     print_head: (d, v) => `Resumen de la Revisión rápida de beneficios, ${d}. ${v}. Una estimación para llevar a una oficina de beneficios o a un orientador: no es una solicitud ni una decisión de elegibilidad.`,
     plan_h: "Su plan: el orden para solicitar",
     plan_steps: {now: "Solicite ahora", next: "Después", tax: "En la temporada de impuestos: su declaración de 2026, presentada a principios de 2027"},
-    plan_check: "vale la pena revisar", plan_or: "o",
+    plan_check: "vale la pena revisar", plan_or: "o", plan_h_none: "¿Ya recibe alguna ayuda?",
+    plan_have: "¿Ya recibe alguno de estos?", plan_added: "vale la pena revisar por lo que ya recibe",
+    plan_already: (names, n) => `Ya recibe ${names}, así que ${n === 1 ? "sale" : "salen"} del plan. La mayoría de los beneficios se deben renovar: esté atento al correo de la oficina.`,
+    have_card: "Ya recibe esto. Manténgalo renovado: esté atento al correo de la oficina.",
     plan_link: {
       wic: s => `WIC: recibir ${s} cuenta como cumplir el límite de ingresos de WIC, así que lleve la carta de aprobación.`,
       school_meals: s => `Comidas escolares: los niños de un hogar que recibe ${s} califican para comidas gratis, y a menudo la escuela recibe el aviso directamente, sin formulario.`,
@@ -569,7 +582,7 @@ const T = {
 };
 
 const $ = id => document.getElementById(id);
-const S = {catalogue: null, byId: {}, state: null, readings: {}, asked: 0, current: null, editing: null, lastNext: null, busy: false, gen: 0, explain: null, cliff: null};
+const S = {catalogue: null, byId: {}, state: null, readings: {}, asked: 0, current: null, editing: null, lastNext: null, busy: false, gen: 0, explain: null, cliff: null, plan: null, already: []};
 let LANG = (() => {
   try { const v = localStorage.getItem("lang"); if (v === "en" || v === "es") return v; } catch (e) {}
   return (navigator.language || "").toLowerCase().startsWith("es") ? "es" : "en";
@@ -577,7 +590,7 @@ let LANG = (() => {
 const STATIC_EN = {};
 const t = key => T[LANG][key];
 
-function store() { try { sessionStorage.setItem("dq", JSON.stringify({state: S.state, readings: S.readings, asked: S.asked})); } catch (e) {} }
+function store() { try { sessionStorage.setItem("dq", JSON.stringify({state: S.state, readings: S.readings, asked: S.asked, already: S.already})); } catch (e) {} }
 function restore() { try { return JSON.parse(sessionStorage.getItem("dq") || "null"); } catch (e) { return null; } }
 function forget() { try { sessionStorage.removeItem("dq"); } catch (e) {} }
 
@@ -670,7 +683,7 @@ async function boot() {
   const saved = restore();
   if (saved && saved.state && Object.keys(saved.readings || {}).length) {
     $("resume").hidden = false;
-    $("resume-go").onclick = () => { Object.assign(S, {state: saved.state, readings: saved.readings, asked: saved.asked || 0}); step([]); };
+    $("resume-go").onclick = () => { Object.assign(S, {state: saved.state, readings: saved.readings, asked: saved.asked || 0, already: Array.isArray(saved.already) ? saved.already : []}); step([]); };
     $("resume-new").onclick = () => { forget(); $("resume").hidden = true; };
   }
 }
@@ -708,7 +721,7 @@ async function step(facts) {
 }
 function reset() {
   S.gen++; forget();
-  Object.assign(S, {state: null, readings: {}, asked: 0, editing: null, current: null, lastNext: null, explain: null, cliff: null});
+  Object.assign(S, {state: null, readings: {}, asked: 0, editing: null, current: null, lastNext: null, explain: null, cliff: null, plan: null, already: []});
   $("resume").hidden = true;
   setBusy(false);
 }
@@ -940,7 +953,7 @@ async function payView(gen) {
 // approval settles part of another's eligibility. Shown for three or more programmes over two or more steps.
 async function planView(gen) {
   try {
-    const p = await post("/v1/plan", {state: S.state});
+    const p = await post("/v1/plan", {state: S.state, already: S.already});
     if (gen !== S.gen || $("results").hidden) return;
     S.plan = p;
     renderPlan();
@@ -948,18 +961,39 @@ async function planView(gen) {
 }
 const SHORT = {snap: "SNAP", tanf: "TANF", ssi: "SSI", medicaid: "Medicaid"};
 function either(ids) {
-  const n = ids.map(i => SHORT[i] || i);
+  const n = ids.map(i => SHORT[i] || (info(i) || {}).name || i);
   return n.length === 1 ? n[0] : n.slice(0, -1).join(", ") + " " + t("plan_or") + " " + n[n.length - 1];
 }
+const HAVE = ["snap", "medicaid", "tanf", "ssi", "wic", "chip", "housing"];  // ongoing benefits a household may already get
 function renderPlan() {
   const p = S.plan, box = $("r-plan");
-  const count = p ? p.steps.reduce((a, s) => a + s.programmes.length, 0) : 0;
-  if (!p || p.steps.length < 2 || count < 3) { box.hidden = true; return; }
-  $("plan-h").textContent = t("plan_h");
+  if (!p) { box.hidden = true; return; }
+  $("plan-h").textContent = p.steps.length ? t("plan_h") : t("plan_h_none");
   $("plan-note").textContent = t("plan_note");
+  $("plan-note").hidden = !p.steps.length;
+  const offered = HAVE.filter(id => S.catalogue.programmes.some(x => x.id === id));
+  $("plan-have").innerHTML = `<legend id="plan-have-l">${esc(t("plan_have"))}</legend>` + offered.map(id =>
+    `<label><input type="checkbox" value="${esc(id)}"${S.already.includes(id) ? " checked" : ""}> ${esc(SHORT[id] || (info(id) || {}).name || id)}</label>`).join("");
+  for (const box_ of $("plan-have").querySelectorAll("input")) box_.onchange = () => {
+    S.already = [...$("plan-have").querySelectorAll("input:checked")].map(i => i.value);
+    store(); planView(S.gen);
+  };
+  const names = p.already.map(a => SHORT[a.id] || (info(a.id) || {}).name || a.programme);
+  $("plan-already").hidden = !names.length;
+  $("plan-already").textContent = names.length ? t("plan_already")(either(p.already.map(a => a.id)), names.length) : "";
+  for (const card of document.querySelectorAll("#r-list .result")) {
+    const have = S.already.includes(card.dataset.pid);
+    let note = card.querySelector(".have");
+    if (have && !note) { note = document.createElement("p"); note.className = "have"; card.querySelector(".desc").after(note); }
+    if (note) { note.hidden = !have; note.textContent = t("have_card"); }
+  }
   const steps = t("plan_steps"), links = t("plan_link"), notes = t("plan_notes");
   $("plan-steps").innerHTML = p.steps.map(s => {
-    const names = s.programmes.map(x => `<a href="#card-${esc(x.id)}">${esc((info(x.id) || {}).name || x.programme)}</a>${x.tier === "likely" ? "" : ` <span class="chk">${esc(t("plan_check"))}</span>`}`).join(" · ");
+    const names = s.programmes.map(x => {
+      const nm = esc((info(x.id) || {}).name || x.programme);
+      const label = document.getElementById("card-" + x.id) ? `<a href="#card-${esc(x.id)}">${nm}</a>` : (info(x.id)?.apply ? link(info(x.id).apply, (info(x.id) || {}).name || x.programme, info(x.id).enPage) : nm);
+      return label + (x.tier === "likely" ? "" : ` <span class="chk">${esc(x.added_by_rule ? t("plan_added") : t("plan_check"))}</span>`);
+    }).join(" · ");
     const lines = s.programmes.flatMap(x => x.links.filter(l => links[x.id]).map(l => links[x.id](either(l.from))))
       .concat(s.notes.filter(n => notes[n.kind]).map(n => notes[n.kind]));
     return `<li class="step"><h3>${esc(steps[s.step] || s.title)}</h3><p class="names">${names}</p>${lines.length ? `<ul>${lines.map(l => `<li>${esc(l)}</li>`).join("")}</ul>` : ""}</li>`;

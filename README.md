@@ -213,7 +213,7 @@ color-only meaning; axe-core finds no WCAG 2.1 A/AA violations on any screen in 
 # 1. environment (Python 3.11+; tested on 3.13 with numpy 2.5.5 and policyengine-us 2.152.15)
 python -m venv .venv && . .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -e ".[dev]" policyengine-us==2.152.15 tables h5py
-pytest -q                                              # 105 tests, on the shipped model; no data needed
+pytest -q                                              # 106 tests, on the shipped model; no data needed
 
 # 2. data: Populace national build populace-us-2024-spm-20260915 (827 MB, sha256 6496cc43...aee84) into
 #    data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)
