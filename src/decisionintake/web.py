@@ -31,7 +31,7 @@ from pathlib import Path
 from urllib.parse import parse_qs
 
 from . import bundle as bundle_mod
-from .mcp_server import ABSTAIN_BELOW, DEFAULT_BUNDLE, K_VERSION, MODERN, VERSION, StatelessServer
+from .mcp_server import ABSTAIN_BELOW, DEFAULT_BUNDLE, K_VERSION, MODERN, RECEIPT_EVIDENCE, VERSION, StatelessServer
 from .guards import DEFAULT_RULES, attach
 from .service import FactError, Intake, Settings
 from .state import StateError
@@ -131,7 +131,7 @@ class App:
         self.provenance = {"commit": (os.environ.get("VERCEL_GIT_COMMIT_SHA") or "")[:7] or None,
                            "bundle_sha256": _sha256(path)[:12],
                            "rules_sha256": _rules_sha256(rules)[:12] if rules and self.b.info.get("rules") else None}
-        self.settings = settings or Settings(abstain_below=ABSTAIN_BELOW)
+        self.settings = settings or Settings(abstain_below=ABSTAIN_BELOW, receipt_evidence=dict(RECEIPT_EVIDENCE))
         Intake(self.b)  # warm the model's cache of initial scores before the first call
         self.mcp = StatelessServer(self.b, self.settings)
         self.static = Path(static_dir).resolve() if static_dir else None
@@ -201,12 +201,25 @@ class App:
         except ValueError:  # JSONDecodeError, UnicodeDecodeError, an integer too long to read, NaN/Infinity
             raise HTTPError(400, "bad_json", "the request body is not valid JSON") from None
 
-    def _intake(self, state, new=()) -> tuple[Intake, list]:
-        """The intake for a state plus any new facts, rebuilt and re-scored in one batch."""
+    def _intake(self, state, new=(), gets=None) -> tuple[Intake, list]:
+        """The intake for a state plus any new facts, rebuilt and re-scored in one batch. gets: what the
+        household already gets, replacing the state's list (None keeps it)."""
         try:
-            return Intake.resume(self.b, state if state not in (None, "") else "", list(new), self.settings)
-        except (StateError, FactError) as e:
+            return Intake.resume(self.b, state if state not in (None, "") else "", list(new), self.settings, gets)
+        except StateError as e:
             raise HTTPError(400, "bad_state", str(e)) from None
+        except FactError as e:
+            raise HTTPError(400, "bad_request" if gets is not None else "bad_state", str(e)) from None
+
+    @staticmethod
+    def _already(body) -> list | None:
+        """The optional "already" list (programme ids the household gets now), or None if absent."""
+        if not isinstance(body, dict) or "already" not in body:
+            return None
+        v = body["already"]
+        if not isinstance(v, list) or not all(isinstance(a, str) for a in v) or len(v) > 20:
+            raise HTTPError(400, "bad_request", "already must be a list of programme ids")
+        return v
 
     # -------------------------------------------------------------------------------- routes
     def route(self, method, path, environ, log):
@@ -259,7 +272,7 @@ class App:
             raise HTTPError(400, "bad_request", "facts must be a list")
         if len(facts) > MAX_FACTS:
             raise HTTPError(400, "bad_request", f"at most {MAX_FACTS} facts in one call")
-        it, readings = self._intake(body.get("state"), facts)
+        it, readings = self._intake(body.get("state"), facts, self._already(body))
         nxt = it.next_step()
         log.update(facts=len(it.facts), action=nxt["action"])
         return _json(200, {"state": it.state(), "readings": readings, "next": nxt})
@@ -268,7 +281,7 @@ class App:
         body = self._body(environ) or {}
         if not isinstance(body, dict):
             raise HTTPError(400, "bad_request", 'send an object: {"state": "..."}')
-        it, _ = self._intake(body.get("state"))
+        it, _ = self._intake(body.get("state"), gets=self._already(body))
         log.update(facts=len(it.facts))
         return _json(200, {"state": it.state(), **it.assessment()})
 
@@ -302,6 +315,11 @@ class App:
                 out.append({"id": rid, "error": "already must be a list of programme ids"})
                 continue
             it = Intake(self.b, self.settings)
+            try:
+                it.receive(already)  # before the facts: one belief update; SNAP is evidence (D51)
+            except FactError as e:
+                out.append({"id": rid, "error": str(e)})
+                continue
             readings = it.record(facts)
             errors = [r for r in readings if "error" in r]
             try:
@@ -324,10 +342,9 @@ class App:
         body = self._body(environ) or {}
         if not isinstance(body, dict):
             raise HTTPError(400, "bad_request", 'send an object: {"state": "...", "already"?: ["snap", ...]}')
-        already = body.get("already", [])
-        if not isinstance(already, list) or not all(isinstance(a, str) for a in already) or len(already) > 20:
-            raise HTTPError(400, "bad_request", "already must be a list of programme ids")
-        it, _ = self._intake(body.get("state"))
+        already = self._already(body)
+        it, _ = self._intake(body.get("state"), gets=already)
+        already = it.receives  # from the body, or else what the state holds
         try:
             out = it.plan(already)
         except FactError as e:
@@ -628,7 +645,10 @@ def openapi_doc(base: str | None = None) -> dict:
                 "operationId": "step",
                 "summary": "Record facts (any questions, asked or not) and get the next step: ask, finish or hand_off",
                 "requestBody": body({"type": "object", "properties": {
-                    "state": ref("State"), "facts": {"type": "array", "maxItems": MAX_FACTS, "items": ref("Fact")}}},
+                    "state": ref("State"), "facts": {"type": "array", "maxItems": MAX_FACTS, "items": ref("Fact")},
+                    "already": {"type": "array", "maxItems": 20, "items": {"type": "string"},
+                                "description": "programme ids the household already gets, replacing the state's "
+                                               "list ([] clears it); getting SNAP is evidence (D51)"}}},
                     {"state": example_state, "facts": [{"question": "children", "choice": "2"}]}),
                 "responses": {"200": resp("the new state, how each fact was read, and the next step", ref("Step")),
                               "400": err, "413": err, "415": err, "429": limited}}},
@@ -636,7 +656,10 @@ def openapi_doc(base: str | None = None) -> dict:
                 "operationId": "assessment",
                 "summary": "Every programme's probability, tier and yearly value range; the facts so far",
                 "requestBody": body({"type": "object", "required": ["state"],
-                                     "properties": {"state": ref("State")}}, {"state": example_state}),
+                                     "properties": {"state": ref("State"), "already": {"type": "array", "maxItems": 20, "items": {"type": "string"},
+                                "description": "programme ids the household already gets, replacing the state's "
+                                               "list ([] clears it); getting SNAP is evidence (D51)"}}},
+                                    {"state": example_state}),
                 "responses": {"200": resp("the assessment", ref("FullAssessment")), "400": err, "413": err,
                               "415": err, "429": limited}}},
             "/v1/explain": {"post": {

@@ -547,3 +547,32 @@ def test_receipt_round_trips_and_is_off_by_default(b_):
     from decisionintake.state import _check
     with pytest.raises(StateError):
         Intake.from_state(b_, f"{body};#{_check(body)}", on)  # a well-formed state naming an unknown programme
+
+
+def test_served_engine_uses_snap_receipt(app):
+    facts = [{"question": "state", "choice": "OH"}, {"question": "household_size", "choice": "3"},
+             {"question": "children", "choice": "2"}, {"question": "child_under5", "choice": "yes"}]
+    plain = call(app, "POST", "/v1/step", {"facts": facts})["json"]
+    got = call(app, "POST", "/v1/step", {"facts": facts, "already": ["snap"]})["json"]
+    assert ";gets=snap;" in got["state"] and "gets=" not in plain["state"]
+    pa = {r["id"]: r["probability"] for r in call(app, "POST", "/v1/assessment", {"state": plain["state"]})["json"]["all_programmes"]}
+    pb = {r["id"]: r["probability"] for r in call(app, "POST", "/v1/assessment", {"state": got["state"]})["json"]["all_programmes"]}
+    assert pb["snap"] > pa["snap"] and pb["wic"] >= pa["wic"]
+    # already given to /v1/assessment replaces the state's list, and an empty list clears it
+    cleared = call(app, "POST", "/v1/assessment", {"state": got["state"], "already": []})["json"]
+    assert "gets=" not in cleared["state"]
+    assert {r["id"]: r["probability"] for r in cleared["all_programmes"]} == pa
+    assert call(app, "POST", "/v1/step", {"facts": facts, "already": ["lunch"]})["status"] == 400
+    assert call(app, "POST", "/v1/assessment", {"state": got["state"], "already": "snap"})["status"] == 400
+
+
+def test_connector_takes_already(app):
+    from decisionintake.mcp_server import StatelessServer, ToolError
+    srv = StatelessServer(app.b, app.settings)
+    st = srv.call("start_intake", {})["state"]
+    out = srv.call("record_facts", {"state": st, "facts": [{"question": "state", "choice": "OH"}], "already": ["snap"]})
+    assert ";gets=snap;" in out["state"]
+    later = srv.call("record_facts", {"state": out["state"], "facts": [{"question": "children", "choice": "2"}]})
+    assert ";gets=snap;" in later["state"]  # kept when not given again
+    with pytest.raises(ToolError):
+        srv.call("record_facts", {"state": st, "facts": [], "already": ["lunch"]})

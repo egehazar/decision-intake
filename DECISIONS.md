@@ -1477,3 +1477,9 @@ Holm: both p 0.0002, the first at 2.5% and the second at 5%; both pass.
 - The effect is larger than in development (-600 on 600 validation households), as is B's loss (6,221 against
   2,969): a different, costlier set of households; the interval is wide and its upper end is -895.
 By the registered rule, receipt evidence for SNAP (EPS 0.2) goes into production.
+
+**D51 shipped (same day).** Served settings carry `receipt_evidence = {"snap": 0.2}` (web and the stdio
+connector). `already` is accepted by /v1/step, /v1/assessment and /v1/plan (replacing the state's `gets=` list;
+`[]` clears it), by /v1/batch records (before the facts: one belief update) and by the connector's
+record_facts in both protocol eras. On the screener, ticking a box under "Already getting any of these?"
+re-scores the results in place: no scroll, focus back on the box, the old notes kept until the new ones land.

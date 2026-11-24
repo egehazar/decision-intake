@@ -614,10 +614,10 @@ function store() { try { sessionStorage.setItem("dq", JSON.stringify({state: S.s
 function restore() { try { return JSON.parse(sessionStorage.getItem("dq") || "null"); } catch (e) { return null; } }
 function forget() { try { sessionStorage.removeItem("dq"); } catch (e) {} }
 
-function show(id) {
+function show(id, keep = false) {  // keep: a re-score of the screen already shown; don't move the page
   for (const s of ["intro", "ask", "results"]) $(s).hidden = s !== id;
-  window.scrollTo({top: 0});
-  if (EMBED) postHeight(true);
+  if (!keep) window.scrollTo({top: 0});
+  if (EMBED) postHeight(!keep);
 }
 // Embedded: tell the host page our height (nothing else) so its iframe fits; open every link in a new tab.
 function postHeight(top) {
@@ -914,7 +914,7 @@ function whoFor(id) {
   if (r.infant_or_pregnant === "no") return t("who_none");  // WIC, Early Head Start: no one pregnant either
   return t("who_for")[id];
 }
-function renderResults(next) {
+function renderResults(next, keep = false) {
   const recs = next.recommend || [], unsure = next.unsure || [];
   const likely = recs.filter(r => r.tier === "likely").length;
   $("r-h").textContent = recs.length ? t("r_h")(recs.length, likely < recs.length) : unsure.length ? t("r_unsure_h") : t("r_none");
@@ -951,8 +951,26 @@ function renderResults(next) {
   renderNearTheLine();
   renderPlan();
   renderPayView();
-  show("results");
-  $("r-h").focus({preventScroll: true});
+  show("results", keep);
+  if (!keep) $("r-h").focus({preventScroll: true});
+}
+
+// "Already getting" ticked or unticked (D51): the engine re-scores with it (getting SNAP is evidence about the
+// household), and the results re-render in place. The old notes, pay table and plan stay until replaced.
+async function rescoreAlready(focusId) {
+  const gen = ++S.gen;
+  try {
+    const a = await post("/v1/assessment", {state: S.state, already: S.already});
+    if (gen !== S.gen) return;
+    S.state = a.state;
+    S.lastNext = {...S.lastNext, recommend: a.recommend, unsure: a.unsure};
+    store();
+    S.refocus = focusId;
+    renderResults(S.lastNext, true);
+    nearTheLine(gen); payView(gen); planView(gen);
+  } catch (e) {
+    if (gen === S.gen) status(t("net_error"));
+  }
 }
 
 // "Near the line": which money answer, one bracket different, would move a programme across "likely" (/v1/explain).
@@ -1018,9 +1036,13 @@ function renderPlan() {
   const offered = HAVE.filter(id => S.catalogue.programmes.some(x => x.id === id));
   $("plan-have").innerHTML = `<legend id="plan-have-l">${esc(t("plan_have"))}</legend>` + offered.map(id =>
     `<label><input type="checkbox" value="${esc(id)}"${S.already.includes(id) ? " checked" : ""}> ${esc(SHORT[id] || (info(id) || {}).name || id)}</label>`).join("");
+  if (S.refocus) {  // back to the box that was just ticked, once the plan is rebuilt
+    const again = $("plan-have").querySelector(`input[value="${CSS.escape(S.refocus)}"]`);
+    if (again && S.plan && S.plan.already.map(x => x.id).join() === S.already.join()) { again.focus({preventScroll: true}); S.refocus = null; }
+  }
   for (const box_ of $("plan-have").querySelectorAll("input")) box_.onchange = () => {
     S.already = [...$("plan-have").querySelectorAll("input:checked")].map(i => i.value);
-    store(); planView(S.gen);
+    store(); rescoreAlready(box_.value);
   };
   const names = p.already.map(a => SHORT[a.id] || (info(a.id) || {}).name || a.programme);
   $("plan-already").hidden = !names.length;

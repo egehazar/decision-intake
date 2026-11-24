@@ -58,6 +58,7 @@ held-out simulated households; intervals are 95%.
 | Does it help an AI assistant? | Claude Haiku with the MCP tools against without | 200 | yes, D29 | mistakes 41% lower ($3,884 → $2,305); total **−$1,591** [−2,469, −775] unweighted; weighted −$294 [−1,831, +1,146] |
 | Is that the question choice? | same predictor, Claude choosing its own questions | 200 | yes, D30 | **−$891** [−1,538, −324] unweighted; weighted −$516 [−1,441, +359] |
 | Do the statutory rules cost anything? | rules on against off | 2,000 | yes, D32 | −$3.7 [−9.4, +0.0] |
+| Does "gets SNAP" help as evidence? | receipt weighed as evidence against the served engine, 5 fields | 991 | yes, D51 | other 14 programs: **−$1,600** [−2,402, −895]; with all 18 answers no decision changes |
 | Do five more programmes help? | v3 (v2 unchanged plus an add-on network) against v2 plus a simple rule | 2,000 | yes, D43 | five added: **−$1,144** [−1,797, −627]; original ten: −$38 [−122, +23] against a +$25 margin |
 | Does "can't tell" cut wrong negatives? | wrong "doesn't look likely" | 2,183 | yes with v2.1 (D35); after the result for the served model | 2.17% → 0.62% [−1.76, −1.35 points]; served: 2.17% → 0.71% |
 
@@ -164,6 +165,9 @@ person's words ──► an LLM, or a form ──► typed facts (option, amount
   screener in a sandboxed, self-sizing iframe on a food bank's or library's page (`data-lang="es"`,
   `data-theme="light"`); only `/embed` may be framed. One page for organizations brings the three together:
   https://decision-intake.vercel.app/partners.html (embed code with a live preview, caseload triage, API).
+- **What the household already gets.** `already: ["snap", ...]` on any call (kept in the state as
+  `gets=...`); getting SNAP is weighed as evidence about the household, which on caseload-style rows cut
+  mistakes on the other programs by about a quarter in a registered test (D51).
 - **The order to apply in.** The programs worth applying for in three steps (now, then, at tax time), with
   the federal rules by which one approval settles part of another's eligibility, each cited: SNAP, Medicaid or
   TANF meets WIC's income test; SNAP or TANF gives children free school meals, often with no form; TANF or SSI
@@ -219,7 +223,7 @@ color-only meaning; axe-core finds no WCAG 2.1 A/AA violations on any screen in 
 # 1. environment (Python 3.11+; tested on 3.13 with numpy 2.5.5 and policyengine-us 2.152.15)
 python -m venv .venv && . .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -e ".[dev]" policyengine-us==2.152.15 tables h5py
-pytest -q                                              # 112 tests, on the shipped model; no data needed
+pytest -q                                              # 115 tests, on the shipped model; no data needed
 
 # 2. data: Populace national build populace-us-2024-spm-20260915 (827 MB, sha256 6496cc43...aee84) into
 #    data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)

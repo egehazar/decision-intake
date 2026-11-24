@@ -319,18 +319,22 @@ class Intake:
         return cls.resume(bundle, token, [], settings)[0]
 
     @classmethod
-    def resume(cls, bundle: Bundle, token: str, new: list, settings: Settings | None = None) -> tuple["Intake", list]:
+    def resume(cls, bundle: Bundle, token: str, new: list, settings: Settings | None = None,
+               gets: list | None = None) -> tuple["Intake", list]:
         """Rebuild from a state and record new facts in one batch, so the households are re-scored once, not
-        twice (the stateless service's hot path). Returns the intake and the readings of the new facts."""
+        twice (the stateless service's hot path). Returns the intake and the readings of the new facts.
+        gets: what the household already gets, replacing the state's list (None keeps the state's)."""
         it = cls(bundle, settings)
         old = decode(bundle.pop.questions, token) if token else []
-        gets = [f for f in old if f["question"] == "gets"]
+        held = [f["programmes"] for f in old if f["question"] == "gets"]
         old = [f for f in old if f["question"] != "gets"]
-        if gets:
+        if held:
             try:
-                it.receive(gets[0]["programmes"])
+                it.receive(held[0])
             except FactError as e:
                 raise StateError(f"state holds {e}") from None
+        if gets is not None:
+            it.receive(gets)  # FactError on an unknown id: the caller's to report
         readings = it.record(old + list(new)) if (old or new) else []
         bad = [r for r in readings[:len(old)] if "error" in r]
         if bad:  # only possible if the bundle changed under a state written for another one

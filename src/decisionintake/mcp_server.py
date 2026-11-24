@@ -44,6 +44,7 @@ K_SERVER = "io.modelcontextprotocol/serverInfo"
 LIST_TTL_MS = 3_600_000  # tools/list and server/discover change only with a deploy
 DEFAULT_BUNDLE = Path(__file__).resolve().parents[2] / "bundles" / "benefits_v3.npz"  # v2 + five programmes (D43)
 ABSTAIN_BELOW = 10.0  # D33/D35: under 10 households like the person, uncertain negatives are "can't tell"
+RECEIPT_EVIDENCE = {"snap": 0.2}  # D51: "gets SNAP" moves the belief (passed its registered test); others don't
 VERSION = "1.1.0"
 MAX_FACTS = 40  # facts in one record_facts call (the HTTP API uses the same limit)
 
@@ -57,6 +58,8 @@ enough. You handle the conversation; it handles the decisions.
    with its period ("2,400 a month" -> {"value": 2400, "period": "month"}) and approximate=true for
    "about"/"around"/ranges. Do no arithmetic yourself. If they don't know, record dont_know.
    If a reading comes back with an error, fix the fact; with a warning, check it with the person.
+   If the person says the household already gets a programme (SNAP, Medicaid, WIC...), pass its id in
+   `already` on record_facts: it isn't recommended again, and getting SNAP sharpens every other estimate.
 3. Follow the step it returns. "ask": ask that one question in plain, friendly words (you may say why,
    using why.mostly_settles). "finish": present the recommendations, "likely" ones first, "worth checking"
    ones as worth a look, with the yearly value ranges, and always the note. Programmes in "unsure" are ones
@@ -93,6 +96,9 @@ FACT = {
     "required": ["question"],
 }
 SID = {"session_id": {"type": "string"}}
+ALREADY = {"type": "array", "items": {"type": "string"},
+           "description": "programme ids the person says the household already gets (snap, medicaid, wic, ...); the "
+                          "whole list each time, replacing any earlier one. SNAP sharpens every other estimate (D51)."}
 TOOLS = [
     {"name": "start_intake", "title": "Start a benefits screening",
      "description": "Open a new US benefits-screening intake (fifteen programmes: federal benefits and tax credits, "
@@ -103,7 +109,7 @@ TOOLS = [
     {"name": "record_facts", "title": "Record what the person said",
      "description": "Record what the person said as typed facts (any questions, asked or volunteered; a fact for an "
                     "answered question replaces it). Returns how each fact was read and the next step.",
-     "inputSchema": {"type": "object", "properties": {**SID, "facts": {"type": "array", "items": FACT}},
+     "inputSchema": {"type": "object", "properties": {**SID, "facts": {"type": "array", "items": FACT}, "already": ALREADY},
                      "required": ["session_id", "facts"]}},
     {"name": "next_step", "title": "What to do next",
      "description": "What to do now: ask a question (with what it is worth and which programmes it settles), "
@@ -141,7 +147,7 @@ TOOLS_STATELESS = [
                                 "amount units), and the first step."},
     {**TOOLS[1], "description": TOOLS[1]["description"] + " Returns the new `state`; use it from now on. With an "
                                                           "empty facts list it only returns the next step.",
-     "inputSchema": {"type": "object", "properties": {**STATE, "facts": {"type": "array", "items": FACT}},
+     "inputSchema": {"type": "object", "properties": {**STATE, "facts": {"type": "array", "items": FACT}, "already": ALREADY},
                      "required": ["state", "facts"]}},
     {**TOOLS[3], "inputSchema": {"type": "object", "properties": STATE, "required": ["state"]}},
     {**TOOLS[4], "inputSchema": {"type": "object", "properties": STATE, "required": ["state"]}},
@@ -184,6 +190,11 @@ class Server:
             facts = args.get("facts")
             if not isinstance(facts, list):
                 raise ToolError("facts must be a list")
+            if "already" in args:
+                try:
+                    it.receive(_already(args))
+                except FactError as e:
+                    raise ToolError(str(e)) from None
             readings = it.record(facts)
             return {"readings": readings, "next": it.next_step()}
         if name == "next_step":
@@ -288,6 +299,13 @@ class Server:
         return {"jsonrpc": "2.0", "id": mid, "result": {"resultType": "complete", **result, "_meta": server}}
 
 
+def _already(args) -> list:
+    v = args.get("already")
+    if not isinstance(v, list) or not all(isinstance(x, str) for x in v) or len(v) > 20:
+        raise ToolError("already must be a list of programme ids, like [\"snap\"]")
+    return v
+
+
 class ToolError(Exception):
     """A tool ran but the input was wrong (bad state, bad fact): reported in the result with isError."""
 
@@ -305,12 +323,12 @@ class StatelessServer(Server):
     def __init__(self, b, settings: Settings):
         super().__init__(b, settings, max_sessions=0)
 
-    def _restore(self, args, new=()) -> tuple[Intake, list]:
+    def _restore(self, args, new=(), gets=None) -> tuple[Intake, list]:
         try:
             token = args.get("state")
             if not isinstance(token, str) or not token.strip():
                 raise StateError("state is missing; call start_intake and pass the state from the most recent result")
-            return Intake.resume(self.b, token, list(new), self.settings)
+            return Intake.resume(self.b, token, list(new), self.settings, gets)
         except (StateError, FactError) as e:
             raise ToolError(str(e)) from None
 
@@ -325,7 +343,7 @@ class StatelessServer(Server):
                 raise ToolError("facts must be a list")
             if len(facts) > MAX_FACTS:
                 raise ToolError(f"at most {MAX_FACTS} facts in one call")
-            it, readings = self._restore(args, facts)
+            it, readings = self._restore(args, facts, _already(args) if "already" in args else None)
             return {"state": it.state(), "readings": readings, "next": it.next_step()}
         if name == "get_assessment":
             it, _ = self._restore(args)
@@ -375,7 +393,7 @@ def main(argv=None):
     print(f"decisionintake: {len(b.pop):,} households, {len(b.pop.questions)} questions, "
           f"{len(b.pop.decisions)} programmes, ready in {time.time() - t0:.1f}s", file=sys.stderr, flush=True)
     settings = Settings(question_cost=a.question_cost, handoff_cost=a.handoff_cost,
-                        abstain_below=None if a.no_abstain else ABSTAIN_BELOW)
+                        abstain_below=None if a.no_abstain else ABSTAIN_BELOW, receipt_evidence=dict(RECEIPT_EVIDENCE))
     serve(StatelessServer(b, settings) if a.stateless else Server(b, settings))
 
 
