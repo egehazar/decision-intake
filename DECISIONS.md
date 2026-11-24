@@ -1344,3 +1344,11 @@ modals for printing) with no referrer.
 - **For organizations** (public/partners.html): one page for a food bank or 211 coordinator with the embed code
   (language and colour options, copy button, a live preview of the real embed), caseload triage and the API,
   and what to know before using it (a screening estimate, tested on simulated households, can't-tell, privacy).
+
+**D43 cost in time (2026-11-24, after shipping v3 locally).** experiments/load_test.py over HTTP on this
+machine, v2 and v3 side by side (127.0.0.1; "localhost" adds Windows' 2-second IPv6 fallback to every call):
+one client, p50 121 -> 147 ms and p95 217 -> 301 ms; four clients, p50 180 -> 248 ms and p95 317 -> 518 ms;
+0 errors. The add-on network is as large as v2's and runs beside it (11.8 + 11.4 ms per 3,000 records; the
+shared feature encoding is only ~2 ms of that), and screenings ask about one more question (11.4 against 10.8
+requests). Fusing the two networks' matrix products would save a little but could change float rounding in
+v2's ten programmes, which D43 promises stay bit for bit the same; not done.
