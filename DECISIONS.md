@@ -1241,3 +1241,10 @@ From the same independent ranking (D42's last note), while D43's labels are comp
 - **Bug found by the print check:** the CSS rule for the "This is a rough guess" checkbox (`.check`) also matched
   result cards in the "worth checking" tier, whose class is also `check`, centring them and shrinking their text
   on the live site. Scoped to `label.check`.
+
+**D43 build note (2026-11-24, before the development run).** v2's belief population holds the answers as coded
+before D34's earnings fix (the known limitation, D39), so v3 keeps that population: the ten programmes then
+behave exactly as served, which is what "v2 unchanged" means for arm A. The five added outcomes come from
+PolicyEngine and are untouched by the coding bug. The add-on network was trained on the corrected answers of the
+same 48,657 households (same order, same weights, same outcomes for the ten; only earnings, self-employed and
+other income differ, as D34 found).

@@ -38,8 +38,18 @@ def main():
 
     v2 = bundle.load(V2)
     pop15, _, _ = build(table, programmes=PROGRAMMES + ADDED_D43)
-    train15 = pop15.subset(rest)
-    assert np.array_equal(train15.answers, v2.pop.answers), "the training households must be v2's, in v2's order"
+    cur = pop15.subset(rest)
+    # v2's belief population carries the answers as coded before D34's earnings fix; keep it, so the ten
+    # programmes behave exactly as served. The same households in the same order: weights and outcomes match,
+    # and only the three answers D34 changed differ. The five added outcomes come from PolicyEngine (untouched
+    # by the coding bug); the add-on itself was trained on the corrected answers.
+    assert np.allclose(cur.weight, v2.pop.weight) and np.array_equal(cur.eligible[:, :10], v2.pop.eligible)
+    differ = {cur.questions[j].id for j in range(len(cur.questions))
+              if not np.array_equal(cur.answers[:, j], v2.pop.answers[:, j])}
+    assert differ <= {"earned_income", "self_employed", "other_income"}, differ
+    from decisionintake.core import Population
+    train15 = Population(v2.pop.questions, list(pop15.decisions), v2.pop.answers, v2.pop.weight,
+                         np.hstack([v2.pop.eligible, cur.eligible[:, 10:]]), np.hstack([v2.pop.value, cur.value[:, 10:]]))
     model = bundle.StackedOutcome([v2.model, addon])
     loss = LossModel(np.full(len(pop15.decisions), FR), np.full(len(pop15.decisions), MIN_VALUE))
     info = {**v2.info,
