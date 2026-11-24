@@ -334,3 +334,27 @@ def test_cliff_refuses_a_question_that_is_not_an_amount(app):
     assert call(app, "POST", "/v1/cliff", {"state": step["state"], "question": "married"})["status"] == 400
     assert call(app, "POST", "/v1/cliff", {"state": step["state"], "question": "nope"})["status"] == 400
     assert call(app, "POST", "/v1/cliff", {"state": step["state"], "question": "housing_cost"})["status"] == 200
+
+
+# ------------------------------------------------------------------------------------------ caseload triage
+def test_batch_ranks_a_caseload(app):
+    recs = [{"id": "rich", "facts": [{"question": "state", "choice": "CA"}, {"question": "household_size", "choice": "1"},
+                                     {"question": "earned_income", "amount": {"value": 95000, "period": "year"}}]},
+            {"id": "family", "facts": [{"question": "state", "choice": "TX"}, {"question": "household_size", "choice": "4"},
+                                       {"question": "children", "choice": "2"},
+                                       {"question": "earned_income", "amount": {"value": 24000, "period": "year"}}]},
+            {"id": "typo", "facts": [{"question": "state", "choice": "Texas!"}]}]
+    r = call(app, "POST", "/v1/batch", {"records": recs})
+    assert r["status"] == 200
+    out = {x["id"]: x for x in r["json"]["results"]}
+    assert r["json"]["call_order"][0] == "family" and out["family"]["expected_value"] > out["rich"]["expected_value"]
+    assert out["family"]["recommend"] and out["family"]["state"].startswith("di1;")
+    assert out["typo"]["errors"][0]["question"] == "state"  # a bad value is reported, the row still comes back
+    assert "not an eligibility decision" in r["json"]["note"]
+
+
+def test_batch_limits(app):
+    assert call(app, "POST", "/v1/batch", {"records": []})["status"] == 400
+    assert call(app, "POST", "/v1/batch", {"records": [{"id": k, "facts": []} for k in range(51)]})["status"] == 400
+    one = call(app, "POST", "/v1/batch", {"records": [{"id": "x", "facts": "nope"}]})["json"]["results"][0]
+    assert "error" in one

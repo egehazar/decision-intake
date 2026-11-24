@@ -327,6 +327,26 @@ class Intake:
             return [j for j in (k - 1, k + 1) if 0 <= j < n]
         return [j for j in range(n) if j != k]
 
+    def triage(self) -> dict:
+        """For a caseload list: what this person stands to gain and what to ask them first. expected_value is the
+        sum, over the programmes the engine would recommend now, of probability times typical yearly value (the
+        dollars a call could unlock); next is the question worth most, with its dollar worth, or None."""
+        thin = self._thin(self.s)
+        recs, ev = [], 0.0
+        for dv in self.s.decisions():
+            if dv.recommend:
+                typical = (max(dv.value_low, 0) + max(dv.value_high, 0)) / 2
+                ev += dv.p_eligible * typical
+                recs.append({"id": dv.decision, "tier": self._tier(True, dv.p_eligible, thin),
+                             "probability": round(dv.p_eligible, 2)})
+        recs.sort(key=lambda r: -r["probability"])
+        nxt = self.next_step()
+        ask = None
+        if nxt["action"] == "ask":
+            ask = {"id": nxt["question"]["id"], "text": nxt["question"]["text"], "worth_per_year": nxt["why"]["worth_per_year"]}
+        return {"expected_value": int(round(ev, -1)), "recommend": recs, "next": ask, "action": nxt["action"],
+                "expected_mistake_cost": round(self.s.risk()), "support": self.support()["level"]}
+
     def cliff(self, question: str = "earned_income") -> dict:
         """Every option of one amount question (earnings by default), the other answers kept: each programme's
         tier, probability and typical value at that option, and the expected yearly value of all of them. A drop

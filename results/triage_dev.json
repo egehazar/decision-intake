@@ -1,0 +1,27 @@
+{
+ "households": 2000,
+ "fields": [
+  "state",
+  "household_size",
+  "children",
+  "earned_income",
+  "tenure"
+ ],
+ "top_share": 0.2,
+ "random": {
+  "all": 0.1998939960290231,
+  "without_health": 0.2020831305652907
+ },
+ "engine (expected value)": {
+  "all": 0.6142561334219272,
+  "without_health": 0.7263442593272013
+ },
+ "lowest earnings first": {
+  "all": 0.12563599694125174,
+  "without_health": 0.13177145345882074
+ },
+ "largest household first": {
+  "all": 0.5327639940843232,
+  "without_health": 0.6026693357779233
+ }
+}

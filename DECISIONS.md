@@ -1223,3 +1223,21 @@ Holm over the two):
 likely" on the five; per programme; realistic answers.
 
 **Ship rule:** v3 (v2 plus the add-on) replaces v2 in production only if P1 and P2 both pass.
+
+## D44. A caseload at once; a printable summary; a styling bug (2026-11-24)
+
+From the same independent ranking (D42's last note), while D43's labels are computed:
+- **Caseload triage** (`Intake.triage`, `/v1/batch`, public/caseload.html). For a household known by a few fields,
+  the expected yearly value of the programmes the engine would recommend now (probability times typical value)
+  and the best next question with its dollar worth; a list is ordered by that value. Development check, not
+  registered (experiments/triage_dev.py, results/triage_dev.*): 2,000 validation households cut down to state,
+  household size, children, an earnings bracket and rent or own. Share of the true benefit dollars (all ten
+  programmes) in the top 20% of the list: the engine's order 61.4%, largest household first 53.3%, random
+  20.0%, lowest earnings first 12.6% (many households without earnings are retirees with other income).
+  Without health coverage: 72.6%, 60.3%, 20.2%, 13.2%. The page parses the CSV in the browser, sends 50 rows a
+  call, stores nothing, and asks for references, never names.
+- **Printable summary** on the screener's results: a dated header, the results with each application address
+  written out, the near-the-line notes, the pay table and the answers.
+- **Bug found by the print check:** the CSS rule for the "This is a rough guess" checkbox (`.check`) also matched
+  result cards in the "worth checking" tier, whose class is also `check`, centring them and shrinking their text
+  on the live site. Scoped to `label.check`.

@@ -226,6 +226,7 @@ nav.toc ol {{ margin: 6px 0 0; padding-left: 20px; }}
 <tr><td><code>POST /v1/step</code></td><td><code>{{"state"?, "facts"?}}</code></td><td>the new <code>state</code>, how each fact was read, and <code>next</code>: ask, finish or hand_off</td></tr>
 <tr><td><code>POST /v1/assessment</code></td><td><code>{{"state"}}</code></td><td>every program's probability, tier and yearly value range; the facts so far; how well the data covers this household</td></tr>
 <tr><td><code>POST /v1/explain</code></td><td><code>{{"state"}}</code></td><td>which single answer, one step different, would change each program's result (<a href="#explain">below</a>)</td></tr>
+<tr><td><code>POST /v1/batch</code></td><td><code>{{"records": [{{"id", "facts"}}]}}</code></td><td>a caseload: expected value and the question to ask first, per household, and the order to call them in (<a href="#batch">below</a>)</td></tr>
 <tr><td><code>POST /v1/cliff</code></td><td><code>{{"state", "question"?}}</code></td><td>every bracket of an amount question, the rest kept: a benefits-cliff view (<a href="#cliff">below</a>)</td></tr>
 <tr><td><code>GET /v1/questions</code></td><td>-</td><td>the ten programs and all 18 questions with their options</td></tr>
 <tr><td><code>POST /mcp</code></td><td>JSON-RPC</td><td>the same engine as tools for AI assistants (<a href="#mcp">section 5</a>)</td></tr>
@@ -279,6 +280,9 @@ nav.toc ol {{ margin: 6px 0 0; padding-left: 20px; }}
 <h3 id="cliff">If pay changed: the cliff view</h3>
 <p><code>POST /v1/cliff</code> with a <code>state</code> (and optionally <code>"question"</code>, any amount question; earnings by default) gives every option of that question with the other answers kept: each program's tier, probability and typical yearly value, and the expected value by group (food and cash, tax credits, health coverage). Drops between neighbouring options are where help falls away as pay rises. Eleven options take about half a second. The screener shows food, cash and tax credits as bars and health coverage as the program that looks likely, since coverage is valued, not paid.</p>
 {code(cliff_view)}
+
+<h3 id="batch">A caseload at once</h3>
+<p><code>POST /v1/batch</code> takes up to 50 records, each <code>{{"id", "facts"}}</code> with what an organisation already knows, and returns for each the expected yearly value of the programs the engine would recommend now (chance times typical amount), the single best question to ask that household and its dollar worth, and a <code>call_order</code>, highest value first. Use your own ids, never names. In a development check on 2,000 simulated households known only by state, household size, children, an earnings bracket and rent or own, the top 20% of this order held 61% of the benefit dollars (73% without health coverage), against 20% at random and 53% for largest household first. The <a href="caseload.html">caseload page</a> does this from a CSV in the browser.</p>
 
 <h2 id="state">4. The state string</h2>
 <p>The facts so far, readable, with a checksum so a mangled copy is refused instead of misread:</p>

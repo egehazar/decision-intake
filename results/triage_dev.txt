@@ -1,0 +1,5 @@
+Caseload triage, development: 2000 validation households, five fields each; share of true benefit dollars in the top 20% of the list
+  random order: 20.0% (without health coverage 20.2%)
+  engine (expected value): 61.4% (without health coverage 72.6%)
+  lowest earnings first: 12.6% (without health coverage 13.2%)
+  largest household first: 53.3% (without health coverage 60.3%)

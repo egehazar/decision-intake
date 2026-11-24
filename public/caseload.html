@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Caseload Triage</title>
+<meta name="description" content="Rank a caseload by the benefits each household is likely missing, and the one question to ask each first. Runs on the DecisionIntake engine; nothing is stored.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect x='1' y='1' width='26' height='26' rx='7' fill='%231d5c88'/%3E%3Cpath d='M8 14.5l4 4 8-9' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root { --bg: #f5f4ef; --surface: #fff; --ink: #18232c; --muted: #56636e; --line: #d9d6cc; --accent: #1d5c88; --accent-ink: #fff;
+  --accent-soft: #e4eef6; --focus: #f2a900; --alert: #8f2d1f; --alert-soft: #fbe9e5; --code: #eef2f5; color-scheme: light; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #10161b; --surface: #182129; --ink: #e7edf1; --muted: #9aa8b3;
+  --line: #2a3641; --accent: #82b8e2; --accent-ink: #0c1620; --accent-soft: #1b2d3c; --focus: #f2c14e; --alert: #f0a090; --alert-soft: #3b1d18; --code: #0c1218; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #10161b; --surface: #182129; --ink: #e7edf1; --muted: #9aa8b3; --line: #2a3641; --accent: #82b8e2;
+  --accent-ink: #0c1620; --accent-soft: #1b2d3c; --focus: #f2c14e; --alert: #f0a090; --alert-soft: #3b1d18; --code: #0c1218; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 64rem; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { border-bottom: 1px solid var(--line); background: var(--surface); }
+header .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-block: 14px; }
+header a { color: var(--ink); font-weight: 700; text-decoration: none; }
+main { padding-block: 28px 56px; display: flex; flex-direction: column; gap: 22px; }
+h1 { font-size: clamp(1.6rem, 4vw, 2.1rem); line-height: 1.2; margin: 0; text-wrap: balance; }
+h2 { font-size: 1.15rem; margin: 0; }
+p { margin: 0; max-width: 46rem; }
+a { color: var(--accent); }
+.lede { color: var(--muted); font-size: 1.06rem; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; gap: 12px; }
+.fine { font-size: .9rem; color: var(--muted); }
+code { font-family: ui-monospace, Consolas, monospace; font-size: .88em; background: var(--code); padding: 1px 5px; border-radius: 4px; }
+textarea { width: 100%; min-height: 9rem; font: .9rem/1.45 ui-monospace, Consolas, monospace; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+.row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+button, .button { font: inherit; font-weight: 600; border-radius: 8px; padding: 10px 16px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); cursor: pointer; text-decoration: none; }
+button.secondary { background: transparent; color: var(--accent); }
+button:disabled { opacity: .55; cursor: wait; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+.error { background: var(--alert-soft); color: var(--alert); border-radius: 8px; padding: 10px 14px; }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: .93rem; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { color: var(--muted); font-weight: 600; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pill { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; margin: 0 4px 4px 0; font-size: .82rem; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header><div class="wrap"><a href="./">Quick Benefits Check</a><span><a href="docs.html#batch">API</a> · <a href="https://github.com/egehazar/decision-intake" target="_blank" rel="noopener">source</a></span></div></header>
+<main class="wrap">
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <h1>Caseload triage</h1>
+    <p class="lede">For food banks, 211 lines and navigator teams: rank the households you already know a little about by the benefits each is likely missing, and see the one question worth asking each of them first.</p>
+  </div>
+
+  <section class="card" aria-labelledby="h-in">
+    <h2 id="h-in">1. Your list</h2>
+    <p class="fine">One row per household, with a header row. Use an <code>id</code> column with your own reference, <b>never names</b>. Any of these columns help; leave unknowns blank: <code>state</code> (two letters), <code>household_size</code>, <code>children</code>, <code>earned_income</code> (dollars a year), <code>tenure</code> (rent, own or neither), <code>housing_cost</code> (dollars a month), <code>child_under5</code>, <code>senior</code>, <code>disabled</code>, <code>married</code> (yes or no), <code>social_security</code> and <code>other_income</code> (dollars a year), <code>assets</code> (dollars).</p>
+    <label for="csv" class="fine">Paste CSV, or choose a file</label>
+    <textarea id="csv" spellcheck="false" placeholder="id,state,household_size,children,earned_income,tenure"></textarea>
+    <div class="row">
+      <input type="file" id="file" accept=".csv,text/csv" aria-label="Choose a CSV file">
+      <button type="button" class="secondary" id="example">Use an example list</button>
+    </div>
+    <p class="fine">Rows are sent to the DecisionIntake engine 50 at a time to be scored and are not stored or logged. Up to 1,000 rows.</p>
+    <div class="row"><button type="button" id="run">Rank this list</button><span id="progress" class="fine" aria-live="polite"></span></div>
+    <div id="err" class="error" role="alert" hidden></div>
+  </section>
+
+  <section class="card" id="out" hidden aria-labelledby="h-out">
+    <h2 id="h-out">2. Who to call first</h2>
+    <p class="fine">Sorted by expected value: for the programmes the engine would recommend from what you know, the chance of qualifying times the typical yearly amount (health coverage counted at its value, not cash). In a development check on 2,000 simulated households known by five fields, the top 20% of this ranking held 61% of the benefit dollars (73% without health coverage), against 20% for a random order and 53% for largest household first. A ranking aid for outreach, not an eligibility decision.</p>
+    <div class="row"><button type="button" class="secondary" id="download">Download results (CSV)</button></div>
+    <div class="tbl"><table>
+      <thead><tr><th scope="col">#</th><th scope="col">Your id</th><th scope="col" class="num">Expected value a year</th><th scope="col">Worth applying for now</th><th scope="col">Ask first</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table></div>
+  </section>
+</main>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const AMOUNT = {earned_income: "year", social_security: "year", other_income: "year", childcare: "year", housing_cost: "month", assets: "none"};
+const EXAMPLE = `id,state,household_size,children,earned_income,tenure,senior
+c-101,TX,4,2,24000,rent,no
+c-102,CA,1,0,95000,rent,no
+c-103,NY,1,0,0,rent,yes
+c-104,OH,3,2,31000,rent,no
+c-105,FL,2,0,52000,own,no
+c-106,PA,5,3,18000,rent,no`;
+let CAT = null, LAST = [];
+
+function esc(s) { return String(s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c])); }
+function money(x) { return "$" + Math.round(x).toLocaleString("en-US"); }
+function parseCSV(text) {  // RFC 4180-ish: quotes, commas and newlines inside quotes
+  const rows = []; let row = [], cell = "", q = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) { if (c === '"' && text[i + 1] === '"') { cell += '"'; i++; } else if (c === '"') q = false; else cell += c; }
+    else if (c === '"') q = true;
+    else if (c === ",") { row.push(cell); cell = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(cell); rows.push(row); row = []; cell = ""; }
+    else cell += c;
+  }
+  if (cell !== "" || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim() !== ""));
+}
+function toRecords(text) {
+  const rows = parseCSV(text.trim());
+  if (rows.length < 2) throw new Error("Add a header row and at least one household.");
+  const head = rows[0].map(h => h.trim().toLowerCase());
+  if (!head.includes("id")) throw new Error("Add an id column with your own reference (never names).");
+  const known = new Set(CAT.questions.map(q => q.id));
+  const unknown = head.filter(h => h !== "id" && !known.has(h));
+  if (unknown.length) throw new Error(`Unknown column${unknown.length > 1 ? "s" : ""}: ${unknown.join(", ")}. Use the column names listed above.`);
+  if (rows.length - 1 > 1000) throw new Error("Up to 1,000 rows at a time.");
+  return rows.slice(1).map((r, k) => {
+    const rec = {id: (r[head.indexOf("id")] || `row ${k + 1}`).trim(), facts: []};
+    head.forEach((h, j) => {
+      if (h === "id") return;
+      const v = (r[j] || "").trim();
+      if (v === "") return;
+      if (h in AMOUNT && !isNaN(Number(v.replace(/[$,]/g, "")))) rec.facts.push({question: h, amount: {value: Number(v.replace(/[$,]/g, "")), period: AMOUNT[h]}});
+      else rec.facts.push({question: h, choice: v});
+    });
+    return rec;
+  });
+}
+async function post(body) {
+  const r = await fetch("/v1/batch", {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+  const j = await r.json().catch(() => ({}));
+  if (r.status === 429) throw new Error("Too many requests a minute from this connection; wait a minute and run it again.");
+  if (!r.ok) throw new Error(j.error?.message || `The server answered ${r.status}`);
+  return j;
+}
+async function run() {
+  $("err").hidden = true; $("run").disabled = true;
+  try {
+    const recs = toRecords($("csv").value);
+    const out = [];
+    for (let k = 0; k < recs.length; k += 50) {
+      $("progress").textContent = `Scoring ${Math.min(k + 50, recs.length)} of ${recs.length}…`;
+      out.push(...(await post({records: recs.slice(k, k + 50)})).results);
+    }
+    out.sort((a, b) => (b.expected_value ?? -1) - (a.expected_value ?? -1));
+    LAST = out; render(out);
+    $("progress").textContent = `${out.length} households ranked.`;
+  } catch (e) { $("err").textContent = e.message; $("err").hidden = false; $("progress").textContent = ""; }
+  finally { $("run").disabled = false; }
+}
+function label(id) { return (CAT.programmes.find(p => p.id === id) || {}).label || id; }
+function render(out) {
+  $("rows").innerHTML = out.map((r, k) => {
+    const issues = r.error ? ` <span class="fine">(${esc(r.error)})</span>` : r.errors ? ` <span class="fine">(${r.errors.length} value${r.errors.length > 1 ? "s" : ""} not read: ${esc(r.errors.map(e => e.question).join(", "))})</span>` : "";
+    const recs = (r.recommend || []).map(p => `<span class="pill">${esc(label(p.id))}${p.tier === "likely" ? "" : " ?"}</span>`).join("") || '<span class="fine">none yet</span>';
+    const ask = r.next ? `${esc(r.next.text)} <span class="fine">(worth ${money(r.next.worth_per_year)} a year in fewer mistakes)</span>` : '<span class="fine">nothing more worth asking</span>';
+    return `<tr><td>${k + 1}</td><td>${esc(r.id)}${issues}</td><td class="num">${r.expected_value != null ? money(r.expected_value) : "-"}</td><td>${recs}</td><td>${ask}</td></tr>`;
+  }).join("");
+  $("out").hidden = false;
+}
+function download() {
+  const q = s => `"${String(s).replace(/"/g, '""')}"`;
+  const lines = [["rank", "id", "expected_value_per_year", "recommend", "ask_first", "ask_first_worth_per_year", "state"].join(",")];
+  LAST.forEach((r, k) => lines.push([k + 1, q(r.id), r.expected_value ?? "", q((r.recommend || []).map(p => p.id).join(" ")),
+    q(r.next ? r.next.id : ""), r.next ? r.next.worth_per_year : "", q(r.state || "")].join(",")));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([lines.join("\n") + "\n"], {type: "text/csv"}));
+  a.download = "caseload-ranked.csv"; a.click(); URL.revokeObjectURL(a.href);
+}
+$("example").onclick = () => { $("csv").value = EXAMPLE; };
+$("file").onchange = e => { const f = e.target.files[0]; if (f) f.text().then(t => { $("csv").value = t; }); };
+$("run").onclick = run;
+$("download").onclick = download;
+fetch("/v1/questions").then(r => r.json()).then(c => { CAT = c; }).catch(() => { $("err").textContent = "The engine can't be reached right now."; $("err").hidden = false; });
+</script>
+</body>
+</html>

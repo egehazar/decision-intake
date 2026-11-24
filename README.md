@@ -157,6 +157,11 @@ person's words ──► an LLM, or a form ──► typed facts (option, amount
 - **If pay changed.** The same machinery runs every earnings bracket with the other answers kept and shows the
   expected yearly value of food, cash and tax-credit help at each, plus the health coverage that looks likely:
   where help falls away as pay rises (`/v1/cliff`; a card on the screener's results).
+- **A caseload at once.** An organisation's list, known only by a few fields, ranked by the benefits each
+  household is likely missing, with the one question to ask each first (`/v1/batch`; the
+  [caseload page](https://decision-intake.vercel.app/caseload.html) takes a CSV and stores nothing). On 2,000
+  simulated households known by five fields, the top 20% of the ranking held 61% of the benefit dollars,
+  against 20% at random and 53% for largest household first (development check, `experiments/triage_dev.py`).
 - **Rules it may not break** (`bundles/guards_2026.json`), each checked against PolicyEngine's own results
   before shipping. They cost nothing on 2,000 fresh households (−$3.7 [−9.4, +0.0], registered, D32).
   Tracing every exception through PolicyEngine tax unit by tax unit explained 108 of 109, and found the
@@ -201,7 +206,7 @@ color-only meaning; axe-core finds no WCAG 2.1 A/AA violations on any screen in 
 # 1. environment (Python 3.11+; tested on 3.13 with numpy 2.5.5 and policyengine-us 2.152.15)
 python -m venv .venv && . .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -e ".[dev]" policyengine-us==2.152.15 tables h5py
-pytest -q                                              # 98 tests, on the shipped model; no data needed
+pytest -q                                              # 102 tests, on the shipped model; no data needed
 
 # 2. data: Populace national build populace-us-2024-spm-20260915 (827 MB, sha256 6496cc43...aee84) into
 #    data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)

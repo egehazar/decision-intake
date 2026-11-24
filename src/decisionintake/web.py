@@ -6,6 +6,7 @@
     POST /v1/assessment    {"state"} -> every programme's probability, tier and value range
     POST /v1/explain       {"state"} -> which single answer, one step different, would change each result
     POST /v1/cliff         {"state", "question"?} -> every option of an amount question, the rest kept: a cliff view
+    POST /v1/batch         {"records": [{"id", "facts"}]} -> per record: expected value, next question; call order
     GET  /openapi.json     this API, described
     POST /mcp              the Model Context Protocol over Streamable HTTP (2026-07-28, 2025-11-25, 2025-06-18,
                            2025-03-26)
@@ -36,6 +37,7 @@ from .state import StateError
 
 MAX_BODY = 64 * 1024
 MAX_FACTS = 40
+MAX_BATCH = 50  # records in one /v1/batch call (each is a full belief update; about 0.1-0.3 s)
 ROOT = Path(__file__).resolve().parents[2]
 STATUS = {200: "200 OK", 202: "202 Accepted", 204: "204 No Content", 400: "400 Bad Request", 403: "403 Forbidden",
           404: "404 Not Found", 405: "405 Method Not Allowed", 413: "413 Payload Too Large",
@@ -216,10 +218,11 @@ class App:
             handler = {("GET", "/healthz"): self.health, ("HEAD", "/healthz"): self.health,
                        ("GET", "/openapi.json"): self.openapi, ("GET", "/v1/questions"): self.questions,
                        ("POST", "/v1/step"): self.step, ("POST", "/v1/assessment"): self.assess,
-                       ("POST", "/v1/explain"): self.explain, ("POST", "/v1/cliff"): self.cliff}.get((method, path))
+                       ("POST", "/v1/explain"): self.explain, ("POST", "/v1/cliff"): self.cliff,
+                       ("POST", "/v1/batch"): self.batch}.get((method, path))
             if handler is None:
                 known = {"/healthz", "/openapi.json", "/v1/questions", "/v1/step", "/v1/assessment", "/v1/explain",
-                         "/v1/cliff"}
+                         "/v1/cliff", "/v1/batch"}
                 if path in known:
                     raise HTTPError(405, "method_not_allowed", f"{method} is not supported on {path}")
                 raise HTTPError(404, "not_found", f"no route {path}; see /openapi.json")
@@ -272,6 +275,36 @@ class App:
         out = it.explain()
         log.update(facts=len(it.facts), tried=out["answers_tried"])
         return _json(200, {"state": it.state(), **out})
+
+    def batch(self, environ, log):
+        """A caseload list: each record's facts so far in, each record's expected value and next question out,
+        and the order to call them in (highest expected value first). Nothing is kept."""
+        body = self._body(environ) or {}
+        records = body.get("records") if isinstance(body, dict) else None
+        if not isinstance(records, list) or not records:
+            raise HTTPError(400, "bad_request", 'send {"records": [{"id": "...", "facts": [...]}, ...]}')
+        if len(records) > MAX_BATCH:
+            raise HTTPError(400, "bad_request", f"at most {MAX_BATCH} records in one call; send the rest in another")
+        out = []
+        for k, rec in enumerate(records):
+            rid = rec.get("id", k) if isinstance(rec, dict) else k
+            facts = rec.get("facts", []) if isinstance(rec, dict) else None
+            if not isinstance(facts, list) or len(facts) > MAX_FACTS:
+                out.append({"id": rid, "error": f"facts must be a list of at most {MAX_FACTS}"})
+                continue
+            it = Intake(self.b, self.settings)
+            readings = it.record(facts)
+            errors = [r for r in readings if "error" in r]
+            row = {"id": rid, "state": it.state(), **it.triage()}
+            if errors:
+                row["errors"] = errors
+            out.append(row)
+        order = [r["id"] for r in sorted((r for r in out if "expected_value" in r), key=lambda r: -r["expected_value"])]
+        log.update(records=len(out))
+        return _json(200, {"results": out, "call_order": order,
+                           "note": "expected_value: dollars a year the programmes recommended now are expected to be "
+                                   "worth (chance times typical amount). A ranking aid for outreach, not an "
+                                   "eligibility decision."})
 
     def cliff(self, environ, log):
         body = self._body(environ) or {}
@@ -603,6 +636,27 @@ def openapi_doc(base: str | None = None) -> dict:
                             "expected_value": {"type": "integer"}}}}}}},
                     "groups": {"type": "object"}, "note": {"type": "string"}}}),
                               "400": err, "413": err, "415": err, "429": limited}}},
+            "/v1/batch": {"post": {
+                "operationId": "batch",
+                "summary": "A caseload list: up to 50 records of facts so far; per record the expected yearly value of "
+                           "the programmes recommended now, the best next question and its worth, and the call order",
+                "requestBody": body({"type": "object", "required": ["records"], "properties": {"records": {
+                    "type": "array", "maxItems": MAX_BATCH, "items": {"type": "object", "properties": {
+                        "id": {"type": ["string", "integer"], "description": "your reference; never a name"},
+                        "facts": {"type": "array", "maxItems": MAX_FACTS, "items": ref("Fact")}}}}}},
+                    {"records": [{"id": "c-101", "facts": [{"question": "state", "choice": "TX"},
+                                                            {"question": "children", "choice": "2"}]}]}),
+                "responses": {"200": resp("per record, and the order to call them in", {"type": "object", "properties": {
+                    "results": {"type": "array", "items": {"type": "object", "properties": {
+                        "id": {"type": ["string", "integer"]}, "state": ref("State"),
+                        "expected_value": {"type": "integer"}, "action": {"type": "string"},
+                        "recommend": {"type": "array", "items": {"type": "object"}},
+                        "next": {"type": ["object", "null"], "properties": {
+                            "id": {"type": "string"}, "text": {"type": "string"}, "worth_per_year": {"type": "integer"}}},
+                        "expected_mistake_cost": {"type": "integer"}, "support": {"type": "string"},
+                        "errors": {"type": "array", "items": ref("Reading")}}}},
+                    "call_order": {"type": "array", "items": {"type": ["string", "integer"]}},
+                    "note": {"type": "string"}}}), "400": err, "413": err, "415": err, "429": limited}}},
             "/mcp": {"post": {
                 "operationId": "mcp",
                 "summary": "Model Context Protocol over Streamable HTTP (JSON responses, no SSE, stateless). "
