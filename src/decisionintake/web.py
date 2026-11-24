@@ -50,6 +50,12 @@ class HTTPError(Exception):
         self.status, self.code, self.message, self.headers = status, code, message, list(headers)
 
 
+def _header(environ, key):
+    """A request header's value without the optional whitespace around it (RFC 9110 5.5)."""
+    v = environ.get(key)
+    return v.strip(" \t") if isinstance(v, str) else v
+
+
 def _decode_header(value):
     """An Mcp-Name value, decoded from the =?base64?...?= form the 2026-07-28 transport allows."""
     if isinstance(value, str) and value.startswith("=?base64?") and value.endswith("?="):
@@ -265,7 +271,7 @@ class App:
             log["error"] = "forbidden_origin"
             return _json(403, {"jsonrpc": "2.0", "id": None, "error": {
                 "code": -32600, "message": f"Forbidden: browser origin {origin} may not call this server"}})
-        version = environ.get("HTTP_MCP_PROTOCOL_VERSION")
+        version = _header(environ, "HTTP_MCP_PROTOCOL_VERSION")
         log["protocol"] = version
         try:
             msg = self._body(environ)
@@ -327,7 +333,7 @@ class App:
         if body_version is not None and body_version != version:
             return fail(400, -32020, f"Header mismatch: MCP-Protocol-Version header value '{version}' does not "
                                      f"match body value '{body_version}'")
-        header_method = environ.get("HTTP_MCP_METHOD")
+        header_method = _header(environ, "HTTP_MCP_METHOD")
         if header_method != method:
             return fail(400, -32020, f"Header mismatch: Mcp-Method header value '{header_method}' does not match "
                                      f"body value '{method}'")
@@ -335,7 +341,7 @@ class App:
             p = msg.get("params")
             name = p.get("name") if isinstance(p, dict) else None
             log["tool"] = name
-            header_name = _decode_header(environ.get("HTTP_MCP_NAME"))
+            header_name = _decode_header(_header(environ, "HTTP_MCP_NAME"))
             if header_name != name:
                 return fail(400, -32020, f"Header mismatch: Mcp-Name header value '{header_name}' does not match "
                                          f"body value '{name}'")

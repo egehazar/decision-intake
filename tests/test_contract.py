@@ -92,6 +92,18 @@ def test_tool_annotations_tell_the_truth(b_):
     assert local == {"start_intake": False, "record_facts": False, "next_step": True, "get_assessment": True}
 
 
+def test_header_values_ignore_surrounding_whitespace_but_not_case(app):
+    """SEP-2243 as the conformance suite checks it: optional whitespace around a header value is not part of it
+    (RFC 9110 5.5); method values are case-sensitive."""
+    body = {"jsonrpc": "2.0", "id": 3, "method": "tools/call",
+            "params": {"name": "start_intake", "arguments": {}, "_meta": MODERN_META}}
+    ok = rpc(app, body, {"MCP-Protocol-Version": " 2026-07-28 ", "Mcp-Method": " tools/call\t", "Mcp-Name": "  start_intake "})
+    assert ok["status"] == 200 and ok["json"]["result"]["resultType"] == "complete"
+    lst = {"jsonrpc": "2.0", "id": 4, "method": "tools/list", "params": {"_meta": MODERN_META}}
+    upper = rpc(app, lst, {"MCP-Protocol-Version": "2026-07-28", "Mcp-Method": "TOOLS/LIST"})
+    assert upper["status"] == 400 and upper["json"]["error"]["code"] == -32020
+
+
 # ------------------------------------------------------------------------------------------ Origin and CORS
 LIST = {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}
 
