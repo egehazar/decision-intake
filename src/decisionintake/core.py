@@ -276,6 +276,26 @@ class Session:
             self._rescore()
         self.log[-1]["tau"] = self.tau
 
+    def observe_records(self, key, lik: np.ndarray, source: str = "receipt", rescore: bool = True) -> None:
+        """Evidence about the households themselves rather than an answer: lik[i] = P(evidence | household i).
+        D51: "the household gets SNAP" is 1 for households PolicyEngine labels SNAP-eligible, eps for the rest.
+        It moves the weights like an answer (same support floor) and changes no household's model inputs."""
+        lik = np.asarray(lik, dtype=float)
+        assert lik.shape == (len(self.pop),)
+        mass = float((self.w * lik).sum())
+        self.log.append({"q": key, "source": source, "evidence_mass": mass})
+        if mass <= 0:
+            self.log[-1]["conflict"] = True
+            return
+        with np.errstate(divide="ignore"):
+            term = np.log(lik)
+        self.loglik = self.loglik + term
+        self.ll_terms[key] = self.ll_terms[key] + term if key in self.ll_terms else term
+        self._reweight()
+        if self.outcome is not None and rescore:
+            self._rescore()
+        self.log[-1]["tau"] = self.tau
+
     def rescore(self) -> None:
         """Re-score after a batch of observe(..., rescore=False): only the final belief's records matter."""
         if self.outcome is not None and self.asked:

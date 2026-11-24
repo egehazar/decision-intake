@@ -1453,3 +1453,8 @@ TANF, SSI and the rest stay rules-only (D45, D48) either way; each would need it
 
 **Secondaries** (reported, not criteria): per-programme losses; the caseload ranking's top-fifth capture with
 and without the term; realistic answers instead of clean ones for P2.
+
+**D51 development run (2026-11-24 18:51 UTC, before the test).** The 600 receipt_dev households with all 18 answers
+(results/d51_dev_analysis.txt): A and B decide identically in all 600 (A-B +$0, half-width $0). With every
+answer given, the belief already rests on households whose SNAP labels agree. As registered, a development run
+whose arms never disagree does not size the margin: **P2's margin stays $25.** The test runs next, unchanged.

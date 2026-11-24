@@ -515,3 +515,35 @@ def test_numbers_json_cannot_read_are_a_400(app):
         for path in ("/v1/plan", "/v1/batch", "/v1/step"):
             assert call(app, "POST", path, raw=raw)["status"] == 400, (path, raw[:30])
     assert call(app, "POST", "/v1/batch", {"records": [{"id": k, "facts": []} for k in range(21)]})["status"] == 400
+
+
+# ------------------------------------------------------------------------------- receipt as evidence (D51)
+def test_receipt_round_trips_and_is_off_by_default(b_):
+    from decisionintake.service import Intake, RECEIPT_EPS
+    from decisionintake.state import StateError
+    import numpy as np
+    facts = [{"question": "state", "choice": "OH"}, {"question": "household_size", "choice": "3"},
+             {"question": "children", "choice": "2"}]
+    plain, got = Intake(b_), Intake(b_)
+    plain.record(facts)
+    got.receive(["snap"])
+    got.record(facts)
+    assert ";gets=snap;" in got.state()
+    p = lambda it: np.array([dv.p_eligible for dv in it.s.decisions()])
+    assert np.array_equal(p(plain), p(got))  # recorded, but no evidence unless the settings say so
+    on = Settings(receipt_evidence={"snap": RECEIPT_EPS["snap"]})
+    a, c = Intake(b_, on), Intake(b_, on)
+    a.receive(["snap"]); a.record(facts)
+    c.record(facts); c.receive(["snap"])
+    assert np.allclose(p(a), p(c))  # the order doesn't matter
+    snap = b_.pop.decisions.index("snap")
+    assert p(a)[snap] > p(plain)[snap]
+    back = Intake.from_state(b_, a.state(), on)
+    assert back.receives == ["snap"] and np.allclose(p(back), p(a))
+    with pytest.raises(Exception):
+        Intake(b_).receive(["food stamps"])
+    bad = a.state().replace("gets=snap", "gets=lunch")
+    body = bad.rpartition(";#")[0]
+    from decisionintake.state import _check
+    with pytest.raises(StateError):
+        Intake.from_state(b_, f"{body};#{_check(body)}", on)  # a well-formed state naming an unknown programme

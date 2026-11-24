@@ -12,6 +12,7 @@ The string is readable, so a person or an assistant can see what it holds:
     amount      a number or low..high, "~" if approximate,  earned_income=~2400/month
                 "/period" unless it has none                housing_cost=1100..1300/month
     don't know  "?"                                         assets=?
+    gets        programmes the household already gets, joined by "+"      gets=snap+medicaid
     check       "#" and four hex digits of a CRC of the rest, so a mangled copy is refused rather
                 than silently read as different facts
 """
@@ -40,7 +41,10 @@ def _check(body: str) -> str:
     return f"{zlib.crc32(body.encode()) & 0xFFFF:04x}"
 
 
-def encode(facts: list[dict]) -> str:
+_PROGRAMME = re.compile(r"[a-z][a-z0-9_]*")
+
+
+def encode(facts: list[dict], gets=()) -> str:
     parts = []
     for f in facts:
         qid = f["question"]
@@ -59,6 +63,11 @@ def encode(facts: list[dict]) -> str:
                 raise StateError(f"option {text!r} of {qid} can't be written into a state")
             v = text.replace(" ", "_")
         parts.append(f"{qid}={v}")
+    if gets:
+        bad = [g for g in gets if not _PROGRAMME.fullmatch(g)]
+        if bad:
+            raise StateError(f"programme {bad[0]!r} can't be written into a state")
+        parts.append("gets=" + "+".join(gets))
     body = ";".join([PREFIX, *parts])
     return f"{body};#{_check(body)}"
 
@@ -81,6 +90,13 @@ def decode(questions, token: str) -> list[dict]:
     seen, facts = set(), []
     for p in parts:
         qid, eq, v = p.partition("=")
+        if qid == "gets" and eq and "gets" not in seen:  # programmes the household already gets
+            names = v.split("+")
+            if not all(_PROGRAMME.fullmatch(n) for n in names):
+                raise StateError("state holds an unreadable list of programmes")
+            seen.add("gets")
+            facts.append({"question": "gets", "programmes": names})
+            continue
         q = by_id.get(qid)
         if not eq or q is None:
             raise StateError(f"state holds an unknown question {qid!r}")

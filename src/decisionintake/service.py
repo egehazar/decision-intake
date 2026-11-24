@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import copy
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 import numpy as np
 
@@ -26,7 +26,7 @@ from .bundle import Bundle
 from .core import Session
 from .language import PERIOD_PER_YEAR, StructuredReader
 from .policies import VOIPolicy
-from .state import decode, encode
+from .state import StateError, decode, encode
 
 YES = {"yes", "y", "true", "yeah", "yep"}
 NO = {"no", "n", "false", "nope", "none"}
@@ -42,6 +42,12 @@ class Settings:
     # recommended but keep at least `unsure_floor` probability are "can't tell", not "unlikely". None = off.
     abstain_below: float | None = None
     unsure_floor: float = 0.05  # chosen on development data (DECISIONS D33)
+    # Programmes whose receipt is used as evidence, with the weight left to households the rules model labels
+    # ineligible (D51). Empty = receipt is recorded (for the plan and triage) but moves no belief.
+    receipt_evidence: dict = field(default_factory=dict)
+
+
+RECEIPT_EPS = {"snap": 0.2}  # D51: chosen on development data; used only where Settings.receipt_evidence says so
 
 
 class FactError(ValueError):
@@ -149,6 +155,7 @@ class Intake:
         self.facts: dict[str, dict] = {}  # question id -> {"evidence", "reading"}, in the order given
         self.raw: dict[str, dict] = {}  # question id -> the fact as the state stores it (see state.py)
         self.history: list[dict] = []
+        self.receives: list[str] = []  # programmes the household already gets (state: gets=...)
         self.s = self._session()
 
     def _session(self) -> Session:
@@ -260,6 +267,7 @@ class Intake:
         # re-score the households through the outcome model once at the end.
         if replaced:  # a correction: replay every fact on a fresh belief
             self.s = self._session()
+            self._observe_receipts()
             for qid, f in self.facts.items():
                 self.s.observe(self.qi[qid], f["evidence"], source="fact", rescore=False)
         else:
@@ -275,10 +283,36 @@ class Intake:
             self.history.append({"facts": new, "cost_before": round(before), "cost_after": round(self.s.risk())})
         return out
 
+    def _observe_receipts(self) -> None:
+        for pid in self.receives:
+            eps = self.cfg.receipt_evidence.get(pid)
+            if eps is not None:
+                d = self.b.pop.decisions.index(pid)
+                self.s.observe_records(f"gets:{pid}", np.where(self.b.pop.eligible[:, d], 1.0, float(eps)),
+                                       rescore=False)
+
+    def receive(self, programmes) -> None:
+        """Record what the household already gets (programme ids). Kept in the state; used as evidence for the
+        programmes in Settings.receipt_evidence (D51), and by the plan and triage either way."""
+        programmes = list(dict.fromkeys(programmes))
+        unknown = [p for p in programmes if p not in self.b.labels]
+        if unknown:
+            raise FactError(f"unknown programme {unknown[0]!r}; use an id from: {', '.join(self.b.labels)}")
+        if programmes == self.receives:
+            return
+        self.receives = programmes
+        self.s = self._session()  # replay: the belief is rebuilt with the new evidence
+        self._observe_receipts()
+        for qid, f in self.facts.items():
+            self.s.observe(self.qi[qid], f["evidence"], source="fact", rescore=False)
+        self.s.rescore()
+        if not self.facts and self.s.outcome is not None:
+            self.s._rescore()  # no answers yet: still recompute the losses under the new weights
+
     # ------------------------------------------------------------------------------- state
     def state(self) -> str:
         """Everything this intake knows, as a short string (state.py); from_state rebuilds it exactly."""
-        return encode(list(self.raw.values()))
+        return encode(list(self.raw.values()), gets=self.receives)
 
     @classmethod
     def from_state(cls, bundle: Bundle, token: str, settings: Settings | None = None) -> "Intake":
@@ -290,6 +324,13 @@ class Intake:
         twice (the stateless service's hot path). Returns the intake and the readings of the new facts."""
         it = cls(bundle, settings)
         old = decode(bundle.pop.questions, token) if token else []
+        gets = [f for f in old if f["question"] == "gets"]
+        old = [f for f in old if f["question"] != "gets"]
+        if gets:
+            try:
+                it.receive(gets[0]["programmes"])
+            except FactError as e:
+                raise StateError(f"state holds {e}") from None
         readings = it.record(old + list(new)) if (old or new) else []
         bad = [r for r in readings[:len(old)] if "error" in r]
         if bad:  # only possible if the bundle changed under a state written for another one

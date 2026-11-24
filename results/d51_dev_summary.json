@@ -1,0 +1,32 @@
+{
+ "households": 600,
+ "full": {
+  "diff": 0.0,
+  "ci": [
+   0.0,
+   0.0
+  ],
+  "half_width": 0.0,
+  "p_diff_ge_0": 1.0,
+  "p_diff_ge_25": 0.00024993751562109475,
+  "households_deciding_differently": 0,
+  "A": 1406.8519093970956,
+  "B": 1406.8519093970956,
+  "per_programme": {
+   "wic": 0.0,
+   "tanf": 0.0,
+   "ssi": 0.0,
+   "medicaid": 0.0,
+   "chip": 0.0,
+   "eitc": 0.0,
+   "ctc": 0.0,
+   "aca_ptc": 0.0,
+   "school_meals": 0.0,
+   "state_eitc": 0.0,
+   "state_ctc": 0.0,
+   "head_start": 0.0,
+   "early_head_start": 0.0,
+   "housing": 0.0
+  }
+ }
+}
