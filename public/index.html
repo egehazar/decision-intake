@@ -67,6 +67,21 @@ li .near { margin-top: 4px; }
 .cliff .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
 .cliff .legend .lc::before { background: var(--bar-cash); } .cliff .legend .lt::before { background: var(--bar-tax); }
 .cliff .tbl { overflow-x: auto; }
+.print-only { display: none; }
+@media print {
+  /* a summary to take to an appointment: results, near-the-line notes, the pay table and the answers */
+  :root { --bg: #fff; --surface: #fff; --ink: #000; --muted: #333; --line: #bbb; color-scheme: light; }
+  body { font-size: 11pt; }
+  header.site, footer.site, .preview, #status, #intro, #ask, .actions, [data-edit], #r-hunger, .skip { display: none !important; }
+  .print-only { display: block; }
+  .card, .result { box-shadow: none !important; border: 1px solid #bbb !important; break-inside: avoid; }
+  details { display: block; } details > summary { list-style: none; font-weight: 700; }
+  details:not([open]) > *:not(summary) { display: block; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 9pt; color: #333; word-break: break-all; }
+  .result .actions { display: block !important; }
+  .result .actions a.button { background: none !important; color: #000 !important; border: 0; padding: 0; font-weight: 600; }
+  .cliff .track i { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+}
 .skip:focus { left: 16px; top: 8px; background: var(--surface); padding: 8px 12px; z-index: 5; }
 
 header.site { border-bottom: 1px solid var(--line); background: var(--surface); }
@@ -133,8 +148,8 @@ input[type="number"], select {
 .money { position: relative; }
 .money span { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted); }
 .money input { padding-left: 28px; }
-.check { display: flex; gap: 10px; align-items: center; font-size: .95rem; }
-.check input { width: 20px; height: 20px; accent-color: var(--accent); }
+label.check { display: flex; gap: 10px; align-items: center; font-size: .95rem; }  /* the "rough guess" box, not the result tier */
+label.check input { width: 20px; height: 20px; accent-color: var(--accent); }
 .error { color: var(--alert); background: var(--alert-soft); border-radius: 8px; padding: 10px 14px; font-size: .95rem; }
 details.ranges summary { cursor: pointer; color: var(--accent); font-weight: 500; }
 details.ranges .options { margin-top: 10px; }
@@ -255,6 +270,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
 
   <!-- results -->
   <section id="results" class="stack-lg" hidden aria-labelledby="r-h">
+    <p class="print-only fine" id="print-head"></p>
     <div class="stack">
       <h1 id="r-h" tabindex="-1"></h1>
       <p class="lede" id="r-lede"></p>
@@ -288,7 +304,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
       <dl id="r-answers"></dl>
     </div>
     <p class="fine" id="r-note"></p>
-    <div class="actions"><button id="again" class="secondary" type="button" data-i18n="again">Clear my answers and start again</button></div>
+    <div class="actions"><button id="print" type="button" data-i18n="print">Print or save this summary</button><button id="again" class="secondary" type="button" data-i18n="again">Clear my answers and start again</button></div>
   </section>
 </main>
 
@@ -420,6 +436,7 @@ const STATIC_ES = {
   answers_h: "Sus respuestas",
   answers_p: "¿Algo está mal? Cámbielo y los resultados se actualizan.",
   again: "Borrar mis respuestas y empezar de nuevo",
+  print: "Imprimir o guardar este resumen",
   how_h: "Cómo funciona",
   how_p: 'El sistema DecisionIntake aprendió de 48,657 hogares evaluados con <a href="https://github.com/PolicyEngine/policyengine-us" target="_blank" rel="noopener">PolicyEngine-US</a>, un modelo abierto de las reglas de beneficios de 2026. Después de cada respuesta hace la pregunta que más probablemente cambie lo que le conviene solicitar, y se detiene cuando otra pregunta ya no vale su tiempo.',
   well_h: "Qué tan bien funciona",
@@ -458,6 +475,7 @@ const T = {
     value: (r, w) => `If you qualify, worth about <b>${r}</b> ${w}`, small: "A small amount if you qualify",
     near: (what, value, likely) => `Near the line: with ${what} at ${value}, this would ${likely ? "no longer look likely" : "look likely"}. Check again if that changes.`,
     unit_year: " a year", unit_month: " a month",
+    print_head: (d, v) => `Quick Benefits Check summary, ${d}. ${v}. A screening estimate to bring to a benefits office or navigator: not an application or an eligibility decision.`,
     cliff_h: "If your pay changed",
     cliff_p: "Everything else you told us stays the same; only earnings change. Bars show the expected yearly value of food, cash and tax-credit help: the chance of qualifying times the typical amount.",
     cliff_cols: ["Earnings a year", "Food, cash and tax credits", "Health coverage that looks likely"],
@@ -493,6 +511,7 @@ const T = {
     value: (r, w) => `Si califica, vale aproximadamente <b>${r}</b> ${w}`, small: "Una cantidad pequeña si califica",
     near: (what, value, likely) => `Cerca del límite: con ${what} de ${value}, esto ${likely ? "ya no parecería probable" : "parecería probable"}. Vuelva a revisar si eso cambia.`,
     unit_year: " al año", unit_month: " al mes",
+    print_head: (d, v) => `Resumen de la Revisión rápida de beneficios, ${d}. ${v}. Una estimación para llevar a una oficina de beneficios o a un orientador: no es una solicitud ni una decisión de elegibilidad.`,
     cliff_h: "Si su sueldo cambiara",
     cliff_p: "Todo lo demás que nos dijo se mantiene igual; solo cambian los ingresos. Las barras muestran el valor anual esperado de la ayuda en alimentos, efectivo y créditos tributarios: la probabilidad de calificar por la cantidad típica.",
     cliff_cols: ["Ingresos al año", "Alimentos, efectivo y créditos tributarios", "Cobertura médica que parece probable"],
@@ -898,6 +917,13 @@ function renderPayView() {
   }).join("");
   box.hidden = false;
 }
+
+$("print").onclick = () => {
+  const d = new Date().toLocaleDateString(LANG === "es" ? "es-US" : "en-US", {year: "numeric", month: "long", day: "numeric"});
+  $("print-head").textContent = t("print_head")(d, $("version-line").textContent);
+  for (const el of document.querySelectorAll("#results details")) el.open = true;  // print what's folded too
+  window.print();
+};
 
 $("start").onclick = () => { reset(); step([]); };
 $("q-clear").onclick = () => $("again").onclick();
