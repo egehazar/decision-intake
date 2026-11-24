@@ -61,6 +61,20 @@ def _decode_header(value):
     return value
 
 
+LOCAL_HOSTS = {"localhost", "127.0.0.1", "::1"}
+
+
+def _hostname(value, url: bool = False) -> str | None:
+    """The lower-case host name of a Host header ("localhost:8080") or, with url=True, of an Origin."""
+    from urllib.parse import urlsplit
+    if not value:
+        return None
+    try:
+        return urlsplit(value if url else "//" + value).hostname
+    except ValueError:
+        return None
+
+
 def _sha256(path) -> str:
     import hashlib
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
@@ -91,7 +105,8 @@ class App:
     """The WSGI application. One instance serves every route; it holds the engine and nothing else."""
 
     def __init__(self, bundle_path=None, settings: Settings | None = None, static_dir=None,
-                 allowed_origins: list[str] | None = None, log=sys.stderr, rules=DEFAULT_RULES):
+                 allowed_origins: list[str] | None = None, log=sys.stderr, rules=DEFAULT_RULES,
+                 allowed_hosts: list[str] | None = None):
         t0 = time.perf_counter()
         path = Path(bundle_path or DEFAULT_BUNDLE).resolve()
         self.b = bundle_mod.load(path)
@@ -106,9 +121,16 @@ class App:
         self.mcp = StatelessServer(self.b, self.settings)
         self.static = Path(static_dir).resolve() if static_dir else None
         # /mcp checks Origin, as the MCP transport requires (DNS rebinding). Server-side clients send none and
-        # pass; browsers may call from this site, from localhost (MCP Inspector and other dev tools) and from
+        # pass; browsers may call from this deployment's own address (from Vercel's environment, never from the
+        # request, whose Host an attacker controls), from localhost (MCP Inspector and other dev tools) and from
         # DI_ALLOWED_ORIGINS (comma-separated; "*" accepts any). The JSON API under /v1 is open to any origin.
         self.origins = set(allowed_origins or ())
+        for var in ("VERCEL_PROJECT_PRODUCTION_URL", "VERCEL_URL", "VERCEL_BRANCH_URL"):
+            if os.environ.get(var):
+                self.origins.add("https://" + os.environ[var])
+        # A server bound to localhost also refuses any other Host, so a page on an attacker's domain that
+        # resolves to 127.0.0.1 can't reach it at all. None (the hosted service) checks no Host.
+        self.hosts = {h.strip().lower() for h in allowed_hosts} if allowed_hosts else None
         self.log_to = log
         self.boot_s = time.perf_counter() - t0
         self.started = time.time()
@@ -172,6 +194,8 @@ class App:
 
     # -------------------------------------------------------------------------------- routes
     def route(self, method, path, environ, log):
+        if self.hosts is not None and _hostname(environ.get("HTTP_HOST")) not in self.hosts:
+            raise HTTPError(403, "forbidden_host", "this server answers only to " + ", ".join(sorted(self.hosts)))
         if method == "OPTIONS":
             return 204, [], b""
         if path == "/mcp":
@@ -230,14 +254,9 @@ class App:
         return _json(200, {"state": it.state(), **it.assessment()})
 
     def origin_ok(self, origin: str, environ) -> bool:
-        if "*" in self.origins or origin in self.origins or origin == _base_url(environ):
+        if "*" in self.origins or origin in self.origins:
             return True
-        from urllib.parse import urlsplit
-        try:
-            host = urlsplit(origin).hostname
-        except ValueError:
-            return False
-        return host in ("localhost", "127.0.0.1", "::1") or bool(host and host.endswith(".localhost"))
+        return _hostname(origin, url=True) in LOCAL_HOSTS
 
     def mcp_post(self, environ, log):
         origin = environ.get("HTTP_ORIGIN")
@@ -528,6 +547,9 @@ def openapi_doc(base: str | None = None) -> dict:
 def create_app(**kw) -> App:
     origins = os.environ.get("DI_ALLOWED_ORIGINS")
     kw.setdefault("allowed_origins", [o.strip() for o in origins.split(",") if o.strip()] if origins else None)
+    hosts = os.environ.get("DI_ALLOWED_HOSTS")
+    if hosts:
+        kw.setdefault("allowed_hosts", [h for h in hosts.split(",") if h.strip()])
     return App(**kw)
 
 
@@ -548,7 +570,9 @@ def main(argv=None):
     ap.add_argument("--bundle", default=str(DEFAULT_BUNDLE))
     ap.add_argument("--static", default=str(ROOT / "public"), help="the screener's files ('' for API only)")
     a = ap.parse_args(argv)
-    app = create_app(bundle_path=a.bundle, static_dir=a.static or None)
+    local = a.host in LOCAL_HOSTS or a.host == "[::1]"
+    app = create_app(bundle_path=a.bundle, static_dir=a.static or None,
+                     **({"allowed_hosts": sorted(LOCAL_HOSTS)} if local else {}))  # DNS-rebinding guard
     print(f"decisionintake {VERSION}: {len(app.b.pop):,} households, ready in {app.boot_s:.1f}s on "
           f"http://{a.host}:{a.port}", file=sys.stderr, flush=True)
     with make_server(a.host, a.port, app, server_class=Server, handler_class=Quiet) as srv:

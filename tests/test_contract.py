@@ -98,7 +98,8 @@ LIST = {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}
 
 @pytest.mark.parametrize("origin, ok", [
     (None, True), ("http://localhost:6274", True), ("http://127.0.0.1:5173", True),
-    ("https://decision-intake.vercel.app", True), ("https://evil.example", False), ("null", False),
+    ("https://decision-intake.vercel.app", False), ("https://evil.example", False), ("null", False),
+    ("http://evil.localhost", False), ("http://[::1]:8080", True),
     ("https://localhost.attacker.example", False), ("http://127.0.0.1.attacker.example", False),
     ("https://decision-intake.vercel.app.evil.example", False), ("https://decision-intake.vercel.app:8443", False)])
 def test_mcp_origin_policy(app, origin, ok):
@@ -112,6 +113,32 @@ def test_mcp_origin_policy(app, origin, ok):
     else:
         assert r["status"] == 403 and r["json"]["error"]["code"] == -32600 and r["json"]["id"] is None
         assert "Access-Control-Allow-Origin" not in r["headers"]
+
+
+def test_same_origin_comes_from_the_deployment_not_the_request(monkeypatch):
+    """The conformance suite's DNS-rebinding attack sets Host and Origin to the same attacker domain, so a
+    'same origin as the Host header' rule would let it through. The deployment's own address comes from Vercel."""
+    from decisionintake.web import App
+    monkeypatch.setenv("VERCEL_PROJECT_PRODUCTION_URL", "decision-intake.vercel.app")
+    a = App(bundle_path=str(SHIPPED), log=None)
+    assert rpc(a, LIST, {"Origin": "https://decision-intake.vercel.app", "Host": "decision-intake.vercel.app"})["status"] == 200
+    attack = {"Host": "evil.example.com", "Origin": "http://evil.example.com"}
+    assert rpc(a, LIST, attack)["status"] == 403
+
+
+def test_local_server_refuses_a_rebound_host():
+    """As the MCP conformance suite's dns-rebinding-protection scenario checks: bound to localhost, a request
+    whose Host/Origin name another domain gets a 4xx; one naming localhost is served."""
+    from decisionintake.web import App, LOCAL_HOSTS
+    a = App(bundle_path=str(SHIPPED), log=None, allowed_hosts=sorted(LOCAL_HOSTS))
+    init = {"jsonrpc": "2.0", "id": 1, "method": "initialize",
+            "params": {"protocolVersion": "2025-11-25", "capabilities": {}, "clientInfo": {"name": "t", "version": "0"}}}
+    bad = rpc(a, init, {"Host": "evil.example.com", "Origin": "http://evil.example.com"})
+    assert 400 <= bad["status"] < 500
+    assert call(a, "GET", "/v1/questions", headers={"Host": "evil.example.com"})["status"] == 403
+    for host in ("localhost:8080", "127.0.0.1:8080", "[::1]:8080"):
+        ok = rpc(a, init, {"Host": host, "Origin": "http://" + host})
+        assert ok["status"] == 200 and ok["json"]["result"]["protocolVersion"] == "2025-11-25", host
 
 
 def test_json_api_is_open_to_any_origin(app):
