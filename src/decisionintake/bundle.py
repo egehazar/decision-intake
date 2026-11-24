@@ -19,7 +19,24 @@ from .core import LossModel, Population, Question
 from .neural import NeuralOutcome
 
 FORMAT = "decisionintake-bundle/1"
+FORMAT2 = "decisionintake-bundle/2"  # several outcome networks side by side (StackedOutcome)
 WEIGHTS = ["W1", "b1", "W2", "b2", "W3", "Ww", "scale"]
+
+
+class StackedOutcome:
+    """Outcome networks side by side, each scoring its own block of programmes, in order. Used to add
+    programmes to a frozen network without retraining it (DECISIONS D43)."""
+
+    def __init__(self, parts: list[NeuralOutcome]):
+        self.parts = list(parts)
+
+    def predict(self, pop: Population, answers: np.ndarray):
+        ps, vs = zip(*(m.predict(pop, answers) for m in self.parts))
+        return np.concatenate(ps, axis=1), np.concatenate(vs, axis=1)
+
+    @property
+    def sizes(self) -> list[int]:
+        return [m.W3.shape[1] // 2 for m in self.parts]
 
 
 class TermFeatures:
@@ -59,9 +76,17 @@ def save(path: str, pop: Population, loss: LossModel, model: NeuralOutcome, term
         "false_rec_cost": np.asarray(loss.false_rec_cost, float).tolist(),
         "miss_floor": np.asarray(loss.miss_floor, float).tolist(),
         "terms": terms,
-        "n_features": int(model.Ww.shape[0]),
         "info": info,
     }
+    parts = model.parts if isinstance(model, StackedOutcome) else [model]
+    assert sum(m.W3.shape[1] // 2 for m in parts) == len(pop.decisions), "the networks must cover every decision"
+    if isinstance(model, StackedOutcome):
+        meta["format"] = FORMAT2
+        meta["networks"] = [{"decisions": m.W3.shape[1] // 2, "n_features": int(m.Ww.shape[0])} for m in parts]
+        weights = {f"n{i}_{k}": getattr(m, k).astype(np.float32) for i, m in enumerate(parts) for k in WEIGHTS}
+    else:
+        meta["n_features"] = int(model.Ww.shape[0])
+        weights = {k: getattr(model, k).astype(np.float32) for k in WEIGHTS}
     np.savez_compressed(
         path,
         meta=np.frombuffer(json.dumps(meta).encode(), dtype=np.uint8),
@@ -69,7 +94,7 @@ def save(path: str, pop: Population, loss: LossModel, model: NeuralOutcome, term
         weight=pop.weight.astype(np.float64),
         eligible=pop.eligible.astype(bool),
         value=pop.value.astype(np.float32),
-        **{k: getattr(model, k).astype(np.float32) for k in WEIGHTS},
+        **weights,
     )
 
 
@@ -81,8 +106,8 @@ class Bundle:
 def load(path: str) -> Bundle:
     z = np.load(path)
     meta = json.loads(z["meta"].tobytes().decode())
-    if meta.get("format") != FORMAT:
-        raise ValueError(f"{path}: not a {FORMAT} file")
+    if meta.get("format") not in (FORMAT, FORMAT2):
+        raise ValueError(f"{path}: not a {FORMAT} or {FORMAT2} file")
     questions = [
         Question(q["id"], q["text"], tuple(q["options"]), q["cost"],
                  None if q["noise"] is None else np.array(q["noise"]), q["ordered"],
@@ -92,8 +117,18 @@ def load(path: str) -> Bundle:
     pop = Population(questions, meta["decisions"], z["answers"].astype(np.int64), z["weight"],
                      z["eligible"], z["value"].astype(np.float64))
     loss = LossModel(np.array(meta["false_rec_cost"]), np.array(meta["miss_floor"]))
-    feats = TermFeatures(meta["terms"], meta["n_features"])
-    model = NeuralOutcome(feats, feats.n_features)
-    for k in WEIGHTS:
-        setattr(model, k, z[k])
+    if meta["format"] == FORMAT:
+        feats = TermFeatures(meta["terms"], meta["n_features"])
+        model = NeuralOutcome(feats, feats.n_features)
+        for k in WEIGHTS:
+            setattr(model, k, z[k])
+    else:
+        parts = []
+        for i, net in enumerate(meta["networks"]):
+            feats = TermFeatures(meta["terms"], net["n_features"])
+            m = NeuralOutcome(feats, feats.n_features)
+            for k in WEIGHTS:
+                setattr(m, k, z[f"n{i}_{k}"])
+            parts.append(m)
+        model = StackedOutcome(parts)
     return Bundle(pop, loss, model, meta["labels"], meta["info"])

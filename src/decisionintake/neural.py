@@ -161,7 +161,7 @@ class NeuralOutcome:
     def raw(self, pop: Population, answers: np.ndarray):
         """(logits, dollars) before Platt scaling of any kind is applied (it lives in the weights)."""
         idx = self.features(pop, answers)
-        D = len(pop.decisions)
+        D = self.W3.shape[1] // 2  # this model's own programmes (a stacked model may serve a wider population)
         wide = np.zeros((len(answers), 2 * D), np.float32)
         for k in range(idx.shape[1]):
             wide += self.Ww[idx[:, k]]

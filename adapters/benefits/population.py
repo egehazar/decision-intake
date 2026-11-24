@@ -20,7 +20,10 @@ LABELS = {
     "snap": "SNAP (food)", "wic": "WIC", "tanf": "TANF (cash aid)", "ssi": "SSI", "medicaid": "Medicaid",
     "chip": "CHIP", "eitc": "Earned income tax credit", "ctc": "Child tax credit (refundable part)",
     "aca_ptc": "ACA premium tax credit", "school_meals": "Free or reduced-price school meals",
+    "state_eitc": "State earned income tax credit", "state_ctc": "State child tax credit",
+    "head_start": "Head Start", "early_head_start": "Early Head Start", "housing": "Housing assistance",
 }
+ADDED_D43 = ["state_eitc", "state_ctc", "head_start", "early_head_start", "housing"]  # DECISIONS D43
 MIN_VALUE = 120.0  # dollars a year: below $10 a month we don't count it as eligible
 
 STATES = [1, 2, 4, 5, 6, 8, 9, 10, 11, 12, 13, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
@@ -69,6 +72,17 @@ def load_table(pattern="data/cache/chunks/c*.csv") -> pd.DataFrame:
     return pd.concat([pd.read_csv(f) for f in files], ignore_index=True)
 
 
+def load_table_d43(base="data/cache/chunks/c*.csv", extra="data/cache/chunks_d43/c*.csv") -> pd.DataFrame:
+    """The original table with D43's five programmes joined on household_id; row order is the original's,
+    so every split and index stays the same."""
+    t = load_table(base)
+    x = load_table(extra)
+    assert len(x) == len(t) and x["household_id"].is_unique, "the D43 table must cover every household once"
+    out = t.merge(x, on="household_id", how="left", validate="one_to_one")
+    assert (out["household_id"].to_numpy() == t["household_id"].to_numpy()).all()
+    return out
+
+
 def poverty_ratio(t: pd.DataFrame) -> np.ndarray:
     """Household income as a percentage of the federal poverty guideline for its size (48 states,
     2025 guideline uprated 2.5% to 2026: $16,040 plus $5,640 per extra person). Bracket edges sit at
@@ -81,7 +95,8 @@ def poverty_ratio(t: pd.DataFrame) -> np.ndarray:
 FPL_EDGES = [1, 50, 100, 130, 138, 150, 185, 200, 250, 300, 400]
 
 
-def build(table: pd.DataFrame, poverty_question: bool = False) -> tuple[Population, LossModel, dict]:
+def build(table: pd.DataFrame, poverty_question: bool = False,
+          programmes: list[str] = PROGRAMMES) -> tuple[Population, LossModel, dict]:
     t = table
     income_edges = [1, 10_000, 20_000, 30_000, 40_000, 50_000, 60_000, 80_000, 100_000, 150_000]
     ss_edges = [1, 10_000, 20_000, 30_000]
@@ -136,12 +151,12 @@ def build(table: pd.DataFrame, poverty_question: bool = False) -> tuple[Populati
                           tuple(amounts[qid][0]) if qid in amounts else None, amounts[qid][1] if qid in amounts else None)
                  for qid, text, opts, _, noise in spec]
     answers = np.stack([np.asarray(col, dtype=int) for *_, col, _ in spec], axis=1)
-    value = np.stack([t[f"v_{p}"].to_numpy(float) for p in PROGRAMMES], axis=1)
+    value = np.stack([t[f"v_{p}"].to_numpy(float) for p in programmes], axis=1)
     value = np.where(value >= MIN_VALUE, value, 0.0)
     eligible = value > 0
-    pop = Population(questions, PROGRAMMES, answers, t["household_weight"].to_numpy(float), eligible, value,
+    pop = Population(questions, list(programmes), answers, t["household_weight"].to_numpy(float), eligible, value,
                      group=t["source_id"].to_numpy())
-    loss = LossModel(false_rec_cost=np.full(len(PROGRAMMES), 300.0), miss_floor=np.full(len(PROGRAMMES), MIN_VALUE))
+    loss = LossModel(false_rec_cost=np.full(len(programmes), 300.0), miss_floor=np.full(len(programmes), MIN_VALUE))
     meta = {
         "volunteerable": [pop.qindex(q) for q in ["state", "household_size", "children", "senior", "married",
                                                    "earned_income", "tenure", "disabled"]],

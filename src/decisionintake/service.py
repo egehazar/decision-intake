@@ -55,8 +55,10 @@ _GROUP = {"likely": "likely", "worth checking": "worth checking", "can't tell": 
 CLIFF_NOTE = ("Each bar keeps every other answer and changes only this one. Expected value is the chance of "
               "qualifying times the typical yearly amount if eligible (health coverage counted at its value, not "
               "cash). A screening estimate for planning, not a promise of any amount.")
-CLIFF_GROUPS = {"food and cash": ["snap", "wic", "tanf", "ssi", "school_meals"], "tax credits": ["eitc", "ctc"],
-                "health coverage": ["medicaid", "chip", "aca_ptc"]}
+CLIFF_GROUPS = {"food and cash": ["snap", "wic", "tanf", "ssi", "school_meals"],
+                "tax credits": ["eitc", "ctc", "state_eitc", "state_ctc"],
+                "health coverage": ["medicaid", "chip", "aca_ptc"],
+                "care and housing": ["head_start", "early_head_start", "housing"]}  # the last three: D43
 _COUNT = re.compile(r"none|\d+|\d+ or more|under \d+")
 
 
@@ -337,14 +339,16 @@ class Intake:
             raise FactError(f"{question} is not an amount question")
         f = self.facts.get(question)
         current = int(np.argmax(f["evidence"])) if f is not None and np.ptp(f["evidence"]) > 0 else None
-        group_of = {d: g for g, ds in CLIFF_GROUPS.items() for d in ds}
+        groups = {g: [d for d in ds if d in self.b.pop.decisions] for g, ds in CLIFF_GROUPS.items()}
+        groups = {g: ds for g, ds in groups.items() if ds}  # only the groups this bundle has
+        group_of = {d: g for g, ds in groups.items() for d in ds}
         options = []
         for k in range(len(q.options)):
             lik = np.zeros(len(q.options))
             lik[k] = 1.0
             s2 = self.s.what_if(j, lik)
             thin = self._thin(s2)
-            rows, by_group = [], {g: 0.0 for g in CLIFF_GROUPS}
+            rows, by_group = [], {g: 0.0 for g in groups}
             for dv in s2.decisions():
                 typical = (max(dv.value_low, 0) + max(dv.value_high, 0)) / 2
                 ev = dv.p_eligible * typical
@@ -357,7 +361,7 @@ class Intake:
                             "by_group": {g: int(round(v, -1)) for g, v in by_group.items()},
                             "programmes": rows})
         return {"question": question, "unit": self.question_view(j).get("unit"), "options": options,
-                "groups": CLIFF_GROUPS, "note": CLIFF_NOTE}
+                "groups": groups, "note": CLIFF_NOTE}
 
     def explain(self) -> dict:
         """For every programme whose result would change: which single answer, moved to a neighbouring option
