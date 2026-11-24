@@ -54,14 +54,18 @@ earnings, self-employed or other-income answer of 8.4% of households. v2 was tra
 test households are scored on the corrected answers, as a person would give them.
 
 What it costs, on the 144 of D35's 2,183 households the fix touched (clean answers, after D35, not
-registered):
+registered). Rates are per program decision (each household has ten), with 95% intervals from resampling
+whole households; the subgroup is small, so read the counts:
 
 | on those households | wrong "doesn't look likely" | eligible programs called unlikely |
 |---|---|---|
-| v2 without the can't-tell layer | 3.00% | 19.6% |
-| **v2 as served** | **1.40%** | **7.8%** |
-| v2.1, retrained on the corrected answers | 1.12% | 6.1% |
-| (v2 as served, every other household) | 0.66% | 3.9% |
+| v2 without the can't-tell layer | 35 of 1,166: 3.00% [1.68, 4.73] | 35 of 179: 19.6% [11.5, 28.4] |
+| **v2 as served** | **14 of 999: 1.40% [0.59, 2.47]** | **14 of 179: 7.8% [3.6, 12.8], in 11 households** |
+| v2.1, retrained on the corrected answers | 11 of 986: 1.12% [0.40, 2.16] | 11 of 179: 6.1% [2.3, 10.8], in 8 households |
+| (v2 as served, every other household) | 96 of 14,585: 0.66% [0.51, 0.82] | 96 of 2,486: 3.9% [3.0, 4.8] |
+
+These households are harder for both models; the served and corrected models differ by 3 decisions here,
+which is within the noise.
 
 v2.1 is not served: it failed its registered release test (D35) and was worse on realistic answers for
 everyone else ($2,117 against $1,863 a household). A guard for the self-employed did not help (1.03% to

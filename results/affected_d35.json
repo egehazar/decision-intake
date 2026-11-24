@@ -9,22 +9,73 @@
     "n": 144,
     "production without can't-tell": {
      "wrong_negative": 0.030017152658662092,
+     "wrong_negative_count": [
+      35,
+      1166
+     ],
+     "wrong_negative_ci": [
+      0.016769508659294545,
+      0.04733632822821637
+     ],
      "wrong_recommendation": 0.4744525547445255,
      "eligible_called_unlikely": 0.19553072625698323,
+     "eligible_called_unlikely_count": [
+      35,
+      179
+     ],
+     "eligible_called_unlikely_ci": [
+      0.11494252873563218,
+      0.2842296154895008
+     ],
+     "households_with_a_wrong_negative": 23,
      "cant_tell_per_household": 0.0,
      "cost": 2333.9272310413
     },
     "production": {
      "wrong_negative": 0.014014014014014014,
+     "wrong_negative_count": [
+      14,
+      999
+     ],
+     "wrong_negative_ci": [
+      0.0059404471604430475,
+      0.024728348985897396
+     ],
      "wrong_recommendation": 0.4744525547445255,
      "eligible_called_unlikely": 0.0782122905027933,
+     "eligible_called_unlikely_count": [
+      14,
+      179
+     ],
+     "eligible_called_unlikely_ci": [
+      0.03550295857988166,
+      0.1282051282051282
+     ],
+     "households_with_a_wrong_negative": 11,
      "cant_tell_per_household": 1.1597222222222223,
      "cost": 2333.9272310413
     },
     "v2.1": {
      "wrong_negative": 0.011156186612576065,
+     "wrong_negative_count": [
+      11,
+      986
+     ],
+     "wrong_negative_ci": [
+      0.003988035892323031,
+      0.021575343553391704
+     ],
      "wrong_recommendation": 0.4844290657439446,
      "eligible_called_unlikely": 0.061452513966480445,
+     "eligible_called_unlikely_count": [
+      11,
+      179
+     ],
+     "eligible_called_unlikely_ci": [
+      0.022847512038523275,
+      0.10843717728055076
+     ],
+     "households_with_a_wrong_negative": 8,
      "cant_tell_per_household": 1.1458333333333333,
      "cost": 1899.669712790827
     }
@@ -33,22 +84,73 @@
     "n": 2039,
     "production without can't-tell": {
      "wrong_negative": 0.021125074805505684,
+     "wrong_negative_count": [
+      353,
+      16710
+     ],
+     "wrong_negative_ci": [
+      0.018657451688196266,
+      0.02379400722877983
+     ],
      "wrong_recommendation": 0.42038043478260867,
      "eligible_called_unlikely": 0.1419951729686243,
+     "eligible_called_unlikely_count": [
+      353,
+      2486
+     ],
+     "eligible_called_unlikely_ci": [
+      0.1265762566611513,
+      0.1584448920951812
+     ],
+     "households_with_a_wrong_negative": 284,
      "cant_tell_per_household": 0.0,
      "cost": 1458.609732365816
     },
     "production": {
      "wrong_negative": 0.0065821049022968805,
+     "wrong_negative_count": [
+      96,
+      14585
+     ],
+     "wrong_negative_ci": [
+      0.005107618432256914,
+      0.008211069139909552
+     ],
      "wrong_recommendation": 0.42038043478260867,
      "eligible_called_unlikely": 0.038616251005631534,
+     "eligible_called_unlikely_count": [
+      96,
+      2486
+     ],
+     "eligible_called_unlikely_ci": [
+      0.03021441811013682,
+      0.04779100947906078
+     ],
+     "households_with_a_wrong_negative": 83,
      "cant_tell_per_household": 1.0421775380088278,
      "cost": 1458.609732365816
     },
     "v2.1": {
      "wrong_negative": 0.0058823529411764705,
+     "wrong_negative_count": [
+      85,
+      14450
+     ],
+     "wrong_negative_ci": [
+      0.004503856865242693,
+      0.007364320320840999
+     ],
      "wrong_recommendation": 0.43543702138896223,
      "eligible_called_unlikely": 0.03419147224456959,
+     "eligible_called_unlikely_count": [
+      85,
+      2486
+     ],
+     "eligible_called_unlikely_ci": [
+      0.026160719138251503,
+      0.04281615321604626
+     ],
+     "households_with_a_wrong_negative": 74,
      "cant_tell_per_household": 1.0559097596861207,
      "cost": 1399.0446646952703
     }
@@ -57,22 +159,73 @@
     "n": 472,
     "production without can't-tell": {
      "wrong_negative": 0.03027084439723845,
+     "wrong_negative_count": [
+      114,
+      3766
+     ],
+     "wrong_negative_ci": [
+      0.02341218278408792,
+      0.0374907670520477
+     ],
      "wrong_recommendation": 0.4056603773584906,
      "eligible_called_unlikely": 0.16740088105726872,
+     "eligible_called_unlikely_count": [
+      114,
+      681
+     ],
+     "eligible_called_unlikely_ci": [
+      0.1332415526090676,
+      0.2020050688972121
+     ],
+     "households_with_a_wrong_negative": 87,
      "cant_tell_per_household": 0.0,
      "cost": 1927.8142963177982
     },
     "production": {
      "wrong_negative": 0.01027077497665733,
+     "wrong_negative_count": [
+      33,
+      3213
+     ],
+     "wrong_negative_ci": [
+      0.00595606618929218,
+      0.015218150930887792
+     ],
      "wrong_recommendation": 0.4056603773584906,
      "eligible_called_unlikely": 0.048458149779735685,
+     "eligible_called_unlikely_count": [
+      33,
+      681
+     ],
+     "eligible_called_unlikely_ci": [
+      0.028568043331076504,
+      0.07131820239981887
+     ],
+     "households_with_a_wrong_negative": 24,
      "cant_tell_per_household": 1.1716101694915255,
      "cost": 1927.8142963177982
     },
     "v2.1": {
      "wrong_negative": 0.008201892744479496,
+     "wrong_negative_count": [
+      26,
+      3170
+     ],
+     "wrong_negative_ci": [
+      0.004383149961246172,
+      0.012625565235861934
+     ],
      "wrong_recommendation": 0.4262626262626263,
      "eligible_called_unlikely": 0.0381791483113069,
+     "eligible_called_unlikely_count": [
+      26,
+      681
+     ],
+     "eligible_called_unlikely_ci": [
+      0.020171461459471993,
+      0.0585605216944361
+     ],
+     "households_with_a_wrong_negative": 18,
      "cant_tell_per_household": 1.1864406779661016,
      "cost": 1873.0904632454176
     }
@@ -81,22 +234,73 @@
     "n": 1711,
     "production without can't-tell": {
      "wrong_negative": 0.019418851878100638,
+     "wrong_negative_count": [
+      274,
+      14110
+     ],
+     "wrong_negative_ci": [
+      0.01692344330153227,
+      0.02216340323086091
+     ],
      "wrong_recommendation": 0.43,
      "eligible_called_unlikely": 0.1381048387096774,
+     "eligible_called_unlikely_count": [
+      274,
+      1984
+     ],
+     "eligible_called_unlikely_ci": [
+      0.12086553336346548,
+      0.1569309176503722
+     ],
+     "households_with_a_wrong_negative": 220,
      "cant_tell_per_household": 0.0,
      "cost": 1330.3343947120338
     },
     "production": {
      "wrong_negative": 0.006224234095869372,
+     "wrong_negative_count": [
+      77,
+      12371
+     ],
+     "wrong_negative_ci": [
+      0.004840868027694446,
+      0.0078120060889582755
+     ],
      "wrong_recommendation": 0.43,
      "eligible_called_unlikely": 0.03881048387096774,
+     "eligible_called_unlikely_count": [
+      77,
+      1984
+     ],
+     "eligible_called_unlikely_ci": [
+      0.030207093253968254,
+      0.04860690144689609
+     ],
+     "households_with_a_wrong_negative": 70,
      "cant_tell_per_household": 1.016364699006429,
      "cost": 1330.3343947120338
     },
     "v2.1": {
      "wrong_negative": 0.005706831893037665,
+     "wrong_negative_count": [
+      70,
+      12266
+     ],
+     "wrong_negative_ci": [
+      0.004326795588328224,
+      0.007270945288229574
+     ],
      "wrong_recommendation": 0.4429682436811406,
      "eligible_called_unlikely": 0.03528225806451613,
+     "eligible_called_unlikely_count": [
+      70,
+      1984
+     ],
+     "eligible_called_unlikely_ci": [
+      0.02687770902770617,
+      0.044481148391560005
+     ],
+     "households_with_a_wrong_negative": 64,
      "cant_tell_per_household": 1.0274693161893629,
      "cost": 1222.2223774885883
     }
@@ -107,22 +311,73 @@
     "n": 144,
     "production without can't-tell": {
      "wrong_negative": 0.03295750216825672,
+     "wrong_negative_count": [
+      38,
+      1153
+     ],
+     "wrong_negative_ci": [
+      0.019194708042466552,
+      0.05110766915455191
+     ],
      "wrong_recommendation": 0.5087108013937283,
      "eligible_called_unlikely": 0.2122905027932961,
+     "eligible_called_unlikely_count": [
+      38,
+      179
+     ],
+     "eligible_called_unlikely_ci": [
+      0.1284770040275432,
+      0.2994027986807134
+     ],
+     "households_with_a_wrong_negative": 24,
      "cant_tell_per_household": 0.0,
      "cost": 1674.9404677567268
     },
     "production": {
      "wrong_negative": 0.014358974358974359,
+     "wrong_negative_count": [
+      14,
+      975
+     ],
+     "wrong_negative_ci": [
+      0.00611589685198839,
+      0.026148784065786457
+     ],
      "wrong_recommendation": 0.5087108013937283,
      "eligible_called_unlikely": 0.0782122905027933,
+     "eligible_called_unlikely_count": [
+      14,
+      179
+     ],
+     "eligible_called_unlikely_ci": [
+      0.03296703296703297,
+      0.13191890806904855
+     ],
+     "households_with_a_wrong_negative": 10,
      "cant_tell_per_household": 1.2361111111111112,
      "cost": 1674.9404677567268
     },
     "v2.1": {
      "wrong_negative": 0.011554621848739496,
+     "wrong_negative_count": [
+      11,
+      952
+     ],
+     "wrong_negative_ci": [
+      0.004867208672086722,
+      0.020542211408805758
+     ],
      "wrong_recommendation": 0.5084175084175084,
      "eligible_called_unlikely": 0.061452513966480445,
+     "eligible_called_unlikely_count": [
+      11,
+      179
+     ],
+     "eligible_called_unlikely_ci": [
+      0.026035786290322584,
+      0.10326555472263865
+     ],
+     "households_with_a_wrong_negative": 9,
      "cant_tell_per_household": 1.3263888888888888,
      "cost": 1510.0115987100544
     }
@@ -131,22 +386,73 @@
     "n": 2039,
     "production without can't-tell": {
      "wrong_negative": 0.027279384840717687,
+     "wrong_negative_count": [
+      447,
+      16386
+     ],
+     "wrong_negative_ci": [
+      0.024277158623247964,
+      0.030457609741502193
+     ],
      "wrong_recommendation": 0.49075924075924077,
      "eligible_called_unlikely": 0.17980691874497184,
+     "eligible_called_unlikely_count": [
+      447,
+      2486
+     ],
+     "eligible_called_unlikely_ci": [
+      0.16114749883250384,
+      0.1983342973436161
+     ],
+     "households_with_a_wrong_negative": 330,
      "cant_tell_per_household": 0.0,
      "cost": 1862.712950362615
     },
     "production": {
      "wrong_negative": 0.00866203736845873,
+     "wrong_negative_count": [
+      121,
+      13969
+     ],
+     "wrong_negative_ci": [
+      0.006925233273973164,
+      0.01048864418397911
+     ],
      "wrong_recommendation": 0.49075924075924077,
      "eligible_called_unlikely": 0.048672566371681415,
+     "eligible_called_unlikely_count": [
+      121,
+      2486
+     ],
+     "eligible_called_unlikely_ci": [
+      0.03881965138405198,
+      0.05880119571192963
+     ],
+     "households_with_a_wrong_negative": 102,
      "cant_tell_per_household": 1.1853849926434528,
      "cost": 1862.712950362615
     },
     "v2.1": {
      "wrong_negative": 0.009580061946265216,
+     "wrong_negative_count": [
+      133,
+      13883
+     ],
+     "wrong_negative_ci": [
+      0.007673062120468505,
+      0.011574808150547592
+     ],
      "wrong_recommendation": 0.4970164097463948,
      "eligible_called_unlikely": 0.05349959774738536,
+     "eligible_called_unlikely_count": [
+      133,
+      2486
+     ],
+     "eligible_called_unlikely_ci": [
+      0.043255676051520434,
+      0.06405601899435107
+     ],
+     "households_with_a_wrong_negative": 109,
      "cant_tell_per_household": 1.218734673859735,
      "cost": 2116.7930036382777
     }
@@ -155,22 +461,73 @@
     "n": 472,
     "production without can't-tell": {
      "wrong_negative": 0.03847188592951305,
+     "wrong_negative_count": [
+      143,
+      3717
+     ],
+     "wrong_negative_ci": [
+      0.03018095456397718,
+      0.04705589832035349
+     ],
      "wrong_recommendation": 0.46360917248255235,
      "eligible_called_unlikely": 0.20998531571218795,
+     "eligible_called_unlikely_count": [
+      143,
+      681
+     ],
+     "eligible_called_unlikely_ci": [
+      0.17158826784726064,
+      0.2500084573748308
+     ],
+     "households_with_a_wrong_negative": 94,
      "cant_tell_per_household": 0.0,
      "cost": 2203.6171206162003
     },
     "production": {
      "wrong_negative": 0.012254111576910674,
+     "wrong_negative_count": [
+      38,
+      3101
+     ],
+     "wrong_negative_ci": [
+      0.00760174389449922,
+      0.01711097179617986
+     ],
      "wrong_recommendation": 0.46360917248255235,
      "eligible_called_unlikely": 0.055800293685756244,
+     "eligible_called_unlikely_count": [
+      38,
+      681
+     ],
+     "eligible_called_unlikely_ci": [
+      0.034794449954522806,
+      0.07729202409282931
+     ],
+     "households_with_a_wrong_negative": 29,
      "cant_tell_per_household": 1.305084745762712,
      "cost": 2203.6171206162003
     },
     "v2.1": {
      "wrong_negative": 0.010855263157894738,
+     "wrong_negative_count": [
+      33,
+      3040
+     ],
+     "wrong_negative_ci": [
+      0.006531253124886972,
+      0.01585803373993043
+     ],
      "wrong_recommendation": 0.46936758893280633,
      "eligible_called_unlikely": 0.048458149779735685,
+     "eligible_called_unlikely_count": [
+      33,
+      681
+     ],
+     "eligible_called_unlikely_ci": [
+      0.02958507010231148,
+      0.06915966935668309
+     ],
+     "households_with_a_wrong_negative": 26,
      "cant_tell_per_household": 1.4152542372881356,
      "cost": 2130.171646283799
     }
@@ -179,22 +536,73 @@
     "n": 1711,
     "production without can't-tell": {
      "wrong_negative": 0.02474316307336131,
+     "wrong_negative_count": [
+      342,
+      13822
+     ],
+     "wrong_negative_ci": [
+      0.021662142304778188,
+      0.02802523369960466
+     ],
      "wrong_recommendation": 0.5006082725060828,
      "eligible_called_unlikely": 0.17237903225806453,
+     "eligible_called_unlikely_count": [
+      342,
+      1984
+     ],
+     "eligible_called_unlikely_ci": [
+      0.15215305984124675,
+      0.19299638645872952
+     ],
+     "households_with_a_wrong_negative": 260,
      "cant_tell_per_household": 0.0,
      "cost": 1668.1389135484326
     },
     "production": {
      "wrong_negative": 0.008190492273917082,
+     "wrong_negative_count": [
+      97,
+      11843
+     ],
+     "wrong_negative_ci": [
+      0.006349716839893334,
+      0.010043335531430261
+     ],
      "wrong_recommendation": 0.5006082725060828,
      "eligible_called_unlikely": 0.04889112903225806,
+     "eligible_called_unlikely_count": [
+      97,
+      1984
+     ],
+     "eligible_called_unlikely_ci": [
+      0.03776991623114524,
+      0.05970694112518973
+     ],
+     "households_with_a_wrong_negative": 83,
      "cant_tell_per_household": 1.1566335476329632,
      "cost": 1668.1389135484326
     },
     "v2.1": {
      "wrong_negative": 0.009410767274268757,
+     "wrong_negative_count": [
+      111,
+      11795
+     ],
+     "wrong_negative_ci": [
+      0.007415494791966539,
+      0.011469225959017813
+     ],
      "wrong_recommendation": 0.5065013607499244,
      "eligible_called_unlikely": 0.05594758064516129,
+     "eligible_called_unlikely_count": [
+      111,
+      1984
+     ],
+     "eligible_called_unlikely_ci": [
+      0.04442276240119624,
+      0.06875380891779684
+     ],
+     "households_with_a_wrong_negative": 92,
      "cant_tell_per_household": 1.173582700175336,
      "cost": 2035.3896852032365
     }

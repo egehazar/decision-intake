@@ -127,7 +127,7 @@ while (next.action === "ask") {
   const fact = await askThePerson(next.question, next.why); // a choice, an amount as said, or don't know
   const r = await step(state, [fact]);
   const problem = r.readings.find(x => x.error);
-  if (problem) explain(problem.error);                    // not recorded: the same question comes back
+  if (problem) { explain(problem.error); continue; }      // nothing recorded: keep the state, ask again
   ({state, next} = r);
 }
 showResults(next);   // recommend, unsure, note; next.action === "hand_off" adds hand_off_reason"""

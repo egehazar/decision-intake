@@ -10,6 +10,9 @@ the bug changed their answers, to see what that costs the people it touched and 
     production  v2 + the D32 rules + abstention (the candidate arm plus the can't-tell layer, as served)
     v2.1        retrained on the corrected answers + 19 rules + abstention (the release arm)
 
+Rates are per program decision (a household has ten), unweighted, with 95% intervals from resampling whole
+households (2,000 draws). Counts are given so the small subgroup can be read at its real size.
+
 usage: python experiments/affected_d35.py
 """
 from __future__ import annotations
@@ -79,18 +82,32 @@ def main():
             w = w_all[g] / w_all[g].sum()
             row = {"n": int(g.sum())}
             parts = []
+            boots = np.random.default_rng(11).integers(0, g.sum(), size=(2000, g.sum()))  # households resampled
             for label, (rec, flag, q) in arm_rows.items():
                 conf_neg = ~rec[g] & ~flag[g]
-                wrong_neg = (conf_neg & el[g]).sum() / max(conf_neg.sum(), 1)
+                wn_num, wn_den = int((conf_neg & el[g]).sum()), int(conf_neg.sum())
+                me_den = int(el[g].sum())
+                wrong_neg = wn_num / max(wn_den, 1)
                 wrong_rec = (rec[g] & ~el[g]).sum() / max(rec[g].sum(), 1)
-                missed_eligible = (conf_neg & el[g]).sum() / max(el[g].sum(), 1)
+                missed_eligible = wn_num / max(me_den, 1)
+                hh_num, hh_den = (conf_neg & el[g]).sum(1), conf_neg.sum(1)  # per household, for the bootstrap
+                hh_el = el[g].sum(1)
+                bw = np.array([hh_num[b].sum() / max(hh_den[b].sum(), 1) for b in boots])
+                be = np.array([hh_num[b].sum() / max(hh_el[b].sum(), 1) for b in boots])
+                wn_ci, me_ci = np.percentile(bw, [2.5, 97.5]), np.percentile(be, [2.5, 97.5])
                 cost = (np.where(rec[g], 0, miss[idx][g]) + np.where(rec[g], fr[idx][g], 0)).sum(1) + RR.QCOST * q[g]
-                row[label] = {"wrong_negative": float(wrong_neg), "wrong_recommendation": float(wrong_rec),
+                row[label] = {"wrong_negative": float(wrong_neg), "wrong_negative_count": [wn_num, wn_den],
+                              "wrong_negative_ci": [float(x) for x in wn_ci],
+                              "wrong_recommendation": float(wrong_rec),
                               "eligible_called_unlikely": float(missed_eligible),
+                              "eligible_called_unlikely_count": [wn_num, me_den],
+                              "eligible_called_unlikely_ci": [float(x) for x in me_ci],
+                              "households_with_a_wrong_negative": int((hh_num > 0).sum()),
                               "cant_tell_per_household": float(flag[g].sum(1).mean()), "cost": float(w @ cost)}
-                parts.append(f"{label}: 'doesn't look likely' wrong {wrong_neg:.2%}, eligible programmes called "
-                             f"unlikely {missed_eligible:.1%}, can't-tell {flag[g].sum(1).mean():.2f}/household, "
-                             f"cost ${w @ cost:,.0f}")
+                parts.append(f"{label}: 'doesn't look likely' wrong {wn_num}/{wn_den} = {wrong_neg:.2%} "
+                             f"[{wn_ci[0]:.2%}, {wn_ci[1]:.2%}]; eligible programs called unlikely {wn_num}/{me_den} = "
+                             f"{missed_eligible:.1%} [{me_ci[0]:.1%}, {me_ci[1]:.1%}] in {(hh_num > 0).sum()} households; "
+                             f"can't-tell {flag[g].sum(1).mean():.2f}/household, cost ${w @ cost:,.0f}")
             out["groups"][uname][gname] = row
             lines.append(f"  {gname} ({g.sum()}):\n    " + "\n    ".join(parts))
     text = "\n".join(lines)

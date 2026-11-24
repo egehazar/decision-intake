@@ -274,7 +274,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
     </div>
     <div>
       <h2 data-i18n="well_h">How well it does</h2>
-      <p data-i18n="well_p">In tests on 2,000 simulated households it had never seen, it asked 8 questions on average instead of 18, with no detectable loss of accuracy against asking all 18, and it beat the strongest decision tree and the best fixed 8-question form we could build. It has been tested against PolicyEngine's rules, not yet with real applicants. This is a screening estimate, not a decision: only the program can tell you for sure.</p>
+      <p data-i18n="well_p">In tests on 2,000 simulated households it had never seen, it asked 8 questions on average instead of 18 (the difference in mistakes from asking all 18 was not statistically distinguishable from zero), and it beat the strongest decision tree and the best fixed 8-question form we could build. It has been tested against PolicyEngine's rules, not yet with real applicants. This is a screening estimate, not a decision: only the program can tell you for sure.</p>
     </div>
     <div>
       <h2 data-i18n="dev_h">For developers</h2>
@@ -386,7 +386,7 @@ const STATIC_ES = {
   how_h: "Cómo funciona",
   how_p: 'El sistema DecisionIntake aprendió de 48,657 hogares evaluados con <a href="https://github.com/PolicyEngine/policyengine-us" target="_blank" rel="noopener">PolicyEngine-US</a>, un modelo abierto de las reglas de beneficios de 2026. Después de cada respuesta hace la pregunta que más probablemente cambie lo que le conviene solicitar, y se detiene cuando otra pregunta ya no vale su tiempo.',
   well_h: "Qué tan bien funciona",
-  well_p: "En pruebas con 2,000 hogares simulados que nunca había visto, hizo 8 preguntas en promedio en lugar de 18, sin una pérdida de precisión detectable frente a hacer las 18, y superó al mejor árbol de decisión y al mejor formulario fijo de 8 preguntas que pudimos construir. Se ha probado con las reglas de PolicyEngine, todavía no con solicitantes reales. Es una estimación, no una decisión: solo el programa puede decírselo con certeza.",
+  well_p: "En pruebas con 2,000 hogares simulados que nunca había visto, hizo 8 preguntas en promedio en lugar de 18 (la diferencia en errores frente a hacer las 18 no fue estadísticamente distinguible de cero), y superó al mejor árbol de decisión y al mejor formulario fijo de 8 preguntas que pudimos construir. Se ha probado con las reglas de PolicyEngine, todavía no con solicitantes reales. Es una estimación, no una decisión: solo el programa puede decírselo con certeza.",
   dev_h: "Para desarrolladores",
   walk: "Vea cómo decide, paso a paso (en inglés)",
   dev_guide: "Guía para desarrolladores (en inglés)",

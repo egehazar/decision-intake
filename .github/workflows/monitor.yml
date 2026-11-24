@@ -24,6 +24,18 @@ jobs:
           curl -sf --max-time 30 -X POST "$BASE/v1/step" -H 'Content-Type: application/json' \
             -d '{"facts":[{"question":"state","choice":"TX"},{"question":"children","choice":"2"}]}' \
             | python3 -c "import json,sys; r=json.load(sys.stdin); assert r['next']['action']=='ask', r; print('step ok, next:', r['next']['question']['id'])"
+      - uses: actions/checkout@v5
+      - name: The deployment serves this repository's model and rules
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, urllib.request
+          h = json.load(urllib.request.urlopen(os.environ["BASE"] + "/healthz", timeout=20))
+          bundle = hashlib.sha256(open("bundles/benefits_v2.npz", "rb").read()).hexdigest()[:12]
+          rules = json.dumps(json.load(open("bundles/guards_2026.json", encoding="utf-8")), sort_keys=True, separators=(",", ":"))
+          rules = hashlib.sha256(rules.encode()).hexdigest()[:12]
+          assert (h["bundle_sha256"], h["rules_sha256"]) == (bundle, rules), (h, bundle, rules)
+          print("deployed", h["commit"], "serves bundle", bundle, "and rules", rules, "from", os.environ["GITHUB_SHA"][:7])
+          PY
       - name: A whole screening, answered to the end
         run: |
           python3 - <<'PY'

@@ -1075,7 +1075,11 @@ the bug touched. Answered with D35's saved interviews (experiments/affected_d35.
   the can't-tell layer 3.00%, production as served 1.40%, the corrected v2.1 1.12%; on the others 0.66%
   and 0.59%. Eligible programmes called unlikely on the touched households: 19.6% -> 7.8% as served (v2.1
   6.1%). These households are harder for both models; the old training answers cost production about a
-  quarter of a point on them, and the abstention layer is what already protects them.
+  quarter of a point on them, and the abstention layer is what already protects them. Counts (per program
+  decision, 95% intervals from resampling households): as served 14 of 999 [0.59%, 2.47%] in 11
+  households, v2.1 11 of 986 [0.40%, 2.16%] in 8, untouched households 96 of 14,585 [0.51%, 0.82%]. The
+  served and corrected models differ by 3 decisions on the touched households, within the noise (added
+  after GPT round 8).
 - A targeted guard was tried and not shipped: for anyone self-employed, any negative at 5% or more as
   "can't tell". It moved wrong negatives among the self-employed from 1.03% to 0.97% (realistic 1.23% to
   1.10%): the misses that remain are confident ones, which no caution layer reaches.

@@ -98,7 +98,9 @@ LIST = {"jsonrpc": "2.0", "id": 1, "method": "tools/list"}
 
 @pytest.mark.parametrize("origin, ok", [
     (None, True), ("http://localhost:6274", True), ("http://127.0.0.1:5173", True),
-    ("https://decision-intake.vercel.app", True), ("https://evil.example", False), ("null", False)])
+    ("https://decision-intake.vercel.app", True), ("https://evil.example", False), ("null", False),
+    ("https://localhost.attacker.example", False), ("http://127.0.0.1.attacker.example", False),
+    ("https://decision-intake.vercel.app.evil.example", False), ("https://decision-intake.vercel.app:8443", False)])
 def test_mcp_origin_policy(app, origin, ok):
     h = {"Host": "decision-intake.vercel.app", "X-Forwarded-Proto": "https"}
     if origin:

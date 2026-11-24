@@ -45,6 +45,20 @@ data, scored by PolicyEngine-US). "Cost of mistakes" is a dollar loss defined in
 the household qualifies for but isn't told about costs its yearly value, a wrong recommendation costs
 $1,000, and each question costs $15 of the person's time.
 
+**At a glance.** Cost is dollars a household a year (mistakes plus $15 a question; lower is better), on
+held-out simulated households; intervals are 95%.
+
+| question | comparison | households | registered | result |
+|---|---|---|---|---|
+| Does choosing questions beat a fixed form? | v2 against the best fixed 8-question form, same model | 2,000 | yes, D28 | **−$768** [−1,241, −398] |
+| ... and a decision tree? | against the strongest tree we built, same model | 2,000 | yes, D28 | **−$293** [−485, −136] |
+| Does asking 8.4 instead of 18 lose accuracy? | against the same model asking all 18 | 2,000 | secondary, D28 | −$79 [−188, +37], not distinguishable from zero |
+| Does that hold with noisy answers? | the same comparisons with misreports and "don't know" | 2,000 | yes, D28 | no question policy separates |
+| Does it help an AI assistant? | Claude Haiku with the MCP tools against without | 200 | yes, D29 | **−$1,591** [−2,469, −775] unweighted (−41%); weighted −$294 [−1,831, +1,146] |
+| Is that the question choice? | same predictor, Claude choosing its own questions | 200 | yes, D30 | **−$891** [−1,538, −324] unweighted; weighted −$516 [−1,441, +359] |
+| Do the statutory rules cost anything? | rules on against off | 2,000 | yes, D32 | −$3.7 [−9.4, +0.0] |
+| Does "can't tell" cut wrong negatives? | wrong "doesn't look likely" | 2,183 | yes with v2.1 (D35); after the result for the served model | 2.17% → 0.62% [−1.76, −1.35 points]; served: 2.17% → 0.71% |
+
 **Choosing questions this way beats fixed forms and decision trees (D28, 2,000 households).** With the
 same outcome model deciding, a screening averaged 8.4 questions:
 
@@ -54,10 +68,11 @@ same outcome model deciding, a screening averaged 8.4 questions:
 | the strongest decision tree we could build (11.1 questions) | **−$293** [−485, −136] |
 | the previous engine, v1 (8.5 questions) | **−$281** [−437, −142] |
 | v1's full 18-question form | **−$483** [−667, −317] |
-| the same model asking all 18 questions (secondary) | −$79 [−188, +37]: no detectable difference |
+| the same model asking all 18 questions (secondary) | −$79 [−188, +37]: not distinguishable from zero |
 
 All four registered comparisons hold after Holm correction (p < 0.002) and when whole source households
-are resampled. Asking 9.6 fewer questions cost no detectable accuracy against asking everything. The
+are resampled. Against asking everything, the difference was not statistically distinguishable from zero
+(a non-significant result, not a test of equivalence). The
 limit: these are clean answers. When simulated people misreport and say "don't know", no question
 policy separates from another (D28, part 2).
 
