@@ -1,8 +1,19 @@
 [project]
 name = "decisionintake"
 version = "1.0.0"
-description = "Tells an AI assistant what to ask next, which answers to trust, and when it knows enough to act or should hand off."
+description = "A decision engine for US benefits screening: what to ask next, when to stop, and when it can't tell."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+authors = [{name = "Ege Hazar"}]
 requires-python = ">=3.11"
+keywords = ["benefits screening", "value of information", "mcp", "policyengine", "decision theory"]
+
+[project.urls]
+Homepage = "https://decision-intake.vercel.app"
+Documentation = "https://decision-intake.vercel.app/docs.html"
+Source = "https://github.com/egehazar/decision-intake"
+Issues = "https://github.com/egehazar/decision-intake/issues"
 dependencies = ["numpy>=1.26"]
 
 [project.scripts]
@@ -13,8 +24,9 @@ decisionintake-mcp = "decisionintake.mcp_server:main"
 benefits = ["policyengine-us", "tables", "pandas"]
 dev = ["pytest"]
 
+# Run from a clone (pip install -e .): the model, rules and screener live in bundles/ and public/ beside src/.
 [build-system]
-requires = ["setuptools>=68"]
+requires = ["setuptools>=77"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]

@@ -16,14 +16,38 @@ jobs:
     steps:
       - name: Screener page
         run: curl -sf --max-time 20 -o /dev/null "$BASE/" && echo "page ok"
-      - name: Health
+      - name: Health, with the rules loaded
         run: |
-          curl -sf --max-time 20 "$BASE/healthz" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['ok'], d; print('healthz', d['version'], '|', d['rules'], '| boot', d['boot_seconds'], 's')"
+          curl -sf --max-time 20 "$BASE/healthz" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['ok'] and d['rules'], d; print('healthz', d['version'], '|', d['rules'], '| commit', d.get('commit'), '| bundle', d.get('bundle_sha256'))"
       - name: A screening step
         run: |
           curl -sf --max-time 30 -X POST "$BASE/v1/step" -H 'Content-Type: application/json' \
             -d '{"facts":[{"question":"state","choice":"TX"},{"question":"children","choice":"2"}]}' \
             | python3 -c "import json,sys; r=json.load(sys.stdin); assert r['next']['action']=='ask', r; print('step ok, next:', r['next']['question']['id'])"
+      - name: A whole screening, answered to the end
+        run: |
+          python3 - <<'PY'
+          import json, os, urllib.request
+          base = os.environ["BASE"]
+          answers = {"state": "PA", "household_size": "4", "children": "2", "child_under5": "yes", "infant_or_pregnant": "no",
+                     "senior": "no", "disabled": "no", "married": "yes", "self_employed": "no", "employer_insurance": "no",
+                     "college": "no", "tenure": "rent", "earned_income": "$30,000 to $40,000", "social_security": "none",
+                     "other_income": "none", "housing_cost": "$1,000 to $1,500", "childcare": "$3,000 to $8,000",
+                     "assets": "under $2,000"}
+          def step(state, facts):
+              req = urllib.request.Request(base + "/v1/step", data=json.dumps({"state": state, "facts": facts}).encode(),
+                                           headers={"Content-Type": "application/json"})
+              return json.load(urllib.request.urlopen(req, timeout=30))
+          r, n = step(None, []), 0
+          while r["next"]["action"] == "ask" and n < 20:
+              q = r["next"]["question"]["id"]
+              r, n = step(r["state"], [{"question": q, "choice": answers[q]}]), n + 1
+          nxt = r["next"]
+          assert nxt["action"] in ("finish", "hand_off"), nxt["action"]
+          ids = {x["id"] for x in nxt["recommend"]}
+          assert {"snap", "medicaid"} <= ids, ids  # a family of four on $35k: SNAP and Medicaid are in every run
+          print(f"finished after {n} questions: {sorted(ids)}")
+          PY
       - name: MCP, handshake era (2025-11-25)
         run: |
           curl -sf --max-time 30 -X POST "$BASE/mcp" -H 'Content-Type: application/json' \
