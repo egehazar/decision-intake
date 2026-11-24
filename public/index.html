@@ -48,6 +48,8 @@ a { color: var(--accent); text-underline-offset: 2px; }
 .skip { position: absolute; left: -9999px; }
 .preview { font-size: .9rem; color: var(--muted); margin: 14px auto 0; }
 .urgent { border-left: 3px solid var(--line-strong); padding-left: 12px; }
+.near { margin: 0; font-size: .92rem; color: var(--muted); border-left: 3px solid var(--check); padding-left: 10px; }
+li .near { margin-top: 4px; }
 .skip:focus { left: 16px; top: 8px; background: var(--surface); padding: 8px 12px; z-index: 5; }
 
 header.site { border-bottom: 1px solid var(--line); background: var(--surface); }
@@ -419,6 +421,8 @@ const T = {
     handoff_text: "Your answers fit households that turn out very differently, so a short check can't call it with confidence.",
     badge_likely: "Likely", badge_check: "Worth checking",
     value: (r, w) => `If you qualify, worth about <b>${r}</b> ${w}`, small: "A small amount if you qualify",
+    near: (what, value, likely) => `Near the line: with ${what} at ${value}, this would ${likely ? "no longer look likely" : "look likely"}. Check again if that changes.`,
+    unit_year: " a year", unit_month: " a month",
     tax: u => `Filing is free with <a href="${u}" target="_blank" rel="noopener">IRS free tax help (VITA)</a> if your income is modest.`,
     hunger: "Need food now? National Hunger Hotline: 1-866-3-HUNGRY (1-866-348-6479), Monday to Friday, 8 a.m. to 8 p.m. Eastern.",
     new_tab: "(opens in a new tab)", en_page: "", change: "Change", dont_know: "Don't know",
@@ -446,6 +450,8 @@ const T = {
     handoff_text: "Sus respuestas coinciden con hogares que terminan en situaciones muy distintas, así que una revisión breve no puede decidirlo con confianza.",
     badge_likely: "Probable", badge_check: "Vale la pena revisar",
     value: (r, w) => `Si califica, vale aproximadamente <b>${r}</b> ${w}`, small: "Una cantidad pequeña si califica",
+    near: (what, value, likely) => `Cerca del límite: con ${what} de ${value}, esto ${likely ? "ya no parecería probable" : "parecería probable"}. Vuelva a revisar si eso cambia.`,
+    unit_year: " al año", unit_month: " al mes",
     tax: u => `Puede presentar gratis con la <a href="${u}" target="_blank" rel="noopener">ayuda tributaria gratuita del IRS (VITA)</a> si sus ingresos son moderados.`,
     hunger: "¿Necesita alimentos ahora? Línea Nacional contra el Hambre: 1-877-8-HAMBRE (1-877-842-6273), de lunes a viernes, de 8 a. m. a 8 p. m., hora del Este.",
     new_tab: "(se abre en una pestaña nueva)", en_page: " (página en inglés)", change: "Cambiar", dont_know: "No sé",
@@ -455,7 +461,7 @@ const T = {
 };
 
 const $ = id => document.getElementById(id);
-const S = {catalogue: null, byId: {}, state: null, readings: {}, asked: 0, current: null, editing: null, lastNext: null, busy: false, gen: 0};
+const S = {catalogue: null, byId: {}, state: null, readings: {}, asked: 0, current: null, editing: null, lastNext: null, busy: false, gen: 0, explain: null};
 let LANG = (() => {
   try { const v = localStorage.getItem("lang"); if (v === "en" || v === "es") return v; } catch (e) {}
   return (navigator.language || "").toLowerCase().startsWith("es") ? "es" : "en";
@@ -581,9 +587,9 @@ async function step(facts) {
     if (bad) { showError(bad.error); return; }
     for (const x of r.readings) S.readings[x.question] = x.reading;
     if (facts.length && !S.editing) S.asked += 1;
-    S.state = r.state; S.editing = null; S.lastNext = r.next;
+    S.state = r.state; S.editing = null; S.lastNext = r.next; S.explain = null;
     store();
-    if (r.next.action === "ask") renderQuestion(r.next); else renderResults(r.next);
+    if (r.next.action === "ask") renderQuestion(r.next); else { renderResults(r.next); nearTheLine(gen); }
   } catch (e) {
     if (gen !== S.gen) return;
     if (e.code === "bad_state") { reset(); show("intro"); status(t("bad_state")); }
@@ -594,7 +600,7 @@ async function step(facts) {
 }
 function reset() {
   S.gen++; forget();
-  Object.assign(S, {state: null, readings: {}, asked: 0, editing: null, current: null, lastNext: null});
+  Object.assign(S, {state: null, readings: {}, asked: 0, editing: null, current: null, lastNext: null, explain: null});
   $("resume").hidden = true;
   setBusy(false);
 }
@@ -758,7 +764,7 @@ function renderResults(next) {
     const tier = r.tier === "likely" ? ["likely", t("badge_likely")] : ["check", t("badge_check")];
     const v = r.value_if_eligible_per_year;
     const value = !Array.isArray(v) ? "" : v[1] < 120 ? t("small") : t("value")(v[0] === v[1] ? money(v[0]) : `${money(v[0])}–${money(v[1])}`, esc(i.when || t("per_year")));
-    return `<article class="card result ${tier[0]} stack">
+    return `<article class="card result ${tier[0]} stack" data-pid="${esc(r.id)}">
       <header><h2 style="font-size:1.2rem">${esc(i.name)}</h2><span class="badge ${tier[0]}"><span aria-hidden="true">${tier[0] === "likely" ? "&#10003;" : "?"}</span> ${esc(tier[1])}</span></header>
       <p class="desc">${esc(i.desc)}</p>
       ${value ? `<p class="value">${value}</p>` : ""}
@@ -770,16 +776,42 @@ function renderResults(next) {
   $("r-hunger").hidden = ![...recs, ...unsure].some(r => info(r.id)?.hunger);
   $("r-hunger").textContent = t("hunger");
   $("r-unsure").hidden = !unsure.length;
-  $("r-unsure-list").innerHTML = unsure.map(r => { const i = info(r.id) || {}; return `<li>${esc(i.name || r.programme)}${i.apply ? " · " + link(i.apply, i.how, i.enPage) : ""}</li>`; }).join("");
+  $("r-unsure-list").innerHTML = unsure.map(r => { const i = info(r.id) || {}; return `<li data-pid="${esc(r.id)}">${esc(i.name || r.programme)}${i.apply ? " · " + link(i.apply, i.how, i.enPage) : ""}</li>`; }).join("");
   const recIds = new Set(recs.map(r => r.id).concat(unsure.map(r => r.id)));
   const others = S.catalogue.programmes.filter(p => !recIds.has(p.id));
   $("r-others").hidden = !others.length;
-  $("r-others-list").innerHTML = others.map(p => { const i = info(p.id) || {}; return `<li>${esc(i.name || p.label)}${i.apply ? " · " + link(i.apply, i.how, i.enPage) : ""}</li>`; }).join("");
+  $("r-others-list").innerHTML = others.map(p => { const i = info(p.id) || {}; return `<li data-pid="${esc(p.id)}">${esc(i.name || p.label)}${i.apply ? " · " + link(i.apply, i.how, i.enPage) : ""}</li>`; }).join("");
   $("r-answers").innerHTML = answersHTML();
   wireEdits($("r-answers"));
   $("r-note").textContent = t("note")();
+  renderNearTheLine();
   show("results");
   $("r-h").focus({preventScroll: true});
+}
+
+// "Near the line": which money answer, one bracket different, would move a programme across "likely" (/v1/explain).
+// Only changes that move the probability by 0.15 or more are shown; the page works the same without them.
+async function nearTheLine(gen) {
+  try {
+    const ex = await post("/v1/explain", {state: S.state});
+    if (gen !== S.gen || $("results").hidden) return;
+    S.explain = ex;
+    renderNearTheLine();
+  } catch (e) { /* optional: the results stand on their own */ }
+}
+function renderNearTheLine() {
+  document.querySelectorAll("#results .near").forEach(e => e.remove());
+  for (const row of (S.explain?.near_the_line || [])) {
+    const likely = row.tier === "likely";
+    const c = row.would_change.find(c => c.kind === "amount" && Math.abs(c.probability_change) >= 0.15 && (c.tier === "likely") !== likely);
+    const host = document.querySelector(`#results [data-pid="${CSS.escape(row.id)}"]`);
+    if (!c || !host) continue;
+    const q = S.byId[c.question];
+    const label = qlabel(c.question);
+    const what = c.question === "social_security" ? label : label.charAt(0).toLowerCase() + label.slice(1);
+    const unit = q.unit === "dollars a year" ? t("unit_year") : q.unit === "dollars a month" ? t("unit_month") : "";
+    host.insertAdjacentHTML("beforeend", `<p class="near">${esc(t("near")(what, optionLabel(q, c.to) + unit, likely))}</p>`);
+  }
 }
 
 $("start").onclick = () => { reset(); step([]); };

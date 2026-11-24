@@ -53,6 +53,7 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
 <tr><th>Call</th><th>Body</th><th>Returns</th></tr>
 <tr><td><code>POST /v1/step</code></td><td><code>{"state"?, "facts"?}</code></td><td>the new <code>state</code>, how each fact was read, and <code>next</code>: ask, finish or hand_off</td></tr>
 <tr><td><code>POST /v1/assessment</code></td><td><code>{"state"}</code></td><td>every program's probability, tier and yearly value range; the facts so far; how well the data covers this household</td></tr>
+<tr><td><code>POST /v1/explain</code></td><td><code>{"state"}</code></td><td>which single answer, one step different, would change each program's result (<a href="#explain">below</a>)</td></tr>
 <tr><td><code>GET /v1/questions</code></td><td>-</td><td>the ten programs and all 18 questions with their options</td></tr>
 <tr><td><code>POST /mcp</code></td><td>JSON-RPC</td><td>the same engine as tools for AI assistants (<a href="#mcp">section 5</a>)</td></tr>
 <tr><td><code>GET /healthz</code></td><td>-</td><td>liveness, version, and the commit and model and rules hashes deployed</td></tr>
@@ -342,6 +343,70 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
   }
 }</code></pre>
 
+<h3 id="explain">What would change it</h3>
+<p><code>POST /v1/explain</code> with a <code>state</code> moves each answer one step (one bracket of income or costs, the next count, the other yes/no; never the state) with every other answer kept, and lists each programme whose tier that changes. Useful for "check again if your income drops", and for spotting a benefits cliff. Each case reuses the belief instead of replaying the interview, so the whole list takes about a second. The <code>note</code> is part of the contract: it is a guide to re-checking, never advice on what to report. The screener shows only money answers that move a probability by 0.15 or more across "likely".</p>
+<pre tabindex="0"><code class="json">{
+  &quot;state&quot;: &quot;…&quot;
+}</code></pre>
+<pre tabindex="0"><code class="json">{
+  &quot;state&quot;: &quot;di1;state=OH;household_size=1;children=none;earned_income=1900/month;tenure=rent;disabled=no;senior=no;#a650&quot;,
+  &quot;near_the_line&quot;: [
+    {
+      &quot;id&quot;: &quot;snap&quot;,
+      &quot;programme&quot;: &quot;SNAP (food)&quot;,
+      &quot;tier&quot;: &quot;likely&quot;,
+      &quot;probability&quot;: 0.57,
+      &quot;would_change&quot;: [
+        {
+          &quot;question&quot;: &quot;earned_income&quot;,
+          &quot;kind&quot;: &quot;amount&quot;,
+          &quot;from&quot;: &quot;$20,000 to $30,000&quot;,
+          &quot;to&quot;: &quot;$30,000 to $40,000&quot;,
+          &quot;tier&quot;: &quot;can&#x27;t tell&quot;,
+          &quot;probability&quot;: 0.18,
+          &quot;probability_change&quot;: -0.39
+        }
+      ]
+    },
+    {
+      &quot;id&quot;: &quot;medicaid&quot;,
+      &quot;programme&quot;: &quot;Medicaid&quot;,
+      &quot;tier&quot;: &quot;worth checking&quot;,
+      &quot;probability&quot;: 0.41,
+      &quot;would_change&quot;: [
+        {
+          &quot;question&quot;: &quot;earned_income&quot;,
+          &quot;kind&quot;: &quot;amount&quot;,
+          &quot;from&quot;: &quot;$20,000 to $30,000&quot;,
+          &quot;to&quot;: &quot;$10,000 to $20,000&quot;,
+          &quot;tier&quot;: &quot;likely&quot;,
+          &quot;probability&quot;: 0.65,
+          &quot;probability_change&quot;: 0.23
+        }
+      ]
+    },
+    {
+      &quot;id&quot;: &quot;eitc&quot;,
+      &quot;programme&quot;: &quot;Earned income tax credit&quot;,
+      &quot;tier&quot;: &quot;unlikely&quot;,
+      &quot;probability&quot;: 0.04,
+      &quot;would_change&quot;: [
+        {
+          &quot;question&quot;: &quot;earned_income&quot;,
+          &quot;kind&quot;: &quot;amount&quot;,
+          &quot;from&quot;: &quot;$20,000 to $30,000&quot;,
+          &quot;to&quot;: &quot;$10,000 to $20,000&quot;,
+          &quot;tier&quot;: &quot;can&#x27;t tell&quot;,
+          &quot;probability&quot;: 0.55,
+          &quot;probability_change&quot;: 0.51
+        }
+      ]
+    }
+  ],
+  &quot;answers_tried&quot;: 8,
+  &quot;note&quot;: &quot;Each line changes one answer and keeps the others. It shows how close each result is to the line, so the person knows to check again if that part of their situation changes. It is not advice on what to report: answer as things are.&quot;
+}</code></pre>
+
 <h2 id="state">4. The state string</h2>
 <p>The facts so far, readable, with a checksum so a mangled copy is refused instead of misread:</p>
 <pre tabindex="0"><code class="text">di1;children=2;state=TX;earned_income=~2400/month;household_size=3;infant_or_pregnant=no;married=no;child_under5=no;social_security=none;#4aa1</code></pre>
@@ -359,7 +424,7 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
 <pre tabindex="0"><code class="text">claude mcp add --transport http decisionintake https://decision-intake.vercel.app/mcp</code></pre>
 <h3>Claude.ai and other clients</h3>
 <p>Add a custom connector with the URL <code>https://decision-intake.vercel.app/mcp</code>. The server's instructions tell the assistant how to run an intake. Tools (all read-only: each is a pure function of its arguments):</p>
-<ul><li><code>start_intake</code> (Start a benefits screening): Open a new benefits-screening intake. Returns the first `state` (pass it to every later call), the ten programmes, every question the engine can use (ids, options, amount units), and the first step.</li><li><code>record_facts</code> (Record what the person said): Record what the person said as typed facts (any questions, asked or volunteered; a fact for an answered question replaces it). Returns how each fact was read and the next step. Returns the new `state`; use it from now on. With an empty facts list it only returns the next step.</li><li><code>get_assessment</code> (Current assessment): The current assessment: every programme&#x27;s probability, tier and yearly value range, the facts recorded so far, and the expected cost of mistakes. A screening estimate, not an eligibility decision.</li></ul>
+<ul><li><code>start_intake</code> (Start a benefits screening): Open a new benefits-screening intake. Returns the first `state` (pass it to every later call), the ten programmes, every question the engine can use (ids, options, amount units), and the first step.</li><li><code>record_facts</code> (Record what the person said): Record what the person said as typed facts (any questions, asked or volunteered; a fact for an answered question replaces it). Returns how each fact was read and the next step. Returns the new `state`; use it from now on. With an empty facts list it only returns the next step.</li><li><code>get_assessment</code> (Current assessment): The current assessment: every programme&#x27;s probability, tier and yearly value range, the facts recorded so far, and the expected cost of mistakes. A screening estimate, not an eligibility decision.</li><li><code>what_would_change</code> (What would change the result): For each programme near the line: which single answer, one step different (one bracket of income, the other yes/no), would change its result, and to what. Use it to tell the person what to re-check if their situation changes; never to suggest what they should report.</li></ul>
 <h3>On the wire, 2026-07-28</h3>
 <p>No handshake. Every request names its revision in <code>_meta</code> and mirrors the method (and, for <code>tools/call</code>, the tool name) in headers that must match the body:</p>
 <pre tabindex="0"><code class="text">Content-Type: application/json

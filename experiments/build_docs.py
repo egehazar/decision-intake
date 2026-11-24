@@ -75,6 +75,14 @@ def examples():
         st, nx = r["state"], r["next"]
     ex["handoff"] = nx
     ex["bad"] = call(app, "/v1/step", {"state": state[:-1] + ("0" if state[-1] != "0" else "1")})
+    # what would change it: a single adult in Ohio on $1,900 a month, near several lines
+    near = [{"question": "state", "choice": "OH"}, {"question": "household_size", "choice": "1"},
+            {"question": "children", "choice": "none"},
+            {"question": "earned_income", "amount": {"value": 1900, "period": "month"}},
+            {"question": "tenure", "choice": "rent"}, {"question": "disabled", "choice": "no"},
+            {"question": "senior", "choice": "no"}]
+    ex["near_state"] = call(app, "/v1/step", {"facts": near})["state"]
+    ex["explain"] = call(app, "/v1/explain", {"state": ex["near_state"]})
     # MCP, both eras, on the same endpoint
     ex["mcp_legacy"] = {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
         "protocolVersion": "2025-11-25", "capabilities": {}, "clientInfo": {"name": "my-agent", "version": "1.0"}}}
@@ -105,6 +113,12 @@ def main():
     ho = ex["handoff"]
     handoff_view = {"action": ho["action"], "hand_off_reason": ho["hand_off_reason"], "recommend": ho["recommend"][:1],
                     "unsure": ho["unsure"][:2], "progress": ho["progress"]}
+    ev = ex["explain"]
+    explain_view = {"state": ev["state"], "near_the_line": [
+        {**{k: r[k] for k in ("id", "programme", "tier", "probability")},
+         "would_change": [c for c in r["would_change"] if c["kind"] == "amount"][:2]}
+        for r in ev["near_the_line"] if any(c["kind"] == "amount" for c in r["would_change"])][:3],
+        "answers_tried": ev["answers_tried"], "note": ev["note"]}
     call_view = {"result": {k: v for k, v in ex["mcp_call"]["result"].items() if k != "content"}}
     call_view["result"]["structuredContent"] = {"state": ex["mcp_call"]["result"]["structuredContent"]["state"],
                                                 "readings": "...", "next": {"action": "ask", "...": "..."}}
@@ -206,6 +220,7 @@ nav.toc ol {{ margin: 6px 0 0; padding-left: 20px; }}
 <tr><th>Call</th><th>Body</th><th>Returns</th></tr>
 <tr><td><code>POST /v1/step</code></td><td><code>{{"state"?, "facts"?}}</code></td><td>the new <code>state</code>, how each fact was read, and <code>next</code>: ask, finish or hand_off</td></tr>
 <tr><td><code>POST /v1/assessment</code></td><td><code>{{"state"}}</code></td><td>every program's probability, tier and yearly value range; the facts so far; how well the data covers this household</td></tr>
+<tr><td><code>POST /v1/explain</code></td><td><code>{{"state"}}</code></td><td>which single answer, one step different, would change each program's result (<a href="#explain">below</a>)</td></tr>
 <tr><td><code>GET /v1/questions</code></td><td>-</td><td>the ten programs and all 18 questions with their options</td></tr>
 <tr><td><code>POST /mcp</code></td><td>JSON-RPC</td><td>the same engine as tools for AI assistants (<a href="#mcp">section 5</a>)</td></tr>
 <tr><td><code>GET /healthz</code></td><td>-</td><td>liveness, version, and the commit and model and rules hashes deployed</td></tr>
@@ -250,6 +265,11 @@ nav.toc ol {{ margin: 6px 0 0; padding-left: 20px; }}
 <h3>Hand off</h3>
 <p>Someone who answers "don't know" to most questions can't be called with confidence. <code>hand_off_reason</code> is advice to show, not a referral: nothing is sent anywhere.</p>
 {code(handoff_view)}
+
+<h3 id="explain">What would change it</h3>
+<p><code>POST /v1/explain</code> with a <code>state</code> moves each answer one step (one bracket of income or costs, the next count, the other yes/no; never the state) with every other answer kept, and lists each programme whose tier that changes. Useful for "check again if your income drops", and for spotting a benefits cliff. Each case reuses the belief instead of replaying the interview, so the whole list takes about a second. The <code>note</code> is part of the contract: it is a guide to re-checking, never advice on what to report. The screener shows only money answers that move a probability by 0.15 or more across "likely".</p>
+{code({"state": "…"})}
+{code(explain_view)}
 
 <h2 id="state">4. The state string</h2>
 <p>The facts so far, readable, with a checksum so a mangled copy is refused instead of misread:</p>

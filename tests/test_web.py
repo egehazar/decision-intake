@@ -186,7 +186,7 @@ def test_mcp_over_http_runs_an_intake_statelessly(app):
     assert "Mcp-Session-Id" not in init["headers"]
     assert rpc(app, "notifications/initialized", id=None)["status"] == 202
     tools = rpc(app, "tools/list")["json"]["result"]["tools"]
-    assert {t["name"] for t in tools} == {"start_intake", "record_facts", "get_assessment"}  # no next_step (D31)
+    assert {t["name"] for t in tools} == {"start_intake", "record_facts", "get_assessment", "what_would_change"}  # no next_step (D31)
     assert all(t["annotations"]["readOnlyHint"] for t in tools)
     assert "state" in tools[1]["inputSchema"]["required"]
     start = rpc(app, "tools/call", {"name": "start_intake", "arguments": {}})["json"]["result"]["structuredContent"]
@@ -290,7 +290,7 @@ def test_mcp_2026_07_28_discover_list_and_call(app):
     assert r["_meta"]["io.modelcontextprotocol/serverInfo"]["name"] == "decisionintake"
     assert r["instructions"] and r["ttlMs"] > 0 and r["cacheScope"] == "public"
     t = modern(app, "tools/list")["json"]["result"]
-    assert t["resultType"] == "complete" and {x["name"] for x in t["tools"]} == {"start_intake", "record_facts", "get_assessment"}
+    assert t["resultType"] == "complete" and {x["name"] for x in t["tools"]} == {"start_intake", "record_facts", "get_assessment", "what_would_change"}
     assert t["ttlMs"] > 0 and t["cacheScope"] == "public"
     s = modern(app, "tools/call", {"name": "start_intake", "arguments": {}})["json"]["result"]
     assert s["resultType"] == "complete" and s["structuredContent"]["state"].startswith("di1;#")

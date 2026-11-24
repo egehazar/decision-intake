@@ -29,4 +29,4 @@ jobs:
             | python -c "import json,sys; r=json.load(sys.stdin); assert r['next']['action']=='ask', r; print('next:', r['next']['question']['id'])"
           curl -sf -X POST localhost:8080/mcp -H 'Content-Type: application/json' \
             -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
-            | python -c "import json,sys; t=json.load(sys.stdin)['result']['tools']; print('mcp tools:', [x['name'] for x in t]); assert len(t)==3"
+            | python -c "import json,sys; t=json.load(sys.stdin)['result']['tools']; print('mcp tools:', [x['name'] for x in t]); assert len(t)==4"

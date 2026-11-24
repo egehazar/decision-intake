@@ -134,7 +134,8 @@ def test_mcp_server_over_stdio(made):
         assert "record_facts" in init["result"]["instructions"]
         rpc(proc, {"jsonrpc": "2.0", "method": "notifications/initialized"})
         tools = rpc(proc, {"jsonrpc": "2.0", "id": 2, "method": "tools/list"})["result"]["tools"]
-        assert [t["name"] for t in tools] == ["start_intake", "record_facts", "next_step", "get_assessment"]
+        assert [t["name"] for t in tools] == ["start_intake", "record_facts", "next_step", "get_assessment",
+                                             "what_would_change"]
 
         def call(i, name, args):
             r = rpc(proc, {"jsonrpc": "2.0", "id": i, "method": "tools/call", "params": {"name": name, "arguments": args}})["result"]

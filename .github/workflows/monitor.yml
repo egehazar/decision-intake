@@ -77,7 +77,7 @@ jobs:
         run: |
           curl -sf --max-time 30 -X POST "$BASE/mcp" -H 'Content-Type: application/json' \
             -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
-            | python3 -c "import json,sys; t=json.load(sys.stdin)['result']['tools']; assert len(t)==3, t; print('mcp tools:', [x['name'] for x in t])"
+            | python3 -c "import json,sys; t=json.load(sys.stdin)['result']['tools']; assert len(t)==4, t; print('mcp tools:', [x['name'] for x in t])"
       - name: MCP, stateless era (2026-07-28)
         run: |
           curl -sf --max-time 30 -X POST "$BASE/mcp" -H 'Content-Type: application/json' \

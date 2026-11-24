@@ -47,6 +47,14 @@ class FactError(ValueError):
     pass
 
 
+EXPLAIN_NOTE = ("Each line changes one answer and keeps the others. It shows how close each result is to the line, "
+                "so the person knows to check again if that part of their situation changes. It is not advice on "
+                "what to report: answer as things are.")
+_GROUP = {"likely": "likely", "worth checking": "worth checking", "can't tell": "can't tell",
+          "not recommended": "not recommended", "unlikely": "not recommended"}
+_COUNT = re.compile(r"none|\d+|\d+ or more|under \d+")
+
+
 def _money(x: float) -> str:
     return f"${x:,.0f}"
 
@@ -269,20 +277,26 @@ class Intake:
                 "level": "supported" if sp["raw_ess"] >= self.cfg.min_ess else "thin",
                 "conflicting_answers": sp["conflicts"]}
 
+    def _tier(self, recommend: bool, p: float, thin: bool) -> str:
+        tier = ("likely" if p >= 0.5 else "worth checking") if recommend else ("unlikely" if p < 0.1 else "not recommended")
+        if thin and tier in ("unlikely", "not recommended") and round(p, 2) >= self.cfg.unsure_floor:
+            tier = "can't tell"  # too few households like this person to call this negative (D33)
+        return tier
+
+    def _thin(self, s: Session) -> bool:
+        return self.cfg.abstain_below is not None and s.support()["raw_ess"] < self.cfg.abstain_below
+
     def assessment(self, brief: bool = False) -> dict:
         rows = []
+        thin = self._thin(self.s)
         for dv in self.s.decisions():
             p = dv.p_eligible
-            tier = ("likely" if p >= 0.5 else "worth checking") if dv.recommend else ("unlikely" if p < 0.1 else "not recommended")
+            tier = self._tier(dv.recommend, p, thin)
             row = {"id": dv.decision, "programme": self.b.labels[dv.decision], "tier": tier, "probability": round(p, 2)}
             if dv.recommend or not brief:
                 lo, hi = max(dv.value_low, 0), max(dv.value_high, 0)
                 row["value_if_eligible_per_year"] = [int(round(lo, -1)), int(round(hi, -1))]  # whole dollars
             rows.append(row)
-        if self.cfg.abstain_below is not None and self.s.support()["raw_ess"] < self.cfg.abstain_below:
-            for r in rows:  # too few households like this person to call these negatives
-                if r["tier"] in ("unlikely", "not recommended") and r["probability"] >= self.cfg.unsure_floor:
-                    r["tier"] = "can't tell"
         rows.sort(key=lambda r: (r["tier"] not in ("likely", "worth checking"), -r["probability"]))
         recs = [r for r in rows if r["tier"] in ("likely", "worth checking")]
         unsure = [{k: r[k] for k in ("id", "programme", "tier", "probability")} for r in rows if r["tier"] == "can't tell"]
@@ -294,4 +308,48 @@ class Intake:
             out["support"] = self.support()
         out["note"] = self.b.info.get("caveat", "")
         return out
+
+    # ------------------------------------------------------------------------------- what would change it
+    def _neighbours(self, q, k: int) -> list[int]:
+        """The answers next to option k: one bracket either side for amounts and counts, the other option for
+        yes/no, every other option for an unordered choice. The state is not a neighbour of anything."""
+        n = len(q.options)
+        if q.id == "state":
+            return []
+        if q.edges is not None or all(_COUNT.fullmatch(o.lower()) for o in q.options):
+            return [j for j in (k - 1, k + 1) if 0 <= j < n]
+        return [j for j in range(n) if j != k]
+
+    def explain(self) -> dict:
+        """For every programme whose result would change: which single answer, moved to a neighbouring option
+        with the others kept, changes it, and to what. Each case reuses the belief (Session.what_if)."""
+        thin = self._thin(self.s)
+        now = {dv.decision: (self._tier(dv.recommend, dv.p_eligible, thin), dv.p_eligible) for dv in self.s.decisions()}
+        changes: dict[str, list] = {d: [] for d in now}
+        tried = 0
+        for qid, f in self.facts.items():
+            ev = f["evidence"]
+            if np.ptp(ev) == 0:
+                continue  # "don't know": nothing to move
+            j = self.qi[qid]
+            q = self.b.pop.questions[j]
+            k = int(np.argmax(ev))
+            for alt in self._neighbours(q, k):
+                lik = np.zeros(len(q.options))
+                lik[alt] = 1.0
+                s2 = self.s.what_if(j, lik)
+                thin2 = self._thin(s2)
+                tried += 1
+                for dv in s2.decisions():
+                    t = self._tier(dv.recommend, dv.p_eligible, thin2)
+                    if _GROUP[t] != _GROUP[now[dv.decision][0]]:
+                        changes[dv.decision].append({
+                            "question": qid, "kind": "amount" if q.edges is not None else "household",
+                            "from": q.options[k], "to": q.options[alt], "tier": t,
+                            "probability": round(dv.p_eligible, 2),
+                            "probability_change": round(dv.p_eligible - now[dv.decision][1], 2)})
+        rows = [{"id": d, "programme": self.b.labels[d], "tier": now[d][0], "probability": round(now[d][1], 2),
+                 "would_change": ch} for d, ch in changes.items() if ch]
+        rows.sort(key=lambda r: (_GROUP[r["tier"]] not in ("likely", "worth checking"), -r["probability"]))
+        return {"near_the_line": rows, "answers_tried": tried, "note": EXPLAIN_NOTE}
 

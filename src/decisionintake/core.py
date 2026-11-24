@@ -178,6 +178,7 @@ class Session:
         self.l_skip, self.l_rec = self.loss.matrices(self.pop)
         self.prior = self.pop.weight.astype(float) / self.pop.weight.sum()
         self.loglik = np.zeros(len(self.pop))
+        self.ll_terms: dict[int, np.ndarray] = {}  # each question's share of loglik, for what_if
         self.tau = 1.0
         self.w = self.prior.copy()
         self.p_now = self.v_now = None
@@ -267,7 +268,9 @@ class Session:
             self.log[-1]["conflict"] = True
             return
         with np.errstate(divide="ignore"):
-            self.loglik = self.loglik + np.log(lik)
+            term = np.log(lik)
+        self.loglik = self.loglik + term
+        self.ll_terms[q] = self.ll_terms[q] + term if q in self.ll_terms else term
         self._reweight()
         if self.outcome is not None and rescore:  # rescore=False: the caller rescores once after a batch
             self._rescore()
@@ -277,6 +280,34 @@ class Session:
         """Re-score after a batch of observe(..., rescore=False): only the final belief's records matter."""
         if self.outcome is not None and self.asked:
             self._rescore()
+
+    def what_if(self, q: int, likelihood: np.ndarray) -> "Session":
+        """A copy of this session in which question q's evidence is `likelihood` instead of what was said;
+        this session is not changed. It swaps one question's log-likelihood term, re-weights, and re-scores
+        only the records whose inputs change, so it costs a small fraction of replaying every answer."""
+        import copy
+        likelihood = np.asarray(likelihood, dtype=float)
+        qu = self.pop.questions[q]
+        assert likelihood.shape == (len(qu.options),)
+        with np.errstate(divide="ignore"):
+            term = np.log((qu.report_matrix() @ likelihood)[self.pop.answers[:, q]])
+        rest = [t for j, t in self.ll_terms.items() if j != q]
+        base = np.sum(rest, axis=0) if rest else np.zeros(len(self.pop))
+        other = copy.copy(self)
+        other.asked = {**self.asked, q: likelihood}
+        other.ll_terms = {j: t for j, t in self.ll_terms.items() if j != q}
+        other.log = list(self.log)
+        if np.isfinite(base + term).any():  # as observe(): evidence no record fits is not applied
+            other.ll_terms[q] = term
+            other.loglik = base + term
+        else:
+            other.loglik = base
+        if self.p_now is not None:  # _rescore writes into these; keep this session's untouched
+            other.p_now, other.v_now, other.h_now = self.p_now.copy(), self.v_now.copy(), self.h_now.copy()
+        other._reweight()
+        if other.outcome is not None:
+            other._rescore()
+        return other
 
     def answer(self, q: int, option: int, source: str = "answer") -> None:
         v = np.zeros(len(self.pop.questions[q].options))

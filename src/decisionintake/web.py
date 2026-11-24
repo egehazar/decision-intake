@@ -4,6 +4,7 @@
     GET  /v1/questions     the programmes, every question, and the starting state
     POST /v1/step          {"state"?, "facts"?} -> {"state", "readings", "next"}
     POST /v1/assessment    {"state"} -> every programme's probability, tier and value range
+    POST /v1/explain       {"state"} -> which single answer, one step different, would change each result
     GET  /openapi.json     this API, described
     POST /mcp              the Model Context Protocol over Streamable HTTP (2026-07-28, 2025-11-25, 2025-06-18,
                            2025-03-26)
@@ -213,9 +214,10 @@ class App:
         if path.startswith("/v1/") or path in ("/healthz", "/openapi.json"):
             handler = {("GET", "/healthz"): self.health, ("HEAD", "/healthz"): self.health,
                        ("GET", "/openapi.json"): self.openapi, ("GET", "/v1/questions"): self.questions,
-                       ("POST", "/v1/step"): self.step, ("POST", "/v1/assessment"): self.assess}.get((method, path))
+                       ("POST", "/v1/step"): self.step, ("POST", "/v1/assessment"): self.assess,
+                       ("POST", "/v1/explain"): self.explain}.get((method, path))
             if handler is None:
-                known = {"/healthz", "/openapi.json", "/v1/questions", "/v1/step", "/v1/assessment"}
+                known = {"/healthz", "/openapi.json", "/v1/questions", "/v1/step", "/v1/assessment", "/v1/explain"}
                 if path in known:
                     raise HTTPError(405, "method_not_allowed", f"{method} is not supported on {path}")
                 raise HTTPError(404, "not_found", f"no route {path}; see /openapi.json")
@@ -259,6 +261,15 @@ class App:
         it, _ = self._intake(body.get("state"))
         log.update(facts=len(it.facts))
         return _json(200, {"state": it.state(), **it.assessment()})
+
+    def explain(self, environ, log):
+        body = self._body(environ) or {}
+        if not isinstance(body, dict):
+            raise HTTPError(400, "bad_request", 'send an object: {"state": "..."}')
+        it, _ = self._intake(body.get("state"))
+        out = it.explain()
+        log.update(facts=len(it.facts), tried=out["answers_tried"])
+        return _json(200, {"state": it.state(), **out})
 
     def origin_ok(self, origin: str, environ) -> bool:
         if "*" in self.origins or origin in self.origins:
@@ -484,6 +495,21 @@ def openapi_doc(base: str | None = None) -> dict:
             "facts": {"type": "array", "items": {"type": "object", "properties": {
                 "question": {"type": "string"}, "reading": {"type": "string"}}}},
             "expected_mistake_cost": {"type": "integer"}, "support": ref("Support")}}]},
+        "Explanation": {"type": "object", "required": ["state", "near_the_line", "answers_tried", "note"], "properties": {
+            "state": ref("State"),
+            "near_the_line": {"type": "array", "description": "programmes whose result one answer, one step "
+                                                              "different, would change; the rest would not change",
+                              "items": {"type": "object", "properties": {
+                "id": {"type": "string"}, "programme": {"type": "string"},
+                "tier": {"type": "string", "enum": tiers}, "probability": {"type": "number"},
+                "would_change": {"type": "array", "items": {"type": "object", "properties": {
+                    "question": {"type": "string"}, "kind": {"type": "string", "enum": ["amount", "household"]},
+                    "from": {"type": "string"}, "to": {"type": "string", "description": "the neighbouring option"},
+                    "tier": {"type": "string", "enum": tiers}, "probability": {"type": "number"},
+                    "probability_change": {"type": "number"}}}}}}},
+            "answers_tried": {"type": "integer"},
+            "note": {"type": "string", "description": "how to read it: a guide to re-checking, never advice on "
+                                                      "what to report"}}},
         "Catalogue": {"type": "object", "properties": {
             "version": {"type": "string"}, "state": ref("State"),
             "about": {"type": "object", "additionalProperties": {"type": ["string", "null"]}},
@@ -532,12 +558,20 @@ def openapi_doc(base: str | None = None) -> dict:
                                      "properties": {"state": ref("State")}}, {"state": example_state}),
                 "responses": {"200": resp("the assessment", ref("FullAssessment")), "400": err, "413": err,
                               "415": err, "429": limited}}},
+            "/v1/explain": {"post": {
+                "operationId": "explain",
+                "summary": "What would change each result: every single answer, moved one step (an income bracket, "
+                           "yes/no), that changes a programme's tier, with the others kept",
+                "requestBody": body({"type": "object", "required": ["state"],
+                                     "properties": {"state": ref("State")}}, {"state": example_state}),
+                "responses": {"200": resp("the programmes near the line", ref("Explanation")), "400": err,
+                              "413": err, "415": err, "429": limited}}},
             "/mcp": {"post": {
                 "operationId": "mcp",
                 "summary": "Model Context Protocol over Streamable HTTP (JSON responses, no SSE, stateless). "
                            "Revisions 2026-07-28 (no handshake; _meta plus MCP-Protocol-Version, Mcp-Method and "
                            "Mcp-Name headers) and 2025-11-25, 2025-06-18, 2025-03-26 (initialize handshake). Tools: "
-                           "start_intake, record_facts, get_assessment.",
+                           "start_intake, record_facts, get_assessment, what_would_change.",
                 "requestBody": body({"type": "object", "description": "a JSON-RPC 2.0 request"}),
                 "responses": {"200": resp("a JSON-RPC response", {"type": "object"}),
                               "202": {"description": "notification accepted"},

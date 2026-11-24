@@ -86,10 +86,11 @@ def b_():
 
 def test_tool_annotations_tell_the_truth(b_):
     hosted = {t["name"]: t for t in StatelessServer(b_, Settings()).TOOLS}
-    assert set(hosted) == {"start_intake", "record_facts", "get_assessment"}
+    assert set(hosted) == {"start_intake", "record_facts", "get_assessment", "what_would_change"}
     assert all(t["annotations"]["readOnlyHint"] and t["title"] for t in hosted.values())
     local = {t["name"]: t["annotations"]["readOnlyHint"] for t in Server(b_, Settings()).TOOLS}
-    assert local == {"start_intake": False, "record_facts": False, "next_step": True, "get_assessment": True}
+    assert local == {"start_intake": False, "record_facts": False, "next_step": True, "get_assessment": True,
+                     "what_would_change": True}
 
 
 def test_header_values_ignore_surrounding_whitespace_but_not_case(app):
@@ -253,3 +254,61 @@ def test_one_shape_per_field(app):
     for row in a["all_programmes"]:
         v = row["value_if_eligible_per_year"]
         assert isinstance(v, list) and len(v) == 2 and all(isinstance(x, int) for x in v)
+
+
+# ------------------------------------------------------------------------------------------ what would change it
+NEAR = [{"question": "state", "choice": "OH"}, {"question": "household_size", "choice": "1"},
+        {"question": "children", "choice": "none"},
+        {"question": "earned_income", "amount": {"value": 1900, "period": "month"}},
+        {"question": "tenure", "choice": "rent"}, {"question": "disabled", "choice": "no"},
+        {"question": "senior", "choice": "no"}]
+
+
+def test_what_if_equals_a_full_replay(b_):
+    """Session.what_if swaps one answer without replaying the rest; it must agree with replaying them all."""
+    import numpy as np
+    from decisionintake.guards import DEFAULT_RULES, attach
+    from decisionintake.service import Intake
+    b = bundle.load(str(SHIPPED))
+    attach(b, DEFAULT_RULES)
+    it = Intake(b, Settings(abstain_below=10.0))
+    it.record(NEAR)
+    j = it.qi["earned_income"]
+    k = int(np.argmax(it.facts["earned_income"]["evidence"]))
+    before = it.s.w.copy()
+    lik = np.zeros(len(b.pop.questions[j].options))
+    lik[k - 1] = 1.0
+    fast = it.s.what_if(j, lik)
+    ref = Intake(b, Settings(abstain_below=10.0))
+    ref.record([f if f["question"] != "earned_income" else
+                {"question": "earned_income", "choice": b.pop.questions[j].options[k - 1]} for f in NEAR])
+    pa = np.array([d.p_eligible for d in fast.decisions()])
+    pb = np.array([d.p_eligible for d in ref.s.decisions()])
+    assert np.abs(pa - pb).max() < 1e-6 and np.array_equal(before, it.s.w)  # and the original is untouched
+
+
+def test_explain_names_the_answer_that_changes_a_result(app):
+    step = call(app, "POST", "/v1/step", {"facts": NEAR})["json"]
+    r = call(app, "POST", "/v1/explain", {"state": step["state"]})
+    assert r["status"] == 200 and r["json"]["state"] == step["state"] and r["json"]["note"]
+    rows = {x["id"]: x for x in r["json"]["near_the_line"]}
+    assert r["json"]["answers_tried"] >= 6
+    # a single adult on $22,800 a year: one income bracket decides SNAP and Medicaid
+    for pid in ("snap", "medicaid"):
+        assert any(c["question"] == "earned_income" and c["kind"] == "amount" for c in rows[pid]["would_change"]), pid
+    for row in rows.values():
+        for c in row["would_change"]:
+            assert c["tier"] != row["tier"] and c["question"] != "state"
+            assert abs(c["probability"] - (row["probability"] + c["probability_change"])) <= 0.011
+
+
+def test_explain_over_mcp(app):
+    start = rpc(app, {"jsonrpc": "2.0", "id": 0, "method": "tools/call", "params": {"name": "start_intake"}})
+    first = start["json"]["result"]["structuredContent"]["state"]
+    st = rpc(app, {"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                   "params": {"name": "record_facts", "arguments": {"state": first, "facts": NEAR}}})
+    state = st["json"]["result"]["structuredContent"]["state"]
+    r = rpc(app, {"jsonrpc": "2.0", "id": 2, "method": "tools/call",
+                  "params": {"name": "what_would_change", "arguments": {"state": state}}})
+    out = r["json"]["result"]["structuredContent"]
+    assert not r["json"]["result"]["isError"] and out["near_the_line"] and "not advice" in out["note"]

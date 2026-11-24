@@ -1143,3 +1143,23 @@ and the connector is listed in the official MCP Registry as io.github.egehazar/d
 Repository description and topics set; private vulnerability reporting on. Posted: PolicyEngine/policyengine-us
 discussion #11247 (Show and tell: scrutiny wanted on household units and earnings inputs) and a LinkedIn post.
 Show HN waits for Ege, whose Hacker News account it needs.
+
+## D41. What would change it (2026-11-24)
+
+Ege after the launch: "Keep building, more features more ideas more stuff." First: tell a person which
+answer sits near a line. For every answer given (except the state), the engine moves it one step (one
+bracket for amounts and counts, the other option for yes/no, every other option for rent/own/neither),
+keeps the rest, and reports each programme whose tier changes (`Intake.explain`, `/v1/explain`, MCP
+`what_would_change`).
+- Cost: Session.what_if swaps one question's log-likelihood term (Session now keeps each question's
+  term), re-weights, and re-scores only records whose inputs change: 15.8 ms a case against a full replay,
+  and the same probabilities as replaying every answer to within 4e-10 (tests/test_contract.py). A whole
+  explanation is 8-23 cases, 0.35-1.0 s on this machine.
+- What it says, on development profiles: a single adult in Ohio on $1,900 a month is near three lines (SNAP
+  likely, but not at $30,000 to $40,000; Medicaid likely at $10,000 to $20,000; the ACA credit likely at
+  $30,000 to $40,000, where the marketplace takes over from Medicaid). Composition flips ("WIC unlikely
+  without a child under 5") are true but obvious, and some tier changes are threshold wobble (CHIP 0.32 to
+  0.35 with more savings), so the API returns all of them with `kind` and `probability_change`, and the
+  screener shows only money answers that move a probability by 0.15 or more across "likely".
+- It is not advice on what to report: the note says so, the MCP instructions say so, and the screener's
+  wording is "check again if that changes".

@@ -62,7 +62,9 @@ enough. You handle the conversation; it handles the decisions.
    ones as worth a look, with the yearly value ranges, and always the note. Programmes in "unsure" are ones
    the engine can't call from these answers: say so, and that the person can still apply or call 211; never
    call them unlikely. "hand_off": say a caseworker or benefits navigator should review, using
-   hand_off_reason, and still share the recommendations so far.
+   hand_off_reason, and still share the recommendations so far. After a result, what_would_change says
+   which answers sit near a line (one income bracket away, say): mention those as "check again if this
+   changes", never as what the person should report.
 4. Never decide eligibility yourself and never ask questions the engine didn't ask for, unless the person
    needs something clarified. This is a screening estimate from 2026 US federal rules (PolicyEngine-US), not
    an eligibility decision; only the programme decides.
@@ -108,6 +110,11 @@ TOOLS = [
                     "recorded so far, and the expected cost of mistakes. A screening estimate, not an eligibility "
                     "decision.",
      "inputSchema": {"type": "object", "properties": SID, "required": ["session_id"]}},
+    {"name": "what_would_change", "title": "What would change the result",
+     "description": "For each programme near the line: which single answer, one step different (one bracket of "
+                    "income, the other yes/no), would change its result, and to what. Use it to tell the person "
+                    "what to re-check if their situation changes; never to suggest what they should report.",
+     "inputSchema": {"type": "object", "properties": SID, "required": ["session_id"]}},
 ]
 
 
@@ -132,6 +139,7 @@ TOOLS_STATELESS = [
      "inputSchema": {"type": "object", "properties": {**STATE, "facts": {"type": "array", "items": FACT}},
                      "required": ["state", "facts"]}},
     {**TOOLS[3], "inputSchema": {"type": "object", "properties": STATE, "required": ["state"]}},
+    {**TOOLS[4], "inputSchema": {"type": "object", "properties": STATE, "required": ["state"]}},
 ]  # no next_step: record_facts returns it, and a next_step sent alongside answers for an older state (D31)
 for _t in TOOLS_STATELESS:  # nothing is kept: every call is a pure function of its arguments
     _t["annotations"] = READ_ONLY
@@ -177,6 +185,8 @@ class Server:
             return self._intake(args).next_step()
         if name == "get_assessment":
             return self._intake(args).assessment()
+        if name == "what_would_change":
+            return self._intake(args).explain()
         raise ToolError(f"unknown tool {name!r}")
 
     # JSON-RPC -----------------------------------------------------------------------------------
@@ -314,6 +324,9 @@ class StatelessServer(Server):
         if name == "get_assessment":
             it, _ = self._restore(args)
             return {"state": it.state(), **it.assessment()}
+        if name == "what_would_change":
+            it, _ = self._restore(args)
+            return {"state": it.state(), **it.explain()}
         raise ToolError(f"unknown tool {name!r}")
 
 
