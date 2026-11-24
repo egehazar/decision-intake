@@ -1417,3 +1417,39 @@ Also: `/embed/` with a slash was embed mode locally but not on Vercel; now only 
 The reviewer found nothing in vercel.json's patterns (checked with path-to-regexp as Vercel compiles them:
 only `/embed` gets the permissive policy), postMessage, HTML escaping, the new handlers' bad-input paths, MCP,
 or the English/Spanish string calls.
+
+## D51. "Gets SNAP" as evidence (registered 2026-11-24 18:45 UTC, before any test outcome is computed)
+
+**Question.** Caseload rows and returning screeners often know one thing the questions don't ask: the household
+already gets SNAP. Does using that as evidence lower decision mistakes on the other fourteen programmes?
+
+**Evidence model.** A likelihood of 1 for belief households PolicyEngine labels SNAP-eligible and EPS = 0.2 for
+the rest (reports and the rules model don't always agree: state options, take-up, timing). EPS was chosen on
+development data (experiments/receipt_dev.py, results/receipt_dev.*: 600 validation households that get SNAP,
+five fields each; A-B for EPS 0.02 / 0.05 / 0.1 / 0.2 / 0.4 = -521 / -473 / -508 / -600 / -263, the last two
+with 95% intervals [-1,079, -198] and [-564, -27]). The term enters the belief like an answer's (same support
+floor), and does not change any household's model inputs.
+
+**Test households.** Every test-split household PolicyEngine labels SNAP-eligible (1,220), each getting SNAP with
+probability 0.82 (USDA's recent participation rate among eligible people), seed 2051: about 1,000. Test
+households were used before (D28-D35, D43) for other questions; whether SNAP receipt helps them has never been
+computed. Disclosed: SNAP eligibility of test households was counted (to size this test), nothing else.
+
+**Arms.** B: the served engine (v3, D32 rules, abstention at 10). A: the same plus the receipt term.
+
+**Primary criteria** (survey-weighted mean per household, dollars a year, decision loss on the 14 programmes
+other than SNAP against the labels: $1,000 a wrong recommendation, the benefit's value, at least $120, a miss;
+household bootstrap, Holm over the two as in D43):
+- P1 (a caseload row): facts = state, household size, children, a child under 5, rent or own. A minus B:
+  upper bound below 0.
+- P2 (no harm with full answers): facts = all 18 answers. A minus B: upper bound below the margin, $25 or
+  the development half-width rounded up to $5 if larger, measured before the test on the same 600 development
+  households with full answers. D43's lesson applies: if the development run shows the arms almost never
+  disagree, the half-width it gives is not trusted below $25.
+
+**Ship rule.** Receipt evidence for SNAP goes into production (`already` in /v1/batch and /v1/plan, and the
+screener's "already getting" boxes, which then re-score the results) only if P1 and P2 both pass. Medicaid,
+TANF, SSI and the rest stay rules-only (D45, D48) either way; each would need its own test.
+
+**Secondaries** (reported, not criteria): per-programme losses; the caseload ranking's top-fifth capture with
+and without the term; realistic answers instead of clean ones for P2.

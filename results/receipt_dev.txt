@@ -1,0 +1,7 @@
+Receipt as evidence, development: 600 validation households that get SNAP (simulated), five fields each; decision loss on the other 14 programmes, $/household/year
+  B (no receipt evidence): 2,969
+  A eps=0.02: 2,448  A-B -521 [-1,042, -74]
+  A eps=0.05: 2,497  A-B -473 [-987, -46]
+  A eps=0.1: 2,461  A-B -508 [-1,018, -84]
+  A eps=0.2: 2,369  A-B -600 [-1,079, -198]
+  A eps=0.4: 2,707  A-B -263 [-564, -27]
