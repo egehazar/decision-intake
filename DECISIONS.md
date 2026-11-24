@@ -1135,7 +1135,7 @@ params and input validation. Two real defects found and fixed on the way: DNS re
 (above) and whitespace around header values (RFC 9110 5.5), which the first run failed 0 of 5 and the rerun
 passed 14 of 14.
 
-## D40. Launch (2026-11-24, 14:40 UTC)
+## D40. Launch (2026-11-24, 13:40 UTC)
 
 Ege: "you can do those" (the repository settings and the read of the posts). Release v1.0.0 published from
 f8705d0 (https://github.com/egehazar/decision-intake/releases/tag/v1.0.0); its tag ran the publish workflow,
