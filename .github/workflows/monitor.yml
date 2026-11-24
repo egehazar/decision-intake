@@ -1,19 +1,32 @@
 name: monitor
-# The live service, every 30 minutes: the page, health, a real screening step, and the MCP connector in both
+# The live service, every 30 minutes and after every push to master: the page, health, a real screening step,
+# a whole screening, the deployed model and rules against this repository, and the MCP connector in both
 # protocol eras. A failure fails the run, and GitHub emails the repository owner.
 on:
   schedule:
     - cron: "17,47 * * * *"
+  push:
+    branches: [master]
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   live:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 15
     env:
       BASE: https://decision-intake.vercel.app
     steps:
+      - name: After a push, wait until Vercel serves this commit
+        if: github.event_name == 'push'
+        run: |
+          want="${GITHUB_SHA::7}"
+          for i in $(seq 1 40); do
+            got=$(curl -sf --max-time 20 "$BASE/healthz" | python3 -c "import json,sys; print(json.load(sys.stdin).get('commit'))" || true)
+            if [ "$got" = "$want" ]; then echo "live: $got"; exit 0; fi
+            echo "waiting: live $got, pushed $want"; sleep 15
+          done
+          echo "commit $want is not live after 10 minutes (the build may have failed)"; exit 1
       - name: Screener page
         run: curl -sf --max-time 20 -o /dev/null "$BASE/" && echo "page ok"
       - name: Health, with the rules loaded
