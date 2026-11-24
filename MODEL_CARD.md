@@ -6,21 +6,23 @@ pass/fail rule written there before it ran; anything else is marked as such.
 
 | | |
 |---|---|
-| version | engine 1.0.0; model v2 (`bundles/benefits_v2.npz`, sha256 `f012a9a0e5ce…`); rules `bundles/guards_2026.json` (14 rules, canonical-JSON sha256 `0cbf5e1845fc…`); `/healthz` reports the hashes that are deployed |
+| version | engine 1.1.0; model v3 (`bundles/benefits_v3.npz`, sha256 `527ffdb595b0…`) = v2's network unchanged (`bundles/benefits_v2.npz`, sha256 `f012a9a0e5ce…`) plus an add-on network for five programmes (D43); rules `bundles/guards_2026.json` (14 rules, canonical-JSON sha256 `0cbf5e1845fc…`); `/healthz` reports the hashes that are deployed |
 | rules year | 2026, from PolicyEngine-US 2.152.15 |
-| last updated | 2026-11-23 (D39) |
+| last updated | 2026-11-24 (D43) |
 | contact | [GitHub issues](https://github.com/egehazar/decision-intake/issues) |
 
 ## What it does
 
 Given what a person has said about their household, the engine picks the next question worth asking
-(or stops), and estimates for ten US programs how likely the household is to qualify and what each is
+(or stops), and estimates for fifteen US programs how likely the household is to qualify and what each is
 worth a year. It recommends a program when applying is worth the expected cost of a wrong
 recommendation, says "can't tell" where too few households like the person are on record, and advises
 that a person review the case when the doubt left over is costly.
 
 Programs: SNAP, WIC, TANF, SSI, Medicaid, CHIP, the Earned Income Tax Credit, the refundable part of the
-Child Tax Credit, the ACA premium tax credit, and free or reduced-price school meals.
+Child Tax Credit, the ACA premium tax credit, and free or reduced-price school meals; since D43 also state
+earned income tax credits, state child tax credits, Head Start, Early Head Start and housing assistance
+(vouchers and public housing, where waiting lists are often long).
 
 **It is a screener, not an eligibility decision.** Only the program decides. Immigration status is not
 asked and can change eligibility.
@@ -31,6 +33,7 @@ asked and can change eligibility.
 |---|---|---|
 | belief | 48,657 households, re-weighted after every answer; a support floor keeps at least 10 effective households behind every estimate | `core.py` |
 | outcome model | wide-and-deep network in plain numpy (512/256 hidden units, dropout 0.4, weight decay 0.3, out-of-fold Platt scaling), ten programs at once | `neural.py`, D28 |
+| add-on network | the same architecture and settings, for the five D43 programmes, trained on the corrected answers; it sits beside v2's network and does not change it | `bundle.StackedOutcome`, D43 |
 | rules | 14 statutory limits on top of the model (2026 EITC phase-out ends; no EITC or refundable CTC without earnings), each checked against PolicyEngine's results before shipping | `guards.py`, D32 |
 | question choice | expected value of information per question, with pair look-ahead; a question must save more than $15 a year to be asked | `policies.py` |
 | decision rule | a wrong recommendation costs $1,000; a missed program costs its yearly value (at least $120); advise a person above $2,500 of expected mistakes | `core.py`, `service.py` |
@@ -85,6 +88,7 @@ wrong negatives to 31 of 3,199) and is not used. All of these figures are in `re
 | D32, 2,000 households, the rules on and off | yes | costs nothing: −$3.7 [−9.4, +0.0] clean, −$15 [−33, −1] realistic; with clean answers no eligible program suppressed |
 | D35, 2,183 households, the release test | yes | the can't-tell layer passed: wrong "doesn't look likely" 2.17% → 0.62% with v2.1 [−1.76, −1.35 points], 1.06 labels a household. v2.1 failed its cost criterion (−$90 [−288, +59] against a +$25 margin sized too tightly) and does not ship |
 | D35, the same run, the model that serves | no, read after the result | wrong "doesn't look likely" 2.17% → 0.71% [−1.66, −1.27], 1.05 labels a household, no recommendation changed. Per program (release arm): EITC 5.0% → 0.8%, refundable CTC 2.8% → 0.3%, SNAP 3.6% → 1.3% |
+| D43, 2,000 held-out households, five programmes added | yes (labels for the five never computed before) | five added: −$1,144 [−1,797, −627]; original ten: −$38 [−122, +23] against a +$25 margin, both pass (Holm). Of the five, eligible programmes found 67.6% against 52.7% for v2 plus a simple rule; 9.2 questions against 8.4. Realistic answers: −$771 [−1,165, −432] on the five, no detectable difference on the ten |
 | D38, Claude through the public connector, 20 development households | no | 20 of 20 finished; recall 73%, precision 38%, against 73% and 36% in memory |
 
 Not yet measured: results by state or household type, and anything with real applicants.

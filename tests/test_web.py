@@ -16,7 +16,7 @@ from decisionintake.mcp_server import Server, StatelessServer
 from decisionintake.service import Intake, Settings
 from decisionintake.state import StateError, decode, encode
 
-SHIPPED = Path(__file__).resolve().parents[1] / "bundles" / "benefits_v2.npz"
+SHIPPED = Path(__file__).resolve().parents[1] / "bundles" / "benefits_v3.npz"
 pytestmark = pytest.mark.skipif(not SHIPPED.exists(), reason="shipped bundle not present")
 
 FACTS = [
@@ -107,7 +107,7 @@ def test_health_questions_and_openapi(app):
     assert h["status"] == 200 and h["json"]["ok"] and h["json"]["households"] == 48657
     assert h["headers"]["Cache-Control"] == "no-store" and h["headers"]["Access-Control-Allow-Origin"] == "*"
     q = call(app, "GET", "/v1/questions")["json"]
-    assert len(q["questions"]) == 18 and len(q["programmes"]) == 10 and q["state"].startswith("di1;#")
+    assert len(q["questions"]) == 18 and len(q["programmes"]) == 15 and q["state"].startswith("di1;#")
     assert "/v1/step" in call(app, "GET", "/openapi.json")["json"]["paths"]
 
 
@@ -129,7 +129,7 @@ def test_a_whole_screening_through_the_api(app):
         assert asked <= 18
     assert nxt["action"] in ("finish", "hand_off") and nxt["recommend"]
     a = call(app, "POST", "/v1/assessment", {"state": state})["json"]
-    assert len(a["all_programmes"]) == 10 and a["state"] == state
+    assert len(a["all_programmes"]) == 15 and a["state"] == state
 
 
 def test_the_api_refuses_bad_input_cleanly(app):
@@ -197,7 +197,7 @@ def test_mcp_over_http_runs_an_intake_statelessly(app):
     again = again["json"]["result"]["structuredContent"]
     assert again["state"] == out["state"] and again["next"] == out["next"]  # no facts: only the next step
     a = rpc(app, "tools/call", {"name": "get_assessment", "arguments": {"state": out["state"]}})["json"]["result"]
-    assert len(a["structuredContent"]["all_programmes"]) == 10
+    assert len(a["structuredContent"]["all_programmes"]) == 15
     bad = rpc(app, "tools/call", {"name": "get_assessment", "arguments": {"state": "di1;#0000"}})["json"]["result"]
     assert bad["isError"] and "damaged" in bad["content"][0]["text"]
 

@@ -584,7 +584,7 @@ def openapi_doc(base: str | None = None) -> dict:
         "openapi": "3.1.0",
         "info": {"title": "DecisionIntake", "version": VERSION,
                  "license": {"name": "MIT", "identifier": "MIT"},
-                 "description": "Decides what to ask next in a US benefits screening (ten federal programmes, 2026 "
+                 "description": "Decides what to ask next in a US benefits screening (fifteen programmes, 2026 "
                                 "rules from PolicyEngine-US), how far to trust each answer, and when it knows enough "
                                 "to recommend or should suggest a person review. A screening estimate, not an "
                                 "eligibility decision. Stateless: every response carries `state`; send it back with "

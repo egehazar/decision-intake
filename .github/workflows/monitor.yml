@@ -43,7 +43,7 @@ jobs:
           python3 - <<'PY'
           import hashlib, json, os, urllib.request
           h = json.load(urllib.request.urlopen(os.environ["BASE"] + "/healthz", timeout=20))
-          bundle = hashlib.sha256(open("bundles/benefits_v2.npz", "rb").read()).hexdigest()[:12]
+          bundle = hashlib.sha256(open("bundles/benefits_v3.npz", "rb").read()).hexdigest()[:12]
           rules = json.dumps(json.load(open("bundles/guards_2026.json", encoding="utf-8")), sort_keys=True, separators=(",", ":"))
           rules = hashlib.sha256(rules.encode()).hexdigest()[:12]
           assert (h["bundle_sha256"], h["rules_sha256"]) == (bundle, rules), (h, bundle, rules)

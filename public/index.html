@@ -5,11 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Quick Benefits Check</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect x='1' y='1' width='26' height='26' rx='7' fill='%231d5c88'/%3E%3Cpath d='M8 14.5l4 4 8-9' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
-<meta name="description" content="Find out which of ten US benefit programs your household should apply for, in about 8 questions. Free, no account, and our server keeps nothing.">
+<meta name="description" content="Find out which of fifteen US benefit programs your household should apply for, in about 8 questions. Free, no account, and our server keeps nothing.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://decision-intake.vercel.app/">
 <meta property="og:title" content="Quick Benefits Check">
-<meta property="og:description" content="Which of ten US benefit programs should your household apply for? About 8 questions, free, no account. Built on the open-source DecisionIntake engine.">
+<meta property="og:description" content="Which of fifteen US benefit programs should your household apply for? About 8 questions, free, no account. Built on the open-source DecisionIntake engine.">
 <meta name="twitter:card" content="summary">
 <style>
 :root {
@@ -220,7 +220,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
   <section id="intro" class="stack-lg" aria-labelledby="intro-h">
     <div class="stack">
       <h1 id="intro-h" data-i18n="intro_h">See which benefits your household should apply for</h1>
-      <p class="lede" data-i18n="lede">Answer a few questions about your household. We check ten US programs and tell you which are worth applying for, and roughly what each is worth a year.</p>
+      <p class="lede" data-i18n="lede">Answer a few questions about your household. We check fifteen US programs, including state tax credits, Head Start and housing help, and tell you which are worth applying for, and roughly what each is worth a year.</p>
     </div>
     <div class="facts">
       <div data-i18n="fact1"><b>About 8 questions</b><span>only the ones that matter for you</span></div>
@@ -410,7 +410,7 @@ const STATIC_ES = {
   brand: "Revisión rápida de beneficios",
   notgov: "No es un sitio web del gobierno",
   intro_h: "Vea qué beneficios le conviene solicitar a su hogar",
-  lede: "Responda unas preguntas sobre su hogar. Revisamos diez programas de EE. UU. y le decimos cuáles vale la pena solicitar y cuánto vale cada uno, aproximadamente, al año.",
+  lede: "Responda unas preguntas sobre su hogar. Revisamos quince programas de EE. UU., incluidos créditos tributarios estatales, Head Start y ayuda para la vivienda, y le decimos cuáles vale la pena solicitar y cuánto vale cada uno, aproximadamente, al año.",
   fact1: "<b>Unas 8 preguntas</b><span>solo las que importan en su caso</span>",
   fact2: "<b>Gratis, sin registro</b><span>sin cuenta ni correo electrónico</span>",
   fact3: "<b>Nuestro servidor no guarda nada</b><span>las respuestas quedan en esta pestaña</span>",
@@ -468,10 +468,10 @@ const T = {
     how_often: "How often", per_year: "a year", per_month: "a month", per_week: "a week", rough: "This is a rough guess", pick_range: "Pick a range instead",
     r_h: (n, mixed) => `${n} program${n > 1 ? "s" : ""} ${mixed ? "to apply for or check" : "worth applying for"}`, r_none: "Nothing stands out from these answers",
     r_unsure_h: "Nothing looks likely, but we couldn't tell about some",
-    lede_unsure: n => `From these answers none of the ten programs looks likely, and for ${n === 1 ? "one" : n} we couldn't tell. You can still apply for any of them.`,
+    lede_unsure: n => `From these answers none of the programs looks likely, and for ${n === 1 ? "one" : n} we couldn't tell. You can still apply for any of them.`,
     lede_handoff: "A short check can't call this one with confidence. You can still apply for any program.",
     lede_likely: (k, n) => k === n ? (n === 1 ? "It looks likely. " : `All ${n} look likely. `) : `${k} look${k === 1 ? "s" : ""} likely. `, lede_values: "Values are rough yearly ranges if you qualify. Only the program can confirm it.",
-    lede_none: "From what you told us, none of the ten programs looks likely. If your situation changes, or you think an answer is off, change it below.",
+    lede_none: "From what you told us, none of the programs we check looks likely. If your situation changes, or you think an answer is off, change it below.",
     handoff_text: "Your answers fit households that turn out very differently, so a short check can't call it with confidence.",
     badge_likely: "Likely", badge_check: "Worth checking",
     value: (r, w) => `If you qualify, worth about <b>${r}</b> ${w}`, small: "A small amount if you qualify",
@@ -504,10 +504,10 @@ const T = {
     how_often: "Con qué frecuencia", per_year: "al año", per_month: "al mes", per_week: "a la semana", rough: "Es un cálculo aproximado", pick_range: "Mejor elegir un rango",
     r_h: (n, mixed) => `${n} programa${n > 1 ? "s" : ""} ${mixed ? "para solicitar o revisar" : (n > 1 ? "que vale la pena solicitar" : "que vale la pena solicitar")}`, r_none: "Con estas respuestas no se destaca ningún programa",
     r_unsure_h: "Ninguno parece probable, pero de algunos no pudimos saberlo",
-    lede_unsure: n => `Con estas respuestas ninguno de los diez programas parece probable, y de ${n === 1 ? "uno" : n} no pudimos saberlo. Igual puede solicitar cualquiera de ellos.`,
+    lede_unsure: n => `Con estas respuestas ninguno de los programas parece probable, y de ${n === 1 ? "uno" : n} no pudimos saberlo. Igual puede solicitar cualquiera de ellos.`,
     lede_handoff: "Una revisión breve no puede decidirlo con confianza. Igual puede solicitar cualquier programa.",
     lede_likely: (k, n) => k === n ? (n === 1 ? "Parece probable. " : `Los ${n} parecen probables. `) : (k === 1 ? "1 parece probable. " : `${k} parecen probables. `), lede_values: "Los valores son rangos anuales aproximados si califica. Solo el programa puede confirmarlo.",
-    lede_none: "Según lo que nos dijo, ninguno de los diez programas parece probable. Si su situación cambia o cree que alguna respuesta está mal, cámbiela abajo.",
+    lede_none: "Según lo que nos dijo, ninguno de los programas que revisamos parece probable. Si su situación cambia o cree que alguna respuesta está mal, cámbiela abajo.",
     handoff_text: "Sus respuestas coinciden con hogares que terminan en situaciones muy distintas, así que una revisión breve no puede decidirlo con confianza.",
     badge_likely: "Probable", badge_check: "Vale la pena revisar",
     value: (r, w) => `Si califica, vale aproximadamente <b>${r}</b> ${w}`, small: "Una cantidad pequeña si califica",

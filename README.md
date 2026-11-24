@@ -4,14 +4,15 @@
 stops when another question isn't worth the person's time, and says "we couldn't tell" instead of
 guessing.**
 
-- **Screener** (English and Spanish, ten US programs): https://decision-intake.vercel.app
+- **Screener** (English and Spanish, fifteen US programs): https://decision-intake.vercel.app
 - **MCP connector** for any AI assistant: `https://decision-intake.vercel.app/mcp`
 - **Developer guide** (JSON API, MCP, examples in JS, Python and curl): https://decision-intake.vercel.app/docs.html
 - **Walkthrough** (watch it interview a test household, with everything it believes on screen):
   https://decision-intake.vercel.app/walkthrough/
 
 It covers SNAP, WIC, TANF, SSI, Medicaid, CHIP, the EITC, the refundable child tax credit, the ACA
-premium tax credit and school meals, with 2026 rules from
+premium tax credit and school meals, and since D43 state earned income and child tax credits, Head Start,
+Early Head Start and housing assistance, with 2026 rules from
 [PolicyEngine-US](https://github.com/PolicyEngine/policyengine-us). **It is a screening estimate, not an
 eligibility decision,** and it has been tested on simulated households, not real applicants
 ([limits](#limits)).
@@ -57,6 +58,7 @@ held-out simulated households; intervals are 95%.
 | Does it help an AI assistant? | Claude Haiku with the MCP tools against without | 200 | yes, D29 | mistakes 41% lower ($3,884 → $2,305); total **−$1,591** [−2,469, −775] unweighted; weighted −$294 [−1,831, +1,146] |
 | Is that the question choice? | same predictor, Claude choosing its own questions | 200 | yes, D30 | **−$891** [−1,538, −324] unweighted; weighted −$516 [−1,441, +359] |
 | Do the statutory rules cost anything? | rules on against off | 2,000 | yes, D32 | −$3.7 [−9.4, +0.0] |
+| Do five more programmes help? | v3 (v2 unchanged plus an add-on network) against v2 plus a simple rule | 2,000 | yes, D43 | five added: **−$1,144** [−1,797, −627]; original ten: −$38 [−122, +23] against a +$25 margin |
 | Does "can't tell" cut wrong negatives? | wrong "doesn't look likely" | 2,183 | yes with v2.1 (D35); after the result for the served model | 2.17% → 0.62% [−1.76, −1.35 points]; served: 2.17% → 0.71% |
 
 **Choosing questions this way beats fixed forms and decision trees (D28, 2,000 households).** With the
@@ -130,7 +132,7 @@ person's words ──► an LLM, or a form ──► typed facts (option, amount
                                                ▼
                   belief: weights over 48,657 households that could be this person
                                                │
-              a neural outcome model scores each candidate (P(eligible) and dollars, ten programs)
+              neural outcome models score each candidate (P(eligible) and dollars, fifteen programs)
               statutory limits cap it where it would extrapolate (EITC phase-out, no earnings)
                                                │
                                                ▼
@@ -146,9 +148,10 @@ person's words ──► an LLM, or a form ──► typed facts (option, amount
   LLM pick a range (D26).
 - **A belief over real-data households,** updated through each question's model of how people misreport,
   with a support floor so it can't become certain by ruling almost everyone out (D12).
-- **A wide-and-deep network in plain numpy:** two ReLU layers shared by all ten programs next to
+- **A wide-and-deep network in plain numpy:** two ReLU layers shared by v2's ten programs next to
   hand-listed linear terms, an eligibility head and a dollars head, out-of-fold Platt scaling. Trains in
-  about 3 minutes on a CPU (D28).
+  about 3 minutes on a CPU (D28). Five more programmes come from a second network with the same settings, beside
+  the first rather than retrained into it, so v2's answers for its ten stay bit for bit the same (D43).
 - **What would change it.** For any result, the engine moves each answer one step (an income bracket,
   a count, yes/no) with the rest kept and reports which programmes would change: "with earnings of $30,000
   to $40,000 a year, SNAP would no longer look likely" is a benefits cliff a person can see coming. Each

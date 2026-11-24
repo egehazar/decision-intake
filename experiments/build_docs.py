@@ -228,7 +228,7 @@ nav.toc ol {{ margin: 6px 0 0; padding-left: 20px; }}
 <tr><td><code>POST /v1/explain</code></td><td><code>{{"state"}}</code></td><td>which single answer, one step different, would change each program's result (<a href="#explain">below</a>)</td></tr>
 <tr><td><code>POST /v1/batch</code></td><td><code>{{"records": [{{"id", "facts"}}]}}</code></td><td>a caseload: expected value and the question to ask first, per household, and the order to call them in (<a href="#batch">below</a>)</td></tr>
 <tr><td><code>POST /v1/cliff</code></td><td><code>{{"state", "question"?}}</code></td><td>every bracket of an amount question, the rest kept: a benefits-cliff view (<a href="#cliff">below</a>)</td></tr>
-<tr><td><code>GET /v1/questions</code></td><td>-</td><td>the ten programs and all 18 questions with their options</td></tr>
+<tr><td><code>GET /v1/questions</code></td><td>-</td><td>the fifteen programs and all 18 questions with their options</td></tr>
 <tr><td><code>POST /mcp</code></td><td>JSON-RPC</td><td>the same engine as tools for AI assistants (<a href="#mcp">section 5</a>)</td></tr>
 <tr><td><code>GET /healthz</code></td><td>-</td><td>liveness, version, and the commit and model and rules hashes deployed</td></tr>
 </table></div>

@@ -324,7 +324,7 @@ def test_cliff_covers_every_bracket_and_marks_the_current_one(app):
     assert [o["option"] for o in opts if o["current"]] == ["$20,000 to $30,000"]  # $1,900 a month
     for o in opts:
         assert o["expected_value"] == pytest.approx(sum(o["by_group"].values()), abs=30)
-        assert len(o["programmes"]) == 10
+        assert len(o["programmes"]) == 15
     # help falls away as earnings rise: the lowest brackets carry more than the highest
     assert opts[1]["expected_value"] > opts[-1]["expected_value"]
 

@@ -1,0 +1,17 @@
+D43 test: 2000 households, A (v3, fifteen programmes) minus B (v2 + rule)
+
+clean answers
+  P1 five added programmes, decision loss: -1,144 [-1,797, -627]
+  P2 original ten, decision loss: -38 [-122, +23]  (95% half-width 73)
+  total over fifteen incl. $15 a question: -1,170 [-1,828, -649]
+  questions A 9.2, B 8.4
+  the five: eligible programmes found A 67.6% B 52.7%; 'not recommended' that is wrong A 1.61% B 2.32%
+  per programme: state_eitc A $30 B $56; state_ctc A $7 B $42; head_start A $134 B $449; early_head_start A $45 B $660; housing A $110 B $264
+
+realistic answers
+  P1 five added programmes, decision loss: -771 [-1,165, -432]
+  P2 original ten, decision loss: +16 [-211, +255]  (95% half-width 233)
+  total over fifteen incl. $15 a question: -744 [-1,175, -342]
+  questions A 8.8, B 8.0
+  the five: eligible programmes found A 61.3% B 50.8%; 'not recommended' that is wrong A 1.93% B 2.43%
+  per programme: state_eitc A $49 B $83; state_ctc A $10 B $54; head_start A $175 B $375; early_head_start A $89 B $496; housing A $130 B $216

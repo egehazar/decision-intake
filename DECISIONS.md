@@ -1253,3 +1253,27 @@ other income differ, as D34 found).
 (results/d43_dev_analysis.txt): P2 +$0 [-0, +1], a 95% half-width of about $1, so the margin stays **$25** as
 registered. On these development households: P1 -$356 [-911, +46]; A asked 9.1 questions, B 8.1. Not evidence
 for the test; the test runs next on the 2,000 held-out households, unchanged.
+
+**D43 result (2026-11-24 16:34 UTC): both pass; v3 ships.** 2,000 held-out households, 8,000 interviews
+(results/d43_test.jsonl, results/d43_test_analysis.txt). Clean answers, survey-weighted, dollars a household a year,
+A (v3, fifteen programmes) minus B (v2 plus the rule):
+
+| | difference [95% CI] | criterion |
+|---|---|---|
+| P1, the five added programmes, decision loss | **-$1,144** [-1,797, -627], bootstrap p 0.0002 | upper bound below 0: **PASS** |
+| P2, the original ten, decision loss | -$38 [-122, +23], p (difference >= +$25) 0.0225 | upper bound below +$25: **PASS** |
+
+Holm: P1 (smaller p) at 2.5%, then P2 at 5%; both pass.
+- Secondary, clean: total over fifteen including $15 a question -$1,170 [-1,828, -649]; questions 9.2 against
+  8.4; of the five, eligible programmes found 67.6% against 52.7% and a "not recommended" that is wrong 1.61%
+  against 2.32%; better on every one of the five (state EITC $30 against $56, state CTC $7 against $42, Head
+  Start $134 against $449, Early Head Start $45 against $660, housing $110 against $264).
+- Secondary, realistic answers: P1 -$771 [-1,165, -432]; P2 +$16 [-211, +255], not distinguishable from zero;
+  total -$744 [-1,175, -342].
+- **Lesson, again about margins:** P2 passed by $2. The development run's half-width (about $1) was far too
+  small because on its 300 households the two arms almost never decided the original ten differently; on the
+  test they did in 132 of 2,000 households (the extra programmes change which questions get asked), and the
+  half-width was $73. A margin sized from a development run must come from enough households to see the
+  disagreements, or from a simulation of them; D35 and D43 both show a small development run understates it.
+
+By the rule registered before the test, v3 (v2's network unchanged plus the add-on) replaces v2 in production.

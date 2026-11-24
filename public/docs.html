@@ -40,7 +40,7 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
 <header><div class="wrap"><a href="./">DecisionIntake</a><span><a href="./">screener</a> · <a href="walkthrough/">walkthrough</a> · <a href="openapi.json">openapi.json</a> · <a href="https://github.com/egehazar/decision-intake" target="_blank" rel="noopener">source</a></span></div></header>
 <main class="wrap">
 <h1>Developer guide</h1>
-<p class="lede">DecisionIntake decides what to ask next in a US benefits screening, how far to trust each answer, and when it knows enough to recommend programs or should suggest a person review the case. Your product keeps the conversation; the engine keeps the decision. Engine 1.0.0 at <code>https://decision-intake.vercel.app</code>; every example below is a real response, generated from the code by <code>experiments/build_docs.py</code>.</p>
+<p class="lede">DecisionIntake decides what to ask next in a US benefits screening, how far to trust each answer, and when it knows enough to recommend programs or should suggest a person review the case. Your product keeps the conversation; the engine keeps the decision. Engine 1.1.0 at <code>https://decision-intake.vercel.app</code>; every example below is a real response, generated from the code by <code>experiments/build_docs.py</code>.</p>
 
 <nav class="toc" aria-label="Contents"><b>Contents</b><ol>
 <li><a href="#loop">The loop</a></li><li><a href="#facts">Facts and readings</a></li><li><a href="#responses">Responses</a></li>
@@ -56,7 +56,7 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
 <tr><td><code>POST /v1/explain</code></td><td><code>{"state"}</code></td><td>which single answer, one step different, would change each program's result (<a href="#explain">below</a>)</td></tr>
 <tr><td><code>POST /v1/batch</code></td><td><code>{"records": [{"id", "facts"}]}</code></td><td>a caseload: expected value and the question to ask first, per household, and the order to call them in (<a href="#batch">below</a>)</td></tr>
 <tr><td><code>POST /v1/cliff</code></td><td><code>{"state", "question"?}</code></td><td>every bracket of an amount question, the rest kept: a benefits-cliff view (<a href="#cliff">below</a>)</td></tr>
-<tr><td><code>GET /v1/questions</code></td><td>-</td><td>the ten programs and all 18 questions with their options</td></tr>
+<tr><td><code>GET /v1/questions</code></td><td>-</td><td>the fifteen programs and all 18 questions with their options</td></tr>
 <tr><td><code>POST /mcp</code></td><td>JSON-RPC</td><td>the same engine as tools for AI assistants (<a href="#mcp">section 5</a>)</td></tr>
 <tr><td><code>GET /healthz</code></td><td>-</td><td>liveness, version, and the commit and model and rules hashes deployed</td></tr>
 </table></div>
@@ -82,29 +82,29 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
       ]
     },
     &quot;why&quot;: {
-      &quot;worth_per_year&quot;: 874,
+      &quot;worth_per_year&quot;: 1691,
       &quot;question_cost&quot;: 15.0,
       &quot;mostly_settles&quot;: [
         {
+          &quot;id&quot;: &quot;early_head_start&quot;,
+          &quot;programme&quot;: &quot;Early Head Start&quot;,
+          &quot;share&quot;: 0.33
+        },
+        {
           &quot;id&quot;: &quot;eitc&quot;,
           &quot;programme&quot;: &quot;Earned income tax credit&quot;,
-          &quot;share&quot;: 0.35
+          &quot;share&quot;: 0.18
         },
         {
           &quot;id&quot;: &quot;snap&quot;,
           &quot;programme&quot;: &quot;SNAP (food)&quot;,
-          &quot;share&quot;: 0.33
-        },
-        {
-          &quot;id&quot;: &quot;school_meals&quot;,
-          &quot;programme&quot;: &quot;Free or reduced-price school meals&quot;,
           &quot;share&quot;: 0.17
         }
       ]
     },
     &quot;progress&quot;: {
       &quot;facts_recorded&quot;: 0,
-      &quot;expected_mistake_cost&quot;: 4483,
+      &quot;expected_mistake_cost&quot;: 6435,
       &quot;similar_households&quot;: 7816,
       &quot;support&quot;: {
         &quot;households_like_this&quot;: 7815.9,
@@ -179,23 +179,23 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
       ]
     },
     &quot;why&quot;: {
-      &quot;worth_per_year&quot;: 1158,
+      &quot;worth_per_year&quot;: 1349,
       &quot;question_cost&quot;: 15.0,
       &quot;mostly_settles&quot;: [
         {
           &quot;id&quot;: &quot;ssi&quot;,
           &quot;programme&quot;: &quot;SSI&quot;,
-          &quot;share&quot;: 0.54
+          &quot;share&quot;: 0.47
         },
         {
           &quot;id&quot;: &quot;aca_ptc&quot;,
           &quot;programme&quot;: &quot;ACA premium tax credit&quot;,
-          &quot;share&quot;: 0.31
+          &quot;share&quot;: 0.27
         },
         {
-          &quot;id&quot;: &quot;wic&quot;,
-          &quot;programme&quot;: &quot;WIC&quot;,
-          &quot;share&quot;: 0.14
+          &quot;id&quot;: &quot;housing&quot;,
+          &quot;programme&quot;: &quot;Housing assistance&quot;,
+          &quot;share&quot;: 0.13
         }
       ]
     }
@@ -205,16 +205,18 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
 <h3>An amount question</h3>
 <p>Amount questions carry a <code>unit</code> and the <code>ranges</code> the engine reasons in. Ask for a number; offer the ranges for people who'd rather pick one.</p>
 <pre tabindex="0"><code class="json">{
-  &quot;id&quot;: &quot;social_security&quot;,
-  &quot;text&quot;: &quot;How much Social Security does the household get in a year?&quot;,
+  &quot;id&quot;: &quot;housing_cost&quot;,
+  &quot;text&quot;: &quot;What do you pay for rent or mortgage each month?&quot;,
   &quot;kind&quot;: &quot;amount&quot;,
-  &quot;unit&quot;: &quot;dollars a year&quot;,
+  &quot;unit&quot;: &quot;dollars a month&quot;,
   &quot;ranges&quot;: [
     &quot;none&quot;,
-    &quot;$1 to $10,000&quot;,
-    &quot;$10,000 to $20,000&quot;,
-    &quot;$20,000 to $30,000&quot;,
-    &quot;$30,000 or more&quot;
+    &quot;$1 to $500&quot;,
+    &quot;$500 to $1,000&quot;,
+    &quot;$1,000 to $1,500&quot;,
+    &quot;$1,500 to $2,000&quot;,
+    &quot;$2,000 to $3,000&quot;,
+    &quot;$3,000 or more&quot;
   ]
 }</code></pre>
 <h3>Corrections, rejected facts and warnings</h3>
@@ -263,49 +265,55 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
 <p>When no remaining question is worth asking, <code>next.action</code> is <code>finish</code>, or <code>hand_off</code> when the doubt left is still costly enough that a person should go through it.</p>
 <h3>Finish</h3>
 <pre tabindex="0"><code class="json">{
-  &quot;action&quot;: &quot;finish&quot;,
+  &quot;action&quot;: &quot;hand_off&quot;,
   &quot;recommend&quot;: [
+    {
+      &quot;id&quot;: &quot;school_meals&quot;,
+      &quot;programme&quot;: &quot;Free or reduced-price school meals&quot;,
+      &quot;tier&quot;: &quot;likely&quot;,
+      &quot;probability&quot;: 0.96,
+      &quot;value_if_eligible_per_year&quot;: [
+        2170,
+        2350
+      ]
+    },
     {
       &quot;id&quot;: &quot;eitc&quot;,
       &quot;programme&quot;: &quot;Earned income tax credit&quot;,
       &quot;tier&quot;: &quot;likely&quot;,
-      &quot;probability&quot;: 0.99,
+      &quot;probability&quot;: 0.93,
       &quot;value_if_eligible_per_year&quot;: [
-        4950,
-        7070
-      ]
-    },
-    {
-      &quot;id&quot;: &quot;ctc&quot;,
-      &quot;programme&quot;: &quot;Child tax credit (refundable part)&quot;,
-      &quot;tier&quot;: &quot;likely&quot;,
-      &quot;probability&quot;: 0.98,
-      &quot;value_if_eligible_per_year&quot;: [
-        2850,
-        3220
+        5250,
+        7100
       ]
     }
   ],
   &quot;unsure&quot;: [
     {
-      &quot;id&quot;: &quot;aca_ptc&quot;,
-      &quot;programme&quot;: &quot;ACA premium tax credit&quot;,
+      &quot;id&quot;: &quot;chip&quot;,
+      &quot;programme&quot;: &quot;CHIP&quot;,
       &quot;tier&quot;: &quot;can&#x27;t tell&quot;,
-      &quot;probability&quot;: 0.05
+      &quot;probability&quot;: 0.08
+    },
+    {
+      &quot;id&quot;: &quot;head_start&quot;,
+      &quot;programme&quot;: &quot;Head Start&quot;,
+      &quot;tier&quot;: &quot;can&#x27;t tell&quot;,
+      &quot;probability&quot;: 0.06
     }
   ],
   &quot;progress&quot;: {
-    &quot;facts_recorded&quot;: 8,
-    &quot;expected_mistake_cost&quot;: 1081,
+    &quot;facts_recorded&quot;: 11,
+    &quot;expected_mistake_cost&quot;: 3381,
     &quot;similar_households&quot;: 10,
     &quot;support&quot;: {
-      &quot;households_like_this&quot;: 5.9,
+      &quot;households_like_this&quot;: 5.1,
       &quot;level&quot;: &quot;thin&quot;,
       &quot;conflicting_answers&quot;: 0
     }
   },
   &quot;note&quot;: &quot;A screening estimate from PolicyEngine&#x27;s rules, not an eligibility decision. Apply through the official programme to get one. Immigration status is not asked and can change eligibility.&quot;,
-  &quot;recommend_more&quot;: &quot;... 3 more&quot;
+  &quot;recommend_more&quot;: &quot;... 5 more&quot;
 }</code></pre>
 <div class="tbl"><table>
 <tr><th>Field</th><th>Meaning</th></tr>
@@ -319,7 +327,7 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
 <p>Someone who answers "don't know" to most questions can't be called with confidence. <code>hand_off_reason</code> is advice to show, not a referral: nothing is sent anywhere.</p>
 <pre tabindex="0"><code class="json">{
   &quot;action&quot;: &quot;hand_off&quot;,
-  &quot;hand_off_reason&quot;: &quot;No remaining question is worth asking, but the doubt that is left would still cost about $2,998 a year in mistakes. A benefits navigator or caseworker should go through it with the person.&quot;,
+  &quot;hand_off_reason&quot;: &quot;No remaining question is worth asking, but the doubt that is left would still cost about $3,668 a year in mistakes. A benefits navigator or caseworker should go through it with the person.&quot;,
   &quot;recommend&quot;: [
     {
       &quot;id&quot;: &quot;medicaid&quot;,
@@ -335,7 +343,7 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
   &quot;unsure&quot;: [],
   &quot;progress&quot;: {
     &quot;facts_recorded&quot;: 13,
-    &quot;expected_mistake_cost&quot;: 2998,
+    &quot;expected_mistake_cost&quot;: 3668,
     &quot;similar_households&quot;: 132,
     &quot;support&quot;: {
       &quot;households_like_this&quot;: 131.6,
@@ -417,11 +425,12 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
     {
       &quot;option&quot;: &quot;$10,000 to $20,000&quot;,
       &quot;current&quot;: false,
-      &quot;expected_value&quot;: 6620,
+      &quot;expected_value&quot;: 9540,
       &quot;by_group&quot;: {
         &quot;food and cash&quot;: 1110,
         &quot;tax credits&quot;: 370,
-        &quot;health coverage&quot;: 5140
+        &quot;health coverage&quot;: 5140,
+        &quot;care and housing&quot;: 2920
       },
       &quot;programmes&quot;: [
         &quot;…&quot;
@@ -430,11 +439,12 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
     {
       &quot;option&quot;: &quot;$20,000 to $30,000&quot;,
       &quot;current&quot;: true,
-      &quot;expected_value&quot;: 5140,
+      &quot;expected_value&quot;: 13350,
       &quot;by_group&quot;: {
         &quot;food and cash&quot;: 740,
         &quot;tax credits&quot;: 120,
-        &quot;health coverage&quot;: 4290
+        &quot;health coverage&quot;: 4290,
+        &quot;care and housing&quot;: 8210
       },
       &quot;programmes&quot;: [
         &quot;…&quot;
@@ -443,11 +453,12 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
     {
       &quot;option&quot;: &quot;$30,000 to $40,000&quot;,
       &quot;current&quot;: false,
-      &quot;expected_value&quot;: 3910,
+      &quot;expected_value&quot;: 12580,
       &quot;by_group&quot;: {
         &quot;food and cash&quot;: 520,
-        &quot;tax credits&quot;: 50,
-        &quot;health coverage&quot;: 3330
+        &quot;tax credits&quot;: 60,
+        &quot;health coverage&quot;: 3330,
+        &quot;care and housing&quot;: 8670
       },
       &quot;programmes&quot;: [
         &quot;…&quot;
@@ -462,7 +473,7 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
 
 <h2 id="state">4. The state string</h2>
 <p>The facts so far, readable, with a checksum so a mangled copy is refused instead of misread:</p>
-<pre tabindex="0"><code class="text">di1;children=2;state=TX;earned_income=~2400/month;household_size=3;infant_or_pregnant=no;married=no;child_under5=no;social_security=none;#4aa1</code></pre>
+<pre tabindex="0"><code class="text">di1;children=2;state=TX;earned_income=~2400/month;household_size=3;housing_cost=$1,000_to_$1,500;child_under5=no;infant_or_pregnant=no;tenure=rent;employer_insurance=no;other_income=none;social_security=none;#5034</code></pre>
 <p>Choices are option text (spaces as <code>_</code>), amounts are <code>~</code>-prefixed when approximate with <code>..</code> for ranges and <code>/period</code>, don't-know is <code>?</code>, and <code>#</code> ends with four hex digits of a CRC-32 (a 16-bit check). It is not encrypted or signed: it holds what the person said, so treat it like the answers themselves. Send it in POST bodies, never in URLs, and don't log it. The service doesn't: its logs hold route, status and timing only. A damaged state is refused:</p>
 <pre tabindex="0"><code class="json">{
   &quot;error&quot;: {
@@ -477,7 +488,7 @@ nav.toc ol { margin: 6px 0 0; padding-left: 20px; }
 <pre tabindex="0"><code class="text">claude mcp add --transport http decisionintake https://decision-intake.vercel.app/mcp</code></pre>
 <h3>Claude.ai and other clients</h3>
 <p>Add a custom connector with the URL <code>https://decision-intake.vercel.app/mcp</code>. The server's instructions tell the assistant how to run an intake. Tools (all read-only: each is a pure function of its arguments):</p>
-<ul><li><code>start_intake</code> (Start a benefits screening): Open a new benefits-screening intake. Returns the first `state` (pass it to every later call), the ten programmes, every question the engine can use (ids, options, amount units), and the first step.</li><li><code>record_facts</code> (Record what the person said): Record what the person said as typed facts (any questions, asked or volunteered; a fact for an answered question replaces it). Returns how each fact was read and the next step. Returns the new `state`; use it from now on. With an empty facts list it only returns the next step.</li><li><code>get_assessment</code> (Current assessment): The current assessment: every programme&#x27;s probability, tier and yearly value range, the facts recorded so far, and the expected cost of mistakes. A screening estimate, not an eligibility decision.</li><li><code>what_would_change</code> (What would change the result): For each programme near the line: which single answer, one step different (one bracket of income, the other yes/no), would change its result, and to what. Use it to tell the person what to re-check if their situation changes; never to suggest what they should report.</li></ul>
+<ul><li><code>start_intake</code> (Start a benefits screening): Open a new benefits-screening intake. Returns the first `state` (pass it to every later call), the fifteen programmes, every question the engine can use (ids, options, amount units), and the first step.</li><li><code>record_facts</code> (Record what the person said): Record what the person said as typed facts (any questions, asked or volunteered; a fact for an answered question replaces it). Returns how each fact was read and the next step. Returns the new `state`; use it from now on. With an empty facts list it only returns the next step.</li><li><code>get_assessment</code> (Current assessment): The current assessment: every programme&#x27;s probability, tier and yearly value range, the facts recorded so far, and the expected cost of mistakes. A screening estimate, not an eligibility decision.</li><li><code>what_would_change</code> (What would change the result): For each programme near the line: which single answer, one step different (one bracket of income, the other yes/no), would change its result, and to what. Use it to tell the person what to re-check if their situation changes; never to suggest what they should report.</li></ul>
 <h3>On the wire, 2026-07-28</h3>
 <p>No handshake. Every request names its revision in <code>_meta</code> and mirrors the method (and, for <code>tools/call</code>, the tool name) in headers that must match the body:</p>
 <pre tabindex="0"><code class="text">Content-Type: application/json
@@ -532,7 +543,7 @@ Mcp-Name: record_facts</code></pre>
     &quot;_meta&quot;: {
       &quot;io.modelcontextprotocol/serverInfo&quot;: {
         &quot;name&quot;: &quot;decisionintake&quot;,
-        &quot;version&quot;: &quot;1.0.0&quot;
+        &quot;version&quot;: &quot;1.1.0&quot;
       }
     }
   }
@@ -631,7 +642,7 @@ print(r[&quot;next&quot;][&quot;action&quot;], r[&quot;next&quot;].get(&quot;que
 <tr><td>Latency</td><td>about 300 ms of server time a step; the first call after a quiet spell adds about a second</td></tr>
 </table></div>
 <p><b>Cross-origin use.</b> The JSON API answers any origin (no credentials are involved). <code>/mcp</code> serves clients that send no <code>Origin</code> (server-side assistants and tools) and browsers from this site or localhost; ask in the repository if a browser client elsewhere needs it.</p>
-<p><b>Versions.</b> The engine is 1.0.0; <code>/healthz</code> reports it with the commit and the model and rules hashes. A state stays readable across deployments while the questions and their options are unchanged. A release that changes them makes older states <code>bad_state</code>: start again (the public screener does this for you). Breaking changes to the API move the major version. This is a free research service with no uptime guarantee; a monitor checks it after every deploy and on a 30-minute schedule.</p>
+<p><b>Versions.</b> The engine is 1.1.0; <code>/healthz</code> reports it with the commit and the model and rules hashes. A state stays readable across deployments while the questions and their options are unchanged. A release that changes them makes older states <code>bad_state</code>: start again (the public screener does this for you). Breaking changes to the API move the major version. This is a free research service with no uptime guarantee; a monitor checks it after every deploy and on a 30-minute schedule.</p>
 <p>Full schema: <a href="openapi.json">openapi.json</a>. Evaluation, decisions and their tests: <a href="https://github.com/egehazar/decision-intake" target="_blank" rel="noopener">the repository</a>.</p>
 </main>
 </body>

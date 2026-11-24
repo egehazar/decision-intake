@@ -42,9 +42,9 @@ SUPPORTED = MODERN + PROTOCOLS
 K_VERSION, K_CAPS = "io.modelcontextprotocol/protocolVersion", "io.modelcontextprotocol/clientCapabilities"
 K_SERVER = "io.modelcontextprotocol/serverInfo"
 LIST_TTL_MS = 3_600_000  # tools/list and server/discover change only with a deploy
-DEFAULT_BUNDLE = Path(__file__).resolve().parents[2] / "bundles" / "benefits_v2.npz"  # v2.1 did not pass D35
+DEFAULT_BUNDLE = Path(__file__).resolve().parents[2] / "bundles" / "benefits_v3.npz"  # v2 + five programmes (D43)
 ABSTAIN_BELOW = 10.0  # D33/D35: under 10 households like the person, uncertain negatives are "can't tell"
-VERSION = "1.0.0"
+VERSION = "1.1.0"
 MAX_FACTS = 40  # facts in one record_facts call (the HTTP API uses the same limit)
 
 INSTRUCTIONS = """\
@@ -66,7 +66,7 @@ enough. You handle the conversation; it handles the decisions.
    which answers sit near a line (one income bracket away, say): mention those as "check again if this
    changes", never as what the person should report.
 4. Never decide eligibility yourself and never ask questions the engine didn't ask for, unless the person
-   needs something clarified. This is a screening estimate from 2026 US federal rules (PolicyEngine-US), not
+   needs something clarified. This is a screening estimate from 2026 US rules (PolicyEngine-US), not
    an eligibility decision; only the programme decides.
 5. Speak the person's language; the engine's ids and options stay in English.
 """
@@ -92,8 +92,9 @@ FACT = {
 SID = {"session_id": {"type": "string"}}
 TOOLS = [
     {"name": "start_intake", "title": "Start a benefits screening",
-     "description": "Open a new US benefits-screening intake (ten federal programmes, 2026 rules). Use it when a "
-                    "person wants to know which benefits to apply for. Returns a session_id, the ten programmes, "
+     "description": "Open a new US benefits-screening intake (fifteen programmes: federal benefits and tax credits, "
+                    "state tax credits, Head Start, housing; 2026 rules). Use it when a person wants to know which "
+                    "benefits to apply for. Returns a session_id, the programmes, "
                     "every question the engine can use (ids, options, amount units), and the first step.",
      "inputSchema": {"type": "object", "properties": {}}},
     {"name": "record_facts", "title": "Record what the person said",
@@ -132,7 +133,7 @@ INSTRUCTIONS_STATELESS = INSTRUCTIONS.replace(
 STATE = {"state": {"type": "string", "description": "the state string from the most recent result, exactly as given"}}
 TOOLS_STATELESS = [
     {**TOOLS[0], "description": "Open a new benefits-screening intake. Returns the first `state` (pass it to every "
-                                "later call), the ten programmes, every question the engine can use (ids, options, "
+                                "later call), the fifteen programmes, every question the engine can use (ids, options, "
                                 "amount units), and the first step."},
     {**TOOLS[1], "description": TOOLS[1]["description"] + " Returns the new `state`; use it from now on. With an "
                                                           "empty facts list it only returns the next step.",
