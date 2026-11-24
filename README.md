@@ -1,268 +1,203 @@
 # DecisionIntake
 
-**A decision engine for AI assistants: what to ask next, how far to trust each answer, and when it
-knows enough to act or should hand off to a person.**
+**An open-source decision engine for benefits screening: it picks the question most worth asking next,
+stops when another question isn't worth the person's time, and says "we couldn't tell" instead of
+guessing.**
 
-**Live:** https://decision-intake.vercel.app, a free screener in English and Spanish for ten US
-programmes, a JSON API and an MCP connector any AI assistant can add by URL
-(https://decision-intake.vercel.app/mcp). [Developer guide](https://decision-intake.vercel.app/docs.html).
-Monitored every 30 minutes.
+- **Screener** (English and Spanish, ten US programs): https://decision-intake.vercel.app
+- **MCP connector** for any AI assistant: `https://decision-intake.vercel.app/mcp`
+- **Developer guide** (JSON API, MCP, examples in JS, Python and curl): https://decision-intake.vercel.app/docs.html
+- **Walkthrough** (watch it interview a test household, with everything it believes on screen):
+  https://decision-intake.vercel.app/walkthrough/
 
-**Walkthrough:** https://decision-intake.vercel.app/walkthrough/ (watch a held-out household's interview,
-with everything the engine believes shown as it decides; the whole engine runs in the page).
+It covers SNAP, WIC, TANF, SSI, Medicaid, CHIP, the EITC, the refundable child tax credit, the ACA
+premium tax credit and school meals, with 2026 rules from
+[PolicyEngine-US](https://github.com/PolicyEngine/policyengine-us). **It is a screening estimate, not an
+eligibility decision,** and it has been tested on simulated households, not real applicants
+([limits](#limits)).
 
-First use: US public-benefits screening across ten programmes, with rules from
-[PolicyEngine-US](https://github.com/PolicyEngine/policyengine-us) and 57,240 households from
-PolicyEngine's [Populace](https://huggingface.co/datasets/policyengine/populace-us) data.
+## Try it in a minute
 
-On 2,000 households it had never seen, in a test registered before it ran (DECISIONS D28):
+Add the hosted connector to Claude Code and ask it to screen a household:
 
-| | DecisionIntake v2 | the full 18-question form (v1) |
-|---|---|---|
-| questions asked | **8.4** | 18 |
-| cost of mistakes per household per year | **$1,017** | $1,356 |
-| difference [95% CI] | **−$339** [−523, −173] | |
+```bash
+claude mcp add --transport http decisionintake https://decision-intake.vercel.app/mcp
+```
 
-**About half the questions, 25% fewer costly mistakes.** It beat every alternative registered
-against it: the previous engine (−22% mistakes), the strongest decision tree we could build, and the
-best fixed 8-question form. All four comparisons hold after Holm correction (p < 0.002) and with
-source households resampled as clusters, and it matches its own 18-question form with 8.4 questions.
+Or call the JSON API directly. Each response carries `state`, the facts so far; send it back with the
+next answer. The server keeps nothing.
 
-**And it makes a real AI assistant better.** In a second registered test (D29), Claude Haiku interviewed
-200 fresh households that answer in everyday sentences ("somewhere between 25 and 30 thousand",
-"my dad lives with us, he's 72"), once deciding on its own and once with DecisionIntake's MCP tools:
+```bash
+curl -s https://decision-intake.vercel.app/v1/step -H 'Content-Type: application/json' \
+  -d '{"facts": [{"question": "state", "choice": "TX"}, {"question": "children", "choice": "2"},
+                 {"question": "earned_income", "amount": {"value": 2400, "period": "month", "approximate": true}}]}'
+# -> {"state": "di1;state=TX;children=2;earned_income=~2400/month;#....",
+#     "readings": [... how each fact was read ...],
+#     "next": {"action": "ask", "question": {...}, "why": {"worth_per_year": ..., "mostly_settles": [...]}}}
+```
+
+## What the tests show
+
+Every test below was written down in [DECISIONS.md](DECISIONS.md) before it ran, on held-out
+households, unless marked otherwise. The households are a calibrated synthetic population (57,240
+households from PolicyEngine's [Populace](https://huggingface.co/datasets/policyengine/populace-us)
+data, scored by PolicyEngine-US). "Cost of mistakes" is a dollar loss defined in advance: a program
+the household qualifies for but isn't told about costs its yearly value, a wrong recommendation costs
+$1,000, and each question costs $15 of the person's time.
+
+**Choosing questions this way beats fixed forms and decision trees (D28, 2,000 households).** With the
+same outcome model deciding, a screening averaged 8.4 questions:
+
+| DecisionIntake v2 (8.4 questions) against | difference in cost a household a year [95% CI] |
+|---|---|
+| the best fixed 8-question form | **−$768** [−1,241, −398] |
+| the strongest decision tree we could build (11.1 questions) | **−$293** [−485, −136] |
+| the previous engine, v1 (8.5 questions) | **−$281** [−437, −142] |
+| v1's full 18-question form | **−$483** [−667, −317] |
+| the same model asking all 18 questions (secondary) | −$79 [−188, +37]: no detectable difference |
+
+All four registered comparisons hold after Holm correction (p < 0.002) and when whole source households
+are resampled. Asking 9.6 fewer questions cost no detectable accuracy against asking everything. The
+limit: these are clean answers. When simulated people misreport and say "don't know", no question
+policy separates from another (D28, part 2).
+
+**It makes an AI assistant better at the job (D29, D30, 200 households).** Claude Haiku interviewed
+simulated people who answer in everyday sentences generated from templates ("somewhere between 25 and
+30 thousand"), once on its own and once with this engine's MCP tools:
 
 | per household | Claude alone | Claude + DecisionIntake |
 |---|---|---|
-| costly mistakes | $3,884 | **$2,305** (−41%) |
-| questions asked | 8.0 | **7.2** |
-| cases handed to a caseworker | 60% | **20%** |
+| cost of mistakes | $3,884 | **$2,305** (41% lower) |
+| eligible programs found | 51% | **68%** |
+| share of recommendations that were right | 40% | 41% |
+| told to see a caseworker | 60% | **20%** |
 
-Total cost −$1,591 a household [−2,469, −775]. It isn't recommending more to find more: at the same
-precision (41% against 40%) it finds 68% of the programmes people qualify for, against 51%. Claude
-alone misses the expensive ones (Medicaid in 26 households against 8). A smaller exploratory run with
-Claude Sonnet 5.5 points the same way: 76% of eligible programmes found against 50%, 32% fewer
-mistakes.
+Total cost −$1,591 a household [−2,469, −775]. Holding the predictor equal and letting Claude pick its
+own questions, it stopped after 3.6 and did $891 worse [−1,538, −324] (D30), so more than half the gain
+is the question choice. Both results are unweighted; survey-weighted, neither is distinguishable from
+zero (−$294 [−1,831, +1,146] and −$516 [−1,441, +359]). Most recommendations in both arms are wrong,
+largely because the loss recommends a $10,000 program at a 9% chance; those are labelled "worth
+checking", and the engine arm over-recommends Medicaid (71 households against 20).
 
-**It's the decisions, not only the data (D30).** Given the same PolicyEngine-trained predictor and
-decision rule but left to choose its own questions, Claude stopped after 3.6 questions and made $3,249
-of mistakes. With the engine choosing what to ask and when to stop: $2,305, a further −$891 a
-household [−1,538, −324], registered and confirmed.
+**It says when it can't tell (D33, D35, 2,183 households).** Where fewer than 10 training households
+match the answers, a negative is wrong 2.5% of the time, against 0.4% where they do. So there, a
+program not recommended but still at 5% or more shows as "we couldn't tell, you can still apply". That
+rule was fixed before the release test and passed its registered criterion: wrong "doesn't look likely"
+answers 2.17% → 0.62%, about one label a household, with the retrained model that test was for. On the
+model that serves, the same run gives 2.17% → 0.71% (read after the result).
 
-> Built by AI agents (Claude, with reviews by GPT and Fable) under Ege Hazar's direction. Every
-> design choice, every result, and every idea that didn't make it is logged in [DECISIONS.md](DECISIONS.md).
+**What did not work** is in the log too: v2.1, retrained after we found a bug in our own data pipeline,
+failed its release test and does not ship (D35, D39); multicalibration made validation worse and was
+dropped (D32); v1's linear model, not the question policy, was what held the first engine back (D28).
 
-## What it does
+## Limits
+
+- **Simulated, not real.** Every number above is agreement with PolicyEngine-US on a synthetic population,
+  assuming everyone takes up what they are entitled to. Nobody has used it to apply yet.
+- **A screening estimate, not an eligibility decision.** Only the program decides; the screener sends
+  people to the official place to apply, and its "talk to someone" advice is advice, not a referral.
+- **Known model limitation (D39).** The model that serves (v2) was trained before we fixed how
+  self-employment from service businesses, partnerships and farms was coded (D34). On the 8% of
+  households that fix touched, it calls an eligible program unlikely 7.8% of the time, against 3.9%
+  elsewhere and 6.1% for the corrected model; the can't-tell layer is what brings it down from 19.6%.
+  The corrected model was worse for everyone else on realistic answers, so it waits for a new test.
+- **Households, not tax or SNAP units.** It asks about the household; households with several tax
+  filers or unrelated adults are where its rules and predictions are weakest.
+- **Not asked:** immigration status, which changes eligibility. **Not reviewed:** the Spanish, which is
+  AI-assisted and labelled so on the page.
+- **Its own error estimate** is 19% too high on clean answers and 28% too low with misreports (D28).
+
+## How it works
 
 ```
-person's words ──► LLM reader ──► typed evidence (amount, period, approximate, don't know)
-                                        │
-                                        ▼
+person's words ──► an LLM, or a form ──► typed facts (option, amount + period, "don't know")
+                                               │
+                                               ▼
                   belief: weights over 48,657 households that could be this person
-                                        │
-              neural outcome model scores each candidate on the person's own answers
-                    (P(eligible) and dollars, ten programmes at once)
-                                        │
-                                        ▼
-           value of information: the expected drop in the cost of mistakes for every question
-                                        │
-               ASK the best one while it is worth more than a question costs
-               ACT with tiered recommendations ("likely" / "worth checking")
-               HAND OFF when the doubt that is left is still costly
+                                               │
+              a neural outcome model scores each candidate (P(eligible) and dollars, ten programs)
+              statutory limits cap it where it would extrapolate (EITC phase-out, no earnings)
+                                               │
+                                               ▼
+           value of information: the expected drop in the cost of mistakes, for every question
+                                               │
+               ASK the best question while it is worth more than a question costs
+               FINISH with "likely" / "worth checking" programs and "can't tell" where data is thin
+               HAND OFF (advise a navigator) when the doubt left is still costly
 ```
 
-- **Reads language, doesn't trust it with arithmetic.** An LLM fills typed slots; code converts
-  "about $2,900 a month" into evidence spread over the right yearly ranges. On fresh amount answers
-  this cut confidently wrong readings from 10% to 0.8% against letting the LLM pick a range (D26).
-- **Believes over real-data households.** Weights over training households, updated through each
-  question's model of how people misreport. A support floor keeps it from becoming certain by ruling
-  almost everyone out (D12).
-- **Predicts with a wide-and-deep network written in plain numpy.** Two ReLU layers shared by all ten
-  programmes, next to the hand-listed linear terms, with an eligibility head and a dollars head;
-  dropout, decoupled weight decay, early stopping on held-out source households, out-of-fold Platt
-  scaling folded into the weights. Trains in about 3 minutes on a CPU (D28).
-- **Prices every question in dollars.** For each unasked question, the expected reduction in the
-  cost of mistakes across all ten programmes, in one matrix product per turn, with pair look-ahead
-  when facts only matter together (D5, D11).
-- **Knows what it doesn't know.** Its estimate of its own remaining mistakes is within 19% of what it
-  actually gets wrong (on the cautious side), and the 20% of households it is least sure about carry
-  45% of all mistake cost, which is what the hand-off routes to a person.
-- **Runs in a browser.** The demo page runs the whole engine and the neural model in JavaScript; its
-  probabilities match numpy to 5×10⁻⁶ and it scores 1,500 households in well under a second.
+- **Language in, arithmetic out.** An LLM fills typed slots; code turns "about $2,900 a month" into
+  evidence over yearly ranges. That cut confidently wrong readings from 10% to 0.8% against letting the
+  LLM pick a range (D26).
+- **A belief over real-data households,** updated through each question's model of how people misreport,
+  with a support floor so it can't become certain by ruling almost everyone out (D12).
+- **A wide-and-deep network in plain numpy:** two ReLU layers shared by all ten programs next to
+  hand-listed linear terms, an eligibility head and a dollars head, out-of-fold Platt scaling. Trains in
+  about 3 minutes on a CPU (D28).
+- **Rules it may not break** (`bundles/guards_2026.json`), each checked against PolicyEngine's own results
+  before shipping. They cost nothing on 2,000 fresh households (−$3.7 [−9.4, +0.0], registered, D32).
+  Tracing every exception through PolicyEngine tax unit by tax unit explained 108 of 109, and found the
+  bug in our own pipeline that D34 fixed ([contradiction ledger](results/contradiction_ledger.md)).
 
-## Plug it into any assistant (MCP)
+## Three ways to run it
 
-The engine ships as one 1.5 MB file and a Model Context Protocol server with no dependencies beyond
-numpy. Any MCP client (Claude Code, Claude Desktop, Cursor, an agent framework) can run an intake:
-the assistant does the talking and reads the person's words into typed facts; the engine decides
-what to ask, how far to trust it, and when to stop or hand off.
+**Hosted** (https://decision-intake.vercel.app). The screener, the JSON API (`/v1/questions`,
+`/v1/step`, `/v1/assessment`, described at `/openapi.json`) and MCP at `/mcp`: the stateless 2026-07-28
+revision and the 2025 handshake revisions, three tools (`start_intake`, `record_facts`,
+`get_assessment`) that pass a `state` string. About 300 ms of server time a step. No database, no
+sessions, no answers in logs. `/healthz` reports the commit and the model and rules hashes; a GitHub
+Actions job checks the page, a step and both MCP eras every 30 minutes.
 
-The trained engine ships in the repo (`bundles/benefits_v2.npz`, 1.5 MB), so this works straight after
-cloning, with no data build:
+**Local**, from a clone (not on PyPI; the model file ships in the repo, 1.5 MB, numpy only):
 
 ```bash
-pip install -e .                                                  # numpy is the only dependency
-claude mcp add decisionintake -- python -m decisionintake.mcp_server
+pip install -e .
+python -m decisionintake.web --port 8080         # screener, API and MCP, as hosted (~110 ms a step)
+claude mcp add decisionintake -- python -m decisionintake.mcp_server   # MCP over stdio, four tools
 ```
 
-Any other MCP client takes the same command (`python -m decisionintake.mcp_server`, stdio transport),
-or the hosted endpoint over HTTP (see below), where the same tools carry a `state` string instead of a
-session and `next_step` is folded into `record_facts`.
+The stdio server keeps sessions in memory and adds a `next_step` tool; the hosted one folds it into
+`record_facts`.
 
-| tool | what it does |
-|---|---|
-| `start_intake` | opens an intake; returns every question (so volunteered facts can be recorded) and the first step |
-| `record_facts` | typed facts from anything the person said: an option, an amount as said (`{"value": 2400, "period": "month", "approximate": true}`) or "don't know"; returns how code read each one and the next step |
-| `next_step` | ask (which question, what it's worth in dollars of mistakes prevented, which programmes it settles), finish with tiered recommendations, or hand off with the reason |
-| `get_assessment` | every programme's probability, tier and yearly value range, and the facts so far |
+**In the browser.** The walkthrough runs the same engine and network in JavaScript on a 1,500-household
+resample of the training data and plays held-out households through it, so you can watch the belief and
+the value of every question change after each answer.
 
-**Tested end to end with a real model** (D29, `experiments/agent_e2e.py`). Claude Haiku 5.5 runs in
-Claude Code's print mode with no built-in tools, only one MCP server: DecisionIntake's four tools in
-one arm, nothing in the other. The simulated person speaks in sentences generated from a held-out
-household's record (exact figures, round numbers, monthly figures for yearly questions, ranges, vague
-words, implied facts, "I'm not sure") and opens with three facts unprompted. Both arms reach the
-person through the same `ask_person` tool and end with `submit_recommendations`, scored against
-PolicyEngine. Prompts and scoring were frozen on 100 separate development households before the 200
-test households ran. The agent passed the engine's verdict on exactly in all 200 interviews; an
-interview takes about 30 seconds and half a cent of model use. Where the engine arm is weaker:
-households that qualify for nothing, where its "worth checking" calls cost $200 more than Claude's
-caution, and the survey-weighted difference (−$294 [−1,831, +1,146]) is not significant. Details in
-DECISIONS D29.
-
-## Run it as a service
-
-One process serves a public screener, a JSON API and a remote MCP endpoint, on the standard library
-and numpy:
-
-```bash
-python -m decisionintake.web --port 8080      # screener at /, API at /v1/*, MCP at /mcp, /openapi.json
-```
-
-| route | what |
-|---|---|
-| `GET /` | the screener: one question at a time, results with yearly value ranges and the official place to apply, answers you can change |
-| `POST /v1/step` | `{"state"?, "facts"?}` → `{"state", "readings", "next"}`: record what the person said, get ask / finish / hand off |
-| `POST /v1/assessment` | every programme's probability, tier and value range, and the facts so far |
-| `GET /v1/questions` | the programmes, every question and its options, the starting state |
-| `POST /mcp` | MCP over Streamable HTTP: the stateless 2026-07-28 revision (`server/discover`, per-request metadata, header validation) and the handshake revisions 2025-11-25 back to 2024-11-05 on the same endpoint; add the URL as a connector in Claude or any MCP client |
-| `GET /healthz`, `GET /openapi.json` | liveness; the API, described |
-| `GET /docs.html` | the developer guide: the loop, facts, responses, the state string, MCP, code in JS, Python and curl; every example is a real response, regenerated by `experiments/build_docs.py` |
-
-- **Keeps nothing.** The facts travel with each call as a short readable string
-  (`di1;state=TX;household_size=3;earned_income=~2400/month;#6f0c`, with a check so a mangled copy
-  is refused) and the service rebuilds the belief from it: 109 ms a request at the median, 175 ms at
-  the 95th percentile on one core, no errors in 997 requests of whole screenings (`experiments/load_test.py`). No database, no sessions,
-  no answers in logs. Any instance answers any call, so it scales to zero (D31).
-- **Rules the model may not break.** Statutory limits on top of the network (`bundles/guards_2026.json`):
-  where the answers pin down one tax unit, no EITC above its 2026 phase-out end and no EITC or
-  refundable child credit without earnings. Every rule names its source and was checked against
-  PolicyEngine's own results before shipping; every exception is traced to its cause
-  ([contradiction ledger](results/contradiction_ledger.md)). On 2,000 fresh households the rules cost
-  nothing (−$3.7 a household [−9.4, +0.0], registered, D32) and, with clean answers, suppressed no
-  programme anyone qualified for. The ledger also caught a bug in this project's own data pipeline
-  (self-employment that PolicyEngine keeps in separate variables was coded as no earnings in 8% of
-  households); fixed and retrained in D34.
-- **Says when it can't tell.** After about 8 answers, most people are matched by fewer than 10 of the
-  48,657 training households, and that is where the model's negatives fail: on 2,183 fresh households
-  a "not recommended" was wrong 2.5% of the time where the data was thin and 0.4% where it was not.
-  So when support is thin, a programme that is not recommended but still has a 5% chance is shown as
-  "we couldn't tell, you can still apply" rather than "unlikely". That cut wrong "doesn't look likely"
-  answers from 2.17% to 0.71% [−1.66, −1.27 points] at about one such label a household, and changes
-  no recommendation (D33, D35).
-- **English and Spanish.** One switch in the header (Spanish is picked automatically for browsers that
-  prefer it): every question, option, answer and result, with each agency's official Spanish page where
-  it has one (Social Security, the IRS, CuidadoDeSalud.gov, InsureKidsNow), USA.gov's pages marked as
-  English-only, and the National Hunger Hotline's Spanish line. AI-assisted translation, not yet
-  reviewed by a native speaker.
-- **Accessible.** axe-core 4.10.2 finds no WCAG 2.1 A/AA violations on any screen (start, question,
-  results), in light and dark mode; one question per screen, labelled controls, focus moved to each
-  new question, no colour-only meaning.
-- **Deploys as is** to Vercel (`vercel.json`, `api/index.py`): the screener from the CDN, everything
-  else from one Python function. CI runs the tests on Python 3.11 to 3.13 and smoke-tests the service
-  over a real socket.
-- **Documented** in a [model card](MODEL_CARD.md): data, tests, where it is wrong, what it must not be
-  used for.
-
-## Results
-
-Held-out test, settings frozen on a validation split first, $/household/year, 95% paired bootstrap
-intervals. Loss is the cost of mistakes: a missed programme at its value, a wrong recommendation at
-$1,000. Full tables in [WRITEUP.md](WRITEUP.md) and `results/`.
-
-| v2 engine (8.4 questions) against | difference in mistakes + $15 a question | in mistakes alone |
-|---|---|---|
-| v1 engine, same questioning (8.5 questions) | **−$281** [−437, −142] | −$280 [−437, −140] |
-| v1 full questionnaire (18 questions) | **−$483** [−667, −317] | −$339 [−523, −173] |
-| strongest decision tree, deciding with v2 (11.1 questions) | **−$293** [−485, −136] | −$253 [−446, −95] |
-| best fixed 8-question form, deciding with v2 | **−$768** [−1,241, −398] | −$774 [−1,251, −405] |
-| v2 asking all 18 questions (secondary) | −$79 [−188, +37] | +$64 [−44, +180] |
-
-The four bold rows were registered before the run (D28) and all hold after Holm correction. The last
-row is the trade-off in one line: asking 9.6 fewer questions costs no detectable accuracy. With noisy
-answers (misreports, "don't know") no question policy separates from another (D28 part 2).
-
-- **Tiered verdicts.** Recommendations it calls "likely" (50% or more) are right 78% of the time and
-  find two thirds of all eligible programmes. Lower-probability ones are shown as "worth checking":
-  the dollar-weighted objective recommends a $10,000 programme at a 9% chance, which is the right
-  call for the person but should be labelled as such.
-- **Against decision trees.** A cost-sensitive greedy tree on the same loss cost $700 a household
-  more than the v1 engine (D25). The strongest tree we then built, which falls back to broader data
-  where its branches run thin, came within noise of v1 (D27); deciding with the same v2 model, v2's
-  engine beats it by $293 with 2.6 fewer questions.
-- **The biggest gain came from prediction, not question choice.** Even with every answer, the old
-  linear model left most of the mistakes; the outcome model was the ceiling every question policy
-  worked against. Replacing it is what moved the numbers (D28).
+The screener has one question per screen, labelled controls, focus moved to each new question, and no
+color-only meaning; axe-core finds no WCAG 2.1 A/AA violations on any screen in light or dark mode.
 
 ## Reproduce
 
 ```bash
-# 1. environment (Python 3.13)
-py -m uv venv --python 3.13 .venv
-py -m uv pip install --python .venv/Scripts/python.exe policyengine-us==2.152.15 tables h5py pytest -e .
+# 1. environment (Python 3.11+; tested on 3.13 with numpy 2.5.5 and policyengine-us 2.152.15)
+python -m venv .venv && . .venv/bin/activate          # Windows: .venv\Scripts\activate
+pip install -e ".[dev]" policyengine-us==2.152.15 tables h5py
+pytest -q                                              # 78 tests, on the shipped model; no data needed
 
-# 2. data: Populace national build populace-us-2024-spm-20260915 (827 MB, sha256 6496cc43...aee84)
-#    into data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)
+# 2. data: Populace national build populace-us-2024-spm-20260915 (827 MB, sha256 6496cc43...aee84) into
+#    data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)
 bash adapters/benefits/build_all.sh 30 5
 
-# 3. tests (52), and tuning on the validation split only
-.venv/Scripts/python.exe -m pytest -q
-.venv/Scripts/python.exe experiments/outcome_v2.py            # outcome models, validation
-.venv/Scripts/python.exe experiments/val_v2.py 400 WORKERS     # engine with each model, validation
+# 3. tuning on the validation split only, then the registered test (D28; WORKERS processes, ~1.5 GB each)
+python experiments/outcome_v2.py && python experiments/val_v2.py 400 WORKERS
+python experiments/run_v2.py 2000 WORKERS && python experiments/run_v2.py 2000 1 analyse
 
-# 4. the pre-registered test (D28): 2,000 fresh test households; WORKERS processes, ~1.5 GB each
-.venv/Scripts/python.exe experiments/run_v2.py 2000 WORKERS
-.venv/Scripts/python.exe experiments/run_v2.py 2000 1 analyse
-
-# 5. the engine as one file, its MCP server, and the end-to-end agent test (D29; needs Claude Code)
-.venv/Scripts/python.exe experiments/export_bundle.py bundles/benefits_v2.npz   # rebuilds the shipped bundle
-.venv/Scripts/python.exe -m decisionintake.mcp_server                              # speaks MCP on stdio
-.venv/Scripts/python.exe experiments/agent_e2e.py prep test 200
-.venv/Scripts/python.exe experiments/agent_e2e.py run test engine haiku 200 3
-.venv/Scripts/python.exe experiments/agent_e2e.py run test alone haiku 200 3
-.venv/Scripts/python.exe experiments/agent_e2e.py analyse test haiku
-
-# 6. the service, its rules file and their tests (D31, D32)
-.venv/Scripts/python.exe experiments/guards_build.py          # rebuilds bundles/guards_2026.json, checks each rule
-.venv/Scripts/python.exe experiments/run_guard.py 2000 WORKERS && .venv/Scripts/python.exe experiments/run_guard.py 2000 1 analyse
-.venv/Scripts/python.exe experiments/agent_e2e.py run dev stateless haiku 100 5
-.venv/Scripts/python.exe -m decisionintake.web --port 8080
-
-# 7. the walkthrough (the whole engine in the browser, served at /walkthrough/)
-.venv/Scripts/python.exe experiments/export_demo_v2.py 1500 public/walkthrough/population.json
+# 4. the shipped model and rules, the agent test (D29; needs Claude Code), the release test (D35)
+python experiments/export_bundle.py bundles/benefits_v2.npz
+python experiments/guards_build.py
+python experiments/agent_e2e.py prep test 200 && python experiments/agent_e2e.py run test engine haiku 200 3
+python experiments/agent_e2e.py run test alone haiku 200 3 && python experiments/agent_e2e.py analyse test haiku
+python experiments/run_release.py WORKERS && python experiments/run_release.py WORKERS analyse
 ```
 
-Earlier experiments (D21-D27: v1 test, trees, run-time adaptation, the language layer) have their
-own scripts in `experiments/`, listed in DECISIONS.md. Seeds are fixed everywhere, so a rerun gives
-the same households and draws. Tested with Python 3.13, numpy 2.5.5, policyengine-us 2.152.15 on a
-12-core CPU without a GPU. On Windows, PolicyEngine's longest file path exceeds the 260-character
-limit unless the package sits under a short prefix: copy it to one and set `PE_SHORT_PATH` (D11).
+Every experiment has its script in `experiments/`, named in DECISIONS.md; seeds are fixed, so a rerun
+gives the same households and draws. On Windows, PolicyEngine's longest file path exceeds 260
+characters unless the package sits under a short prefix: copy it to one and set `PE_SHORT_PATH` (D11).
 
-## Scope
+## How it was built
 
-- **A research system, not an eligibility determination.** Results are agreement with PolicyEngine's
-  2026 rules on a calibrated synthetic population, assuming everyone takes up what they're entitled
-  to. A real screener sends people to the official application.
-- **The language results are for 4B models on a CPU.** The demo uses Claude to fill the same slots;
-  spoken answers in the tests come from templates, which are cleaner than real speech.
-- **No immigration questions,** by design. Immigration status changes eligibility, so it remains an
-  unasked source of error.
+AI agents (Claude, with reviews by GPT) wrote the code and ran the experiments under Ege Hazar's
+direction. Each test's pass/fail rule was written before it ran and is followed even when it goes
+against us (v2.1 is not shipped because its rule failed). The [decision log](DECISIONS.md) has every
+choice, result and dead end; the [model card](MODEL_CARD.md) has data, tests and what it must not be
+used for; [DEPLOY.md](DEPLOY.md) has the production runbook. MIT licensed.

@@ -26,40 +26,28 @@ git tag v1.0.0 && git push origin v1.0.0
 
 To list a new version later: bump `version` in `server.json`, commit, tag `v<version>`, push the tag.
 
-## Live staging (D36)
+## Setting up a deployment (how this one was staged, D36)
 
-Project `decision-intake` on Vercel, linked to this repository: every push to master deploys.
-Vercel Authentication protects **all** deployments, the production address `decision-intake.vercel.app`
-included (Settings → Deployment Protection → Vercel Authentication: All Deployments). Note: a new
-project starts with standard protection, which leaves the production address public; switch it to all
-deployments before the first build.
-
-## Staging first
-
-Deploy behind protection until the release gate below passes.
-
-1. On vercel.com: **Add New → Project → Import** `egehazar/decision-intake`. Framework preset: Other.
-   No build command, no environment variables.
-2. **Settings → Deployment Protection**: leave Vercel Authentication on, so only signed-in team members
-   can open the deployments. Deploy from a branch other than the production branch to get a protected
-   preview URL.
+1. On vercel.com: **Add New → Project → Import** the repository. Framework preset: Other. No build
+   command, no environment variables.
+2. A new project starts with standard protection, which leaves the production address public. To stage
+   privately first, set **Settings → Deployment Protection → Vercel Authentication: All Deployments**
+   before the first build; this project was staged that way (D36) and opened to the public in D38.
 3. Check the deployment (replace `$URL`):
 
 ```bash
-curl -s $URL/healthz                       # ok, version 1.0.0, 14 statutory limits, boot_seconds
-curl -s -X POST $URL/v1/step -H 'Content-Type: application/json' \
-  -d '{"facts":[{"question":"state","choice":"TX"},{"question":"household_size","choice":"2"}]}'
-curl -s -X POST $URL/mcp -H 'Content-Type: application/json' \
-  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'      # three tools
+curl -s $URL/healthz                       # ok, version, 14 statutory limits, commit, bundle/rules hashes
+curl -s -X POST $URL/v1/step -H 'Content-Type: application/json'   -d '{"facts":[{"question":"state","choice":"TX"},{"question":"household_size","choice":"2"}]}'
+curl -s -X POST $URL/mcp -H 'Content-Type: application/json'   -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'      # three tools
 ```
 
-   With protection on, pass a protection-bypass token (Vercel: Settings → Deployment Protection →
-   Protection Bypass for Automation) as the `x-vercel-protection-bypass` header.
+   With protection on, pass a protection-bypass token as the `x-vercel-protection-bypass` header.
 4. Open `$URL/` and complete a screening; change an answer; clear the answers.
 
-## Release gate (before the protection comes off)
+## Release gate (D36-D38)
 
-From GPT's round-6 review; each item is checked in DECISIONS.md or the model card.
+From GPT's round-6 review; each item is checked in DECISIONS.md or the model card. The two open items
+were waived when the site went public (D38): the page labels the Spanish as AI-assisted.
 
 - [x] D32 passed: the rules cost nothing on 2,000 fresh households
 - [x] Every rule's exceptions explained (`results/contradiction_ledger.md`) and the eligible households it suppresses counted
@@ -82,9 +70,21 @@ From GPT's round-6 review; each item is checked in DECISIONS.md or the model car
 - [x] Request limits in the app (64 KB body, 40 facts, 2,000-character state); the Hobby plan has no
       billing to run up (usage limits cap it)
 - [x] Cold and warm latency measured on the real deployment: engine boot 1.1 s, /v1/step about 300 ms
-      median server time (89 ms to 1.1 s); locally 125 ms median (D36)
+      median server time (89 ms to 1.1 s); on a desktop CPU 109-125 ms median (D31, D36)
 - [x] Rollback rehearsed (D36): production moved back to the previous deployment in seconds, served it,
       and was promoted forward again
+
+## When something breaks
+
+- **The monitor fails** (GitHub emails the owner): open the failed run to see which step. `/healthz`
+  down or 5xx: check Vercel → Deployments → the production deployment → Logs (or the Vercel connector's
+  runtime logs) for the traceback the service writes to stderr; if the latest deployment is the cause,
+  roll back (below). Only the MCP steps failing: a protocol change; run `pytest tests/test_contract.py`
+  against the deployed commit.
+- **`/healthz` shows the wrong commit or hashes**: the deployment is not the commit you meant; promote
+  the right one.
+- **Hobby usage limits reached**: Vercel pauses the project instead of billing. The screener and API are
+  down until the limit resets or the plan changes; nothing is lost, because nothing is stored.
 
 ## Rollback
 
@@ -100,5 +100,6 @@ pip install numpy
 PYTHONPATH=src python -m decisionintake.web --host 0.0.0.0 --port 8080
 ```
 
-Any WSGI server works (`gunicorn 'decisionintake.web:create_app()'`). Set `DI_ALLOWED_ORIGINS` to a
-comma-separated list to restrict which browser origins may call `/mcp`.
+Any WSGI server works (`gunicorn 'decisionintake.web:create_app()'`). Browsers may call `/mcp` from the
+same origin and from localhost; set `DI_ALLOWED_ORIGINS` (comma-separated, or `*`) to allow others.
+Requests without an Origin header (server-side MCP clients) are always served.
