@@ -1181,3 +1181,45 @@ registered claim rests on it.
 Next (from an independent ranking of ten candidates): add programmes whose held-out labels have never been
 computed (state EITC and CTC, Head Start, Lifeline, childcare subsidies, Pell, housing assistance) on top
 of the frozen v2, the one direction with a clean registered test left.
+
+## D43. Five more programmes on a frozen core (registered 2026-11-24 14:49 UTC, before any held-out label for them is computed)
+
+**What.** State earned income tax credits, state child tax credits, Head Start, Early Head Start and housing
+assistance (PolicyEngine-US 2.152.15 variables state_eitc, state_ctc, head_start, early_head_start,
+housing_assistance; every take-up flag set, as for the original ten). A probe on one chunk's training
+households (experiments/probe_new_programmes.py, results/probe_new_programmes.json) found them non-zero for
+14.2%, 5.9%, 5.5%, 4.5% and 8.4% (weighted). Not added: Lifeline, Pell grants and LIHEAP (zero for every
+household from Populace's inputs), childcare subsidies (3 states, 0.7%), CSFP (later).
+
+**Build.** The new labels go into a separate table (data/cache/chunks_d43/, joined on household id). The
+original table, the v2 network and its rules stay unchanged byte for byte. An add-on network with v2's
+architecture and settings (D28) is trained on the training households for the five new programmes only; the
+served outcome is v2's ten probabilities next to the add-on's five. Value of information, the decision rule
+(a missed programme costs its yearly value, at least $120; a wrong recommendation $1,000), the can't-tell rule
+and the support floor are unchanged and now range over fifteen programmes. The five get statutory rules only
+if the D32 check finds any that hold.
+
+**Test households.** The held-out households were used for the original ten (D28-D35); their labels for these
+five have never been computed. 2,000 of them (seed 2043), split by source household as everywhere.
+
+**Arms**, the same households and simulated answers (paired):
+- A: the expanded engine, fifteen programmes, choosing its own questions.
+- B: v2's engine as served, ten programmes, its own questions, plus a rule a screener could use without a
+  model for the five, applied to B's final belief: the state EITC when the federal EITC is recommended and
+  the state has one; the state CTC when the federal refundable CTC is recommended and the state has one;
+  Head Start when the belief puts a child under 5 at 50% or more and SNAP, TANF or SSI is recommended; Early
+  Head Start the same with a baby under 1 or a pregnancy; housing assistance when SNAP is recommended and
+  the household rents. "The state has one": a non-zero amount for any training household in that state.
+
+**Primary** (clean answers, survey-weighted dollars a household a year, 95% paired bootstrap over households,
+Holm over the two):
+- P1: decision loss on the five new programmes, A minus B: the upper bound below 0.
+- P2: decision loss on the original ten, A minus B: the upper bound below the margin. The margin is $25
+  unless a development run (300 validation households, before the test) gives a 95% half-width above $25;
+  then it is that half-width rounded up to $5, recorded here before the test runs (the D35 lesson: size the
+  margin to the comparison).
+
+**Secondary:** questions asked; total cost over all fifteen including $15 a question; wrong "doesn't look
+likely" on the five; per programme; realistic answers.
+
+**Ship rule:** v3 (v2 plus the add-on) replaces v2 in production only if P1 and P2 both pass.

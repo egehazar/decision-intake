@@ -1,0 +1,98 @@
+{
+ "chunk": 0,
+ "households": 1935,
+ "training_households": 1639,
+ "programmes": {
+  "state_eitc": {
+   "variable": "state_eitc",
+   "what": "state earned income tax credit",
+   "share_nonzero_weighted": 0.1421,
+   "households_nonzero": 205,
+   "median_if_nonzero": 480.0,
+   "states_with_any": 24,
+   "states_seen": 51
+  },
+  "state_ctc": {
+   "variable": "state_ctc",
+   "what": "state child tax credit",
+   "share_nonzero_weighted": 0.0591,
+   "households_nonzero": 96,
+   "median_if_nonzero": 500.0,
+   "states_with_any": 11,
+   "states_seen": 51
+  },
+  "head_start": {
+   "variable": "head_start",
+   "what": "Head Start",
+   "share_nonzero_weighted": 0.0545,
+   "households_nonzero": 60,
+   "median_if_nonzero": 16491.0,
+   "states_with_any": 12,
+   "states_seen": 51
+  },
+  "early_head_start": {
+   "variable": "early_head_start",
+   "what": "Early Head Start",
+   "share_nonzero_weighted": 0.0449,
+   "households_nonzero": 58,
+   "median_if_nonzero": 22341.0,
+   "states_with_any": 12,
+   "states_seen": 51
+  },
+  "lifeline": {
+   "variable": "lifeline",
+   "what": "Lifeline phone or internet discount",
+   "share_nonzero_weighted": 0.0,
+   "households_nonzero": 0,
+   "median_if_nonzero": 0.0,
+   "states_with_any": 0,
+   "states_seen": 51
+  },
+  "childcare_subsidy": {
+   "variable": "child_care_subsidies",
+   "what": "state childcare subsidy (CCDF)",
+   "share_nonzero_weighted": 0.0074,
+   "households_nonzero": 9,
+   "median_if_nonzero": 1645.0,
+   "states_with_any": 3,
+   "states_seen": 51
+  },
+  "pell": {
+   "variable": "pell_grant",
+   "what": "Pell grant",
+   "share_nonzero_weighted": 0.0,
+   "households_nonzero": 0,
+   "median_if_nonzero": 0.0,
+   "states_with_any": 0,
+   "states_seen": 51
+  },
+  "housing": {
+   "variable": "housing_assistance",
+   "what": "housing assistance (vouchers, public housing)",
+   "share_nonzero_weighted": 0.0841,
+   "households_nonzero": 62,
+   "median_if_nonzero": 5463.0,
+   "states_with_any": 16,
+   "states_seen": 51
+  },
+  "liheap": {
+   "variable": "liheap",
+   "what": "home energy assistance (LIHEAP)",
+   "share_nonzero_weighted": 0.0,
+   "households_nonzero": 0,
+   "median_if_nonzero": 0.0,
+   "states_with_any": 0,
+   "states_seen": 51
+  },
+  "csfp": {
+   "variable": "commodity_supplemental_food_program",
+   "what": "food boxes for older adults (CSFP)",
+   "share_nonzero_weighted": 0.0629,
+   "households_nonzero": 46,
+   "median_if_nonzero": 651.0,
+   "states_with_any": 13,
+   "states_seen": 51
+  }
+ },
+ "seconds": 94
+}
