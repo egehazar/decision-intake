@@ -1277,3 +1277,22 @@ Holm: P1 (smaller p) at 2.5%, then P2 at 5%; both pass.
   disagreements, or from a simulation of them; D35 and D43 both show a small development run understates it.
 
 By the rule registered before the test, v3 (v2's network unchanged plus the add-on) replaces v2 in production.
+
+## D45. The order to apply in (2026-11-24)
+
+A result list of twelve programmes says what, not in which order, and misses that the programmes lean on each
+other. `Intake.plan` (`/v1/plan`, "Your plan" on the screener) puts the recommended programmes into three steps:
+apply now (SNAP, TANF, SSI, health coverage, housing, whose waiting lists are long), then (WIC, school meals,
+Head Start, Early Head Start), and at tax time (the federal and state credits). Where both ends are recommended
+it names the federal rule linking them, with the citation:
+- SNAP, Medicaid or TANF counts as meeting WIC's income limit (adjunctive eligibility, 7 CFR 246.7(d)(2)(vi));
+- children in a SNAP or TANF household are eligible for free school meals, often by direct certification with no
+  application (7 CFR 245.2 and 245.6a);
+- a family receiving TANF or SSI ("public assistance", 45 CFR 1305.2) meets Head Start's and Early Head Start's
+  income rule (45 CFR 1302.12(c)(1)(ii));
+- in most states SSI comes with Medicaid (42 U.S.C. 1396a(a)(10)(A)(i)(II)).
+Plus one practical note per step: one application covers Medicaid, CHIP and the Marketplace credit; housing
+lists are long, so apply now and to more than one agency; the credits come with the federal and state returns.
+Not modelled: these links do not change any probability (the population has no "already receives" answer), so
+the plan orders and explains; it does not re-score. The screener shows it for three or more programmes across
+two or more steps, in English and Spanish, after the result cards. axe clean in both themes.

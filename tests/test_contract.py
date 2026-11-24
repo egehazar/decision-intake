@@ -358,3 +358,37 @@ def test_batch_limits(app):
     assert call(app, "POST", "/v1/batch", {"records": [{"id": k, "facts": []} for k in range(51)]})["status"] == 400
     one = call(app, "POST", "/v1/batch", {"records": [{"id": "x", "facts": "nope"}]})["json"]["results"][0]
     assert "error" in one
+
+
+# ------------------------------------------------------------------------------------------ application plan
+def test_plan_orders_and_links_programmes(app):
+    facts = [{"question": "state", "choice": "NY"}, {"question": "household_size", "choice": "4"},
+             {"question": "children", "choice": "2"}, {"question": "child_under5", "choice": "yes"},
+             {"question": "earned_income", "amount": {"value": 21000, "period": "year"}},
+             {"question": "tenure", "choice": "rent"}]
+    st = call(app, "POST", "/v1/step", {"facts": facts})["json"]["state"]
+    recs = {r["id"] for r in call(app, "POST", "/v1/assessment", {"state": st})["json"]["recommend"]}
+    r = call(app, "POST", "/v1/plan", {"state": st})
+    assert r["status"] == 200
+    steps = r["json"]["steps"]
+    assert [s["number"] for s in steps] == list(range(1, len(steps) + 1))
+    order = {"now": 0, "next": 1, "tax": 2}
+    assert [order[s["step"]] for s in steps] == sorted(order[s["step"]] for s in steps)
+    planned = [p["id"] for s in steps for p in s["programmes"]]
+    assert set(planned) == recs and len(planned) == len(set(planned))  # every recommendation once, nothing else
+    for s in steps:
+        for p in s["programmes"]:
+            for link in p["links"]:
+                assert set(link["from"]) <= recs and p["id"] not in link["from"]
+                assert "CFR" in link["source"] or "U.S.C." in link["source"]
+    wic = [p for s in steps for p in s["programmes"] if p["id"] == "wic"]
+    if wic and "snap" in recs:
+        assert any(l["kind"] == "income_met" and "snap" in l["from"] for l in wic[0]["links"])
+
+
+def test_plan_is_empty_when_nothing_is_recommended(app):
+    st = call(app, "POST", "/v1/step", {"facts": [{"question": "state", "choice": "CA"},
+                                                   {"question": "household_size", "choice": "1"},
+                                                   {"question": "earned_income", "amount": {"value": 250000, "period": "year"}}]})["json"]["state"]
+    assert call(app, "POST", "/v1/plan", {"state": st})["json"]["steps"] == []
+    assert call(app, "POST", "/v1/plan", {"state": "di1;#bad"})["status"] == 400

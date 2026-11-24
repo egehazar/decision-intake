@@ -61,6 +61,47 @@ CLIFF_GROUPS = {"food and cash": ["snap", "wic", "tanf", "ssi", "school_meals"],
                 "care and housing": ["head_start", "early_head_start", "housing"]}  # the last three: D43
 _COUNT = re.compile(r"none|\d+|\d+ or more|under \d+")
 
+# ------------------------------------------------------------------------------------ the application plan (D45)
+# The order to apply in. Step 1 is what pays every month or covers health (and housing, whose waiting lists
+# are long); step 2 is what an approval from step 1 makes easier; step 3 waits for the tax return.
+PLAN_STEPS = [
+    ("now", "Apply now", ["snap", "tanf", "ssi", "medicaid", "chip", "aca_ptc", "housing"]),
+    ("next", "Then", ["wic", "school_meals", "head_start", "early_head_start"]),
+    ("tax", "At tax time: the 2026 tax return, filed in early 2027", ["eitc", "ctc", "state_eitc", "state_ctc"]),
+]
+# Statutory links: getting a source programme settles part of the target's eligibility. Shown only when a
+# source is also recommended. (target, sources, kind, English text with {src}, citation)
+PLAN_LINKS = [
+    ("wic", ["snap", "medicaid", "tanf"], "income_met",
+     "Getting {src} counts as meeting WIC's income limit, so bring the approval letter.", "7 CFR 246.7(d)(2)(vi)"),
+    ("school_meals", ["snap", "tanf"], "free_meals",
+     "Children in a household getting {src} qualify for free school meals, and the school is often told "
+     "directly, with no form to fill in.", "7 CFR 245.2 and 245.6a"),
+    ("head_start", ["tanf", "ssi"], "income_met",
+     "A family getting {src} meets Head Start's income rule.", "45 CFR 1302.12(c)(1)(ii) and 1305.2"),
+    ("early_head_start", ["tanf", "ssi"], "income_met",
+     "A family getting {src} meets Early Head Start's income rule.", "45 CFR 1302.12(c)(1)(ii) and 1305.2"),
+    ("medicaid", ["ssi"], "comes_with",
+     "In most states, getting SSI comes with Medicaid.", "42 U.S.C. 1396a(a)(10)(A)(i)(II)"),
+]
+PLAN_NOTES = {  # (kind, English text); shown when one of the programmes is in the step
+    "one_health_application": (["medicaid", "chip", "aca_ptc"],
+                               "One application covers Medicaid, CHIP and the Marketplace tax credit: through your "
+                               "state or HealthCare.gov."),
+    "waiting_list": (["housing"], "Waiting lists are often long, so put your name down now, with more than one "
+                                  "housing agency if you can."),
+    "one_return": (["eitc", "ctc", "state_eitc", "state_ctc"],
+                   "The federal credits and the state credits are claimed on your federal and state returns. "
+                   "Free filing help: IRS VITA sites."),
+}
+PLAN_NOTE = ("The order to apply in, for the programmes worth applying for now. The links between programmes are "
+             "federal rules; a state or programme office decides each application.")
+_SHORT = {"snap": "SNAP", "tanf": "TANF", "ssi": "SSI", "medicaid": "Medicaid"}
+
+
+def _either(names: list[str]) -> str:
+    return names[0] if len(names) == 1 else ", ".join(names[:-1]) + " or " + names[-1]
+
 
 def _money(x: float) -> str:
     return f"${x:,.0f}"
@@ -346,6 +387,32 @@ class Intake:
             ask = {"id": nxt["question"]["id"], "text": nxt["question"]["text"], "worth_per_year": nxt["why"]["worth_per_year"]}
         return {"expected_value": int(round(ev, -1)), "recommend": recs, "next": ask, "action": nxt["action"],
                 "expected_mistake_cost": round(self.s.risk()), "support": self.support()["level"]}
+
+    def plan(self) -> dict:
+        """The recommended programmes in the order to apply (PLAN_STEPS), with the statutory links between
+        them (PLAN_LINKS) where both ends are recommended, and one practical note per step (PLAN_NOTES)."""
+        recs = {r["id"]: r for r in self.assessment(brief=True)["recommend"]}
+        steps = []
+        for key, title, ids in PLAN_STEPS:
+            items = []
+            for pid in ids:
+                if pid not in recs:
+                    continue
+                links = []
+                for target, sources, kind, text, cite in PLAN_LINKS:
+                    have = [s for s in sources if s in recs and s != pid]
+                    if target == pid and have:
+                        links.append({"kind": kind, "from": have, "source": cite,
+                                      "text": text.format(src=_either([_SHORT[s] for s in have]))})
+                items.append({"id": pid, "programme": recs[pid]["programme"], "tier": recs[pid]["tier"],
+                              "links": links})
+            if items:
+                in_step = {i["id"] for i in items}
+                notes = [{"kind": k, "text": t} for k, (ids_, t) in PLAN_NOTES.items() if in_step & set(ids_)]
+                steps.append({"step": key, "title": title, "programmes": items, "notes": notes})
+        for n, s in enumerate(steps, 1):
+            s["number"] = n
+        return {"steps": steps, "note": PLAN_NOTE}
 
     def cliff(self, question: str = "earned_income") -> dict:
         """Every option of one amount question (earnings by default), the other answers kept: each programme's

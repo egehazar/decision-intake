@@ -53,6 +53,15 @@ a { color: var(--accent); text-underline-offset: 2px; }
 .urgent { border-left: 3px solid var(--line-strong); padding-left: 12px; }
 .near { margin: 0; font-size: .92rem; color: var(--muted); border-left: 3px solid var(--check); padding-left: 10px; }
 li .near { margin-top: 4px; }
+.plan ol { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px; counter-reset: step; }
+.plan li.step { display: grid; grid-template-columns: 2rem 1fr; gap: 4px 10px; }
+.plan li.step::before { counter-increment: step; content: counter(step); grid-row: span 3; width: 1.8rem; height: 1.8rem; border-radius: 50%;
+  background: var(--accent-soft); color: var(--ink); font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.plan h3 { margin: 0; font-size: 1rem; }
+.plan .names { margin: 0; }
+.plan .names a { color: var(--ink); }
+.plan .chk { color: var(--muted); font-size: .85rem; font-style: italic; }
+.plan ul { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 4px; font-size: .93rem; }
 .cliff table { width: 100%; border-collapse: collapse; font-size: .92rem; }
 .cliff th, .cliff td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 .cliff th { color: var(--muted); font-weight: 600; font-size: .85rem; }
@@ -281,6 +290,11 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
       <p style="margin-top:8px" data-i18n="handoff_help">Free local help: call <b>211</b> or visit <a href="https://211.org/" target="_blank" rel="noopener">211.org</a>. A benefits navigator can check every program with you.</p>
     </div>
     <div id="r-list" class="stack"></div>
+    <section id="r-plan" class="card stack plan" hidden aria-labelledby="plan-h">
+      <h2 id="plan-h" style="font-size:1.2rem"></h2>
+      <ol id="plan-steps"></ol>
+      <p class="fine" id="plan-note"></p>
+    </section>
     <section id="r-cliff" class="card stack cliff" hidden aria-labelledby="cliff-h">
       <h2 id="cliff-h" style="font-size:1.2rem"></h2>
       <p class="fine" id="cliff-p"></p>
@@ -478,6 +492,19 @@ const T = {
     near: (what, value, likely) => `Near the line: with ${what} at ${value}, this would ${likely ? "no longer look likely" : "look likely"}. Check again if that changes.`,
     unit_year: " a year", unit_month: " a month",
     print_head: (d, v) => `Quick Benefits Check summary, ${d}. ${v}. A screening estimate to bring to a benefits office or navigator: not an application or an eligibility decision.`,
+    plan_h: "Your plan: the order to apply in",
+    plan_steps: {now: "Apply now", next: "Then", tax: "At tax time: your 2026 tax return, filed in early 2027"},
+    plan_check: "worth checking", plan_or: "or",
+    plan_link: {
+      wic: s => `WIC: getting ${s} counts as meeting WIC's income limit, so bring the approval letter.`,
+      school_meals: s => `School meals: children in a household getting ${s} qualify for free meals, and the school is often told directly, with no form to fill in.`,
+      head_start: s => `Head Start: a family getting ${s} meets its income rule.`,
+      early_head_start: s => `Early Head Start: a family getting ${s} meets its income rule.`,
+      medicaid: () => "Medicaid: in most states, getting SSI comes with Medicaid."},
+    plan_notes: {one_health_application: "One application covers Medicaid, CHIP and the Marketplace tax credit: through your state or HealthCare.gov.",
+      waiting_list: "Housing waiting lists are often long, so put your name down now, with more than one housing agency if you can.",
+      one_return: "Federal and state credits are claimed on your federal and state tax returns."},
+    plan_note: "The links between programs are federal rules (each is cited in the API). A state or program office decides each application.",
     cliff_h: "If your pay changed",
     cliff_p: "Everything else you told us stays the same; only earnings change. Bars show the expected yearly value of food, cash and tax-credit help: the chance of qualifying times the typical amount.",
     cliff_cols: ["Earnings a year", "Food, cash and tax credits", "Health coverage that looks likely"],
@@ -514,6 +541,19 @@ const T = {
     near: (what, value, likely) => `Cerca del límite: con ${what} de ${value}, esto ${likely ? "ya no parecería probable" : "parecería probable"}. Vuelva a revisar si eso cambia.`,
     unit_year: " al año", unit_month: " al mes",
     print_head: (d, v) => `Resumen de la Revisión rápida de beneficios, ${d}. ${v}. Una estimación para llevar a una oficina de beneficios o a un orientador: no es una solicitud ni una decisión de elegibilidad.`,
+    plan_h: "Su plan: el orden para solicitar",
+    plan_steps: {now: "Solicite ahora", next: "Después", tax: "En la temporada de impuestos: su declaración de 2026, presentada a principios de 2027"},
+    plan_check: "vale la pena revisar", plan_or: "o",
+    plan_link: {
+      wic: s => `WIC: recibir ${s} cuenta como cumplir el límite de ingresos de WIC, así que lleve la carta de aprobación.`,
+      school_meals: s => `Comidas escolares: los niños de un hogar que recibe ${s} califican para comidas gratis, y a menudo la escuela recibe el aviso directamente, sin formulario.`,
+      head_start: s => `Head Start: una familia que recibe ${s} cumple su regla de ingresos.`,
+      early_head_start: s => `Early Head Start: una familia que recibe ${s} cumple su regla de ingresos.`,
+      medicaid: () => "Medicaid: en la mayoría de los estados, recibir SSI incluye Medicaid."},
+    plan_notes: {one_health_application: "Una sola solicitud cubre Medicaid, CHIP y el crédito tributario del Mercado: en su estado o en HealthCare.gov.",
+      waiting_list: "Las listas de espera de vivienda suelen ser largas: inscríbase ahora, y en más de una agencia de vivienda si puede.",
+      one_return: "Los créditos federales y estatales se reclaman en sus declaraciones de impuestos federal y estatal."},
+    plan_note: "Los vínculos entre programas son reglas federales (cada una se cita en la API). Una oficina estatal o del programa decide cada solicitud.",
     cliff_h: "Si su sueldo cambiara",
     cliff_p: "Todo lo demás que nos dijo se mantiene igual; solo cambian los ingresos. Las barras muestran el valor anual esperado de la ayuda en alimentos, efectivo y créditos tributarios: la probabilidad de calificar por la cantidad típica.",
     cliff_cols: ["Ingresos al año", "Alimentos, efectivo y créditos tributarios", "Cobertura médica que parece probable"],
@@ -655,9 +695,9 @@ async function step(facts) {
     if (bad) { showError(bad.error); return; }
     for (const x of r.readings) S.readings[x.question] = x.reading;
     if (facts.length && !S.editing) S.asked += 1;
-    S.state = r.state; S.editing = null; S.lastNext = r.next; S.explain = null; S.cliff = null;
+    S.state = r.state; S.editing = null; S.lastNext = r.next; S.explain = null; S.cliff = null; S.plan = null;
     store();
-    if (r.next.action === "ask") renderQuestion(r.next); else { renderResults(r.next); nearTheLine(gen); payView(gen); }
+    if (r.next.action === "ask") renderQuestion(r.next); else { renderResults(r.next); nearTheLine(gen); payView(gen); planView(gen); }
   } catch (e) {
     if (gen !== S.gen) return;
     if (e.code === "bad_state") { reset(); show("intro"); status(t("bad_state")); }
@@ -832,7 +872,7 @@ function renderResults(next) {
     const tier = r.tier === "likely" ? ["likely", t("badge_likely")] : ["check", t("badge_check")];
     const v = r.value_if_eligible_per_year;
     const value = !Array.isArray(v) ? "" : v[1] < 120 ? t("small") : t("value")(v[0] === v[1] ? money(v[0]) : `${money(v[0])}–${money(v[1])}`, esc(i.when || t("per_year")));
-    return `<article class="card result ${tier[0]} stack" data-pid="${esc(r.id)}">
+    return `<article class="card result ${tier[0]} stack" data-pid="${esc(r.id)}" id="card-${esc(r.id)}" tabindex="-1">
       <header><h2 style="font-size:1.2rem">${esc(i.name)}</h2><span class="badge ${tier[0]}"><span aria-hidden="true">${tier[0] === "likely" ? "&#10003;" : "?"}</span> ${esc(tier[1])}</span></header>
       <p class="desc">${esc(i.desc)}</p>
       ${value ? `<p class="value">${value}</p>` : ""}
@@ -853,6 +893,7 @@ function renderResults(next) {
   wireEdits($("r-answers"));
   $("r-note").textContent = t("note")();
   renderNearTheLine();
+  renderPlan();
   renderPayView();
   show("results");
   $("r-h").focus({preventScroll: true});
@@ -895,6 +936,41 @@ async function payView(gen) {
     renderPayView();
   } catch (e) { /* optional */ }
 }
+// "Your plan" (/v1/plan): the recommended programmes in the order to apply, and the federal rules by which one
+// approval settles part of another's eligibility. Shown for three or more programmes over two or more steps.
+async function planView(gen) {
+  try {
+    const p = await post("/v1/plan", {state: S.state});
+    if (gen !== S.gen || $("results").hidden) return;
+    S.plan = p;
+    renderPlan();
+  } catch (e) { /* optional */ }
+}
+const SHORT = {snap: "SNAP", tanf: "TANF", ssi: "SSI", medicaid: "Medicaid"};
+function either(ids) {
+  const n = ids.map(i => SHORT[i] || i);
+  return n.length === 1 ? n[0] : n.slice(0, -1).join(", ") + " " + t("plan_or") + " " + n[n.length - 1];
+}
+function renderPlan() {
+  const p = S.plan, box = $("r-plan");
+  const count = p ? p.steps.reduce((a, s) => a + s.programmes.length, 0) : 0;
+  if (!p || p.steps.length < 2 || count < 3) { box.hidden = true; return; }
+  $("plan-h").textContent = t("plan_h");
+  $("plan-note").textContent = t("plan_note");
+  const steps = t("plan_steps"), links = t("plan_link"), notes = t("plan_notes");
+  $("plan-steps").innerHTML = p.steps.map(s => {
+    const names = s.programmes.map(x => `<a href="#card-${esc(x.id)}">${esc((info(x.id) || {}).name || x.programme)}</a>${x.tier === "likely" ? "" : ` <span class="chk">${esc(t("plan_check"))}</span>`}`).join(" · ");
+    const lines = s.programmes.flatMap(x => x.links.filter(l => links[x.id]).map(l => links[x.id](either(l.from))))
+      .concat(s.notes.filter(n => notes[n.kind]).map(n => notes[n.kind]));
+    return `<li class="step"><h3>${esc(steps[s.step] || s.title)}</h3><p class="names">${names}</p>${lines.length ? `<ul>${lines.map(l => `<li>${esc(l)}</li>`).join("")}</ul>` : ""}</li>`;
+  }).join("");
+  for (const a of $("plan-steps").querySelectorAll("a")) a.onclick = e => {
+    const card = document.getElementById(a.getAttribute("href").slice(1));
+    if (card) { e.preventDefault(); card.scrollIntoView({behavior: "smooth", block: "start"}); card.focus({preventScroll: true}); }
+  };
+  box.hidden = false;
+}
+
 function renderPayView() {
   const c = S.cliff, box = $("r-cliff");
   if (!c) { box.hidden = true; return; }

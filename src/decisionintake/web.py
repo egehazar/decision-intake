@@ -7,6 +7,7 @@
     POST /v1/explain       {"state"} -> which single answer, one step different, would change each result
     POST /v1/cliff         {"state", "question"?} -> every option of an amount question, the rest kept: a cliff view
     POST /v1/batch         {"records": [{"id", "facts"}]} -> per record: expected value, next question; call order
+    POST /v1/plan          {"state"} -> the recommended programmes in the order to apply, with the rules linking them
     GET  /openapi.json     this API, described
     POST /mcp              the Model Context Protocol over Streamable HTTP (2026-07-28, 2025-11-25, 2025-06-18,
                            2025-03-26)
@@ -219,10 +220,10 @@ class App:
                        ("GET", "/openapi.json"): self.openapi, ("GET", "/v1/questions"): self.questions,
                        ("POST", "/v1/step"): self.step, ("POST", "/v1/assessment"): self.assess,
                        ("POST", "/v1/explain"): self.explain, ("POST", "/v1/cliff"): self.cliff,
-                       ("POST", "/v1/batch"): self.batch}.get((method, path))
+                       ("POST", "/v1/batch"): self.batch, ("POST", "/v1/plan"): self.plan}.get((method, path))
             if handler is None:
                 known = {"/healthz", "/openapi.json", "/v1/questions", "/v1/step", "/v1/assessment", "/v1/explain",
-                         "/v1/cliff", "/v1/batch"}
+                         "/v1/cliff", "/v1/batch", "/v1/plan"}
                 if path in known:
                     raise HTTPError(405, "method_not_allowed", f"{method} is not supported on {path}")
                 raise HTTPError(404, "not_found", f"no route {path}; see /openapi.json")
@@ -305,6 +306,14 @@ class App:
                            "note": "expected_value: dollars a year the programmes recommended now are expected to be "
                                    "worth (chance times typical amount). A ranking aid for outreach, not an "
                                    "eligibility decision."})
+
+    def plan(self, environ, log):
+        body = self._body(environ) or {}
+        if not isinstance(body, dict):
+            raise HTTPError(400, "bad_request", 'send an object: {"state": "..."}')
+        it, _ = self._intake(body.get("state"))
+        log.update(facts=len(it.facts))
+        return _json(200, {"state": it.state(), **it.plan()})
 
     def cliff(self, environ, log):
         body = self._body(environ) or {}
@@ -635,6 +644,27 @@ def openapi_doc(base: str | None = None) -> dict:
                             "probability": {"type": "number"}, "typical_value": {"type": "integer"},
                             "expected_value": {"type": "integer"}}}}}}},
                     "groups": {"type": "object"}, "note": {"type": "string"}}}),
+                              "400": err, "413": err, "415": err, "429": limited}}},
+            "/v1/plan": {"post": {
+                "operationId": "plan",
+                "summary": "The programmes worth applying for, in the order to apply (now, then, at tax time), with "
+                           "the federal rules by which one approval settles part of another's eligibility",
+                "requestBody": body({"type": "object", "required": ["state"], "properties": {"state": ref("State")}},
+                                    {"state": example_state}),
+                "responses": {"200": resp("the steps", {"type": "object", "properties": {
+                    "state": ref("State"), "note": {"type": "string"},
+                    "steps": {"type": "array", "items": {"type": "object", "properties": {
+                        "number": {"type": "integer"}, "step": {"type": "string", "enum": ["now", "next", "tax"]},
+                        "title": {"type": "string"},
+                        "programmes": {"type": "array", "items": {"type": "object", "properties": {
+                            "id": {"type": "string"}, "programme": {"type": "string"},
+                            "tier": {"type": "string", "enum": ["likely", "worth checking"]},
+                            "links": {"type": "array", "items": {"type": "object", "properties": {
+                                "kind": {"type": "string"}, "from": {"type": "array", "items": {"type": "string"}},
+                                "text": {"type": "string"}, "source": {"type": "string",
+                                                                       "description": "the regulation or statute"}}}}}}},
+                        "notes": {"type": "array", "items": {"type": "object", "properties": {
+                            "kind": {"type": "string"}, "text": {"type": "string"}}}}}}}}}),
                               "400": err, "413": err, "415": err, "429": limited}}},
             "/v1/batch": {"post": {
                 "operationId": "batch",
