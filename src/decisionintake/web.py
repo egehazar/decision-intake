@@ -484,7 +484,7 @@ def openapi_doc(base: str | None = None) -> dict:
                     "state": ref("State"), "facts": {"type": "array", "maxItems": MAX_FACTS, "items": ref("Fact")}}},
                     {"state": example_state, "facts": [{"question": "children", "choice": "2"}]}),
                 "responses": {"200": resp("the new state, how each fact was read, and the next step", ref("Step")),
-                              "400": err, "413": err, "415": err}}},
+                              "400": err, "413": err, "415": err, "429": {"$ref": "#/components/responses/RateLimited"}}}},
             "/v1/assessment": {"post": {
                 "operationId": "assessment",
                 "summary": "Every programme's probability, tier and yearly value range; the facts so far",
@@ -507,7 +507,10 @@ def openapi_doc(base: str | None = None) -> dict:
             "/healthz": {"get": {"operationId": "health", "summary": "Liveness and exactly what is deployed",
                                  "responses": {"200": resp("ok", ref("Health"))}}},
         },
-        "components": {"schemas": schemas, "responses": {"Error": resp("error", ref("Error"))}},
+        "components": {"schemas": schemas, "responses": {
+            "Error": resp("error", ref("Error")),
+            "RateLimited": {"description": "over 120 requests a minute from one IP address (enforced at the edge); "
+                                           "wait a minute"}}},
     }
     if base:
         doc["servers"] = [{"url": base}]

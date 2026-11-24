@@ -69,6 +69,9 @@ were waived when the site went public (D38): the page labels the Spanish as AI-a
 - [x] No facts in URLs, logs or analytics (state travels in POST bodies only)
 - [x] Request limits in the app (64 KB body, 40 facts, 2,000-character state); the Hobby plan has no
       billing to run up (usage limits cap it)
+- [x] Rate limit at the edge (Vercel Firewall, rule "Rate limit /v1/* and /mcp"): 120 requests a minute per
+      IP address on the compute routes, 429 beyond it; checked with a 125-request burst (120 x 200, 5 x 429),
+      the page and /healthz unaffected (D39)
 - [x] Cold and warm latency measured on the real deployment: engine boot 1.1 s, /v1/step about 300 ms
       median server time (89 ms to 1.1 s); on a desktop CPU 109-125 ms median (D31, D36)
 - [x] Rollback rehearsed (D36): production moved back to the previous deployment in seconds, served it,

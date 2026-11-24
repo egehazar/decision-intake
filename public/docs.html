@@ -497,6 +497,7 @@ print(r[&quot;next&quot;][&quot;action&quot;], r[&quot;next&quot;].get(&quot;que
 <tr><td>403</td><td>MCP only: a browser <code>Origin</code> this server doesn't accept</td></tr>
 <tr><td>404, 405</td><td>no such route; wrong method (MCP is POST only)</td></tr>
 <tr><td>413, 415</td><td>body over 64 KB; not <code>application/json</code></td></tr>
+<tr><td>429</td><td>more than 120 requests a minute from one IP address to <code>/v1/*</code> or <code>/mcp</code>; wait a minute</td></tr>
 <tr><td>500</td><td><code>internal</code>; nothing about the failure is returned, the server log keeps it</td></tr>
 </table></div>
 <div class="tbl"><table>
@@ -505,6 +506,7 @@ print(r[&quot;next&quot;][&quot;action&quot;], r[&quot;next&quot;].get(&quot;que
 <tr><td>Facts in one call</td><td>40</td></tr>
 <tr><td>State string</td><td>2,000 characters</td></tr>
 <tr><td>Amounts</td><td>numbers from 0 to 1,000,000,000</td></tr>
+<tr><td>Rate</td><td>120 requests a minute per IP address on <code>/v1/*</code> and <code>/mcp</code> (a whole screening is about 10)</td></tr>
 <tr><td>Latency</td><td>about 300 ms of server time a step; the first call after a quiet spell adds about a second</td></tr>
 </table></div>
 <p><b>Cross-origin use.</b> The JSON API answers any origin (no credentials are involved). <code>/mcp</code> serves clients that send no <code>Origin</code> (server-side assistants and tools) and browsers from this site or localhost; ask in the repository if a browser client elsewhere needs it.</p>
