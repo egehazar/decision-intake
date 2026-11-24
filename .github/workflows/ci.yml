@@ -16,7 +16,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python }}
-      - run: pip install -r requirements.txt pytest
+      - name: Install the package (validates pyproject.toml, as Vercel's builder does)
+        run: pip install -e . pytest
       - name: Tests (engine, typed intake, rules, stateless service, MCP over stdio and HTTP)
         run: pytest -q
       - name: Smoke test the service over a real socket

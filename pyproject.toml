@@ -9,12 +9,13 @@ authors = [{name = "Ege Hazar"}]
 requires-python = ">=3.11"
 keywords = ["benefits screening", "value of information", "mcp", "policyengine", "decision theory"]
 
+dependencies = ["numpy>=1.26"]
+
 [project.urls]
 Homepage = "https://decision-intake.vercel.app"
 Documentation = "https://decision-intake.vercel.app/docs.html"
 Source = "https://github.com/egehazar/decision-intake"
 Issues = "https://github.com/egehazar/decision-intake/issues"
-dependencies = ["numpy>=1.26"]
 
 [project.scripts]
 decisionintake-web = "decisionintake.web:main"
