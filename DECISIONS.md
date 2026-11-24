@@ -1134,3 +1134,12 @@ says), resource-not-found, skills-directory, and the input-required checks for u
 params and input validation. Two real defects found and fixed on the way: DNS rebinding for local runs
 (above) and whitespace around header values (RFC 9110 5.5), which the first run failed 0 of 5 and the rerun
 passed 14 of 14.
+
+## D40. Launch (2026-11-24, 14:40 UTC)
+
+Ege: "you can do those" (the repository settings and the read of the posts). Release v1.0.0 published from
+f8705d0 (https://github.com/egehazar/decision-intake/releases/tag/v1.0.0); its tag ran the publish workflow,
+and the connector is listed in the official MCP Registry as io.github.egehazar/decision-intake 1.0.0.
+Repository description and topics set; private vulnerability reporting on. Posted: PolicyEngine/policyengine-us
+discussion #11247 (Show and tell: scrutiny wanted on household units and earnings inputs) and a LinkedIn post.
+Show HN waits for Ege, whose Hacker News account it needs.
