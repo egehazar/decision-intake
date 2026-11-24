@@ -1248,3 +1248,8 @@ behave exactly as served, which is what "v2 unchanged" means for arm A. The five
 PolicyEngine and are untouched by the coding bug. The add-on network was trained on the corrected answers of the
 same 48,657 households (same order, same weights, same outcomes for the ten; only earnings, self-employed and
 other income differ, as D34 found).
+
+**D43 development run (2026-11-24 15:58 UTC, before the test).** 300 validation households, clean answers
+(results/d43_dev_analysis.txt): P2 +$0 [-0, +1], a 95% half-width of about $1, so the margin stays **$25** as
+registered. On these development households: P1 -$356 [-911, +46]; A asked 9.1 questions, B 8.1. Not evidence
+for the test; the test runs next on the 2,000 held-out households, unchanged.

@@ -1,0 +1,9 @@
+D43 dev: 300 households, A (v3, fifteen programmes) minus B (v2 + rule)
+
+clean answers
+  P1 five added programmes, decision loss: -356 [-911, +46]
+  P2 original ten, decision loss: +0 [-0, +1]  (95% half-width 1)
+  total over fifteen incl. $15 a question: -341 [-894, +58]
+  questions A 9.1, B 8.1
+  the five: eligible programmes found A 65.4% B 66.7%; 'not recommended' that is wrong A 1.94% B 1.87%
+  per programme: state_eitc A $11 B $26; state_ctc A $0 B $58; head_start A $66 B $17; early_head_start A $87 B $189; housing A $0 B $229
