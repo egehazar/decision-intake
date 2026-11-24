@@ -1352,3 +1352,14 @@ one client, p50 121 -> 147 ms and p95 217 -> 301 ms; four clients, p50 180 -> 24
 shared feature encoding is only ~2 ms of that), and screenings ask about one more question (11.4 against 10.8
 requests). Fusing the two networks' matrix products would save a little but could change float rounding in
 v2's ten programmes, which D43 promises stay bit for bit the same; not done.
+
+## D48. Caseload triage knows what households already get (2026-11-24)
+
+Food banks and 211 lines usually know who is on SNAP. `/v1/batch` records (and the caseload page's `already`
+column) take what the household gets now: those programmes leave its expected value (a call can't unlock them),
+and `opened_by_rule` lists the programmes the D45 rules open because of them, with the rule cited: SNAP with
+children opens free school meals (7 CFR 245.2), SNAP or Medicaid with a young child opens WIC's income test, TANF
+or SSI opens Head Start's. Opened programmes are flagged, not counted in the expected value: the rule settles
+the income test, not the whole of eligibility. The example list now includes one (Michigan, three people,
+$54,000, on SNAP under the state's higher limit: free school meals opened). An unknown programme name fails that
+row only.

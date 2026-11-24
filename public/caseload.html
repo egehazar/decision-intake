@@ -40,6 +40,7 @@ table { border-collapse: collapse; width: 100%; font-size: .93rem; }
 th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
 th { color: var(--muted); font-weight: 600; }
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pill.open { border-style: dashed; }
 .pill { display: inline-block; border: 1px solid var(--line); border-radius: 999px; padding: 0 8px; margin: 0 4px 4px 0; font-size: .82rem; }
 [hidden] { display: none !important; }
 </style>
@@ -54,7 +55,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 
   <section class="card" aria-labelledby="h-in">
     <h2 id="h-in">1. Your list</h2>
-    <p class="fine">One row per household, with a header row. Use an <code>id</code> column with your own reference, <b>never names</b>. Any of these columns help; leave unknowns blank: <code>state</code> (two letters), <code>household_size</code>, <code>children</code>, <code>earned_income</code> (dollars a year), <code>tenure</code> (rent, own or neither), <code>housing_cost</code> (dollars a month), <code>child_under5</code>, <code>senior</code>, <code>disabled</code>, <code>married</code> (yes or no), <code>social_security</code> and <code>other_income</code> (dollars a year), <code>assets</code> (dollars).</p>
+    <p class="fine">One row per household, with a header row. Use an <code>id</code> column with your own reference, <b>never names</b>. Any of these columns help; leave unknowns blank: <code>state</code> (two letters), <code>household_size</code>, <code>children</code>, <code>earned_income</code> (dollars a year), <code>tenure</code> (rent, own or neither), <code>housing_cost</code> (dollars a month), <code>child_under5</code>, <code>senior</code>, <code>disabled</code>, <code>married</code> (yes or no), <code>social_security</code> and <code>other_income</code> (dollars a year), <code>assets</code> (dollars). And <code>already</code>: what the household gets now, separated by spaces (<code>snap</code>, <code>medicaid</code>, <code>tanf</code>, <code>ssi</code>, <code>wic</code>, <code>chip</code>, <code>housing</code>). Those are left out of the ranking, and the federal rules they trigger are shown: a household on SNAP with a child under 5 meets WIC's income test, for one.</p>
     <label for="csv" class="fine">Paste CSV, or choose a file</label>
     <textarea id="csv" spellcheck="false" placeholder="id,state,household_size,children,earned_income,tenure"></textarea>
     <div class="row">
@@ -80,13 +81,16 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
 "use strict";
 const $ = id => document.getElementById(id);
 const AMOUNT = {earned_income: "year", social_security: "year", other_income: "year", childcare: "year", housing_cost: "month", assets: "none"};
-const EXAMPLE = `id,state,household_size,children,earned_income,tenure,senior
-c-101,TX,4,2,24000,rent,no
-c-102,CA,1,0,95000,rent,no
-c-103,NY,1,0,0,rent,yes
-c-104,OH,3,2,31000,rent,no
-c-105,FL,2,0,52000,own,no
-c-106,PA,5,3,18000,rent,no`;
+const EXAMPLE = `id,state,household_size,children,child_under5,earned_income,tenure,senior,already
+c-101,TX,4,2,no,24000,rent,no,
+c-102,CA,1,0,,95000,rent,no,
+c-103,NY,1,0,,0,rent,yes,
+c-104,OH,3,2,yes,31000,rent,no,snap
+c-105,FL,2,0,,52000,own,no,
+c-106,PA,5,3,yes,18000,rent,no,snap medicaid
+c-107,MI,3,1,yes,54000,rent,no,snap`;
+const RULE = {wic: "SNAP, Medicaid or TANF meets WIC's income test", school_meals: "SNAP or TANF: free school meals",
+  head_start: "TANF or SSI meets Head Start's income rule", early_head_start: "TANF or SSI meets Early Head Start's income rule"};
 let CAT = null, LAST = [];
 
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c])); }
@@ -110,7 +114,7 @@ function toRecords(text) {
   const head = rows[0].map(h => h.trim().toLowerCase());
   if (!head.includes("id")) throw new Error("Add an id column with your own reference (never names).");
   const known = new Set(CAT.questions.map(q => q.id));
-  const unknown = head.filter(h => h !== "id" && !known.has(h));
+  const unknown = head.filter(h => h !== "id" && h !== "already" && !known.has(h));
   if (unknown.length) throw new Error(`Unknown column${unknown.length > 1 ? "s" : ""}: ${unknown.join(", ")}. Use the column names listed above.`);
   if (rows.length - 1 > 1000) throw new Error("Up to 1,000 rows at a time.");
   return rows.slice(1).map((r, k) => {
@@ -119,6 +123,7 @@ function toRecords(text) {
       if (h === "id") return;
       const v = (r[j] || "").trim();
       if (v === "") return;
+      if (h === "already") { rec.already = v.toLowerCase().split(/[\s,;|]+/).filter(Boolean); return; }
       if (h in AMOUNT && !isNaN(Number(v.replace(/[$,]/g, "")))) rec.facts.push({question: h, amount: {value: Number(v.replace(/[$,]/g, "")), period: AMOUNT[h]}});
       else rec.facts.push({question: h, choice: v});
     });
@@ -151,16 +156,19 @@ function label(id) { return (CAT.programmes.find(p => p.id === id) || {}).label 
 function render(out) {
   $("rows").innerHTML = out.map((r, k) => {
     const issues = r.error ? ` <span class="fine">(${esc(r.error)})</span>` : r.errors ? ` <span class="fine">(${r.errors.length} value${r.errors.length > 1 ? "s" : ""} not read: ${esc(r.errors.map(e => e.question).join(", "))})</span>` : "";
-    const recs = (r.recommend || []).map(p => `<span class="pill">${esc(label(p.id))}${p.tier === "likely" ? "" : " ?"}</span>`).join("") || '<span class="fine">none yet</span>';
+    const opened = (r.opened_by_rule || []).map(p => `<span class="pill open" title="${esc(RULE[p.id] || p.rule)} (${esc(p.rule)})">+ ${esc(label(p.id))} <span class="fine">${esc(RULE[p.id] || "")}</span></span>`).join("");
+    const recs = ((r.recommend || []).map(p => `<span class="pill">${esc(label(p.id))}${p.tier === "likely" ? "" : " ?"}</span>`).join("") + opened) || '<span class="fine">none yet</span>';
+    const has = r.already && r.already.length ? `<br><span class="fine">gets ${esc(r.already.join(", "))}</span>` : "";
     const ask = r.next ? `${esc(r.next.text)} <span class="fine">(worth ${money(r.next.worth_per_year)} a year in fewer mistakes)</span>` : '<span class="fine">nothing more worth asking</span>';
-    return `<tr><td>${k + 1}</td><td>${esc(r.id)}${issues}</td><td class="num">${r.expected_value != null ? money(r.expected_value) : "-"}</td><td>${recs}</td><td>${ask}</td></tr>`;
+    return `<tr><td>${k + 1}</td><td>${esc(r.id)}${has}${issues}</td><td class="num">${r.expected_value != null ? money(r.expected_value) : "-"}</td><td>${recs}</td><td>${ask}</td></tr>`;
   }).join("");
   $("out").hidden = false;
 }
 function download() {
   const q = s => `"${String(s).replace(/"/g, '""')}"`;
-  const lines = [["rank", "id", "expected_value_per_year", "recommend", "ask_first", "ask_first_worth_per_year", "state"].join(",")];
+  const lines = [["rank", "id", "expected_value_per_year", "recommend", "opened_by_rule", "already", "ask_first", "ask_first_worth_per_year", "state"].join(",")];
   LAST.forEach((r, k) => lines.push([k + 1, q(r.id), r.expected_value ?? "", q((r.recommend || []).map(p => p.id).join(" ")),
+    q((r.opened_by_rule || []).map(p => p.id).join(" ")), q((r.already || []).join(" ")),
     q(r.next ? r.next.id : ""), r.next ? r.next.worth_per_year : "", q(r.state || "")].join(",")));
   const a = document.createElement("a");
   a.href = URL.createObjectURL(new Blob([lines.join("\n") + "\n"], {type: "text/csv"}));

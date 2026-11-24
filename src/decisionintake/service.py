@@ -375,14 +375,22 @@ class Intake:
             return [j for j in (k - 1, k + 1) if 0 <= j < n]
         return [j for j in range(n) if j != k]
 
-    def triage(self) -> dict:
+    def triage(self, already=()) -> dict:
         """For a caseload list: what this person stands to gain and what to ask them first. expected_value is the
-        sum, over the programmes the engine would recommend now, of probability times typical yearly value (the
-        dollars a call could unlock); next is the question worth most, with its dollar worth, or None."""
+        sum, over the programmes the engine would recommend now and the household doesn't already get, of
+        probability times typical yearly value (the dollars a call could unlock); next is the question worth
+        most, with its dollar worth, or None. opened_by_rule: programmes the plan's federal rules open because of
+        what the household already gets (SNAP -> WIC's income test, for one), not counted in expected_value."""
+        already = list(dict.fromkeys(already))
+        opened = []
+        if already:
+            plan = self.plan(already)  # validates the ids
+            opened = [{"id": p["id"], "because": p["links"][0]["already"], "rule": p["links"][0]["source"]}
+                      for s in plan["steps"] for p in s["programmes"] if p.get("added_by_rule")]
         thin = self._thin(self.s)
         recs, ev = [], 0.0
         for dv in self.s.decisions():
-            if dv.recommend:
+            if dv.recommend and dv.decision not in already:
                 typical = (max(dv.value_low, 0) + max(dv.value_high, 0)) / 2
                 ev += dv.p_eligible * typical
                 recs.append({"id": dv.decision, "tier": self._tier(True, dv.p_eligible, thin),
@@ -392,8 +400,12 @@ class Intake:
         ask = None
         if nxt["action"] == "ask":
             ask = {"id": nxt["question"]["id"], "text": nxt["question"]["text"], "worth_per_year": nxt["why"]["worth_per_year"]}
-        return {"expected_value": int(round(ev, -1)), "recommend": recs, "next": ask, "action": nxt["action"],
-                "expected_mistake_cost": round(self.s.risk()), "support": self.support()["level"]}
+        out = {"expected_value": int(round(ev, -1)), "recommend": recs, "next": ask, "action": nxt["action"],
+               "expected_mistake_cost": round(self.s.risk()), "support": self.support()["level"]}
+        if already:
+            out["already"] = already
+            out["opened_by_rule"] = opened
+        return out
 
     def _category_fits(self, pid: str) -> bool:
         for q, ruled_out in PLAN_CATEGORY.get(pid, []):

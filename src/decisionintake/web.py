@@ -293,10 +293,19 @@ class App:
             if not isinstance(facts, list) or len(facts) > MAX_FACTS:
                 out.append({"id": rid, "error": f"facts must be a list of at most {MAX_FACTS}"})
                 continue
+            already = rec.get("already", []) if isinstance(rec, dict) else []
+            if not isinstance(already, list) or not all(isinstance(a, str) for a in already):
+                out.append({"id": rid, "error": "already must be a list of programme ids"})
+                continue
             it = Intake(self.b, self.settings)
             readings = it.record(facts)
             errors = [r for r in readings if "error" in r]
-            row = {"id": rid, "state": it.state(), **it.triage()}
+            try:
+                tri = it.triage(already)
+            except FactError as e:
+                out.append({"id": rid, "error": str(e)})
+                continue
+            row = {"id": rid, "state": it.state(), **tri}
             if errors:
                 row["errors"] = errors
             out.append(row)
@@ -692,7 +701,10 @@ def openapi_doc(base: str | None = None) -> dict:
                 "requestBody": body({"type": "object", "required": ["records"], "properties": {"records": {
                     "type": "array", "maxItems": MAX_BATCH, "items": {"type": "object", "properties": {
                         "id": {"type": ["string", "integer"], "description": "your reference; never a name"},
-                        "facts": {"type": "array", "maxItems": MAX_FACTS, "items": ref("Fact")}}}}}},
+                        "facts": {"type": "array", "maxItems": MAX_FACTS, "items": ref("Fact")},
+                        "already": {"type": "array", "items": {"type": "string"},
+                                    "description": "programme ids the household gets now: left out of the expected "
+                                                   "value, and used to find programmes the federal rules open"}}}}}},
                     {"records": [{"id": "c-101", "facts": [{"question": "state", "choice": "TX"},
                                                             {"question": "children", "choice": "2"}]}]}),
                 "responses": {"200": resp("per record, and the order to call them in", {"type": "object", "properties": {
@@ -703,6 +715,10 @@ def openapi_doc(base: str | None = None) -> dict:
                         "next": {"type": ["object", "null"], "properties": {
                             "id": {"type": "string"}, "text": {"type": "string"}, "worth_per_year": {"type": "integer"}}},
                         "expected_mistake_cost": {"type": "integer"}, "support": {"type": "string"},
+                        "already": {"type": "array", "items": {"type": "string"}},
+                        "opened_by_rule": {"type": "array", "items": {"type": "object", "properties": {
+                            "id": {"type": "string"}, "because": {"type": "array", "items": {"type": "string"}},
+                            "rule": {"type": "string"}}}},
                         "errors": {"type": "array", "items": ref("Reading")}}}},
                     "call_order": {"type": "array", "items": {"type": ["string", "integer"]}},
                     "note": {"type": "string"}}}), "400": err, "413": err, "415": err, "429": limited}}},

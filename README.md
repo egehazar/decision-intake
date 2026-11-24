@@ -173,6 +173,8 @@ person's words ──► an LLM, or a form ──► typed facts (option, amount
   [caseload page](https://decision-intake.vercel.app/caseload.html) takes a CSV and stores nothing). On 2,000
   simulated households known by five fields, the top 20% of the ranking held 61% of the benefit dollars,
   against 20% at random and 53% for largest household first (development check, `experiments/triage_dev.py`).
+  An `already` column (what each household gets now) leaves those out and lists what the federal rules open,
+  the SNAP-to-WIC and SNAP-to-school-meals gaps outreach teams look for.
 - **Rules it may not break** (`bundles/guards_2026.json`), each checked against PolicyEngine's own results
   before shipping. They cost nothing on 2,000 fresh households (−$3.7 [−9.4, +0.0], registered, D32).
   Tracing every exception through PolicyEngine tax unit by tax unit explained 108 of 109, and found the
@@ -217,7 +219,7 @@ color-only meaning; axe-core finds no WCAG 2.1 A/AA violations on any screen in 
 # 1. environment (Python 3.11+; tested on 3.13 with numpy 2.5.5 and policyengine-us 2.152.15)
 python -m venv .venv && . .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -e ".[dev]" policyengine-us==2.152.15 tables h5py
-pytest -q                                              # 108 tests, on the shipped model; no data needed
+pytest -q                                              # 109 tests, on the shipped model; no data needed
 
 # 2. data: Populace national build populace-us-2024-spm-20260915 (827 MB, sha256 6496cc43...aee84) into
 #    data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)

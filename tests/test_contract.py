@@ -455,3 +455,23 @@ def test_only_embed_may_be_framed():
         assert csp_for(path) and all("frame-ancestors 'none'" in v for v in csp_for(path)), path
     assert len(csp_for("/embed")) == 1 and "frame-ancestors https:" in csp_for("/embed")[0]
     assert {"source": "/embed", "destination": "/index.html"} in cfg["rewrites"]
+
+
+def test_batch_with_programmes_already_received(app):
+    fam = [{"question": "state", "choice": "MI"}, {"question": "household_size", "choice": "3"},
+           {"question": "children", "choice": "1"}, {"question": "child_under5", "choice": "yes"},
+           {"question": "earned_income", "amount": {"value": 54000, "period": "year"}}]
+    r = call(app, "POST", "/v1/batch", {"records": [{"id": "plain", "facts": fam},
+                                                    {"id": "snap", "facts": fam, "already": ["snap"]},
+                                                    {"id": "wic", "facts": fam, "already": ["wic"]},
+                                                    {"id": "typo", "facts": fam, "already": ["food stamps"]}]})["json"]
+    out = {x["id"]: x for x in r["results"]}
+    assert "opened_by_rule" not in out["plain"]
+    assert out["snap"]["already"] == ["snap"]
+    for o in out["snap"]["opened_by_rule"]:  # each opened programme names what opened it and the rule
+        assert o["because"] == ["snap"] and ("CFR" in o["rule"] or "U.S.C." in o["rule"])
+        assert o["id"] not in {p["id"] for p in out["snap"]["recommend"]}
+    if any(p["id"] == "wic" for p in out["plain"]["recommend"]):  # what they already get leaves the value
+        assert out["wic"]["expected_value"] < out["plain"]["expected_value"]
+        assert "wic" not in {p["id"] for p in out["wic"]["recommend"]}
+    assert "error" in out["typo"] and "typo" not in r["call_order"]
