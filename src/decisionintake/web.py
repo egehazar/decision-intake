@@ -66,6 +66,14 @@ def _sha256(path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def _rules_sha256(path) -> str:
+    """The rules' identity, not their bytes: canonical JSON, so a Windows checkout (CRLF) and the Linux build
+    (LF) report the same hash."""
+    import hashlib
+    canon = json.dumps(json.loads(Path(path).read_text(encoding="utf-8")), sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(canon.encode("utf-8")).hexdigest()
+
+
 def _base_url(environ) -> str | None:
     """This deployment's own origin, from the request (Vercel passes the public host and scheme along)."""
     host = environ.get("HTTP_X_FORWARDED_HOST") or environ.get("HTTP_HOST")
@@ -92,7 +100,7 @@ class App:
             attach(self.b, rules, strict=True if path == Path(DEFAULT_BUNDLE).resolve() else None)
         self.provenance = {"commit": (os.environ.get("VERCEL_GIT_COMMIT_SHA") or "")[:7] or None,
                            "bundle_sha256": _sha256(path)[:12],
-                           "rules_sha256": _sha256(rules)[:12] if rules and self.b.info.get("rules") else None}
+                           "rules_sha256": _rules_sha256(rules)[:12] if rules and self.b.info.get("rules") else None}
         self.settings = settings or Settings(abstain_below=ABSTAIN_BELOW)
         Intake(self.b)  # warm the model's cache of initial scores before the first call
         self.mcp = StatelessServer(self.b, self.settings)

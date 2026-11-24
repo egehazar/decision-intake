@@ -6,7 +6,7 @@ pass/fail rule written there before it ran; anything else is marked as such.
 
 | | |
 |---|---|
-| version | engine 1.0.0; model v2 (`bundles/benefits_v2.npz`, sha256 `f012a9a0e5ce…`); rules `bundles/guards_2026.json` (14 rules, sha256 `6baf8ba770da…`); `/healthz` reports the hashes that are deployed |
+| version | engine 1.0.0; model v2 (`bundles/benefits_v2.npz`, sha256 `f012a9a0e5ce…`); rules `bundles/guards_2026.json` (14 rules, canonical-JSON sha256 `0cbf5e1845fc…`); `/healthz` reports the hashes that are deployed |
 | rules year | 2026, from PolicyEngine-US 2.152.15 |
 | last updated | 2026-11-23 (D39) |
 | contact | [GitHub issues](https://github.com/egehazar/decision-intake/issues) |

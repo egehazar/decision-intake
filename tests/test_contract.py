@@ -161,6 +161,15 @@ def test_health_says_what_is_deployed(app):
     assert h["commit"] is None  # VERCEL_GIT_COMMIT_SHA is set on Vercel only
 
 
+def test_rules_hash_ignores_line_endings(tmp_path):
+    from decisionintake.guards import DEFAULT_RULES
+    from decisionintake.web import _rules_sha256
+    text = Path(DEFAULT_RULES).read_bytes().decode("utf-8").replace("\r\n", "\n")
+    (tmp_path / "lf.json").write_bytes(text.encode())
+    (tmp_path / "crlf.json").write_bytes(text.replace("\n", "\r\n").encode())
+    assert _rules_sha256(tmp_path / "lf.json") == _rules_sha256(tmp_path / "crlf.json") == _rules_sha256(DEFAULT_RULES)
+
+
 def test_production_bundle_refuses_to_start_without_its_rules(tmp_path):
     from decisionintake.web import App
     bad = tmp_path / "rules.json"
