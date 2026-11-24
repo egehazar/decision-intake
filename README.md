@@ -160,6 +160,9 @@ person's words ──► an LLM, or a form ──► typed facts (option, amount
 - **If pay changed.** The same machinery runs every earnings bracket with the other answers kept and shows the
   expected yearly value of food, cash and tax-credit help at each, plus the health coverage that looks likely:
   where help falls away as pay rises (`/v1/cliff`; a card on the screener's results).
+- **On any site.** `<script src="https://decision-intake.vercel.app/embed.js" async></script>` puts the
+  screener in a sandboxed, self-sizing iframe on a food bank's or library's page (`data-lang="es"`,
+  `data-theme="light"`); only `/embed` may be framed.
 - **The order to apply in.** The programs worth applying for in three steps (now, then, at tax time), with
   the federal rules by which one approval settles part of another's eligibility, each cited: SNAP, Medicaid or
   TANF meets WIC's income test; SNAP or TANF gives children free school meals, often with no form; TANF or SSI
@@ -213,7 +216,7 @@ color-only meaning; axe-core finds no WCAG 2.1 A/AA violations on any screen in 
 # 1. environment (Python 3.11+; tested on 3.13 with numpy 2.5.5 and policyengine-us 2.152.15)
 python -m venv .venv && . .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -e ".[dev]" policyengine-us==2.152.15 tables h5py
-pytest -q                                              # 106 tests, on the shipped model; no data needed
+pytest -q                                              # 108 tests, on the shipped model; no data needed
 
 # 2. data: Populace national build populace-us-2024-spm-20260915 (827 MB, sha256 6496cc43...aee84) into
 #    data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)

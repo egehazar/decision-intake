@@ -431,6 +431,8 @@ class App:
 
     def static_file(self, path):
         rel = path.lstrip("/") or "index.html"
+        if rel.rstrip("/") == "embed":  # the screener, embeddable (D47); vercel.json rewrites the same way
+            rel = "index.html"
         f = (self.static / rel).resolve()
         if f.is_dir():
             f = f / "index.html"

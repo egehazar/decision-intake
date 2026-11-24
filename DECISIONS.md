@@ -1326,3 +1326,18 @@ What was wrong was the card: it said who the programme is for in general, not wh
 answers. The screener now adds, when the answers say no child under 5 (or no children), "From your answers,
 this would be for someone who is pregnant" (Early Head Start; WIC adds "or has just had a baby") or "for a
 child who is 5 and not yet in kindergarten" (Head Start), in English and Spanish.
+
+## D47. The screener on other sites (2026-11-24)
+
+The people a benefits screener helps arrive through food banks, libraries, 211 lines and clinics, so their sites
+should be able to show it. `embed.js` inserts one iframe of `/embed`, the same page in embed mode: no footer (a
+one-line credit instead), every link opens in a new tab, and the host chooses the language and theme
+(`data-lang`, `data-theme`; the default follows the visitor). The page posts its content height, and a flag on
+a new screen, to the parent and nothing else; the loader accepts only messages from the screener's origin and
+its own frame. The iframe is sandboxed (scripts, same origin for the API, popups for the application links,
+modals for printing) with no referrer.
+- Framing is refused everywhere (`frame-ancestors 'none'`) except `/embed`, which HTTPS pages (and localhost,
+  for testing) may frame; the monitor checks both on every run.
+- Found while testing on a stand-in host page (another origin): the height could only grow, because inside an
+  iframe `scrollHeight` never drops below the frame's own height. The page now measures the bottom of its
+  content. And a dark visitor setting put a dark box on a light page; hence `data-theme`.

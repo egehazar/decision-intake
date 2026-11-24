@@ -428,3 +428,30 @@ def test_plan_with_programmes_already_received(app):
     assert not [p for s in alone["steps"] for p in s["programmes"] if p.get("added_by_rule")]
     assert call(app, "POST", "/v1/plan", {"state": st, "already": ["food stamps"]})["status"] == 400
     assert call(app, "POST", "/v1/plan", {"state": st, "already": "snap"})["status"] == 400
+
+
+# ------------------------------------------------------------------------------------------ embedding (D47)
+def test_embed_serves_the_screener_and_the_loader():
+    from decisionintake.web import App
+    app = App(bundle_path=str(SHIPPED), log=None, static_dir=str(Path(__file__).resolve().parents[1] / "public"))
+    page = call(app, "GET", "/embed")
+    assert page["status"] == 200 and b"const EMBED = " in page["body"]
+    js = call(app, "GET", "/embed.js")
+    assert js["status"] == 200 and b"decisionintake:height" in js["body"] and b"sandbox" in js["body"]
+
+
+def test_only_embed_may_be_framed():
+    """vercel.json: frame-ancestors 'none' on every path but /embed, which https pages may frame."""
+    import re
+    cfg = json.loads((Path(__file__).resolve().parents[1] / "vercel.json").read_text(encoding="utf-8"))
+    def csp_for(path):
+        hits = []
+        for rule in cfg["headers"]:
+            pattern = "^" + re.sub(r"\(\?!embed\$\)", "(?!embed$)", rule["source"]) + "$"
+            if re.match(pattern, path):
+                hits += [h["value"] for h in rule["headers"] if h["key"] == "Content-Security-Policy"]
+        return hits
+    for path in ("/", "/docs.html", "/caseload.html", "/walkthrough/", "/embed.js"):
+        assert csp_for(path) and all("frame-ancestors 'none'" in v for v in csp_for(path)), path
+    assert len(csp_for("/embed")) == 1 and "frame-ancestors https:" in csp_for("/embed")[0]
+    assert {"source": "/embed", "destination": "/index.html"} in cfg["rewrites"]

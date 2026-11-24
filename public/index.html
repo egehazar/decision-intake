@@ -191,6 +191,10 @@ details.ranges .options { margin-top: 10px; }
 .fine { font-size: .88rem; color: var(--muted); }
 
 footer.site { border-top: 1px solid var(--line); background: var(--surface); }
+/* Embedded on another site (/embed, D47): no footer, a one-line credit instead, no page chrome to scroll. */
+.embed-foot { display: none; }
+html.embed footer.site { display: none; }
+html.embed .embed-foot { display: block; border-top: 1px solid var(--line); padding-block: 12px 16px; }
 footer.site .wrap { padding-block: 28px 40px; display: grid; gap: 20px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 footer.site h2 { font-size: 1rem; margin-bottom: 6px; }
 footer.site p, footer.site li { font-size: .9rem; color: var(--muted); }
@@ -359,6 +363,7 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
     </div>
   </div>
 </footer>
+<p class="embed-foot fine"><span class="wrap" style="display:block"><span data-i18n="embed_foot">Quick Benefits Check, run by the open-source DecisionIntake engine. Free; your answers stay in this box until you clear them.</span> <a href="./" data-i18n="embed_more">How it works</a></span></p>
 
 <script>
 "use strict";
@@ -466,6 +471,8 @@ const STATIC_ES = {
   dev_h: "Para desarrolladores",
   walk: "Vea cómo decide, paso a paso (en inglés)",
   caseload: "Priorizar una lista de casos, para organizaciones (en inglés)",
+  embed_foot: "Revisión rápida de beneficios, con el sistema de código abierto DecisionIntake. Gratis; sus respuestas se quedan en este recuadro hasta que las borre.",
+  embed_more: "Cómo funciona",
   dev_guide: "Guía para desarrolladores (en inglés)",
   dev_api: "API JSON:",
   dev_mcp: "Conector MCP para asistentes de IA:",
@@ -589,7 +596,12 @@ const T = {
 
 const $ = id => document.getElementById(id);
 const S = {catalogue: null, byId: {}, state: null, readings: {}, asked: 0, current: null, editing: null, lastNext: null, busy: false, gen: 0, explain: null, cliff: null, plan: null, already: []};
+const EMBED = /^\/embed\/?$/.test(location.pathname);
+const EMBED_OPTS = EMBED ? location.hash.slice(1).split(",") : [];  // the host page chooses: #es,light
+if (EMBED) document.documentElement.classList.add("embed");
+for (const th of ["light", "dark"]) if (EMBED_OPTS.includes(th)) document.documentElement.dataset.theme = th;
 let LANG = (() => {
+  for (const l of ["en", "es"]) if (EMBED_OPTS.includes(l)) return l;
   try { const v = localStorage.getItem("lang"); if (v === "en" || v === "es") return v; } catch (e) {}
   return (navigator.language || "").toLowerCase().startsWith("es") ? "es" : "en";
 })();
@@ -603,6 +615,20 @@ function forget() { try { sessionStorage.removeItem("dq"); } catch (e) {} }
 function show(id) {
   for (const s of ["intro", "ask", "results"]) $(s).hidden = s !== id;
   window.scrollTo({top: 0});
+  if (EMBED) postHeight(true);
+}
+// Embedded: tell the host page our height (nothing else) so its iframe fits; open every link in a new tab.
+function postHeight(top) {
+  // the content's bottom, not scrollHeight: inside an iframe that never drops below the frame's own height
+  const bottom = Math.max(0, ...[...document.body.children].map(el => el.getBoundingClientRect().bottom)) + window.scrollY;
+  try { parent.postMessage({type: "decisionintake:height", height: Math.ceil(bottom), top: !!top}, "*"); } catch (e) {}
+}
+if (EMBED) {
+  new ResizeObserver(() => postHeight(false)).observe(document.body);
+  document.addEventListener("click", e => {
+    const a = e.target.closest && e.target.closest("a[href]");
+    if (a && !a.getAttribute("href").startsWith("#")) { a.target = "_blank"; a.rel = "noopener"; }
+  }, true);
 }
 function status(msg) { $("status").textContent = msg || ""; $("status").hidden = !msg; }
 function esc(s) { return String(s).replace(/[&<>"']/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"}[c])); }

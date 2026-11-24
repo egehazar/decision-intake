@@ -29,6 +29,12 @@ jobs:
           echo "commit $want is not live after 10 minutes (the build may have failed)"; exit 1
       - name: Screener page
         run: curl -sf --max-time 20 -o /dev/null "$BASE/" && echo "page ok"
+      - name: Framing - refused everywhere but /embed (D47)
+        run: |
+          curl -sfI --max-time 20 "$BASE/" | grep -i '^content-security-policy:' | grep -q "frame-ancestors 'none'" && echo "/ refuses framing"
+          curl -sfI --max-time 20 "$BASE/docs.html" | grep -i '^content-security-policy:' | grep -q "frame-ancestors 'none'" && echo "/docs.html refuses framing"
+          curl -sfI --max-time 20 "$BASE/embed" | grep -i '^content-security-policy:' | grep -q "frame-ancestors https:" && echo "/embed allows https sites"
+          curl -sf --max-time 20 "$BASE/embed.js" | grep -q "decisionintake:height" && echo "embed.js served"
       - name: Health, with the rules loaded
         run: |
           curl -sf --max-time 20 "$BASE/healthz" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['ok'] and d['rules'], d; print('healthz', d['version'], '|', d['rules'], '| commit', d.get('commit'), '| bundle', d.get('bundle_sha256'))"
