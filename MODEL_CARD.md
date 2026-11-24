@@ -50,7 +50,8 @@ asked and can change eligibility.
 
 The contradiction ledger found that this project's adapter coded self-employment from service businesses,
 partnerships and farms (which PolicyEngine keeps in separate variables) as no earnings. It changed the
-earnings, self-employed or other-income answer of 8.4% of households. v2 was trained before the fix;
+earnings of 8.4% of households and the self-employed answer of 7.1% (in the question brackets, 2,391, 3,623
+and, through earnings, 1,831 other-income answers of 57,240). v2 was trained before the fix;
 test households are scored on the corrected answers, as a person would give them.
 
 What it costs, on the 144 of D35's 2,183 households the fix touched (clean answers, after D35, not
@@ -68,8 +69,8 @@ These households are harder for both models; the served and corrected models dif
 which is within the noise.
 
 v2.1 is not served: it failed its registered release test (D35) and was worse on realistic answers for
-everyone else ($2,117 against $1,863 a household). A guard for the self-employed did not help (1.03% to
-0.97%) and is not used. The next candidate needs that weakness explained and a test on new data.
+everyone else ($2,117 against $1,863 a household). A guard for the self-employed did not help (33 of 3,213
+wrong negatives to 31 of 3,199) and is not used. All of these figures are in `results/affected_d35.txt`. The next candidate needs that weakness explained and a test on new data.
 
 ## How well it does
 

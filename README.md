@@ -53,8 +53,8 @@ held-out simulated households; intervals are 95%.
 | Does choosing questions beat a fixed form? | v2 against the best fixed 8-question form, same model | 2,000 | yes, D28 | **−$768** [−1,241, −398] |
 | ... and a decision tree? | against the strongest tree we built, same model | 2,000 | yes, D28 | **−$293** [−485, −136] |
 | Does asking 8.4 instead of 18 lose accuracy? | against the same model asking all 18 | 2,000 | secondary, D28 | −$79 [−188, +37], not distinguishable from zero |
-| Does that hold with noisy answers? | the same comparisons with misreports and "don't know" | 2,000 | yes, D28 | no question policy separates |
-| Does it help an AI assistant? | Claude Haiku with the MCP tools against without | 200 | yes, D29 | **−$1,591** [−2,469, −775] unweighted (−41%); weighted −$294 [−1,831, +1,146] |
+| Does that hold with noisy answers? | the same comparisons with misreports and "don't know" | 2,000 | secondary, D28 | no question policy separates |
+| Does it help an AI assistant? | Claude Haiku with the MCP tools against without | 200 | yes, D29 | mistakes 41% lower ($3,884 → $2,305); total **−$1,591** [−2,469, −775] unweighted; weighted −$294 [−1,831, +1,146] |
 | Is that the question choice? | same predictor, Claude choosing its own questions | 200 | yes, D30 | **−$891** [−1,538, −324] unweighted; weighted −$516 [−1,441, +359] |
 | Do the statutory rules cost anything? | rules on against off | 2,000 | yes, D32 | −$3.7 [−9.4, +0.0] |
 | Does "can't tell" cut wrong negatives? | wrong "doesn't look likely" | 2,183 | yes with v2.1 (D35); after the result for the served model | 2.17% → 0.62% [−1.76, −1.35 points]; served: 2.17% → 0.71% |
@@ -161,7 +161,8 @@ person's words ──► an LLM, or a form ──► typed facts (option, amount
 revision and the 2025 handshake revisions, three tools (`start_intake`, `record_facts`,
 `get_assessment`) that pass a `state` string. About 300 ms of server time a step. No database, no
 sessions, no answers in logs. `/healthz` reports the commit and the model and rules hashes; a GitHub
-Actions job checks the page, a step and both MCP eras every 30 minutes.
+Actions job checks the page, a whole screening, the deployed model and rules, and both MCP eras after every
+deploy and on a 30-minute schedule. Per IP, 120 requests a minute on the API and MCP routes.
 
 **Local**, from a clone (not on PyPI; the model file ships in the repo, 1.5 MB, numpy only):
 
@@ -187,7 +188,7 @@ color-only meaning; axe-core finds no WCAG 2.1 A/AA violations on any screen in 
 # 1. environment (Python 3.11+; tested on 3.13 with numpy 2.5.5 and policyengine-us 2.152.15)
 python -m venv .venv && . .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -e ".[dev]" policyengine-us==2.152.15 tables h5py
-pytest -q                                              # 78 tests, on the shipped model; no data needed
+pytest -q                                              # 92 tests, on the shipped model; no data needed
 
 # 2. data: Populace national build populace-us-2024-spm-20260915 (827 MB, sha256 6496cc43...aee84) into
 #    data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)

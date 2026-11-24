@@ -155,7 +155,8 @@ class App:
             traceback.print_exception(e, file=sys.stderr)
         origin = environ.get("HTTP_ORIGIN")
         if path == "/mcp":
-            headers += CORS + [("Cache-Control", "no-store"), ("Vary", "Origin")]
+            headers += [("Access-Control-Allow-Methods", "POST, OPTIONS"), *CORS[1:],
+                        ("Cache-Control", "no-store"), ("Vary", "Origin")]
             if origin and self.origin_ok(origin, environ):
                 headers.append(("Access-Control-Allow-Origin", origin))
         elif path.startswith(("/v1/", "/healthz", "/openapi.json")):
@@ -383,6 +384,7 @@ def openapi_doc(base: str | None = None) -> dict:
         return {"description": desc, "content": {"application/json": {"schema": schema}}}
 
     err = {"$ref": "#/components/responses/Error"}
+    limited = {"$ref": "#/components/responses/RateLimited"}
     tiers = ["likely", "worth checking", "can't tell", "not recommended", "unlikely"]
     schemas = {
         "State": {"type": "string", "maxLength": 2000, "example": example_state,
@@ -396,7 +398,7 @@ def openapi_doc(base: str | None = None) -> dict:
                        "description": "what the number is per; the engine converts to the question's unit"},
             "approximate": {"type": "boolean", "description": "true for \"about\", \"around\", ranges"}},
             "description": "Give value, or low and high. Do no arithmetic: send the number and its period."},
-        "Fact": {"type": "object", "required": ["question"], "additionalProperties": False,
+        "Fact": {"type": "object", "required": ["question"],
                  "description": "One fact the person stated: exactly one of choice, amount or dont_know. A fact for "
                                 "an already answered question replaces it.",
                  "properties": {
@@ -444,10 +446,11 @@ def openapi_doc(base: str | None = None) -> dict:
             "value_if_eligible_per_year": {"type": "array", "items": {"type": "integer"}, "minItems": 2,
                                            "maxItems": 2, "description": "[low, high] dollars a year if eligible "
                                                                          "(health coverage: its value, not cash)"}}},
-        "Assessment": {"type": "object", "required": ["recommend", "note"], "properties": {
+        "Assessment": {"type": "object", "required": ["recommend", "unsure", "note"], "properties": {
             "recommend": {"type": "array", "items": ref("Programme"), "description": "worth applying for, "
                                                                                      "most likely first"},
-            "unsure": {"type": "array", "items": ref("Programme")},
+            "unsure": {"type": "array", "items": ref("Programme"), "description": "always present; empty when the "
+                                                                                    "data covers the person"},
             "note": {"type": "string", "description": "the caveat; show it with any result"}}},
         "Ask": {"type": "object", "required": ["action", "question", "why", "progress"], "properties": {
             "action": {"const": "ask"}, "question": ref("Question"), "progress": ref("Progress"),
@@ -484,10 +487,14 @@ def openapi_doc(base: str | None = None) -> dict:
         "Health": {"type": "object", "properties": {
             "ok": {"type": "boolean"}, "version": {"type": "string"}, "engine": {"type": "string"},
             "rules": {"type": ["string", "null"]}, "commit": {"type": ["string", "null"]},
-            "bundle_sha256": {"type": "string"}, "households": {"type": "integer"}}},
+            "bundle_sha256": {"type": "string", "description": "first 12 hex digits of the model file's sha256"},
+            "rules_sha256": {"type": ["string", "null"], "description": "first 12 hex digits of the sha256 of the "
+                                                                        "rules file as canonical JSON"},
+            "households": {"type": "integer"}, "questions": {"type": "integer"}, "programmes": {"type": "integer"},
+            "boot_seconds": {"type": "number"}, "uptime_seconds": {"type": "integer"}}},
         "Error": {"type": "object", "required": ["error"], "properties": {"error": {"type": "object", "properties": {
             "code": {"type": "string", "enum": ["bad_json", "bad_request", "bad_state", "unsupported_media_type",
-                                                "too_large", "not_found", "method_not_allowed", "forbidden_origin",
+                                                "too_large", "not_found", "method_not_allowed", "forbidden_host",
                                                 "internal"]},
             "message": {"type": "string"}}}}},
     }
@@ -503,22 +510,22 @@ def openapi_doc(base: str | None = None) -> dict:
         "paths": {
             "/v1/questions": {"get": {"operationId": "getQuestions",
                                       "summary": "The programmes, every question, and the starting state",
-                                      "responses": {"200": resp("the catalogue", ref("Catalogue"))}}},
+                                      "responses": {"200": resp("the catalogue", ref("Catalogue")), "429": limited}}},
             "/v1/step": {"post": {
                 "operationId": "step",
                 "summary": "Record facts (any questions, asked or not) and get the next step: ask, finish or hand_off",
-                "requestBody": body({"type": "object", "additionalProperties": False, "properties": {
+                "requestBody": body({"type": "object", "properties": {
                     "state": ref("State"), "facts": {"type": "array", "maxItems": MAX_FACTS, "items": ref("Fact")}}},
                     {"state": example_state, "facts": [{"question": "children", "choice": "2"}]}),
                 "responses": {"200": resp("the new state, how each fact was read, and the next step", ref("Step")),
-                              "400": err, "413": err, "415": err, "429": {"$ref": "#/components/responses/RateLimited"}}}},
+                              "400": err, "413": err, "415": err, "429": limited}}},
             "/v1/assessment": {"post": {
                 "operationId": "assessment",
                 "summary": "Every programme's probability, tier and yearly value range; the facts so far",
-                "requestBody": body({"type": "object", "additionalProperties": False, "required": ["state"],
+                "requestBody": body({"type": "object", "required": ["state"],
                                      "properties": {"state": ref("State")}}, {"state": example_state}),
                 "responses": {"200": resp("the assessment", ref("FullAssessment")), "400": err, "413": err,
-                              "415": err}}},
+                              "415": err, "429": limited}}},
             "/mcp": {"post": {
                 "operationId": "mcp",
                 "summary": "Model Context Protocol over Streamable HTTP (JSON responses, no SSE, stateless). "
@@ -530,7 +537,9 @@ def openapi_doc(base: str | None = None) -> dict:
                               "202": {"description": "notification accepted"},
                               "400": resp("a JSON-RPC error (bad version, header mismatch, missing _meta)",
                                           {"type": "object"}),
-                              "403": resp("a browser Origin this server does not accept", {"type": "object"})}}},
+                              "403": resp("a browser Origin this server does not accept", {"type": "object"}),
+                              "404": resp("2026-07-28: an unknown method (-32601)", {"type": "object"}),
+                              "429": limited}}},
             "/healthz": {"get": {"operationId": "health", "summary": "Liveness and exactly what is deployed",
                                  "responses": {"200": resp("ok", ref("Health"))}}},
         },

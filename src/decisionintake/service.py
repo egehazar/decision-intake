@@ -142,6 +142,9 @@ class Intake:
 
     def _evidence(self, q, f: dict) -> tuple[np.ndarray, str, dict]:
         """(likelihood over the options, how it was read, the fact as the state stores it)"""
+        kinds = [k for k in ("choice", "amount") if f.get(k) is not None] + (["dont_know"] if f.get("dont_know") else [])
+        if len(kinds) > 1:
+            raise FactError(f'give exactly one of "choice", "amount" or "dont_know" (got {", ".join(kinds)})')
         if f.get("dont_know"):
             return np.ones(len(q.options)), "don't know (no evidence; the belief is unchanged)",                 {"question": q.id, "dont_know": True}
         if f.get("amount") is not None:
@@ -282,10 +285,8 @@ class Intake:
                     r["tier"] = "can't tell"
         rows.sort(key=lambda r: (r["tier"] not in ("likely", "worth checking"), -r["probability"]))
         recs = [r for r in rows if r["tier"] in ("likely", "worth checking")]
-        out = {"recommend": recs}
         unsure = [{k: r[k] for k in ("id", "programme", "tier", "probability")} for r in rows if r["tier"] == "can't tell"]
-        if unsure:
-            out["unsure"] = unsure
+        out = {"recommend": recs, "unsure": unsure}  # always present, empty when the data covers the person
         if not brief:
             out["all_programmes"] = rows
             out["facts"] = [{"question": k, "reading": f["reading"]} for k, f in self.facts.items()]

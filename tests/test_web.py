@@ -264,7 +264,7 @@ def test_thin_profiles_say_cant_tell_instead_of_unlikely(app):
     for r in a["all_programmes"]:
         assert not (r["tier"] in ("unlikely", "not recommended") and r["probability"] >= 0.05), r
     supported = call(app, "POST", "/v1/assessment", {"state": call(app, "POST", "/v1/step", {})["json"]["state"]})["json"]
-    assert supported["support"]["level"] == "supported" and "unsure" not in supported
+    assert supported["support"]["level"] == "supported" and supported["unsure"] == []
 
 
 # --------------------------------------------------------------------------------- MCP 2026-07-28 (stateless)

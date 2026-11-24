@@ -9,9 +9,11 @@ no database, no secret and no migration.
 
 Public since 2026-11-23 20:21 UTC at https://decision-intake.vercel.app: Vercel Authentication now
 protects preview deployments only (Settings → Deployment Protection → Standard, previews). Every push to
-master deploys to production. `.github/workflows/monitor.yml` checks the page, health, a screening step
-and the MCP connector (both protocol eras) every 30 minutes; a failure fails the run and GitHub emails the
-owner.
+master deploys to production. `.github/workflows/monitor.yml` runs after every push (it first waits until
+`/healthz` reports that commit) and on a 30-minute schedule: the page, health with the rules, a step, a
+whole screening, the deployed model and rules hashes against the repository, and the MCP connector in both
+protocol eras; a failure fails the run and GitHub emails the owner. The monitor reached GitHub only on
+2026-11-24, and its schedule had not fired in its first four hours; the push trigger is the reliable one.
 
 ## Listing in the MCP Registry
 
@@ -71,7 +73,7 @@ were waived when the site went public (D38): the page labels the Spanish as AI-a
       billing to run up (usage limits cap it)
 - [x] Rate limit at the edge (Vercel Firewall, rule "Rate limit /v1/* and /mcp"): 120 requests a minute per
       IP address on the compute routes, 429 beyond it; checked with a 125-request burst (120 x 200, 5 x 429),
-      the page and /healthz unaffected (D39)
+      the page and /healthz unaffected (DECISIONS D39, launch audit)
 - [x] Cold and warm latency measured on the real deployment: engine boot 1.1 s, /v1/step about 300 ms
       median server time (89 ms to 1.1 s); on a desktop CPU 109-125 ms median (D31, D36)
 - [x] Rollback rehearsed (D36): production moved back to the previous deployment in seconds, served it,

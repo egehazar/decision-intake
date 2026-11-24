@@ -110,6 +110,33 @@ def main():
                              f"can't-tell {flag[g].sum(1).mean():.2f}/household, cost ${w @ cost:,.0f}")
             out["groups"][uname][gname] = row
             lines.append(f"  {gname} ({g.sum()}):\n    " + "\n    ".join(parts))
+    # The whole run, as served (v2 + rules + can't-tell) against v2 without the layer: the D35 figure for the
+    # served model, with its interval; and the self-employed guard tried in D39, on the self-employed.
+    for uname in ["clean", "realistic"]:
+        R_ = [runs[("candidate", uname, int(i))] for i in idx]
+        rec = np.array([r["rec"] for r in R_], bool)
+        p = np.array([r["p"] for r in R_])
+        raw = np.array([r["raw_ess"] for r in R_])
+        flag = ~rec & (raw < RR.ABSTAIN_BELOW)[:, None] & (p >= RR.UNSURE_FLOOR)
+        boots = np.random.default_rng(5).choice(len(idx), size=(4000, len(idx)))  # as run_release.py analyse
+        num0, den0 = (~rec & el).sum(1), (~rec).sum(1)
+        num1, den1 = (~rec & ~flag & el).sum(1), (~rec & ~flag).sum(1)
+        diff = np.array([num1[b].sum() / den1[b].sum() - num0[b].sum() / den0[b].sum() for b in boots])
+        lo, hi = np.percentile(diff, [2.5, 97.5])
+        r0, r1 = num0.sum() / den0.sum(), num1.sum() / den1.sum()
+        guard = flag | (~rec & says_se[:, None] & (p >= RR.UNSURE_FLOOR))
+        se = says_se
+        g_num, g_den = (~rec & ~guard & el)[se].sum(), (~rec & ~guard)[se].sum()
+        s_num, s_den = (~rec & ~flag & el)[se].sum(), (~rec & ~flag)[se].sum()
+        out.setdefault("served_whole_run", {})[uname] = {
+            "without_cant_tell": [int(num0.sum()), int(den0.sum())], "served": [int(num1.sum()), int(den1.sum())],
+            "difference_ci_points": [float(lo * 100), float(hi * 100)], "labels_per_household": float(flag.sum(1).mean()),
+            "self_employed_as_served": [int(s_num), int(s_den)], "self_employed_with_guard": [int(g_num), int(g_den)]}
+        lines.append(f"\n{uname} answers, all {len(idx)} households, the model that serves: wrong 'doesn't look likely' "
+                     f"{num0.sum()}/{den0.sum()} = {r0:.2%} without can't-tell, {num1.sum()}/{den1.sum()} = {r1:.2%} as served; "
+                     f"difference {100 * (r1 - r0):+.2f} points [{100 * lo:+.2f}, {100 * hi:+.2f}]; "
+                     f"{flag.sum(1).mean():.2f} labels a household. Self-employed guard (not shipped): among the "
+                     f"self-employed {s_num}/{s_den} = {s_num / s_den:.2%} as served, {g_num}/{g_den} = {g_num / g_den:.2%} with it.")
     text = "\n".join(lines)
     print(text)
     json.dump(out, open(OUT, "w"), indent=1)

@@ -35,3 +35,7 @@ realistic answers
     production without can't-tell: 'doesn't look likely' wrong 342/13822 = 2.47% [2.17%, 2.80%]; eligible programs called unlikely 342/1984 = 17.2% [15.2%, 19.3%] in 260 households; can't-tell 0.00/household, cost $1,668
     production: 'doesn't look likely' wrong 97/11843 = 0.82% [0.63%, 1.00%]; eligible programs called unlikely 97/1984 = 4.9% [3.8%, 6.0%] in 83 households; can't-tell 1.16/household, cost $1,668
     v2.1: 'doesn't look likely' wrong 111/11795 = 0.94% [0.74%, 1.15%]; eligible programs called unlikely 111/1984 = 5.6% [4.4%, 6.9%] in 92 households; can't-tell 1.17/household, cost $2,035
+
+clean answers, all 2183 households, the model that serves: wrong 'doesn't look likely' 388/17876 = 2.17% without can't-tell, 110/15584 = 0.71% as served; difference -1.46 points [-1.66, -1.27]; 1.05 labels a household. Self-employed guard (not shipped): among the self-employed 33/3213 = 1.03% as served, 31/3199 = 0.97% with it.
+
+realistic answers, all 2183 households, the model that serves: wrong 'doesn't look likely' 485/17539 = 2.77% without can't-tell, 135/14944 = 0.90% as served; difference -1.86 points [-2.11, -1.62]; 1.19 labels a household. Self-employed guard (not shipped): among the self-employed 38/3101 = 1.23% as served, 34/3081 = 1.10% with it.

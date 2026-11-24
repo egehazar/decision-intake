@@ -608,5 +608,53 @@
     }
    }
   }
+ },
+ "served_whole_run": {
+  "clean": {
+   "without_cant_tell": [
+    388,
+    17876
+   ],
+   "served": [
+    110,
+    15584
+   ],
+   "difference_ci_points": [
+    -1.6639674587056321,
+    -1.268188608860349
+   ],
+   "labels_per_household": 1.0499312872194229,
+   "self_employed_as_served": [
+    33,
+    3213
+   ],
+   "self_employed_with_guard": [
+    31,
+    3199
+   ]
+  },
+  "realistic": {
+   "without_cant_tell": [
+    485,
+    17539
+   ],
+   "served": [
+    135,
+    14944
+   ],
+   "difference_ci_points": [
+    -2.1125590628427426,
+    -1.616269312391027
+   ],
+   "labels_per_household": 1.1887311039853412,
+   "self_employed_as_served": [
+    38,
+    3101
+   ],
+   "self_employed_with_guard": [
+    34,
+    3081
+   ]
+  }
  }
 }

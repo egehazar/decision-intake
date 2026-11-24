@@ -98,13 +98,13 @@ def main():
     step_view = {"state": step["state"], "readings": step["readings"], "next": {
         k: step["next"][k] for k in ("action", "question", "why")}}
     mixed_view = {"state": ex["mixed"]["state"], "readings": ex["mixed"]["readings"], "next": {"action": ex["mixed"]["next"]["action"], "...": "..."}}
-    finish_view = {"action": finish["action"], "recommend": finish["recommend"][:2], "unsure": finish.get("unsure"),
+    finish_view = {"action": finish["action"], "recommend": finish["recommend"][:2], "unsure": finish["unsure"],
                    "progress": finish["progress"], "note": finish["note"]}
     if len(finish["recommend"]) > 2:
         finish_view["recommend_more"] = f"... {len(finish['recommend']) - 2} more"
     ho = ex["handoff"]
     handoff_view = {"action": ho["action"], "hand_off_reason": ho["hand_off_reason"], "recommend": ho["recommend"][:1],
-                    "unsure": (ho.get("unsure") or [])[:2], "progress": ho["progress"]}
+                    "unsure": ho["unsure"][:2], "progress": ho["progress"]}
     call_view = {"result": {k: v for k, v in ex["mcp_call"]["result"].items() if k != "content"}}
     call_view["result"]["structuredContent"] = {"state": ex["mcp_call"]["result"]["structuredContent"]["state"],
                                                 "readings": "...", "next": {"action": "ask", "...": "..."}}
@@ -136,8 +136,11 @@ showResults(next);   // recommend, unsure, note; next.action === "hand_off" adds
 BASE = "{BASE}"
 
 def step(state=None, facts=()):
+    body = {"facts": list(facts)}
+    if state:
+        body["state"] = state
     req = urllib.request.Request(BASE + "/v1/step", method="POST",
-        data=json.dumps({"state": state, "facts": list(facts)}).encode(),
+        data=json.dumps(body).encode(),
         headers={"Content-Type": "application/json"})
     with urllib.request.urlopen(req) as r:
         return json.load(r)
@@ -266,7 +269,7 @@ nav.toc ol {{ margin: 6px 0 0; padding-left: 20px; }}
 {code(headers, "text")}
 {code(ex["mcp_call_body"])}
 {code(call_view)}
-<p>Start with <code>server/discover</code> for the supported revisions and instructions. Errors: <code>-32022</code> (unsupported revision, with the supported list), <code>-32020</code> (header and body disagree), <code>-32602</code> (missing <code>_meta</code>, bad arguments, unknown tool).</p>
+<p>Start with <code>server/discover</code> for the supported revisions and instructions. Protocol errors: <code>-32022</code> (unsupported revision, with the supported list), <code>-32020</code> (header and body disagree), <code>-32602</code> (missing <code>_meta</code>, <code>arguments</code> that aren't an object, unknown tool), <code>-32601</code> with HTTP 404 (unknown method). A fact or state the engine can't use is not a protocol error: the tool result comes back with <code>isError: true</code> and a message saying how to fix it, so the assistant can correct itself.</p>
 <h3>On the wire, handshake revisions</h3>
 {code(ex["mcp_legacy"])}
 <p>Then <code>tools/list</code> and <code>tools/call</code> with an <code>MCP-Protocol-Version</code> header. No <code>Mcp-Session-Id</code> is issued: the state travels in the tool arguments.</p>
@@ -293,11 +296,11 @@ nav.toc ol {{ margin: 6px 0 0; padding-left: 20px; }}
 <p>Errors are JSON: <code>{{"error": {{"code", "message"}}}}</code>. A fact that can't be read doesn't fail the call (<a href="#facts">section 2</a>).</p>
 <div class="tbl"><table>
 <tr><th>Status</th><th>When</th></tr>
-<tr><td>200</td><td>success; MCP protocol errors are JSON-RPC errors in a 200 for the handshake revisions</td></tr>
+<tr><td>200</td><td>success; for the MCP handshake revisions also JSON-RPC errors such as -32601 and -32602, and tool results with <code>isError</code></td></tr>
 <tr><td>202</td><td>MCP notification accepted</td></tr>
-<tr><td>400</td><td><code>bad_json</code>, <code>bad_request</code>, <code>bad_state</code> (damaged state, or one written for another question set); MCP 2026-07-28 errors</td></tr>
-<tr><td>403</td><td>MCP only: a browser <code>Origin</code> this server doesn't accept</td></tr>
-<tr><td>404, 405</td><td>no such route; wrong method (MCP is POST only)</td></tr>
+<tr><td>400</td><td><code>bad_json</code>, <code>bad_request</code>, <code>bad_state</code> (damaged state, or one written for another question set); on <code>/mcp</code>: unparseable JSON (-32700), an <code>MCP-Protocol-Version</code> this server doesn't speak (-32022), and the 2026-07-28 errors above</td></tr>
+<tr><td>403</td><td>MCP: a browser <code>Origin</code> this server doesn't accept; a server run on localhost also refuses requests whose <code>Host</code> isn't localhost (<code>forbidden_host</code>)</td></tr>
+<tr><td>404, 405</td><td>no such route, or on <code>/mcp</code> (2026-07-28) an unknown method; wrong method (MCP is POST only)</td></tr>
 <tr><td>413, 415</td><td>body over {MAX_BODY // 1024} KB; not <code>application/json</code></td></tr>
 <tr><td>429</td><td>more than 120 requests a minute from one IP address to <code>/v1/*</code> or <code>/mcp</code>; wait a minute</td></tr>
 <tr><td>500</td><td><code>internal</code>; nothing about the failure is returned, the server log keeps it</td></tr>
@@ -312,7 +315,7 @@ nav.toc ol {{ margin: 6px 0 0; padding-left: 20px; }}
 <tr><td>Latency</td><td>about 300 ms of server time a step; the first call after a quiet spell adds about a second</td></tr>
 </table></div>
 <p><b>Cross-origin use.</b> The JSON API answers any origin (no credentials are involved). <code>/mcp</code> serves clients that send no <code>Origin</code> (server-side assistants and tools) and browsers from this site or localhost; ask in the repository if a browser client elsewhere needs it.</p>
-<p><b>Versions.</b> The engine is {VERSION}; <code>/healthz</code> reports it with the commit and the model and rules hashes. A state stays readable across deployments while the questions and their options are unchanged. A release that changes them makes older states <code>bad_state</code>: start again (the public screener does this for you). Breaking changes to the API move the major version. This is a free research service with no uptime guarantee; it is monitored every 30 minutes.</p>
+<p><b>Versions.</b> The engine is {VERSION}; <code>/healthz</code> reports it with the commit and the model and rules hashes. A state stays readable across deployments while the questions and their options are unchanged. A release that changes them makes older states <code>bad_state</code>: start again (the public screener does this for you). Breaking changes to the API move the major version. This is a free research service with no uptime guarantee; a monitor checks it after every deploy and on a 30-minute schedule.</p>
 <p>Full schema: <a href="openapi.json">openapi.json</a>. Evaluation, decisions and their tests: <a href="https://github.com/egehazar/decision-intake" target="_blank" rel="noopener">the repository</a>.</p>
 </main>
 </body>

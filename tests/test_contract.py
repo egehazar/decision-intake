@@ -209,6 +209,31 @@ def test_production_bundle_refuses_to_start_without_its_rules(tmp_path):
 
 
 # ------------------------------------------------------------------------------------------ response shapes
+def test_a_fact_is_exactly_one_kind(app):
+    r = call(app, "POST", "/v1/step", {"facts": [{"question": "children", "choice": "2", "dont_know": True},
+                                                 {"question": "state", "choice": "TX", "dont_know": False}]})["json"]
+    assert "exactly one" in r["readings"][0]["error"] and r["readings"][1]["reading"] == "TX"
+
+
+def test_unsure_is_always_present(app):
+    first = call(app, "POST", "/v1/step", {"facts": []})["json"]
+    st = call(app, "POST", "/v1/assessment", {"state": first["state"]})["json"]
+    assert st["unsure"] == [] or isinstance(st["unsure"], list)
+    r = call(app, "POST", "/v1/step", {"facts": [{"question": "state", "choice": "NY"},
+                                                 {"question": "senior", "choice": "yes"}]})["json"]
+    while r["next"]["action"] == "ask":
+        r = call(app, "POST", "/v1/step", {"state": r["state"],
+                                           "facts": [{"question": r["next"]["question"]["id"], "dont_know": True}]})["json"]
+    assert "unsure" in r["next"] and isinstance(r["next"]["unsure"], list)
+
+
+def test_mcp_cors_offers_only_post():
+    from decisionintake.web import App
+    a = App(bundle_path=str(SHIPPED), log=None)
+    h = call(a, "OPTIONS", "/mcp", headers={"Origin": "http://localhost:6274"})["headers"]
+    assert h["Access-Control-Allow-Methods"] == "POST, OPTIONS" and h["Access-Control-Allow-Origin"] == "http://localhost:6274"
+
+
 def test_one_shape_per_field(app):
     first = call(app, "POST", "/v1/step", {"facts": []})["json"]
     assert all("id" in s for s in first["next"]["why"]["mostly_settles"])

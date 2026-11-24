@@ -1058,7 +1058,9 @@ over the internet (the D37 remote arm, pointed at https://decision-intake.vercel
 finished with a submission; recall 73% and precision 38%, against 73% and 36% for the in-memory run on
 the same households; total cost -$58 a household [-172, +1]. Vercel logged 572 requests in the window and
 no error-level line; record_facts took 150-660 ms of server time. Monitoring: a GitHub Actions job every
-30 minutes (page, health, a step, MCP in both eras).
+30 minutes (page, health, a step, MCP in both eras). *Correction (2026-11-24): that workflow was committed
+here but reached GitHub only with the push of 2026-11-24 08:28 UTC, and its schedule had not fired in its
+first four hours; see D39.*
 
 ## D39. Launch audit: what the earnings bug costs the people it touched (2026-11-23 21:18 UTC)
 
@@ -1093,3 +1095,27 @@ with no exception text; Origin checked on /mcp; 2024-11-05 offered over stdio on
 meant the old SSE transport; a complete OpenAPI document with a real state example; /healthz reports the
 commit and the bundle and rules hashes, and the production bundle refuses to start without its rules) and
 corrected public claims that ran ahead of this log. tests/test_contract.py covers each point.
+
+**D39, the rest of the audit (2026-11-24).** GPT round 8, on the changes above: ready for a developer-facing
+research launch, no blocking defects, on two conditions: independently confirm the deployed content, and run
+a third-party MCP conformance check before the registry listing.
+- Rate limit at the edge (Vercel Firewall rule, set in the dashboard): 120 requests a minute per IP on
+  /v1/* and /mcp, 429 beyond it; a 125-request burst got 120 x 200 and 5 x 429, the page and /healthz unaffected.
+- The MCP conformance suite (@modelcontextprotocol/conformance 0.1.16, run by Ege against the live connector):
+  initialize, ping and tools/list pass; 24 scenarios need the suite's reference-server features (test tools,
+  resources, prompts, logging, sampling, elicitation, completion), which this server neither offers nor
+  advertises. Its dns-rebinding-protection scenario applies only to localhost servers, and reading what it
+  sends found a real defect: "same origin" was judged against the request's Host header, which a rebinding
+  attacker controls, so a copy run on someone's machine could be reached from an attacker's page. Now the
+  deployment's own address comes from Vercel's environment, and a server bound to localhost refuses any other
+  Host (tests/test_contract.py reproduces the suite's request).
+- An independent reviewer (a fresh agent, 84 live requests, over 40 numbers checked against this log and the
+  result files) confirmed the examples, status codes, limits, both MCP eras and the Origin policy, and found
+  12 mismatches, fixed together: the hand-off example showed an "unsure" field the service omitted when empty
+  (now always present); the guide called invalid tool input -32602 (it is a tool result with isError, as the
+  MCP spec intends; only non-object arguments are -32602); the status table missed the 400s on /mcp; OpenAPI
+  drift; the README's 41% sat next to total cost; a secondary result was marked registered; the monitor
+  claim (above); two figures existed only in this log (both now in results/affected_d35.txt, the D35 interval
+  reproduced exactly: -1.46 points [-1.66, -1.27]); a fact with both a choice and don't-know was silently read
+  as don't-know (now refused: exactly one kind); and the walkthrough loaded Google Fonts (now system fonts,
+  so no page on the site makes a third-party request).
