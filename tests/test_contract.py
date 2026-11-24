@@ -312,3 +312,25 @@ def test_explain_over_mcp(app):
                   "params": {"name": "what_would_change", "arguments": {"state": state}}})
     out = r["json"]["result"]["structuredContent"]
     assert not r["json"]["result"]["isError"] and out["near_the_line"] and "not advice" in out["note"]
+
+
+# ------------------------------------------------------------------------------------------ the cliff view
+def test_cliff_covers_every_bracket_and_marks_the_current_one(app):
+    step = call(app, "POST", "/v1/step", {"facts": NEAR})["json"]
+    r = call(app, "POST", "/v1/cliff", {"state": step["state"]})
+    assert r["status"] == 200 and r["json"]["question"] == "earned_income" and r["json"]["unit"] == "dollars a year"
+    opts = r["json"]["options"]
+    assert len(opts) == 11 and sum(o["current"] for o in opts) == 1
+    assert [o["option"] for o in opts if o["current"]] == ["$20,000 to $30,000"]  # $1,900 a month
+    for o in opts:
+        assert o["expected_value"] == pytest.approx(sum(o["by_group"].values()), abs=30)
+        assert len(o["programmes"]) == 10
+    # help falls away as earnings rise: the lowest brackets carry more than the highest
+    assert opts[1]["expected_value"] > opts[-1]["expected_value"]
+
+
+def test_cliff_refuses_a_question_that_is_not_an_amount(app):
+    step = call(app, "POST", "/v1/step", {"facts": NEAR})["json"]
+    assert call(app, "POST", "/v1/cliff", {"state": step["state"], "question": "married"})["status"] == 400
+    assert call(app, "POST", "/v1/cliff", {"state": step["state"], "question": "nope"})["status"] == 400
+    assert call(app, "POST", "/v1/cliff", {"state": step["state"], "question": "housing_cost"})["status"] == 200

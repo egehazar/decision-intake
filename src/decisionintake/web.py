@@ -5,6 +5,7 @@
     POST /v1/step          {"state"?, "facts"?} -> {"state", "readings", "next"}
     POST /v1/assessment    {"state"} -> every programme's probability, tier and value range
     POST /v1/explain       {"state"} -> which single answer, one step different, would change each result
+    POST /v1/cliff         {"state", "question"?} -> every option of an amount question, the rest kept: a cliff view
     GET  /openapi.json     this API, described
     POST /mcp              the Model Context Protocol over Streamable HTTP (2026-07-28, 2025-11-25, 2025-06-18,
                            2025-03-26)
@@ -215,9 +216,10 @@ class App:
             handler = {("GET", "/healthz"): self.health, ("HEAD", "/healthz"): self.health,
                        ("GET", "/openapi.json"): self.openapi, ("GET", "/v1/questions"): self.questions,
                        ("POST", "/v1/step"): self.step, ("POST", "/v1/assessment"): self.assess,
-                       ("POST", "/v1/explain"): self.explain}.get((method, path))
+                       ("POST", "/v1/explain"): self.explain, ("POST", "/v1/cliff"): self.cliff}.get((method, path))
             if handler is None:
-                known = {"/healthz", "/openapi.json", "/v1/questions", "/v1/step", "/v1/assessment", "/v1/explain"}
+                known = {"/healthz", "/openapi.json", "/v1/questions", "/v1/step", "/v1/assessment", "/v1/explain",
+                         "/v1/cliff"}
                 if path in known:
                     raise HTTPError(405, "method_not_allowed", f"{method} is not supported on {path}")
                 raise HTTPError(404, "not_found", f"no route {path}; see /openapi.json")
@@ -269,6 +271,21 @@ class App:
         it, _ = self._intake(body.get("state"))
         out = it.explain()
         log.update(facts=len(it.facts), tried=out["answers_tried"])
+        return _json(200, {"state": it.state(), **out})
+
+    def cliff(self, environ, log):
+        body = self._body(environ) or {}
+        if not isinstance(body, dict):
+            raise HTTPError(400, "bad_request", 'send an object: {"state": "...", "question"?: "earned_income"}')
+        question = body.get("question", "earned_income")
+        if not isinstance(question, str):
+            raise HTTPError(400, "bad_request", "question must be a question id")
+        it, _ = self._intake(body.get("state"))
+        try:
+            out = it.cliff(question)
+        except FactError as e:
+            raise HTTPError(400, "bad_request", str(e)) from None
+        log.update(facts=len(it.facts), question=question)
         return _json(200, {"state": it.state(), **out})
 
     def origin_ok(self, origin: str, environ) -> bool:
@@ -566,6 +583,26 @@ def openapi_doc(base: str | None = None) -> dict:
                                      "properties": {"state": ref("State")}}, {"state": example_state}),
                 "responses": {"200": resp("the programmes near the line", ref("Explanation")), "400": err,
                               "413": err, "415": err, "429": limited}}},
+            "/v1/cliff": {"post": {
+                "operationId": "cliff",
+                "summary": "A benefits-cliff view: every option of one amount question (earned_income unless named), "
+                           "the other answers kept, with each programme's tier, probability and expected yearly value",
+                "requestBody": body({"type": "object", "required": ["state"], "properties": {
+                    "state": ref("State"), "question": {"type": "string", "default": "earned_income",
+                                                        "description": "an amount question id"}}},
+                    {"state": example_state}),
+                "responses": {"200": resp("one entry per option", {"type": "object", "properties": {
+                    "state": ref("State"), "question": {"type": "string"}, "unit": {"type": "string"},
+                    "options": {"type": "array", "items": {"type": "object", "properties": {
+                        "option": {"type": "string"}, "current": {"type": "boolean"},
+                        "expected_value": {"type": "integer", "description": "dollars a year, all programmes"},
+                        "by_group": {"type": "object", "additionalProperties": {"type": "integer"}},
+                        "programmes": {"type": "array", "items": {"type": "object", "properties": {
+                            "id": {"type": "string"}, "tier": {"type": "string", "enum": tiers},
+                            "probability": {"type": "number"}, "typical_value": {"type": "integer"},
+                            "expected_value": {"type": "integer"}}}}}}},
+                    "groups": {"type": "object"}, "note": {"type": "string"}}}),
+                              "400": err, "413": err, "415": err, "429": limited}}},
             "/mcp": {"post": {
                 "operationId": "mcp",
                 "summary": "Model Context Protocol over Streamable HTTP (JSON responses, no SSE, stateless). "

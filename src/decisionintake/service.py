@@ -52,6 +52,11 @@ EXPLAIN_NOTE = ("Each line changes one answer and keeps the others. It shows how
                 "what to report: answer as things are.")
 _GROUP = {"likely": "likely", "worth checking": "worth checking", "can't tell": "can't tell",
           "not recommended": "not recommended", "unlikely": "not recommended"}
+CLIFF_NOTE = ("Each bar keeps every other answer and changes only this one. Expected value is the chance of "
+              "qualifying times the typical yearly amount if eligible (health coverage counted at its value, not "
+              "cash). A screening estimate for planning, not a promise of any amount.")
+CLIFF_GROUPS = {"food and cash": ["snap", "wic", "tanf", "ssi", "school_meals"], "tax credits": ["eitc", "ctc"],
+                "health coverage": ["medicaid", "chip", "aca_ptc"]}
 _COUNT = re.compile(r"none|\d+|\d+ or more|under \d+")
 
 
@@ -319,6 +324,40 @@ class Intake:
         if q.edges is not None or all(_COUNT.fullmatch(o.lower()) for o in q.options):
             return [j for j in (k - 1, k + 1) if 0 <= j < n]
         return [j for j in range(n) if j != k]
+
+    def cliff(self, question: str = "earned_income") -> dict:
+        """Every option of one amount question (earnings by default), the other answers kept: each programme's
+        tier, probability and typical value at that option, and the expected yearly value of all of them. A drop
+        between neighbouring options is a benefits cliff. Each option reuses the belief (Session.what_if)."""
+        if question not in self.qi:
+            raise FactError(f"unknown question {question!r}")
+        j = self.qi[question]
+        q = self.b.pop.questions[j]
+        if q.edges is None:
+            raise FactError(f"{question} is not an amount question")
+        f = self.facts.get(question)
+        current = int(np.argmax(f["evidence"])) if f is not None and np.ptp(f["evidence"]) > 0 else None
+        group_of = {d: g for g, ds in CLIFF_GROUPS.items() for d in ds}
+        options = []
+        for k in range(len(q.options)):
+            lik = np.zeros(len(q.options))
+            lik[k] = 1.0
+            s2 = self.s.what_if(j, lik)
+            thin = self._thin(s2)
+            rows, by_group = [], {g: 0.0 for g in CLIFF_GROUPS}
+            for dv in s2.decisions():
+                typical = (max(dv.value_low, 0) + max(dv.value_high, 0)) / 2
+                ev = dv.p_eligible * typical
+                by_group[group_of.get(dv.decision, "food and cash")] += ev
+                rows.append({"id": dv.decision, "tier": self._tier(dv.recommend, dv.p_eligible, thin),
+                             "probability": round(dv.p_eligible, 2), "typical_value": int(round(typical, -1)),
+                             "expected_value": int(round(ev, -1))})
+            options.append({"option": q.options[k], "current": k == current,
+                            "expected_value": int(round(sum(by_group.values()), -1)),
+                            "by_group": {g: int(round(v, -1)) for g, v in by_group.items()},
+                            "programmes": rows})
+        return {"question": question, "unit": self.question_view(j).get("unit"), "options": options,
+                "groups": CLIFF_GROUPS, "note": CLIFF_NOTE}
 
     def explain(self) -> dict:
         """For every programme whose result would change: which single answer, moved to a neighbouring option

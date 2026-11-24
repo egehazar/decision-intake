@@ -17,6 +17,7 @@
   --accent: #1d5c88; --accent-ink: #ffffff; --accent-soft: #e4eef6; --focus: #f2a900;
   --likely: #1b744b; --likely-soft: #e2f1e8; --check: #8a5800; --check-soft: #faefd8;
   --alert: #8f2d1f; --alert-soft: #fbe9e5; --shadow: 0 1px 2px rgba(24, 35, 44, .06), 0 4px 16px rgba(24, 35, 44, .05);
+  --bar-cash: #1f6fb8; --bar-tax: #b06a00;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -25,6 +26,7 @@
     --accent: #82b8e2; --accent-ink: #0c1620; --accent-soft: #1b2d3c; --focus: #f2c14e;
     --likely: #73d1a2; --likely-soft: #17352a; --check: #e8bb6a; --check-soft: #3a2c13;
     --alert: #f0a090; --alert-soft: #3b1d18; --shadow: none; color-scheme: dark;
+    --bar-cash: #3f8ad6; --bar-tax: #bf7d18;
   }
 }
 :root[data-theme="dark"] {
@@ -32,6 +34,7 @@
   --accent: #82b8e2; --accent-ink: #0c1620; --accent-soft: #1b2d3c; --focus: #f2c14e;
   --likely: #73d1a2; --likely-soft: #17352a; --check: #e8bb6a; --check-soft: #3a2c13;
   --alert: #f0a090; --alert-soft: #3b1d18; --shadow: none; color-scheme: dark;
+  --bar-cash: #3f8ad6; --bar-tax: #bf7d18;
 }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
@@ -50,6 +53,20 @@ a { color: var(--accent); text-underline-offset: 2px; }
 .urgent { border-left: 3px solid var(--line-strong); padding-left: 12px; }
 .near { margin: 0; font-size: .92rem; color: var(--muted); border-left: 3px solid var(--check); padding-left: 10px; }
 li .near { margin-top: 4px; }
+.cliff table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.cliff th, .cliff td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.cliff th { color: var(--muted); font-weight: 600; font-size: .85rem; }
+.cliff tr.now td { background: var(--accent-soft); font-weight: 600; }
+.cliff .bars { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.cliff .track { flex: 1; display: flex; gap: 2px; height: 12px; min-width: 40px; }
+.cliff .track i { display: block; height: 100%; }
+.cliff .track i:last-child { border-radius: 0 4px 4px 0; }
+.cliff .c { background: var(--bar-cash); } .cliff .t { background: var(--bar-tax); }
+.cliff .amt { font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--ink); min-width: 4.5em; text-align: right; }
+.cliff .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: .85rem; color: var(--muted); }
+.cliff .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.cliff .legend .lc::before { background: var(--bar-cash); } .cliff .legend .lt::before { background: var(--bar-tax); }
+.cliff .tbl { overflow-x: auto; }
 .skip:focus { left: 16px; top: 8px; background: var(--surface); padding: 8px 12px; z-index: 5; }
 
 header.site { border-bottom: 1px solid var(--line); background: var(--surface); }
@@ -248,6 +265,13 @@ code { font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-siz
       <p style="margin-top:8px" data-i18n="handoff_help">Free local help: call <b>211</b> or visit <a href="https://211.org/" target="_blank" rel="noopener">211.org</a>. A benefits navigator can check every program with you.</p>
     </div>
     <div id="r-list" class="stack"></div>
+    <section id="r-cliff" class="card stack cliff" hidden aria-labelledby="cliff-h">
+      <h2 id="cliff-h" style="font-size:1.2rem"></h2>
+      <p class="fine" id="cliff-p"></p>
+      <div class="legend" aria-hidden="true"><span class="lc" id="cliff-lc"></span><span class="lt" id="cliff-lt"></span></div>
+      <div class="tbl"><table><thead><tr><th scope="col" id="cliff-c1"></th><th scope="col" id="cliff-c2"></th><th scope="col" id="cliff-c3"></th></tr></thead><tbody id="cliff-rows"></tbody></table></div>
+      <p class="fine" id="cliff-note"></p>
+    </section>
     <p class="fine" id="r-tax" hidden></p>
     <p class="fine" id="r-hunger" hidden></p>
     <div id="r-unsure" class="card stack" hidden>
@@ -423,6 +447,12 @@ const T = {
     value: (r, w) => `If you qualify, worth about <b>${r}</b> ${w}`, small: "A small amount if you qualify",
     near: (what, value, likely) => `Near the line: with ${what} at ${value}, this would ${likely ? "no longer look likely" : "look likely"}. Check again if that changes.`,
     unit_year: " a year", unit_month: " a month",
+    cliff_h: "If your pay changed",
+    cliff_p: "Everything else you told us stays the same; only earnings change. Bars show the expected yearly value of food, cash and tax-credit help: the chance of qualifying times the typical amount.",
+    cliff_cols: ["Earnings a year", "Food, cash and tax credits", "Health coverage that looks likely"],
+    cliff_lc: "Food and cash (SNAP, WIC, TANF, SSI, school meals)", cliff_lt: "Tax credits (EITC, child tax credit)",
+    cliff_now: "you now", cliff_none: "none likely", cliff_health: {medicaid: "Medicaid", chip: "CHIP", aca_ptc: "Marketplace credit"},
+    cliff_note: "A screening estimate for planning, not a promise of any amount. Drops between rows are where help falls away as pay rises.",
     tax: u => `Filing is free with <a href="${u}" target="_blank" rel="noopener">IRS free tax help (VITA)</a> if your income is modest.`,
     hunger: "Need food now? National Hunger Hotline: 1-866-3-HUNGRY (1-866-348-6479), Monday to Friday, 8 a.m. to 8 p.m. Eastern.",
     new_tab: "(opens in a new tab)", en_page: "", change: "Change", dont_know: "Don't know",
@@ -452,6 +482,12 @@ const T = {
     value: (r, w) => `Si califica, vale aproximadamente <b>${r}</b> ${w}`, small: "Una cantidad pequeña si califica",
     near: (what, value, likely) => `Cerca del límite: con ${what} de ${value}, esto ${likely ? "ya no parecería probable" : "parecería probable"}. Vuelva a revisar si eso cambia.`,
     unit_year: " al año", unit_month: " al mes",
+    cliff_h: "Si su sueldo cambiara",
+    cliff_p: "Todo lo demás que nos dijo se mantiene igual; solo cambian los ingresos. Las barras muestran el valor anual esperado de la ayuda en alimentos, efectivo y créditos tributarios: la probabilidad de calificar por la cantidad típica.",
+    cliff_cols: ["Ingresos al año", "Alimentos, efectivo y créditos tributarios", "Cobertura médica que parece probable"],
+    cliff_lc: "Alimentos y efectivo (SNAP, WIC, TANF, SSI, comidas escolares)", cliff_lt: "Créditos tributarios (EITC, crédito por hijos)",
+    cliff_now: "usted ahora", cliff_none: "ninguna probable", cliff_health: {medicaid: "Medicaid", chip: "CHIP", aca_ptc: "Crédito del Mercado"},
+    cliff_note: "Una estimación para planificar, no la promesa de ninguna cantidad. Las caídas entre filas muestran dónde se pierde ayuda al subir el sueldo.",
     tax: u => `Puede presentar gratis con la <a href="${u}" target="_blank" rel="noopener">ayuda tributaria gratuita del IRS (VITA)</a> si sus ingresos son moderados.`,
     hunger: "¿Necesita alimentos ahora? Línea Nacional contra el Hambre: 1-877-8-HAMBRE (1-877-842-6273), de lunes a viernes, de 8 a. m. a 8 p. m., hora del Este.",
     new_tab: "(se abre en una pestaña nueva)", en_page: " (página en inglés)", change: "Cambiar", dont_know: "No sé",
@@ -461,7 +497,7 @@ const T = {
 };
 
 const $ = id => document.getElementById(id);
-const S = {catalogue: null, byId: {}, state: null, readings: {}, asked: 0, current: null, editing: null, lastNext: null, busy: false, gen: 0, explain: null};
+const S = {catalogue: null, byId: {}, state: null, readings: {}, asked: 0, current: null, editing: null, lastNext: null, busy: false, gen: 0, explain: null, cliff: null};
 let LANG = (() => {
   try { const v = localStorage.getItem("lang"); if (v === "en" || v === "es") return v; } catch (e) {}
   return (navigator.language || "").toLowerCase().startsWith("es") ? "es" : "en";
@@ -587,9 +623,9 @@ async function step(facts) {
     if (bad) { showError(bad.error); return; }
     for (const x of r.readings) S.readings[x.question] = x.reading;
     if (facts.length && !S.editing) S.asked += 1;
-    S.state = r.state; S.editing = null; S.lastNext = r.next; S.explain = null;
+    S.state = r.state; S.editing = null; S.lastNext = r.next; S.explain = null; S.cliff = null;
     store();
-    if (r.next.action === "ask") renderQuestion(r.next); else { renderResults(r.next); nearTheLine(gen); }
+    if (r.next.action === "ask") renderQuestion(r.next); else { renderResults(r.next); nearTheLine(gen); payView(gen); }
   } catch (e) {
     if (gen !== S.gen) return;
     if (e.code === "bad_state") { reset(); show("intro"); status(t("bad_state")); }
@@ -600,7 +636,7 @@ async function step(facts) {
 }
 function reset() {
   S.gen++; forget();
-  Object.assign(S, {state: null, readings: {}, asked: 0, editing: null, current: null, lastNext: null, explain: null});
+  Object.assign(S, {state: null, readings: {}, asked: 0, editing: null, current: null, lastNext: null, explain: null, cliff: null});
   $("resume").hidden = true;
   setBusy(false);
 }
@@ -785,6 +821,7 @@ function renderResults(next) {
   wireEdits($("r-answers"));
   $("r-note").textContent = t("note")();
   renderNearTheLine();
+  renderPayView();
   show("results");
   $("r-h").focus({preventScroll: true});
 }
@@ -812,6 +849,43 @@ function renderNearTheLine() {
     const unit = q.unit === "dollars a year" ? t("unit_year") : q.unit === "dollars a month" ? t("unit_month") : "";
     host.insertAdjacentHTML("beforeend", `<p class="near">${esc(t("near")(what, optionLabel(q, c.to) + unit, likely))}</p>`);
   }
+}
+
+// "If your pay changed": the expected value of food, cash and tax-credit help at each earnings bracket near the
+// person's own, everything else kept (/v1/cliff). Shown only when earnings were given.
+async function payView(gen) {
+  const r = S.readings.earned_income;
+  if (!r || /^don't know/.test(r)) return;
+  try {
+    const c = await post("/v1/cliff", {state: S.state});
+    if (gen !== S.gen || $("results").hidden) return;
+    S.cliff = c;
+    renderPayView();
+  } catch (e) { /* optional */ }
+}
+function renderPayView() {
+  const c = S.cliff, box = $("r-cliff");
+  if (!c) { box.hidden = true; return; }
+  const q = S.byId[c.question];
+  const k = c.options.findIndex(o => o.current);
+  if (k < 0) { box.hidden = true; return; }
+  const rows = c.options.slice(Math.max(0, k - 3), k + 4);
+  const helpOf = o => o.by_group["food and cash"] + o.by_group["tax credits"];
+  const top = Math.max(1, ...rows.map(helpOf));
+  const cols = t("cliff_cols");
+  $("cliff-h").textContent = t("cliff_h"); $("cliff-p").textContent = t("cliff_p"); $("cliff-note").textContent = t("cliff_note");
+  $("cliff-lc").textContent = t("cliff_lc"); $("cliff-lt").textContent = t("cliff_lt");
+  [1, 2, 3].forEach(i => { $("cliff-c" + i).textContent = cols[i - 1]; });
+  const names = t("cliff_health");
+  $("cliff-rows").innerHTML = rows.map(o => {
+    const cash = o.by_group["food and cash"], tax = o.by_group["tax credits"];
+    const health = o.programmes.filter(p => p.id in names && p.tier === "likely").map(p => names[p.id]).join(", ") || t("cliff_none");
+    const label = optionLabel(q, o.option) + (o.current ? ` (${t("cliff_now")})` : "");
+    return `<tr class="${o.current ? "now" : ""}"${o.current ? ' aria-current="true"' : ""}><td>${esc(label)}</td>
+      <td><div class="bars"><span class="track" aria-hidden="true"><i class="c" style="width:${(100 * cash / top).toFixed(1)}%"></i><i class="t" style="width:${(100 * tax / top).toFixed(1)}%"></i></span>
+      <span class="amt">${money(cash + tax)}</span></div></td><td>${esc(health)}</td></tr>`;
+  }).join("");
+  box.hidden = false;
 }
 
 $("start").onclick = () => { reset(); step([]); };

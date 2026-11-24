@@ -1163,3 +1163,21 @@ keeps the rest, and reports each programme whose tier changes (`Intake.explain`,
   screener shows only money answers that move a probability by 0.15 or more across "likely".
 - It is not advice on what to report: the note says so, the MCP instructions say so, and the screener's
   wording is "check again if that changes".
+
+## D42. If pay changed: the cliff view (2026-11-24)
+
+The same what_if machinery, over every option of one amount question (earnings by default) with the rest
+kept: per option, each programme's tier, probability and typical value, and the expected value (p times the
+typical value) by group (`Intake.cliff`, `/v1/cliff`, a card on the screener's results). Eleven options take
+0.46 s on this machine. On a development profile (Pennsylvania, two adults, two children, $3,100 a month) the
+expected food, cash and tax-credit help peaks at $20,000-$40,000 a year and falls to $3,350 at
+$60,000-$80,000, where SNAP, WIC and Medicaid stop looking likely. The dollar value of health coverage
+wobbles between neighbouring brackets ($19,500 to $26,000 for one family) because it comes from whichever
+households fit, so the screener shows coverage as the programme that looks likely, not as dollars; the API
+returns both. The bar colours pass the dataviz palette validator in both themes (lightness band, chroma,
+colour-blind separation, contrast); axe finds no violations with the card shown. Development-only: no
+registered claim rests on it.
+
+Next (from an independent ranking of ten candidates): add programmes whose held-out labels have never been
+computed (state EITC and CTC, Head Start, Lifeline, childcare subsidies, Pell, housing assistance) on top
+of the frozen v2, the one direction with a clean registered test left.

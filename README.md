@@ -154,6 +154,9 @@ person's words ──► an LLM, or a form ──► typed facts (option, amount
   to $40,000 a year, SNAP would no longer look likely" is a benefits cliff a person can see coming. Each
   case swaps one answer's term in the belief instead of replaying the interview (15 ms, identical to a full
   replay within 1e-9), so a whole explanation takes about a second (`/v1/explain`, MCP `what_would_change`).
+- **If pay changed.** The same machinery runs every earnings bracket with the other answers kept and shows the
+  expected yearly value of food, cash and tax-credit help at each, plus the health coverage that looks likely:
+  where help falls away as pay rises (`/v1/cliff`; a card on the screener's results).
 - **Rules it may not break** (`bundles/guards_2026.json`), each checked against PolicyEngine's own results
   before shipping. They cost nothing on 2,000 fresh households (−$3.7 [−9.4, +0.0], registered, D32).
   Tracing every exception through PolicyEngine tax unit by tax unit explained 108 of 109, and found the
@@ -163,7 +166,7 @@ person's words ──► an LLM, or a form ──► typed facts (option, amount
 
 **Hosted** (https://decision-intake.vercel.app). The screener, the JSON API (`/v1/questions`,
 `/v1/step`, `/v1/assessment`, described at `/openapi.json`) and MCP at `/mcp`: the stateless 2026-07-28
-revision and the 2025 handshake revisions, three tools (`start_intake`, `record_facts`,
+revision and the 2025 handshake revisions, four tools (`start_intake`, `record_facts`,
 `get_assessment`, `what_would_change`) that pass a `state` string. About 300 ms of server time a step. No database, no
 sessions, no answers in logs. `/healthz` reports the commit and the model and rules hashes; a GitHub
 Actions job checks the page, a whole screening, the deployed model and rules, and both MCP eras after every
@@ -198,7 +201,7 @@ color-only meaning; axe-core finds no WCAG 2.1 A/AA violations on any screen in 
 # 1. environment (Python 3.11+; tested on 3.13 with numpy 2.5.5 and policyengine-us 2.152.15)
 python -m venv .venv && . .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -e ".[dev]" policyengine-us==2.152.15 tables h5py
-pytest -q                                              # 96 tests, on the shipped model; no data needed
+pytest -q                                              # 98 tests, on the shipped model; no data needed
 
 # 2. data: Populace national build populace-us-2024-spm-20260915 (827 MB, sha256 6496cc43...aee84) into
 #    data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)

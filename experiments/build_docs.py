@@ -83,6 +83,7 @@ def examples():
             {"question": "senior", "choice": "no"}]
     ex["near_state"] = call(app, "/v1/step", {"facts": near})["state"]
     ex["explain"] = call(app, "/v1/explain", {"state": ex["near_state"]})
+    ex["cliff"] = call(app, "/v1/cliff", {"state": ex["near_state"]})
     # MCP, both eras, on the same endpoint
     ex["mcp_legacy"] = {"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": {
         "protocolVersion": "2025-11-25", "capabilities": {}, "clientInfo": {"name": "my-agent", "version": "1.0"}}}
@@ -119,6 +120,10 @@ def main():
          "would_change": [c for c in r["would_change"] if c["kind"] == "amount"][:2]}
         for r in ev["near_the_line"] if any(c["kind"] == "amount" for c in r["would_change"])][:3],
         "answers_tried": ev["answers_tried"], "note": ev["note"]}
+    cl = ex["cliff"]
+    cliff_view = {"question": cl["question"], "unit": cl["unit"], "options": [
+        {"option": o["option"], "current": o["current"], "expected_value": o["expected_value"], "by_group": o["by_group"],
+         "programmes": ["…"]} for o in cl["options"][2:5]], "note": cl["note"]}
     call_view = {"result": {k: v for k, v in ex["mcp_call"]["result"].items() if k != "content"}}
     call_view["result"]["structuredContent"] = {"state": ex["mcp_call"]["result"]["structuredContent"]["state"],
                                                 "readings": "...", "next": {"action": "ask", "...": "..."}}
@@ -221,6 +226,7 @@ nav.toc ol {{ margin: 6px 0 0; padding-left: 20px; }}
 <tr><td><code>POST /v1/step</code></td><td><code>{{"state"?, "facts"?}}</code></td><td>the new <code>state</code>, how each fact was read, and <code>next</code>: ask, finish or hand_off</td></tr>
 <tr><td><code>POST /v1/assessment</code></td><td><code>{{"state"}}</code></td><td>every program's probability, tier and yearly value range; the facts so far; how well the data covers this household</td></tr>
 <tr><td><code>POST /v1/explain</code></td><td><code>{{"state"}}</code></td><td>which single answer, one step different, would change each program's result (<a href="#explain">below</a>)</td></tr>
+<tr><td><code>POST /v1/cliff</code></td><td><code>{{"state", "question"?}}</code></td><td>every bracket of an amount question, the rest kept: a benefits-cliff view (<a href="#cliff">below</a>)</td></tr>
 <tr><td><code>GET /v1/questions</code></td><td>-</td><td>the ten programs and all 18 questions with their options</td></tr>
 <tr><td><code>POST /mcp</code></td><td>JSON-RPC</td><td>the same engine as tools for AI assistants (<a href="#mcp">section 5</a>)</td></tr>
 <tr><td><code>GET /healthz</code></td><td>-</td><td>liveness, version, and the commit and model and rules hashes deployed</td></tr>
@@ -270,6 +276,9 @@ nav.toc ol {{ margin: 6px 0 0; padding-left: 20px; }}
 <p><code>POST /v1/explain</code> with a <code>state</code> moves each answer one step (one bracket of income or costs, the next count, the other yes/no; never the state) with every other answer kept, and lists each programme whose tier that changes. Useful for "check again if your income drops", and for spotting a benefits cliff. Each case reuses the belief instead of replaying the interview, so the whole list takes about a second. The <code>note</code> is part of the contract: it is a guide to re-checking, never advice on what to report. The screener shows only money answers that move a probability by 0.15 or more across "likely".</p>
 {code({"state": "…"})}
 {code(explain_view)}
+<h3 id="cliff">If pay changed: the cliff view</h3>
+<p><code>POST /v1/cliff</code> with a <code>state</code> (and optionally <code>"question"</code>, any amount question; earnings by default) gives every option of that question with the other answers kept: each program's tier, probability and typical yearly value, and the expected value by group (food and cash, tax credits, health coverage). Drops between neighbouring options are where help falls away as pay rises. Eleven options take about half a second. The screener shows food, cash and tax credits as bars and health coverage as the program that looks likely, since coverage is valued, not paid.</p>
+{code(cliff_view)}
 
 <h2 id="state">4. The state string</h2>
 <p>The facts so far, readable, with a checksum so a mangled copy is refused instead of misread:</p>
