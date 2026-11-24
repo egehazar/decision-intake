@@ -1458,3 +1458,22 @@ and without the term; realistic answers instead of clean ones for P2.
 (results/d51_dev_analysis.txt): A and B decide identically in all 600 (A-B +$0, half-width $0). With every
 answer given, the belief already rests on households whose SNAP labels agree. As registered, a development run
 whose arms never disagree does not size the margin: **P2's margin stays $25.** The test runs next, unchanged.
+
+**D51 result (2026-11-24 19:00 UTC): both pass; receipt evidence for SNAP ships.** 991 test households that get SNAP
+(results/d51_test.jsonl, results/d51_test_analysis.txt), clean answers, survey-weighted, dollars a household a
+year on the 14 programmes other than SNAP:
+
+| | A (receipt as evidence) | B (served) | A minus B [95% CI] | criterion |
+|---|---|---|---|---|
+| P1, five fields | 4,620 | 6,221 | **-1,600** [-2,402, -895], p 0.0002 | upper bound below 0: **PASS** |
+| P2, all 18 answers | 2,166 | 2,166 | +0 [+0, +0], p(>= +$25) 0.0002 | upper bound below +$25: **PASS** |
+
+Holm: both p 0.0002, the first at 2.5% and the second at 5%; both pass.
+- Decisions differ in 462 of 991 households with five fields, and in none with all 18 answers: a full set of
+  answers already places the household, and the receipt only helps where the answers are few.
+- Per programme with five fields (A-B): Medicaid -708, Head Start -235, SSI -214, TANF -180, EITC -105, school
+  meals -74, state EITC -38, CTC -30, CHIP -26, housing -25, ACA -12, WIC -11, state CTC -10; Early Head Start
+  +66, the only programme worse.
+- The effect is larger than in development (-600 on 600 validation households), as is B's loss (6,221 against
+  2,969): a different, costlier set of households; the interval is wide and its upper end is -895.
+By the registered rule, receipt evidence for SNAP (EPS 0.2) goes into production.

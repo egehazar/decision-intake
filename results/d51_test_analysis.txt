@@ -1,0 +1,5 @@
+D51 test: 991 households that get SNAP; A (receipt as evidence) minus B (served), decision loss on the 14 programmes other than SNAP, $/household/year, survey-weighted
+  sparse answers: A 4,620  B 6,221  A-B -1,600 [-2,402, -895] (half-width 754); p(A-B>=0) 0.0002, p(A-B>=25) 0.0002; decisions differ in 462 households
+    per programme A-B: wic -11, tanf -180, ssi -214, medicaid -708, chip -26, eitc -105, ctc -30, aca_ptc -12, school_meals -74, state_eitc -38, state_ctc -10, head_start -235, early_head_start +66, housing -25
+  full answers: A 2,166  B 2,166  A-B +0 [+0, +0] (half-width 0); p(A-B>=0) 1.0000, p(A-B>=25) 0.0002; decisions differ in 0 households
+    per programme A-B: 
