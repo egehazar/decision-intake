@@ -1483,3 +1483,15 @@ connector). `already` is accepted by /v1/step, /v1/assessment and /v1/plan (repl
 `[]` clears it), by /v1/batch records (before the facts: one belief update) and by the connector's
 record_facts in both protocol eras. On the screener, ticking a box under "Already getting any of these?"
 re-scores the results in place: no scroll, focus back on the box, the old notes kept until the new ones land.
+
+## D52. v1.1.0 released (2026-11-24)
+
+Pushed f8705d0..4831e07 (Ege, 19:08 UTC). Live checks on https://decision-intake.vercel.app: /healthz reports
+1.1.0, commit 4831e07, bundle 527ffdb595b0, 15 programmes; `frame-ancestors 'none'` on /, /docs.html,
+/partners.html, /embed.js and /embed/ (404), and `https:` only on /embed; the served embed.js carries
+allow-forms; /v1/step with `already: ["snap"]` writes gets=snap and moves SNAP 0.52 -> 0.65 and WIC 0.65 -> 0.78
+for the test family; /v1/plan, /v1/batch (school meals opened by SNAP) and the connector in both protocol eras
+(4 tools, record_facts takes `already`) answer. CI and the monitor (with the new framing step) green on
+4831e07. GitHub release v1.1.0 published 19:11 UTC (the release page first showed GitHub's error page; the API
+confirmed the release, and it renders); the tag ran publish-mcp.yml, and the MCP Registry lists
+io.github.egehazar/decision-intake 1.1.0 as latest.
