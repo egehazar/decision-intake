@@ -162,7 +162,8 @@ person's words ──► an LLM, or a form ──► typed facts (option, amount
   where help falls away as pay rises (`/v1/cliff`; a card on the screener's results).
 - **On any site.** `<script src="https://decision-intake.vercel.app/embed.js" async></script>` puts the
   screener in a sandboxed, self-sizing iframe on a food bank's or library's page (`data-lang="es"`,
-  `data-theme="light"`); only `/embed` may be framed.
+  `data-theme="light"`); only `/embed` may be framed. One page for organizations brings the three together:
+  https://decision-intake.vercel.app/partners.html (embed code with a live preview, caseload triage, API).
 - **The order to apply in.** The programs worth applying for in three steps (now, then, at tax time), with
   the federal rules by which one approval settles part of another's eligibility, each cited: SNAP, Medicaid or
   TANF meets WIC's income test; SNAP or TANF gives children free school meals, often with no form; TANF or SSI

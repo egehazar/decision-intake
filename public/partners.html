@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>For Organizations</title>
+<meta name="description" content="Put the Quick Benefits Check on your website, rank a caseload by the benefits each household is likely missing, or connect it to your systems. Free, open source, nothing stored.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 28 28'%3E%3Crect x='1' y='1' width='26' height='26' rx='7' fill='%231d5c88'/%3E%3Cpath d='M8 14.5l4 4 8-9' fill='none' stroke='white' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root { --bg: #f5f4ef; --surface: #fff; --ink: #18232c; --muted: #56636e; --line: #d9d6cc; --accent: #1d5c88; --accent-ink: #fff;
+  --accent-soft: #e4eef6; --focus: #f2a900; --code: #eef2f5; color-scheme: light; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #10161b; --surface: #182129; --ink: #e7edf1; --muted: #9aa8b3;
+  --line: #2a3641; --accent: #82b8e2; --accent-ink: #0c1620; --accent-soft: #1b2d3c; --focus: #f2c14e; --code: #0c1218; color-scheme: dark; } }
+:root[data-theme="dark"] { --bg: #10161b; --surface: #182129; --ink: #e7edf1; --muted: #9aa8b3; --line: #2a3641; --accent: #82b8e2;
+  --accent-ink: #0c1620; --accent-soft: #1b2d3c; --focus: #f2c14e; --code: #0c1218; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 62rem; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header { border-bottom: 1px solid var(--line); background: var(--surface); }
+header .wrap { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding-block: 14px; }
+header a { color: var(--ink); font-weight: 700; text-decoration: none; }
+main { padding-block: 32px 64px; display: flex; flex-direction: column; gap: 28px; }
+h1 { font-size: clamp(1.7rem, 4.2vw, 2.3rem); line-height: 1.15; margin: 0; text-wrap: balance; max-width: 34rem; }
+h2 { font-size: 1.2rem; margin: 0; text-wrap: balance; }
+p { margin: 0; max-width: 44rem; }
+a { color: var(--accent); }
+.lede { color: var(--muted); font-size: 1.08rem; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 12px; margin: 0; padding: 0; list-style: none; }
+.facts li { border-top: 3px solid var(--accent); padding-top: 8px; }
+.facts b { display: block; }
+.facts span { color: var(--muted); font-size: .92rem; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px 22px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.step { font-size: .8rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.fine { font-size: .9rem; color: var(--muted); }
+code { font-family: ui-monospace, Consolas, monospace; font-size: .88em; background: var(--code); padding: 1px 5px; border-radius: 4px; }
+pre { margin: 0; background: var(--code); border-radius: 8px; padding: 12px 14px; overflow-x: auto; font: .88rem/1.5 ui-monospace, Consolas, monospace; }
+.row { display: flex; gap: 10px 14px; flex-wrap: wrap; align-items: center; }
+button, .button { font: inherit; font-weight: 600; border-radius: 8px; padding: 9px 15px; border: 1px solid var(--accent); background: var(--accent); color: var(--accent-ink); cursor: pointer; text-decoration: none; display: inline-block; }
+.secondary { background: transparent; color: var(--accent); }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+select { font: inherit; padding: 6px 8px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); }
+label { display: inline-flex; gap: 6px; align-items: center; font-size: .95rem; }
+.preview { border: 1px dashed var(--line); border-radius: 12px; padding: 12px; background: var(--bg); }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 16px; }
+dl { margin: 0; display: grid; grid-template-columns: minmax(8rem, max-content) 1fr; gap: 8px 16px; }
+dt { font-weight: 600; } dd { margin: 0; color: var(--ink); }
+@media (max-width: 34rem) { dl { grid-template-columns: 1fr; } dd { margin-bottom: 6px; } }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<header><div class="wrap"><a href="./">Quick Benefits Check</a><span><a href="docs.html">Developer guide</a> · <a href="https://github.com/egehazar/decision-intake" target="_blank" rel="noopener">Source</a></span></div></header>
+<main class="wrap">
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <h1>Help the people you serve find the benefits they're missing</h1>
+    <p class="lede">For food banks, libraries, 211 lines, clinics and navigator teams. The Quick Benefits Check asks about 8 questions and says which of fifteen US programs a household should apply for, in English or Spanish. It is free and open source, and it stores nothing.</p>
+  </div>
+  <ul class="facts" aria-label="At a glance">
+    <li><b>15 programs</b><span>SNAP, WIC, Medicaid, CHIP, TANF, SSI, school meals, federal and state tax credits, Head Start, housing</span></li>
+    <li><b>About 8 questions</b><span>it picks the next question worth asking and stops when another isn't</span></li>
+    <li><b>Nothing stored</b><span>no accounts, no database; answers stay in the visitor's browser tab</span></li>
+    <li><b>Says when it can't tell</b><span>and hands off to a person instead of guessing</span></li>
+  </ul>
+
+  <section class="card" aria-labelledby="h-embed">
+    <span class="step">1 · On your website</span>
+    <h2 id="h-embed">Put the check on your own page</h2>
+    <p>Paste one line where it should appear. It adds a box that grows with its content, opens application links in a new tab, and tells your page nothing but its height.</p>
+    <div class="row">
+      <label>Language <select id="o-lang"><option value="">visitor's browser</option><option value="en">English</option><option value="es">Spanish</option></select></label>
+      <label>Colors <select id="o-theme"><option value="">visitor's setting</option><option value="light">light</option><option value="dark">dark</option></select></label>
+    </div>
+    <pre id="snippet" aria-label="Code to paste"></pre>
+    <div class="row"><button type="button" id="copy">Copy the code</button><span id="copied" class="fine" aria-live="polite"></span></div>
+    <details>
+      <summary>Preview it here</summary>
+      <div class="preview" id="preview" style="margin-top:10px"></div>
+    </details>
+  </section>
+
+  <div class="two">
+    <section class="card" aria-labelledby="h-caseload">
+      <span class="step">2 · For a list of households</span>
+      <h2 id="h-caseload">Rank a caseload</h2>
+      <p>Upload a spreadsheet of households you already know a little about (state, household size, children, earnings, rent). Get them back ranked by the benefits each is likely missing, with the one question to ask each first.</p>
+      <p class="fine">In a development check on 2,000 simulated households known by five fields, the top fifth of this ranking held 61% of the benefit dollars, against 20% in random order and 53% for largest household first. Use your own reference numbers, never names; rows are scored and not kept.</p>
+      <div class="row"><a class="button" href="caseload.html">Open caseload triage</a></div>
+    </section>
+    <section class="card" aria-labelledby="h-api">
+      <span class="step">3 · In your systems</span>
+      <h2 id="h-api">Connect it to your tools</h2>
+      <p>A JSON API for intake forms and case management systems, and an MCP connector so AI assistants (Claude, ChatGPT and others) run the screening with the engine choosing the questions instead of guessing.</p>
+      <p class="fine">Endpoints for each step, the full assessment, what would change a result, the order to apply in, and a caseload at once. Free; 120 requests a minute from one address.</p>
+      <div class="row"><a class="button" href="docs.html">Developer guide</a><a class="button secondary" href="openapi.json">OpenAPI</a></div>
+    </section>
+  </div>
+
+  <section class="card" aria-labelledby="h-honest">
+    <h2 id="h-honest">What to know before you use it</h2>
+    <dl>
+      <dt>What it is</dt><dd>A screening estimate from PolicyEngine's open model of the 2026 rules, with fourteen statutory limits it may not break. Not an application and not an eligibility decision: only the program decides, and anyone can apply whatever it says.</dd>
+      <dt>How it was tested</dt><dd>On thousands of simulated households it had never seen, against the rules model. It has not yet been tested with real applicants. Immigration status isn't asked and can change eligibility.</dd>
+      <dt>When it can't tell</dt><dd>Where the answers fit households that turn out very differently, it says so and points to a person (211 or a benefits navigator) rather than calling a program unlikely.</dd>
+      <dt>Privacy</dt><dd>No accounts, no database, no answers in logs. The screener keeps answers in the visitor's browser tab until they clear them or close it.</dd>
+      <dt>Cost and support</dt><dd>Free. Open source, so you can run your own copy. Questions and problems: <a href="https://github.com/egehazar/decision-intake/issues" target="_blank" rel="noopener">GitHub issues</a>.</dd>
+    </dl>
+  </section>
+</main>
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+function snippet() {
+  const attrs = [$("o-lang").value && ` data-lang="${$("o-lang").value}"`, $("o-theme").value && ` data-theme="${$("o-theme").value}"`].filter(Boolean).join("");
+  return `<script src="${location.origin}/embed.js"${attrs} async><\/script>`;
+}
+function render() {
+  $("snippet").textContent = snippet();
+  $("copied").textContent = "";
+}
+function preview() {
+  const box = $("preview");
+  box.textContent = "";
+  const s = document.createElement("script");
+  s.src = "embed.js";
+  if ($("o-lang").value) s.dataset.lang = $("o-lang").value;
+  if ($("o-theme").value) s.dataset.theme = $("o-theme").value;
+  box.appendChild(s);
+}
+$("o-lang").onchange = $("o-theme").onchange = () => { render(); if (document.querySelector("details").open) preview(); };
+document.querySelector("details").addEventListener("toggle", e => { if (e.target.open && !$("preview").firstChild) preview(); });
+$("copy").onclick = async () => {
+  try { await navigator.clipboard.writeText(snippet()); $("copied").textContent = "Copied."; }
+  catch (e) {
+    const r = document.createRange(); r.selectNodeContents($("snippet"));
+    const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    $("copied").textContent = "Selected: press Ctrl+C (or ⌘C) to copy.";
+  }
+};
+render();
+</script>
+</body>
+</html>

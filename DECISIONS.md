@@ -1341,3 +1341,6 @@ modals for printing) with no referrer.
 - Found while testing on a stand-in host page (another origin): the height could only grow, because inside an
   iframe `scrollHeight` never drops below the frame's own height. The page now measures the bottom of its
   content. And a dark visitor setting put a dark box on a light page; hence `data-theme`.
+- **For organizations** (public/partners.html): one page for a food bank or 211 coordinator with the embed code
+  (language and colour options, copy button, a live preview of the real embed), caseload triage and the API,
+  and what to know before using it (a screening estimate, tested on simulated households, can't-tell, privacy).
