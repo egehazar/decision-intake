@@ -1363,3 +1363,57 @@ or SSI opens Head Start's. Opened programmes are flagged, not counted in the exp
 the income test, not the whole of eligibility. The example list now includes one (Michigan, three people,
 $54,000, on SNAP under the state's higher limit: free school meals opened). An unknown programme name fails that
 row only.
+
+## D49. The plan's federal links, checked against the rules model (2026-11-24)
+
+experiments/plan_rules_check.py (results/plan_rules_check.*): for each D45 link, among training and validation
+households PolicyEngine labels eligible for the source programme and whose answers fit the target's category,
+the share it also labels eligible for the target (survey-weighted; labels, not predictions; no test household):
+
+| link | share | households |
+|---|---|---|
+| SNAP -> WIC | 99.6% | 2,134 |
+| Medicaid -> WIC | 93.8% | 3,930 |
+| TANF -> WIC | 100.0% | 285 |
+| SNAP -> school meals | 94.1% (83.0% before the rule below) | 4,108 |
+| TANF -> school meals | 96.4% (81.2% before) | 544 |
+| TANF / SSI -> Head Start | 62.4% / 64.4% | 264 / 129 |
+| TANF / SSI -> Early Head Start | 59.8% / 66.7% | 285 / 164 |
+| SSI -> Medicaid | 100.0% | 1,443 |
+
+(Final figures, with D50's category rules: WIC and Early Head Start count households where someone is pregnant.)
+
+The income links hold. What is left is age, which "child under 5" can't settle: Head Start is for 3 to 5 and
+Early Head Start for under 3 (hence "worth checking", never "likely"), and school meals need a child of school
+age. For school meals the answers can rule one case out: when the only child is under 5, PolicyEngine gives
+free meals to 0 of 380 such SNAP households (and 0 of 63 TANF ones), against 94% (SNAP) and 96% (TANF) of the
+rest. Category rules become conjunctions, and that case no longer opens school meals. Medicaid -> WIC at 94%: the
+person on Medicaid is not always the one WIC would serve.
+The caseload example's Michigan row was exactly that case; it is replaced by sparse rows where the rules matter
+most, households an organisation knows by state, size and children plus "on SNAP" or "on Medicaid", with no
+income: there the engine alone can't see what SNAP or Medicaid already settles.
+
+## D50. An independent review of D41-D49, and its fixes (2026-11-24)
+
+A reviewer agent read the code from f8705d0 on (no edits) and reported eight findings, each fixed and tested:
+1. **The embedded screener could not record an answer** (high). `embed.js` sandboxed the iframe without
+   `allow-forms`, and a sandboxed frame without it never fires a form's submit event, so Continue and Enter did
+   nothing; only "Don't know" moved on. My D47 test had clicked "Start" (a button) and never submitted an
+   answer. Fixed, and the monitor now checks that the served `embed.js` carries `allow-forms`.
+2. **The monitor's framing check could pass with framing allowed**: `cmd | grep -q ... && echo` lines don't
+   stop a `bash -e` script, so only the last line counted. Each line now exits on failure, with pipefail.
+3. **Category rules wrong both ways**: SNAP opened school meals when the only child is under 5 (D49: never
+   eligible), and no young child ruled out WIC and Early Head Start even when someone is pregnant (the
+   `infant_or_pregnant` answer). Rules are now conjunctions over answers, with "unanswered" explicit.
+4. **Triage's question and mistake cost still counted what the household already gets.** They are now worked
+   out on a copy of the belief whose losses for those programmes are zero.
+5. **Two quick ticks of "already getting" could let the older plan reply win.** A plan generation counter.
+6. Wording: "You get SNAP or Medicaid now" (now "and"); Head Start's "for a child who is 5" shown with no
+   children, and WIC's pregnancy note shown when the answer was no pregnancy (both now say no one in the
+   household is who the programme serves, and why it still appears).
+7. **A JSON integer over 4,300 digits gave a 500**, and NaN/Infinity were read as numbers: now 400.
+8. **/v1/batch could approach Vercel's 30 s limit** (50 fully answered records took ~13 s locally): at most 20.
+Also: `/embed/` with a slash was embed mode locally but not on Vercel; now only `/embed`, both places.
+The reviewer found nothing in vercel.json's patterns (checked with path-to-regexp as Vercel compiles them:
+only `/embed` gets the permissive policy), postMessage, HTML escaping, the new handlers' bad-input paths, MCP,
+or the English/Spanish string calls.

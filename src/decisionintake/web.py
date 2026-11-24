@@ -38,7 +38,11 @@ from .state import StateError
 
 MAX_BODY = 64 * 1024
 MAX_FACTS = 40
-MAX_BATCH = 50  # records in one /v1/batch call (each is a full belief update; about 0.1-0.3 s)
+MAX_BATCH = 20  # records in one /v1/batch call (each is a full belief update, 0.1-0.3 s; 50 took ~13 s locally)
+
+
+def _no_constant(name):
+    raise ValueError(f"{name} is not JSON")
 ROOT = Path(__file__).resolve().parents[2]
 STATUS = {200: "200 OK", 202: "202 Accepted", 204: "204 No Content", 400: "400 Bad Request", 403: "403 Forbidden",
           404: "404 Not Found", 405: "405 Method Not Allowed", 413: "413 Payload Too Large",
@@ -193,8 +197,8 @@ class App:
         if not raw.strip():
             return None
         try:
-            return json.loads(raw)
-        except (json.JSONDecodeError, UnicodeDecodeError):
+            return json.loads(raw, parse_constant=_no_constant)
+        except ValueError:  # JSONDecodeError, UnicodeDecodeError, an integer too long to read, NaN/Infinity
             raise HTTPError(400, "bad_json", "the request body is not valid JSON") from None
 
     def _intake(self, state, new=()) -> tuple[Intake, list]:
@@ -440,7 +444,7 @@ class App:
 
     def static_file(self, path):
         rel = path.lstrip("/") or "index.html"
-        if rel.rstrip("/") == "embed":  # the screener, embeddable (D47); vercel.json rewrites the same way
+        if rel == "embed":  # the screener, embeddable (D47); vercel.json rewrites exactly this path
             rel = "index.html"
         f = (self.static / rel).resolve()
         if f.is_dir():
@@ -696,7 +700,7 @@ def openapi_doc(base: str | None = None) -> dict:
                               "400": err, "413": err, "415": err, "429": limited}}},
             "/v1/batch": {"post": {
                 "operationId": "batch",
-                "summary": "A caseload list: up to 50 records of facts so far; per record the expected yearly value of "
+                "summary": "A caseload list: up to 20 records of facts so far; per record the expected yearly value of "
                            "the programmes recommended now, the best next question and its worth, and the call order",
                 "requestBody": body({"type": "object", "required": ["records"], "properties": {"records": {
                     "type": "array", "maxItems": MAX_BATCH, "items": {"type": "object", "properties": {

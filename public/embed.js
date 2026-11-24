@@ -14,7 +14,7 @@
   var f = document.createElement("iframe");
   f.src = origin + "/embed" + (opts ? "#" + opts : "");
   f.title = lang === "es" ? "Revisión rápida de beneficios" : "Quick Benefits Check";
-  f.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-modals");
+  f.setAttribute("sandbox", "allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-modals");
   f.setAttribute("referrerpolicy", "no-referrer");
   f.style.cssText = "display:block;width:100%;max-width:760px;height:640px;border:0;border-radius:12px;color-scheme:normal";
   window.addEventListener("message", function (e) {

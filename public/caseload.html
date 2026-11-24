@@ -62,7 +62,7 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-sp
       <input type="file" id="file" accept=".csv,text/csv" aria-label="Choose a CSV file">
       <button type="button" class="secondary" id="example">Use an example list</button>
     </div>
-    <p class="fine">Rows are sent to the DecisionIntake engine 50 at a time to be scored and are not stored or logged. Up to 1,000 rows.</p>
+    <p class="fine">Rows are sent to the DecisionIntake engine 20 at a time to be scored and are not stored or logged. Up to 1,000 rows.</p>
     <div class="row"><button type="button" id="run">Rank this list</button><span id="progress" class="fine" aria-live="polite"></span></div>
     <div id="err" class="error" role="alert" hidden></div>
   </section>
@@ -88,7 +88,8 @@ c-103,NY,1,0,,0,rent,yes,
 c-104,OH,3,2,yes,31000,rent,no,snap
 c-105,FL,2,0,,52000,own,no,
 c-106,PA,5,3,yes,18000,rent,no,snap medicaid
-c-107,MI,3,1,yes,54000,rent,no,snap`;
+c-107,GA,2,1,no,,,,snap
+c-108,TX,3,1,yes,,,,medicaid`;
 const RULE = {wic: "SNAP, Medicaid or TANF meets WIC's income test", school_meals: "SNAP or TANF: free school meals",
   head_start: "TANF or SSI meets Head Start's income rule", early_head_start: "TANF or SSI meets Early Head Start's income rule"};
 let CAT = null, LAST = [];
@@ -142,9 +143,9 @@ async function run() {
   try {
     const recs = toRecords($("csv").value);
     const out = [];
-    for (let k = 0; k < recs.length; k += 50) {
-      $("progress").textContent = `Scoring ${Math.min(k + 50, recs.length)} of ${recs.length}…`;
-      out.push(...(await post({records: recs.slice(k, k + 50)})).results);
+    for (let k = 0; k < recs.length; k += 20) {
+      $("progress").textContent = `Scoring ${Math.min(k + 20, recs.length)} of ${recs.length}…`;
+      out.push(...(await post({records: recs.slice(k, k + 20)})).results);
     }
     out.sort((a, b) => (b.expected_value ?? -1) - (a.expected_value ?? -1));
     LAST = out; render(out);

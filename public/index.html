@@ -511,7 +511,8 @@ const T = {
     who_for: {early_head_start: "From your answers, this would be for someone who is pregnant.",
       wic: "From your answers, this would be for someone who is pregnant or has just had a baby.",
       head_start: "From your answers, this would be for a child who is 5 and not yet in kindergarten."},
-    plan_check: "worth checking", plan_or: "or", plan_h_none: "Already getting any help?",
+    who_none: "From your answers, no one in your household is who this program serves. It's shown because households with answers like yours sometimes are; skip it if it clearly doesn't apply.",
+    plan_check: "worth checking", plan_or: "or", plan_and: "and", plan_h_none: "Already getting any help?",
     plan_have: "Already getting any of these?", plan_added: "worth checking because of what you get now",
     plan_already: (names, n) => `You get ${names} now, so ${n === 1 ? "it leaves" : "they leave"} the plan. Most benefits have to be renewed: watch for mail from the office.`,
     have_card: "You already get this. Keep it renewed: watch for mail from the office.",
@@ -566,7 +567,8 @@ const T = {
     who_for: {early_head_start: "Según sus respuestas, esto sería para alguien que está embarazada.",
       wic: "Según sus respuestas, esto sería para alguien que está embarazada o acaba de tener un bebé.",
       head_start: "Según sus respuestas, esto sería para un niño de 5 años que todavía no está en kínder."},
-    plan_check: "vale la pena revisar", plan_or: "o", plan_h_none: "¿Ya recibe alguna ayuda?",
+    who_none: "Según sus respuestas, nadie en su hogar es a quien atiende este programa. Aparece porque hogares con respuestas como las suyas a veces sí lo son; omítalo si claramente no aplica.",
+    plan_check: "vale la pena revisar", plan_or: "o", plan_and: "y", plan_h_none: "¿Ya recibe alguna ayuda?",
     plan_have: "¿Ya recibe alguno de estos?", plan_added: "vale la pena revisar por lo que ya recibe",
     plan_already: (names, n) => `Ya recibe ${names}, así que ${n === 1 ? "sale" : "salen"} del plan. La mayoría de los beneficios se deben renovar: esté atento al correo de la oficina.`,
     have_card: "Ya recibe esto. Manténgalo renovado: esté atento al correo de la oficina.",
@@ -596,7 +598,7 @@ const T = {
 
 const $ = id => document.getElementById(id);
 const S = {catalogue: null, byId: {}, state: null, readings: {}, asked: 0, current: null, editing: null, lastNext: null, busy: false, gen: 0, explain: null, cliff: null, plan: null, already: []};
-const EMBED = /^\/embed\/?$/.test(location.pathname);
+const EMBED = location.pathname === "/embed";
 const EMBED_OPTS = EMBED ? location.hash.slice(1).split(",") : [];  // the host page chooses: #es,light
 if (EMBED) document.documentElement.classList.add("embed");
 for (const th of ["light", "dark"]) if (EMBED_OPTS.includes(th)) document.documentElement.dataset.theme = th;
@@ -906,8 +908,11 @@ function renderSoFar() {
 
 // When the answers rule out the usual case, say who a young-children programme would still be for (D46).
 function whoFor(id) {
-  const noYoung = S.readings.child_under5 === "no" || S.readings.children === "none";
-  return noYoung && t("who_for")[id] || "";
+  const r = S.readings, noKids = r.children === "none", noYoung = noKids || r.child_under5 === "no";
+  if (!noYoung || !(id in t("who_for"))) return "";
+  if (id === "head_start") return noKids ? t("who_none") : t("who_for")[id];
+  if (r.infant_or_pregnant === "no") return t("who_none");  // WIC, Early Head Start: no one pregnant either
+  return t("who_for")[id];
 }
 function renderResults(next) {
   const recs = next.recommend || [], unsure = next.unsure || [];
@@ -990,17 +995,18 @@ async function payView(gen) {
 // "Your plan" (/v1/plan): the recommended programmes in the order to apply, and the federal rules by which one
 // approval settles part of another's eligibility. Shown for three or more programmes over two or more steps.
 async function planView(gen) {
+  const mine = S.planGen = (S.planGen || 0) + 1;  // two quick ticks: only the newest reply may render
   try {
     const p = await post("/v1/plan", {state: S.state, already: S.already});
-    if (gen !== S.gen || $("results").hidden) return;
+    if (gen !== S.gen || mine !== S.planGen || $("results").hidden) return;
     S.plan = p;
     renderPlan();
   } catch (e) { /* optional */ }
 }
 const SHORT = {snap: "SNAP", tanf: "TANF", ssi: "SSI", medicaid: "Medicaid"};
-function either(ids) {
+function either(ids, word = t("plan_or")) {
   const n = ids.map(i => SHORT[i] || (info(i) || {}).name || i);
-  return n.length === 1 ? n[0] : n.slice(0, -1).join(", ") + " " + t("plan_or") + " " + n[n.length - 1];
+  return n.length === 1 ? n[0] : n.slice(0, -1).join(", ") + " " + word + " " + n[n.length - 1];
 }
 const HAVE = ["snap", "medicaid", "tanf", "ssi", "wic", "chip", "housing"];  // ongoing benefits a household may already get
 function renderPlan() {
@@ -1018,7 +1024,7 @@ function renderPlan() {
   };
   const names = p.already.map(a => SHORT[a.id] || (info(a.id) || {}).name || a.programme);
   $("plan-already").hidden = !names.length;
-  $("plan-already").textContent = names.length ? t("plan_already")(either(p.already.map(a => a.id)), names.length) : "";
+  $("plan-already").textContent = names.length ? t("plan_already")(either(p.already.map(a => a.id), t("plan_and")), names.length) : "";
   for (const card of document.querySelectorAll("#r-list .result")) {
     const have = S.already.includes(card.dataset.pid);
     let note = card.querySelector(".have");

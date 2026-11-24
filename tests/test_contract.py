@@ -438,6 +438,7 @@ def test_embed_serves_the_screener_and_the_loader():
     assert page["status"] == 200 and b"const EMBED = " in page["body"]
     js = call(app, "GET", "/embed.js")
     assert js["status"] == 200 and b"decisionintake:height" in js["body"] and b"sandbox" in js["body"]
+    assert b"allow-forms" in js["body"]  # without it the question form's submit event never fires (review, D50)
 
 
 def test_only_embed_may_be_framed():
@@ -475,3 +476,42 @@ def test_batch_with_programmes_already_received(app):
         assert out["wic"]["expected_value"] < out["plain"]["expected_value"]
         assert "wic" not in {p["id"] for p in out["wic"]["recommend"]}
     assert "error" in out["typo"] and "typo" not in r["call_order"]
+
+
+# ------------------------------------------------------------------------------- review fixes (D50)
+def _plan_ids(app, facts, already):
+    st = call(app, "POST", "/v1/step", {"facts": facts})["json"]["state"]
+    p = call(app, "POST", "/v1/plan", {"state": st, "already": already})["json"]
+    return {x["id"]: x for s in p["steps"] for x in s["programmes"]}
+
+
+def test_plan_categories_follow_the_answers(app):
+    only_baby = [{"question": "state", "choice": "OH"}, {"question": "children", "choice": "1"},
+                 {"question": "child_under5", "choice": "yes"}]
+    assert not _plan_ids(app, only_baby, ["snap"]).get("school_meals", {}).get("added_by_rule")  # not school age
+    older = [{"question": "state", "choice": "OH"}, {"question": "children", "choice": "2"},
+             {"question": "child_under5", "choice": "yes"}]
+    pregnant = [{"question": "state", "choice": "OH"}, {"question": "children", "choice": "none"},
+                {"question": "infant_or_pregnant", "choice": "yes"}]
+    plan = _plan_ids(app, pregnant, ["snap"])
+    assert "wic" in plan and "school_meals" not in plan and "head_start" not in plan  # WIC serves pregnancy
+    not_pregnant = pregnant[:2] + [{"question": "infant_or_pregnant", "choice": "no"}]
+    assert not any(x.get("added_by_rule") for x in _plan_ids(app, not_pregnant, ["snap"]).values())
+    assert "school_meals" in _plan_ids(app, older + [{"question": "earned_income", "amount": {"value": 90000, "period": "year"}}], ["snap"])
+
+
+def test_triage_question_ignores_what_they_already_get(app):
+    fam = [{"question": "state", "choice": "TX"}, {"question": "household_size", "choice": "3"},
+           {"question": "children", "choice": "2"}]
+    r = call(app, "POST", "/v1/batch", {"records": [{"id": "a", "facts": fam},
+                                                    {"id": "b", "facts": fam, "already": ["snap", "medicaid", "chip"]}]})
+    a, b = r["json"]["results"]
+    assert b["expected_mistake_cost"] < a["expected_mistake_cost"]
+
+
+def test_numbers_json_cannot_read_are_a_400(app):
+    for raw in (b'{"state": ' + b"9" * 5000 + b"}", b'{"records": [{"id": NaN, "facts": []}]}',
+                b'{"facts": [{"question": "children", "choice": Infinity}]}'):
+        for path in ("/v1/plan", "/v1/batch", "/v1/step"):
+            assert call(app, "POST", path, raw=raw)["status"] == 400, (path, raw[:30])
+    assert call(app, "POST", "/v1/batch", {"records": [{"id": k, "facts": []} for k in range(21)]})["status"] == 400

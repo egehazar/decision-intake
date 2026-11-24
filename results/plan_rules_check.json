@@ -1,0 +1,52 @@
+{
+ "snap->wic": {
+  "households": 2134,
+  "target_eligible": 0.9962719211209302,
+  "rule": "7 CFR 246.7(d)(2)(vi)"
+ },
+ "medicaid->wic": {
+  "households": 3930,
+  "target_eligible": 0.9380682083605746,
+  "rule": "7 CFR 246.7(d)(2)(vi)"
+ },
+ "tanf->wic": {
+  "households": 285,
+  "target_eligible": 0.9999999806259029,
+  "rule": "7 CFR 246.7(d)(2)(vi)"
+ },
+ "snap->school_meals": {
+  "households": 4108,
+  "target_eligible": 0.9405129888555944,
+  "rule": "7 CFR 245.2 and 245.6a"
+ },
+ "tanf->school_meals": {
+  "households": 544,
+  "target_eligible": 0.9644286422199055,
+  "rule": "7 CFR 245.2 and 245.6a"
+ },
+ "tanf->head_start": {
+  "households": 264,
+  "target_eligible": 0.6239066200569598,
+  "rule": "45 CFR 1302.12(c)(1)(ii) and 1305.2"
+ },
+ "ssi->head_start": {
+  "households": 129,
+  "target_eligible": 0.6438001047951549,
+  "rule": "45 CFR 1302.12(c)(1)(ii) and 1305.2"
+ },
+ "tanf->early_head_start": {
+  "households": 285,
+  "target_eligible": 0.598305719214935,
+  "rule": "45 CFR 1302.12(c)(1)(ii) and 1305.2"
+ },
+ "ssi->early_head_start": {
+  "households": 164,
+  "target_eligible": 0.6673049762049137,
+  "rule": "45 CFR 1302.12(c)(1)(ii) and 1305.2"
+ },
+ "ssi->medicaid": {
+  "households": 1443,
+  "target_eligible": 1.0,
+  "rule": "42 U.S.C. 1396a(a)(10)(A)(i)(II)"
+ }
+}

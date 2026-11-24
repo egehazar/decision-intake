@@ -31,10 +31,13 @@ jobs:
         run: curl -sf --max-time 20 -o /dev/null "$BASE/" && echo "page ok"
       - name: Framing - refused everywhere but /embed (D47)
         run: |
-          curl -sfI --max-time 20 "$BASE/" | grep -i '^content-security-policy:' | grep -q "frame-ancestors 'none'" && echo "/ refuses framing"
-          curl -sfI --max-time 20 "$BASE/docs.html" | grep -i '^content-security-policy:' | grep -q "frame-ancestors 'none'" && echo "/docs.html refuses framing"
-          curl -sfI --max-time 20 "$BASE/embed" | grep -i '^content-security-policy:' | grep -q "frame-ancestors https:" && echo "/embed allows https sites"
-          curl -sf --max-time 20 "$BASE/embed.js" | grep -q "decisionintake:height" && echo "embed.js served"
+          set -o pipefail
+          csp() { curl -sfI --max-time 20 "$BASE$1" | grep -i '^content-security-policy:'; }
+          csp / | grep -q "frame-ancestors 'none'" || { echo "/ does not refuse framing"; exit 1; }
+          csp /docs.html | grep -q "frame-ancestors 'none'" || { echo "/docs.html does not refuse framing"; exit 1; }
+          csp /embed | grep -q "frame-ancestors https:" || { echo "/embed does not allow https sites"; exit 1; }
+          curl -sf --max-time 20 "$BASE/embed.js" | grep -q "allow-forms" || { echo "embed.js missing or stale"; exit 1; }
+          echo "framing: refused on / and /docs.html, allowed on /embed; embed.js served"
       - name: Health, with the rules loaded
         run: |
           curl -sf --max-time 20 "$BASE/healthz" | python3 -c "import json,sys; d=json.load(sys.stdin); assert d['ok'] and d['rules'], d; print('healthz', d['version'], '|', d['rules'], '| commit', d.get('commit'), '| bundle', d.get('bundle_sha256'))"

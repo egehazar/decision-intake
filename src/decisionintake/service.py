@@ -16,6 +16,7 @@ A fact for a question that already has one replaces it (a correction).
 
 from __future__ import annotations
 
+import copy
 import re
 from dataclasses import dataclass
 
@@ -98,10 +99,21 @@ PLAN_NOTE = ("The order to apply in, for the programmes worth applying for now. 
              "federal rules; a state or programme office decides each application.")
 # A programme the household already gets can settle another's income test even where the answers alone don't
 # point to it; the target is then added as "worth checking" if its category can fit (who it is for).
-# programme -> [(question, the canonical choices that rule the category out)]
-_YOUNG = [("children", {"none"}), ("child_under5", {"no"})]
-PLAN_CATEGORY = {"wic": _YOUNG, "head_start": _YOUNG, "early_head_start": _YOUNG,
-                 "school_meals": [("children", {"none"})]}
+# programme -> rules that put its category out of reach. A rule is {question: choices}; it applies when EVERY
+# question in it was answered with one of those choices (None in a set: unanswered counts too).
+# WIC and Early Head Start also serve pregnant people, so no young child rules them out only when no one is
+# pregnant (or the question wasn't answered: pregnancy is rare, so it isn't assumed).
+_NOT_PREGNANT = {"no", None}
+PLAN_CATEGORY = {
+    "wic": [{"children": {"none"}, "infant_or_pregnant": _NOT_PREGNANT},
+            {"child_under5": {"no"}, "infant_or_pregnant": _NOT_PREGNANT}],
+    "early_head_start": [{"children": {"none"}, "infant_or_pregnant": _NOT_PREGNANT},
+                         {"child_under5": {"no"}, "infant_or_pregnant": _NOT_PREGNANT}],
+    "head_start": [{"children": {"none"}}, {"child_under5": {"no"}}],
+    # the only child is under 5: not school age (PolicyEngine labels: 0 of 380 such SNAP households eligible,
+    # against 94% of the rest; experiments/plan_rules_check.py, D49)
+    "school_meals": [{"children": {"none"}}, {"children": {"1"}, "child_under5": {"yes"}}],
+}
 ALREADY_SOURCES = ["snap", "medicaid", "tanf", "ssi"]
 _SHORT = {"snap": "SNAP", "tanf": "TANF", "ssi": "SSI", "medicaid": "Medicaid"}
 
@@ -298,8 +310,9 @@ class Intake:
     def catalogue(self) -> list[dict]:
         return [self.question_view(j) for j in range(len(self.b.pop.questions))]
 
-    def next_step(self) -> dict:
-        s = self.s
+    def next_step(self, s: Session | None = None) -> dict:
+        """s: a session to decide on instead of this intake's (triage passes one that ignores some programmes)."""
+        s = s or self.s
         risk = s.risk()
         progress = {"facts_recorded": len(self.facts), "expected_mistake_cost": round(risk),
                     "similar_households": round(s.ess()), "support": self.support()}
@@ -387,6 +400,13 @@ class Intake:
             plan = self.plan(already)  # validates the ids
             opened = [{"id": p["id"], "because": p["links"][0]["already"], "rule": p["links"][0]["source"]}
                       for s in plan["steps"] for p in s["programmes"] if p.get("added_by_rule")]
+        s = self.s
+        if already:  # what they already get: no question is worth asking for it and no mistake can be made on it
+            ix = [self.b.pop.decisions.index(a) for a in already]
+            s = copy.copy(self.s)
+            s.l_skip, s.l_rec = self.s.l_skip.copy(), self.s.l_rec.copy()
+            s.l_skip[:, ix] = 0.0
+            s.l_rec[:, ix] = 0.0
         thin = self._thin(self.s)
         recs, ev = [], 0.0
         for dv in self.s.decisions():
@@ -396,21 +416,23 @@ class Intake:
                 recs.append({"id": dv.decision, "tier": self._tier(True, dv.p_eligible, thin),
                              "probability": round(dv.p_eligible, 2)})
         recs.sort(key=lambda r: -r["probability"])
-        nxt = self.next_step()
+        nxt = self.next_step(s)
         ask = None
         if nxt["action"] == "ask":
             ask = {"id": nxt["question"]["id"], "text": nxt["question"]["text"], "worth_per_year": nxt["why"]["worth_per_year"]}
         out = {"expected_value": int(round(ev, -1)), "recommend": recs, "next": ask, "action": nxt["action"],
-               "expected_mistake_cost": round(self.s.risk()), "support": self.support()["level"]}
+               "expected_mistake_cost": round(s.risk()), "support": self.support()["level"]}
         if already:
             out["already"] = already
             out["opened_by_rule"] = opened
         return out
 
     def _category_fits(self, pid: str) -> bool:
-        for q, ruled_out in PLAN_CATEGORY.get(pid, []):
-            choice = self.raw.get(q, {}).get("choice")
-            if choice is not None and str(choice).lower() in ruled_out:  # unanswered: it may fit
+        for rule in PLAN_CATEGORY.get(pid, []):
+            def hit(q, ruled):
+                c = self.raw.get(q, {}).get("choice")
+                return None in ruled if c is None else str(c).lower() in ruled
+            if all(hit(q, ruled) for q, ruled in rule.items()):
                 return False
         return True
 
