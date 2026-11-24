@@ -1,0 +1,4 @@
+No child under 5 answered: 1000 validation households, every answer given; thin support for 100.0% (weighted)
+  early_head_start: recommended 1.9%, actually eligible 0.2%, wrong recommendation 1.8% (thin 1.8% vs supported 0.0% recommended); mean probability 0.006
+  head_start: recommended 2.8%, actually eligible 1.2%, wrong recommendation 2.0% (thin 5.0% vs supported 0.0% recommended); mean probability 0.008
+  wic: recommended 0.9%, actually eligible 0.9%, wrong recommendation 0.0% (thin 0.7% vs supported 0.0% recommended); mean probability 0.010

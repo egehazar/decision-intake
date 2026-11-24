@@ -1,0 +1,28 @@
+{
+ "households": 1000,
+ "thin_share": 0.9999999984613107,
+ "early_head_start": {
+  "recommended": 0.019443049641982575,
+  "eligible": 0.001852317643220804,
+  "wrong_recommendation": 0.017590731998761773,
+  "recommended_thin": 0.018018018018018018,
+  "recommended_supported": 0.0,
+  "mean_probability": 0.006366829963822996
+ },
+ "head_start": {
+  "recommended": 0.02757614946012324,
+  "eligible": 0.011979333321102636,
+  "wrong_recommendation": 0.02017216068365244,
+  "recommended_thin": 0.05005005005005005,
+  "recommended_supported": 0.0,
+  "mean_probability": 0.008042822094095813
+ },
+ "wic": {
+  "recommended": 0.008819112401255144,
+  "eligible": 0.008819112838875206,
+  "wrong_recommendation": 0.0,
+  "recommended_thin": 0.007007007007007007,
+  "recommended_supported": 0.0,
+  "mean_probability": 0.01004203701991744
+ }
+}

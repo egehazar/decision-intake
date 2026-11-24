@@ -1305,3 +1305,24 @@ two or more steps, in English and Spanish, after the result cards. axe clean in 
   free school meals when there are children; SNAP, Medicaid or TANF adds WIC, and TANF or SSI adds Head Start and
   Early Head Start, unless the answers say no children or no child under 5. This is the case broad-based
   categorical eligibility creates: a household on SNAP above WIC's own income line. Probabilities are untouched.
+
+## D46. Early Head Start without a young child: the loss is right, the card was unclear (2026-11-24)
+
+Found while testing D45: a household answering "no child under 5" was shown Early Head Start as worth checking.
+Development check, not registered (experiments/young_child_dev.py, results/young_child_dev.*), 1,000 validation
+households with that answer, every question answered, served settings:
+
+| | recommended | eligible (PolicyEngine) | wrong recommendation |
+|---|---|---|---|
+| Early Head Start | 1.9% | 0.2% | 1.8% |
+| Head Start | 2.8% | 1.2% | 2.0% |
+| WIC | 0.9% | 0.9% | 0.0% |
+
+Not a bug in the decision. Early Head Start also serves pregnant people and Head Start serves 5-year-olds not yet
+in kindergarten, and these are large benefits ($15,000 to $30,000 a year in care), so a few percent is worth a
+check under the engine's loss: capping Early Head Start at 0.02 for "no child under 5" would cost about $40 a
+household in this group against $38 now, and capping Head Start about $204 against $88. No rule added.
+What was wrong was the card: it said who the programme is for in general, not who it could be for given the
+answers. The screener now adds, when the answers say no child under 5 (or no children), "From your answers,
+this would be for someone who is pregnant" (Early Head Start; WIC adds "or has just had a baby") or "for a
+child who is 5 and not yet in kindergarten" (Head Start), in English and Spanish.

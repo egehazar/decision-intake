@@ -501,6 +501,9 @@ const T = {
     print_head: (d, v) => `Quick Benefits Check summary, ${d}. ${v}. A screening estimate to bring to a benefits office or navigator: not an application or an eligibility decision.`,
     plan_h: "Your plan: the order to apply in",
     plan_steps: {now: "Apply now", next: "Then", tax: "At tax time: your 2026 tax return, filed in early 2027"},
+    who_for: {early_head_start: "From your answers, this would be for someone who is pregnant.",
+      wic: "From your answers, this would be for someone who is pregnant or has just had a baby.",
+      head_start: "From your answers, this would be for a child who is 5 and not yet in kindergarten."},
     plan_check: "worth checking", plan_or: "or", plan_h_none: "Already getting any help?",
     plan_have: "Already getting any of these?", plan_added: "worth checking because of what you get now",
     plan_already: (names, n) => `You get ${names} now, so ${n === 1 ? "it leaves" : "they leave"} the plan. Most benefits have to be renewed: watch for mail from the office.`,
@@ -553,6 +556,9 @@ const T = {
     print_head: (d, v) => `Resumen de la Revisión rápida de beneficios, ${d}. ${v}. Una estimación para llevar a una oficina de beneficios o a un orientador: no es una solicitud ni una decisión de elegibilidad.`,
     plan_h: "Su plan: el orden para solicitar",
     plan_steps: {now: "Solicite ahora", next: "Después", tax: "En la temporada de impuestos: su declaración de 2026, presentada a principios de 2027"},
+    who_for: {early_head_start: "Según sus respuestas, esto sería para alguien que está embarazada.",
+      wic: "Según sus respuestas, esto sería para alguien que está embarazada o acaba de tener un bebé.",
+      head_start: "Según sus respuestas, esto sería para un niño de 5 años que todavía no está en kínder."},
     plan_check: "vale la pena revisar", plan_or: "o", plan_h_none: "¿Ya recibe alguna ayuda?",
     plan_have: "¿Ya recibe alguno de estos?", plan_added: "vale la pena revisar por lo que ya recibe",
     plan_already: (names, n) => `Ya recibe ${names}, así que ${n === 1 ? "sale" : "salen"} del plan. La mayoría de los beneficios se deben renovar: esté atento al correo de la oficina.`,
@@ -872,6 +878,11 @@ function renderSoFar() {
   wireEdits($("sofar-list"));
 }
 
+// When the answers rule out the usual case, say who a young-children programme would still be for (D46).
+function whoFor(id) {
+  const noYoung = S.readings.child_under5 === "no" || S.readings.children === "none";
+  return noYoung && t("who_for")[id] || "";
+}
 function renderResults(next) {
   const recs = next.recommend || [], unsure = next.unsure || [];
   const likely = recs.filter(r => r.tier === "likely").length;
@@ -889,6 +900,7 @@ function renderResults(next) {
       <header><h2 style="font-size:1.2rem">${esc(i.name)}</h2><span class="badge ${tier[0]}"><span aria-hidden="true">${tier[0] === "likely" ? "&#10003;" : "?"}</span> ${esc(tier[1])}</span></header>
       <p class="desc">${esc(i.desc)}</p>
       ${value ? `<p class="value">${value}</p>` : ""}
+      ${whoFor(r.id) ? `<p class="fine who">${esc(whoFor(r.id))}</p>` : ""}
       <div class="actions"><a class="button" href="${i.apply}" target="_blank" rel="noopener">${esc(i.how)}${i.enPage ? esc(t("en_page")) : ""} <span aria-hidden="true">&#8599;</span><span class="skip"> ${esc(t("new_tab"))}</span></a></div>
     </article>`;
   }).join("");
