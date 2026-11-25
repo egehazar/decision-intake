@@ -17,6 +17,8 @@ A fact for a question that already has one replaces it (a correction).
 from __future__ import annotations
 
 import copy
+import json
+import os
 import re
 from dataclasses import dataclass, field
 
@@ -45,6 +47,27 @@ class Settings:
     # Programmes whose receipt is used as evidence, with the weight left to households the rules model labels
     # ineligible (D51). Empty = receipt is recorded (for the plan and triage) but moves no belief.
     receipt_evidence: dict = field(default_factory=dict)
+
+
+# D53: where to apply in the household's state. Each programme's key into apply_links.json (built and checked by
+# experiments/apply_links.py from the federal directories); CHIP shares Medicaid's, since one application covers
+# both (42 CFR 435.907). Programmes without a key, or a state without a checked link, keep the national page.
+APPLY_KEY = {"snap": "snap", "medicaid": "medicaid", "chip": "medicaid", "tanf": "tanf",
+             "state_eitc": "state_tax", "state_ctc": "state_tax"}
+_APPLY_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "apply_links.json")
+_apply_links: dict | None = None
+
+
+def apply_links() -> dict:
+    """The checked state links, {state: {key: {url, title, checked}}}; empty if the file is absent."""
+    global _apply_links
+    if _apply_links is None:
+        try:
+            with open(_APPLY_FILE, encoding="utf-8") as fh:
+                _apply_links = json.load(fh).get("links", {})
+        except FileNotFoundError:
+            _apply_links = {}
+    return _apply_links
 
 
 RECEIPT_EPS = {"snap": 0.2}  # D51: chosen on development data; used only where Settings.receipt_evidence says so
@@ -409,10 +432,13 @@ class Intake:
             if dv.recommend or not brief:
                 lo, hi = max(dv.value_low, 0), max(dv.value_high, 0)
                 row["value_if_eligible_per_year"] = [int(round(lo, -1)), int(round(hi, -1))]  # whole dollars
+            if tier in ("likely", "worth checking", "can't tell") and (where := self.where(dv.decision)):
+                row["apply"] = where
             rows.append(row)
         rows.sort(key=lambda r: (r["tier"] not in ("likely", "worth checking"), -r["probability"]))
         recs = [r for r in rows if r["tier"] in ("likely", "worth checking")]
-        unsure = [{k: r[k] for k in ("id", "programme", "tier", "probability")} for r in rows if r["tier"] == "can't tell"]
+        unsure = [{k: r[k] for k in ("id", "programme", "tier", "probability", "apply") if k in r}
+                  for r in rows if r["tier"] == "can't tell"]
         out = {"recommend": recs, "unsure": unsure}  # always present, empty when the data covers the person
         if not brief:
             out["all_programmes"] = rows
@@ -421,6 +447,24 @@ class Intake:
             out["support"] = self.support()
         out["note"] = self.b.info.get("caveat", "")
         return out
+
+    def state_code(self) -> str | None:
+        """The household's state as answered (its two-letter option), or None if not answered."""
+        f = self.facts.get("state")
+        if f is None or "state" not in self.qi:
+            return None
+        k = np.flatnonzero(np.asarray(f["evidence"]) > 0)
+        return self.b.pop.questions[self.qi["state"]].options[int(k[0])] if len(k) == 1 else None
+
+    def where(self, pid: str) -> dict | None:
+        """Where to apply for pid in the household's state (D53): the state's own page, checked on the date
+        given, or None (state not answered, no state page for this programme, or no link passed the check)."""
+        key = APPLY_KEY.get(pid)
+        st = self.state_code() if key else None
+        link = apply_links().get(st, {}).get(key) if st else None
+        if not link:
+            return None
+        return {"url": link["url"], "state": st, "checked": link["checked"]}
 
     # ------------------------------------------------------------------------------- what would change it
     def _neighbours(self, q, k: int) -> list[int]:
@@ -510,6 +554,10 @@ class Intake:
                 elif any(link["already"] for link in links) and self._category_fits(pid):
                     items.append({"id": pid, "programme": self.b.labels[pid], "tier": "worth checking",
                                   "added_by_rule": True, "links": [l for l in links if l["already"]]})
+                else:
+                    continue
+                if where := self.where(pid):
+                    items[-1]["apply"] = where
             if items:
                 in_step = {i["id"] for i in items}
                 notes = [{"kind": k, "text": t} for k, (ids_, t) in PLAN_NOTES.items() if in_step & set(ids_)]

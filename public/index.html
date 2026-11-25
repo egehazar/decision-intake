@@ -533,6 +533,9 @@ const T = {
     cliff_now: "you now", cliff_none: "none likely", cliff_health: {medicaid: "Medicaid", chip: "CHIP", aca_ptc: "Marketplace credit"},
     cliff_note: "A screening estimate for planning, not a promise of any amount. Drops between rows are where help falls away as pay rises.",
     tax: u => `Filing is free with <a href="${u}" target="_blank" rel="noopener">IRS free tax help (VITA)</a> if your income is modest.`,
+    how_in: {snap: s => `Apply for SNAP in ${s}`, medicaid: s => `Apply for Medicaid in ${s}`, chip: s => `Apply for CHIP in ${s}`,
+      tanf: s => `Apply for cash assistance in ${s}`, state_eitc: s => `Claim it on your ${s} tax return`, state_ctc: s => `Claim it on your ${s} tax return`},
+    state_site: h => `${h}, the state's own site`,
     hunger: "Need food now? National Hunger Hotline: 1-866-3-HUNGRY (1-866-348-6479), Monday to Friday, 8 a.m. to 8 p.m. Eastern.",
     new_tab: "(opens in a new tab)", en_page: "", change: "Change", dont_know: "Don't know",
     note: () => "This is a free screener, not an application and not an eligibility decision; you can apply for any program whatever it says here. Estimates use PolicyEngine's model of the 2026 rules. Immigration status isn't asked and can change eligibility. Your answers are kept only in this browser tab until you clear them or close it.",
@@ -589,6 +592,9 @@ const T = {
     cliff_now: "usted ahora", cliff_none: "ninguna probable", cliff_health: {medicaid: "Medicaid", chip: "CHIP", aca_ptc: "Crédito del Mercado"},
     cliff_note: "Una estimación para planificar, no la promesa de ninguna cantidad. Las caídas entre filas muestran dónde se pierde ayuda al subir el sueldo.",
     tax: u => `Puede presentar gratis con la <a href="${u}" target="_blank" rel="noopener">ayuda tributaria gratuita del IRS (VITA)</a> si sus ingresos son moderados.`,
+    how_in: {snap: s => `Solicite SNAP en ${s}`, medicaid: s => `Solicite Medicaid en ${s}`, chip: s => `Solicite CHIP en ${s}`,
+      tanf: s => `Solicite asistencia en efectivo en ${s}`, state_eitc: s => `Reclámelo en su declaración de impuestos de ${s}`, state_ctc: s => `Reclámelo en su declaración de impuestos de ${s}`},
+    state_site: h => `${h}, el sitio del propio estado (puede estar en inglés)`,
     hunger: "¿Necesita alimentos ahora? Línea Nacional contra el Hambre: 1-877-8-HAMBRE (1-877-842-6273), de lunes a viernes, de 8 a. m. a 8 p. m., hora del Este.",
     new_tab: "(se abre en una pestaña nueva)", en_page: " (página en inglés)", change: "Cambiar", dont_know: "No sé",
     note: () => "Esta es una revisión gratuita, no una solicitud ni una decisión de elegibilidad; puede solicitar cualquier programa sin importar lo que diga aquí. Las estimaciones usan el modelo de PolicyEngine de las reglas de 2026. La condición migratoria no se pregunta y puede cambiar la elegibilidad. Sus respuestas se guardan solo en esta pestaña del navegador hasta que las borre o la cierre.",
@@ -658,7 +664,7 @@ function shownReading(qid, reading) {
   return cap(s);
 }
 function link(href, text, enPage) {
-  return `<a href="${href}" target="_blank" rel="noopener">${esc(text)}${enPage ? esc(t("en_page")) : ""}<span class="skip"> ${esc(t("new_tab"))}</span></a>`;
+  return `<a href="${esc(href)}" target="_blank" rel="noopener">${esc(text)}${enPage ? esc(t("en_page")) : ""}<span class="skip"> ${esc(t("new_tab"))}</span></a>`;
 }
 
 function applyStatic() {
@@ -914,6 +920,18 @@ function whoFor(id) {
   if (r.infant_or_pregnant === "no") return t("who_none");  // WIC, Early Head Start: no one pregnant either
   return t("who_for")[id];
 }
+// Where to apply (D53): the state's own page when the engine sends one for this programme (it does once the state
+// is answered and a link passed the check), else the national page. Only http(s) links are used.
+function applyFor(r) {
+  const i = info(r.id) || {name: r.programme, desc: "", apply: "", how: "Apply"};
+  const w = r.apply, fn = (t("how_in") || {})[r.id];
+  if (w && /^https?:\/\//.test(w.url) && fn && STATES[w.state]) {
+    let host = "";
+    try { host = new URL(w.url).hostname.replace(/^www\./, ""); } catch (e) { host = ""; }
+    return {href: w.url, how: fn(STATES[w.state]), enPage: false, site: host ? t("state_site")(host) : ""};
+  }
+  return {href: i.apply, how: i.how, enPage: i.enPage, site: ""};
+}
 function renderResults(next, keep = false) {
   const recs = next.recommend || [], unsure = next.unsure || [];
   const likely = recs.filter(r => r.tier === "likely").length;
@@ -923,7 +941,7 @@ function renderResults(next, keep = false) {
   $("handoff").hidden = next.action !== "hand_off";
   $("handoff-text").textContent = t("handoff_text");
   $("r-list").innerHTML = recs.map(r => {
-    const i = info(r.id) || {name: r.programme, desc: "", apply: "", how: "Apply"};
+    const i = info(r.id) || {name: r.programme, desc: "", apply: "", how: "Apply"}, a = applyFor(r);
     const tier = r.tier === "likely" ? ["likely", t("badge_likely")] : ["check", t("badge_check")];
     const v = r.value_if_eligible_per_year;
     const value = !Array.isArray(v) ? "" : v[1] < 120 ? t("small") : t("value")(v[0] === v[1] ? money(v[0]) : `${money(v[0])}–${money(v[1])}`, esc(i.when || t("per_year")));
@@ -932,7 +950,7 @@ function renderResults(next, keep = false) {
       <p class="desc">${esc(i.desc)}</p>
       ${value ? `<p class="value">${value}</p>` : ""}
       ${whoFor(r.id) ? `<p class="fine who">${esc(whoFor(r.id))}</p>` : ""}
-      <div class="actions"><a class="button" href="${i.apply}" target="_blank" rel="noopener">${esc(i.how)}${i.enPage ? esc(t("en_page")) : ""} <span aria-hidden="true">&#8599;</span><span class="skip"> ${esc(t("new_tab"))}</span></a></div>
+      <div class="actions"><a class="button" href="${esc(a.href)}" target="_blank" rel="noopener">${esc(a.how)}${a.enPage ? esc(t("en_page")) : ""} <span aria-hidden="true">&#8599;</span><span class="skip"> ${esc(t("new_tab"))}</span></a>${a.site ? `<p class="fine site">${esc(a.site)}</p>` : ""}</div>
     </article>`;
   }).join("");
   $("r-tax").hidden = ![...recs, ...unsure].some(r => info(r.id)?.tax);
@@ -940,7 +958,7 @@ function renderResults(next, keep = false) {
   $("r-hunger").hidden = ![...recs, ...unsure].some(r => info(r.id)?.hunger);
   $("r-hunger").textContent = t("hunger");
   $("r-unsure").hidden = !unsure.length;
-  $("r-unsure-list").innerHTML = unsure.map(r => { const i = info(r.id) || {}; return `<li data-pid="${esc(r.id)}">${esc(i.name || r.programme)}${i.apply ? " · " + link(i.apply, i.how, i.enPage) : ""}</li>`; }).join("");
+  $("r-unsure-list").innerHTML = unsure.map(r => { const i = info(r.id) || {}, a = applyFor(r); return `<li data-pid="${esc(r.id)}">${esc(i.name || r.programme)}${a.href ? " · " + link(a.href, a.how, a.enPage) : ""}</li>`; }).join("");
   const recIds = new Set(recs.map(r => r.id).concat(unsure.map(r => r.id)));
   const others = S.catalogue.programmes.filter(p => !recIds.has(p.id));
   $("r-others").hidden = !others.length;
@@ -1057,7 +1075,8 @@ function renderPlan() {
   $("plan-steps").innerHTML = p.steps.map(s => {
     const names = s.programmes.map(x => {
       const nm = esc((info(x.id) || {}).name || x.programme);
-      const label = document.getElementById("card-" + x.id) ? `<a href="#card-${esc(x.id)}">${nm}</a>` : (info(x.id)?.apply ? link(info(x.id).apply, (info(x.id) || {}).name || x.programme, info(x.id).enPage) : nm);
+      const a = applyFor(x);
+      const label = document.getElementById("card-" + x.id) ? `<a href="#card-${esc(x.id)}">${nm}</a>` : (a.href ? link(a.href, (info(x.id) || {}).name || x.programme, a.enPage) : nm);
       return label + (x.tier === "likely" ? "" : ` <span class="chk">${esc(x.added_by_rule ? t("plan_added") : t("plan_check"))}</span>`);
     }).join(" · ");
     const lines = s.programmes.flatMap(x => x.links.filter(l => links[x.id]).map(l => links[x.id](either(l.from))))

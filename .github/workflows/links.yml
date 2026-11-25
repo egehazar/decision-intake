@@ -1,0 +1,36 @@
+name: links
+# Where-to-apply links (D53), checked from a US machine: many state benefit sites refuse requests from other
+# countries, so this is the check that counts. Weekly, on demand, and when the link files change. The run summary
+# lists every state and programme with the link chosen and why the other candidates failed, and ends with the
+# JSON that src/decisionintake/apply_links.json should hold. The run fails when a link the service serves no
+# longer passes and no other candidate does (GitHub emails the repository owner).
+on:
+  schedule:
+    - cron: "41 7 * * 1"
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - experiments/apply_links.py
+      - experiments/apply_links_sources/**
+      - src/decisionintake/apply_links.json
+      - .github/workflows/links.yml
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check every candidate link
+        run: |
+          set -o pipefail
+          cp src/decisionintake/apply_links.json "$RUNNER_TEMP/served.json"
+          python experiments/apply_links.py check --report report.md
+          cat report.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Every served link still passes
+        run: python experiments/apply_links.py compare "$RUNNER_TEMP/served.json"

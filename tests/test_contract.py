@@ -576,3 +576,59 @@ def test_connector_takes_already(app):
     assert ";gets=snap;" in later["state"]  # kept when not given again
     with pytest.raises(ToolError):
         srv.call("record_facts", {"state": st, "facts": [], "already": ["lunch"]})
+
+
+# ------------------------------------------------------------------------------------- where to apply (D53)
+def test_apply_links_file_is_well_formed():
+    from decisionintake import service
+    data = json.loads(Path(service._APPLY_FILE).read_text(encoding="utf-8"))
+    keys = set(service.APPLY_KEY.values())
+    import re
+    assert set(data["sources"]) == keys
+    for st, progs in data["links"].items():
+        assert re.fullmatch(r"[A-Z]{2}", st)
+        for key, link in progs.items():
+            assert key in keys
+            assert re.match(r"https?://[^\s\"'<>]+$", link["url"])
+            assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", link["checked"])
+
+
+def test_where_to_apply_follows_the_state(app, monkeypatch):
+    from decisionintake import service
+    fake = {"NC": {"snap": {"url": "https://nc.example.gov/snap", "title": "SNAP", "checked": "2026-11-25"},
+                   "medicaid": {"url": "https://nc.example.gov/medicaid", "title": "Medicaid", "checked": "2026-11-25"}}}
+    monkeypatch.setattr(service, "_apply_links", fake)
+    base = [{"question": "household_size", "choice": "3"}, {"question": "children", "choice": "2"},
+            {"question": "child_under5", "choice": "yes"},
+            {"question": "earned_income", "amount": {"value": 18000, "period": "year"}}]
+    # no state answered: no state links anywhere
+    st = call(app, "POST", "/v1/step", {"facts": base})["json"]["state"]
+    a = call(app, "POST", "/v1/assessment", {"state": st})["json"]
+    assert not any("apply" in r for r in a["all_programmes"])
+    # North Carolina: SNAP and Medicaid carry NC's pages, CHIP shares Medicaid's, the rest have none
+    st = call(app, "POST", "/v1/step", {"facts": base + [{"question": "state", "choice": "NC"}]})["json"]["state"]
+    a = call(app, "POST", "/v1/assessment", {"state": st})["json"]
+    rows = {r["id"]: r for r in a["all_programmes"]}
+    for r in a["recommend"] + a["unsure"]:
+        want = fake["NC"].get(service.APPLY_KEY.get(r["id"]))
+        assert r.get("apply") == ({"url": want["url"], "state": "NC", "checked": "2026-11-25"} if want else None)
+    for pid, r in rows.items():  # never on a programme the engine advises against
+        if r["tier"] in ("unlikely", "not recommended"):
+            assert "apply" not in r
+    assert "snap" in {r["id"] for r in a["recommend"]}  # the case exercises a state link
+    plan = call(app, "POST", "/v1/plan", {"state": st})["json"]
+    for s in plan["steps"]:
+        for p in s["programmes"]:
+            key = service.APPLY_KEY.get(p["id"])
+            assert (p.get("apply") or {}).get("url") == (fake["NC"].get(key) or {}).get("url")
+    # a state without links: none
+    st = call(app, "POST", "/v1/step", {"facts": base + [{"question": "state", "choice": "VT"}]})["json"]["state"]
+    assert not any("apply" in r for r in call(app, "POST", "/v1/assessment", {"state": st})["json"]["all_programmes"])
+
+
+def test_screener_uses_state_links_safely():
+    page = (Path(__file__).parent.parent / "public" / "index.html").read_text(encoding="utf-8")
+    assert "function applyFor(r)" in page and r"/^https?:\/\//.test(w.url)" in page
+    assert '<a href="${esc(href)}"' in page and 'href="${esc(a.href)}"' in page  # server-sent URLs are escaped
+    for lang_key in ("how_in", "state_site"):
+        assert page.count(f"    {lang_key}:") == 2  # English and Spanish

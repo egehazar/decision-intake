@@ -560,7 +560,14 @@ def openapi_doc(base: str | None = None) -> dict:
             "probability": {"type": "number", "minimum": 0, "maximum": 1},
             "value_if_eligible_per_year": {"type": "array", "items": {"type": "integer"}, "minItems": 2,
                                            "maxItems": 2, "description": "[low, high] dollars a year if eligible "
-                                                                         "(health coverage: its value, not cash)"}}},
+                                                                         "(health coverage: its value, not cash)"},
+            "apply": {"type": "object", "required": ["url", "state", "checked"], "description":
+                      "where to apply in the household's state (D53): the state's own page for SNAP, Medicaid and "
+                      "CHIP, TANF or the state tax credits, from the federal directories and checked on the date "
+                      "given. Absent until the state is answered, for national programmes, and where no state link "
+                      "passed the check: then use the national page.", "properties": {
+                "url": {"type": "string", "format": "uri"}, "state": {"type": "string", "example": "NC"},
+                "checked": {"type": "string", "format": "date"}}}}},
         "Assessment": {"type": "object", "required": ["recommend", "unsure", "note"], "properties": {
             "recommend": {"type": "array", "items": ref("Programme"), "description": "worth applying for, "
                                                                                      "most likely first"},

@@ -1495,3 +1495,48 @@ for the test family; /v1/plan, /v1/batch (school meals opened by SNAP) and the c
 4831e07. GitHub release v1.1.0 published 19:11 UTC (the release page first showed GitHub's error page; the API
 confirmed the release, and it renders); the tag ran publish-mcp.yml, and the MCP Registry lists
 io.github.egehazar/decision-intake 1.1.0 as latest.
+
+## D53. Where to apply, in the household's state (2026-11-25)
+
+**Why.** Every "Apply" button pointed to a national page (usa.gov/food-stamps and the like), so a family in
+Georgia still had to find Georgia's SNAP office themselves, the step where people drop off. The plan (D45) said
+what to apply for and in what order, but not where.
+
+**What.** For the programmes a state runs or taxes (SNAP; Medicaid and CHIP, one application covering both under
+42 CFR 435.907; TANF; the state EITC and CTC), the engine adds `apply: {url, state, checked}` to recommended,
+can't-tell and plan items once the state is answered. The screener's button becomes "Apply for SNAP in
+Pennsylvania" with the site's name under it ("pa.gov, the state's own site"; in Spanish, that it may be in
+English). Programmes run locally or nationally (WIC clinics, Head Start centres, school meals, housing agencies,
+federal tax credits, the Marketplace, SSI) keep their national pages.
+
+**Sources** (`experiments/apply_links.py sources`, candidates best first, in
+`experiments/apply_links_sources/candidates.json`):
+- SNAP: USDA FNS SNAP State Directory, each state's "State SNAP Website", then its application link. fns.usda.gov
+  refuses requests from outside the US (403 even in a browser), so the entries were read from the Internet
+  Archive's 2026 copies (Feb to Jun 2026).
+- Medicaid and CHIP: Medicaid.gov's pages about applying first (archived 2025-03-19, the newest copy), then
+  HealthCare.gov's "apply through your state Medicaid agency" link (live), then Medicaid.gov's other links.
+  Medicaid.gov's "Enrollment" links include member portals (Alaska, North Carolina), which are dropped, as are
+  renewal pages.
+- TANF: HHS ACF's state TANF list (archived 2025-02-03): 39 states; the other 12 keep the national page.
+- State tax credits: the Federation of Tax Administrators' member list (the income tax agency where a state
+  lists several; DC's Office of Tax and Revenue).
+- `review.json`: links read and excluded by hand, with the reason (one so far: Iowa's HealthCare.gov link is the
+  managed-care plan page).
+
+**Check** (`experiments/apply_links.py check`). A candidate passes when it answers 200; is not an error,
+captcha, block or maintenance page; is not a short page saying it is missing (Connecticut's HealthCare.gov link
+answers 200 with "The URL is invalid"); and, if it redirects, does not land on the site's home page and still
+names the programme (Louisiana's old TANF page now redirects to an event page; Wyoming's old SNAP page to the
+agency's front page). A server that leaves out an intermediate certificate is looked at again without the
+check, as browsers complete the chain. Home pages go after specific pages. The first passing candidate is served.
+
+**From here, not enough.** Run from this machine (outside the US) on 2026-11-25, 380 candidates: SNAP 30 of 51
+states, Medicaid 24, TANF 22 of 39, state tax 25. Most failures are refusals of non-US requests (403s,
+timeouts), not dead links. Those are the links served until a US check runs; the rest keep the national page.
+`links.yml` runs the same check from a GitHub runner (on push, weekly and on demand), puts every choice and every
+failed candidate in the run summary, and fails if a served link no longer passes.
+
+**Tests.** The links file's shape; the engine's `apply` follows the state (none before it is answered, none for a
+state without links, CHIP on Medicaid's link, never on a programme it advises against) on the API's assessment
+and plan; the screener escapes server-sent URLs and has both languages. 118 pass.

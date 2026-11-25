@@ -172,6 +172,13 @@ person's words ──► an LLM, or a form ──► typed facts (option, amount
   the federal rules by which one approval settles part of another's eligibility, each cited: SNAP, Medicaid or
   TANF meets WIC's income test; SNAP or TANF gives children free school meals, often with no form; TANF or SSI
   meets Head Start's income rule (`/v1/plan`, and "Your plan" on the screener).
+- **Where to apply, in your state.** Once the state is answered, SNAP, Medicaid and CHIP, TANF and the state
+  tax credits link to that state's own page ("Apply for SNAP in Pennsylvania", pa.gov), not a national one.
+  The links come from the federal directories (USDA's SNAP State Directory, HealthCare.gov and Medicaid.gov,
+  HHS's TANF list, the Federation of Tax Administrators), and each is checked before it is served: it must
+  answer, not be an error, block or "page not found" page, and still be about the program if it redirects. A
+  weekly check from a US machine (`links.yml`) fails when a served link stops passing. Every result and plan
+  item carries it as `apply` (url, state, date checked); without one, the national page.
 - **A caseload at once.** An organisation's list, known only by a few fields, ranked by the benefits each
   household is likely missing, with the one question to ask each first (`/v1/batch`; the
   [caseload page](https://decision-intake.vercel.app/caseload.html) takes a CSV and stores nothing). On 2,000
@@ -223,7 +230,7 @@ color-only meaning; axe-core finds no WCAG 2.1 A/AA violations on any screen in 
 # 1. environment (Python 3.11+; tested on 3.13 with numpy 2.5.5 and policyengine-us 2.152.15)
 python -m venv .venv && . .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -e ".[dev]" policyengine-us==2.152.15 tables h5py
-pytest -q                                              # 115 tests, on the shipped model; no data needed
+pytest -q                                              # 118 tests, on the shipped model; no data needed
 
 # 2. data: Populace national build populace-us-2024-spm-20260915 (827 MB, sha256 6496cc43...aee84) into
 #    data/raw/populace_us_2024.h5, then the outcome table (about 10 minutes on 12 cores)

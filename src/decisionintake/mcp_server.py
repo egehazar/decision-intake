@@ -67,7 +67,8 @@ enough. You handle the conversation; it handles the decisions.
    call them unlikely. "hand_off": say a caseworker or benefits navigator should review, using
    hand_off_reason, and still share the recommendations so far. get_assessment's plan gives the order to
    apply in (apply now, then, at tax time) and the federal rules by which one approval helps another (SNAP
-   approval letter proves WIC income, for one): use it when there are several programmes. After a result,
+   approval letter proves WIC income, for one): use it when there are several programmes. A programme with
+   an `apply` field has the household's own state page for applying (url): give that link, not a national one. After a result,
    what_would_change says
    which answers sit near a line (one income bracket away, say): mention those as "check again if this
    changes", never as what the person should report.

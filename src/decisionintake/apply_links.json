@@ -1,0 +1,604 @@
+{
+ "_about": "Where to apply in each state: the first candidate (experiments/apply_links_sources) that passed experiments/apply_links.py check, per state and programme. CHIP uses the Medicaid link (one application covers both, 42 CFR 435.907). No entry: the national page is shown.",
+ "sources": {
+  "snap": {
+   "name": "USDA FNS, SNAP State Directory of Resources",
+   "url": "https://www.fns.usda.gov/snap/state-directory"
+  },
+  "medicaid": {
+   "name": "HealthCare.gov, Medicaid & CHIP: apply through your state Medicaid agency; then Medicaid.gov, Where can people get help with Medicaid & CHIP",
+   "url": "https://www.healthcare.gov/medicaid-chip/getting-medicaid-chip/",
+   "also": "https://www.medicaid.gov/about-us/where-can-people-get-help-medicaid-chip/index.html"
+  },
+  "tanf": {
+   "name": "HHS ACF Office of Family Assistance, Help for families (state TANF programs)",
+   "url": "https://www.acf.hhs.gov/ofa/map/about/help-families"
+  },
+  "state_tax": {
+   "name": "Federation of Tax Administrators, member agencies",
+   "url": "https://taxadmin.org/fta-members/"
+  }
+ },
+ "checked": "2026-11-25",
+ "links": {
+  "AK": {
+   "snap": {
+    "url": "https://alaskaconnect.ilinx.com/engage/dpa",
+    "title": "ILINX Engage",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://dor.alaska.gov/",
+    "title": "Department Of Revenue",
+    "checked": "2026-11-25"
+   }
+  },
+  "AL": {
+   "snap": {
+    "url": "https://dhr.alabama.gov/food-assistance/",
+    "title": "Food Assistance – Alabama Department of Human Resources",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://www.revenue.alabama.gov/",
+    "title": "Home - Alabama Department of Revenue",
+    "checked": "2026-11-25"
+   }
+  },
+  "AR": {
+   "snap": {
+    "url": "https://humanservices.arkansas.gov/divisions-shared-services/county-operations/supplemental-nutrition-assistance-snap/",
+    "title": "Supplemental Nutrition Assistance (SNAP) - Arkansas Department of Human Services",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://humanservices.arkansas.gov/apply-for-services/",
+    "title": "Apply For Services - Arkansas Department of Human Services",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://www.dfa.arkansas.gov/",
+    "title": "Home Page – Arkansas Department of Finance and Administration",
+    "checked": "2026-11-25"
+   }
+  },
+  "CA": {
+   "state_tax": {
+    "url": "https://www.ftb.ca.gov/",
+    "title": "Franchise Tax Board Homepage | FTB.ca.gov",
+    "checked": "2026-11-25"
+   }
+  },
+  "CO": {
+   "snap": {
+    "url": "https://cdhs.colorado.gov/snap",
+    "title": "Supplemental Nutrition Assistance Program (SNAP) | Colorado Department of Human Services",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://www.healthfirstcolorado.gov/apply-now/",
+    "title": "Apply Now - Health First Colorado",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://cdhs.colorado.gov/colorado-works",
+    "title": "Colorado Works | Colorado Department of Human Services",
+    "checked": "2026-11-25"
+   }
+  },
+  "DC": {
+   "snap": {
+    "url": "https://dhs.dc.gov/service/supplemental-nutrition-assistance-program-snap",
+    "title": "Supplemental Nutrition Assistance Program (SNAP) | dhs",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://dhcf.dc.gov/service/medicaid",
+    "title": "Medicaid | dhcf",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://dhs.dc.gov/service/temporary-cash-assistance-needy-families-tanf",
+    "title": "Temporary Cash Assistance for Needy Families (TANF) | dhs",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://otr.cfo.dc.gov/",
+    "title": "| otr",
+    "checked": "2026-11-25"
+   }
+  },
+  "DE": {
+   "snap": {
+    "url": "https://assist.dhss.delaware.gov/",
+    "title": "ASSIST Home",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://assist.dhss.delaware.gov/",
+    "title": "ASSIST Home",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://assist.dhss.delaware.gov/",
+    "title": "ASSIST Home",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://revenue.delaware.gov/",
+    "title": "Division of Revenue - Department of Finance - State of Delaware",
+    "checked": "2026-11-25"
+   }
+  },
+  "FL": {
+   "snap": {
+    "url": "https://www.myflfamilies.com/services/public-assistance",
+    "title": "Public Benefits and Services | Florida DCF",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://www.myflorida.com/accessflorida/",
+    "title": "Public Assistance | Florida DCF",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://www.myflfamilies.com/services/public-assistance/temporary-cash-assistance",
+    "title": "Temporary Cash Assistance | Florida DCF",
+    "checked": "2026-11-25"
+   }
+  },
+  "HI": {
+   "snap": {
+    "url": "https://humanservices.hawaii.gov/bessd/snap/",
+    "title": "SUPPLEMENTAL NUTRITION ASSISTANCE PROGRAM (SNAP) – Benefit, Employment & Support Services",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://humanservices.hawaii.gov/bessd/tanf/",
+    "title": "Temporary Assistance for Needy Families (TANF) and Temporary Assistance for Other Needy Families (TAONF) – Benefit, Empl",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://tax.hawaii.gov/",
+    "title": "Department of Taxation | State of Hawaii",
+    "checked": "2026-11-25"
+   }
+  },
+  "IA": {
+   "snap": {
+    "url": "https://hhs.iowa.gov/assistance-programs/food-assistance/snap",
+    "title": "Supplemental Nutrition Assistance Program (SNAP) | Health & Human Services",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://hhsservices.iowa.gov/apspssp/ssp.portal",
+    "title": "Self Service Portal Home Page",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://hhs.iowa.gov/assistance-programs/cash-assistance/fip-tanf",
+    "title": "Family Investment Program (FIP) | Health & Human Services",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://revenue.iowa.gov/",
+    "title": "Iowa Department of Revenue | Department of Revenue",
+    "checked": "2026-11-25"
+   }
+  },
+  "ID": {
+   "snap": {
+    "url": "https://healthandwelfare.idaho.gov/services-programs/food-assistance/about-snap",
+    "title": "About SNAP | Idaho Department of Health and Welfare",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://healthandwelfare.idaho.gov/services-programs/medicaid-health",
+    "title": "Medicaid & Health | Idaho Department of Health and Welfare",
+    "checked": "2026-11-25"
+   }
+  },
+  "IL": {
+   "snap": {
+    "url": "https://www.dhs.state.il.us/page.aspx?item=30357",
+    "title": "IDHS: Supplemental Nutrition Assistance Program - SNAP",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://hfs.illinois.gov/medicalclients.html",
+    "title": "My Healthcare",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://www.dhs.state.il.us/page.aspx?item=33698",
+    "title": "IDHS: Cash, SNAP & Medical Assistance",
+    "checked": "2026-11-25"
+   }
+  },
+  "KY": {
+   "medicaid": {
+    "url": "https://kynect.ky.gov/benefits/s/?language=en_US",
+    "title": "kynect benefits",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://kynect.ky.gov/benefits/s/?language=en_US",
+    "title": "kynect benefits",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://revenue.ky.gov/Pages/index.aspx",
+    "title": "Welcome - Department of Revenue",
+    "checked": "2026-11-25"
+   }
+  },
+  "LA": {
+   "tanf": {
+    "url": "https://dcfs.louisiana.gov/",
+    "title": "Louisiana Department of Children & Family Services | DCFS",
+    "checked": "2026-11-25"
+   }
+  },
+  "MA": {
+   "snap": {
+    "url": "https://dtaconnect.eohhs.mass.gov/apply",
+    "title": "DTA Connect - Massachusetts Department of Transitional Assistance",
+    "checked": "2026-11-25"
+   }
+  },
+  "MD": {
+   "medicaid": {
+    "url": "https://health.maryland.gov/mmcp/eligibility/Pages/apply.aspx",
+    "title": "Pages - apply",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://dhs.maryland.gov/weathering-tough-times/temporary-cash-assistance/",
+    "title": "Temporary Cash Assistance - Maryland Department of Human Services",
+    "checked": "2026-11-25"
+   }
+  },
+  "ME": {
+   "snap": {
+    "url": "https://www.mymaineconnection.gov/benefits/s/?language=en_US",
+    "title": "Maine",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://www.mymaineconnection.gov/benefits/s/?language=en_US",
+    "title": "Maine",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://www.maine.gov/revenue/",
+    "title": "Home | Maine Revenue Services",
+    "checked": "2026-11-25"
+   }
+  },
+  "MI": {
+   "snap": {
+    "url": "https://newmibridges.michigan.gov",
+    "title": "",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://newmibridges.michigan.gov/s/isd-landing-page?language=en_US",
+    "title": "SOMPortal",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://newmibridges.michigan.gov/",
+    "title": "",
+    "checked": "2026-11-25"
+   }
+  },
+  "MS": {
+   "snap": {
+    "url": "https://www.mdhs.ms.gov/help/snap/",
+    "title": "SNAP - Supplemental Nutrition Assistance Program - Mississippi Department of Human Services",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://www.mdhs.ms.gov/help/tanf/",
+    "title": "TANF - Temporary Assistance for Needy Families - Mississippi Department of Human Services",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://www.dor.ms.gov/",
+    "title": "Home | Mississippi Department of Revenue",
+    "checked": "2026-11-25"
+   }
+  },
+  "MT": {
+   "snap": {
+    "url": "https://dphhs.mt.gov/hcsd/SNAP/",
+    "title": "SNAP Program Overview (Home)",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://www.dphhs.mt.gov/",
+    "title": "DPHHS Home",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://dphhs.mt.gov/hcsd/TANF",
+    "title": "Temporary Assistance for Needy Children",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://revenue.mt.gov/",
+    "title": "Montana Department of Revenue",
+    "checked": "2026-11-25"
+   }
+  },
+  "NC": {
+   "snap": {
+    "url": "https://www.ncdhhs.gov/divisions/child-and-family-well-being/food-and-nutrition-services-food-stamps",
+    "title": "NC DHHS: Food and Nutrition Services Food Stamps",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://medicaid.ncdhhs.gov/",
+    "title": "Home | NC Medicaid",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://www.ncdhhs.gov/divisions/social-services/work-first-family-assistance",
+    "title": "NC DHHS: Work First Cash Assistance",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://www.ncdor.gov/",
+    "title": "Home Page | NCDOR",
+    "checked": "2026-11-25"
+   }
+  },
+  "ND": {
+   "snap": {
+    "url": "https://www.hhs.nd.gov/applyforhelp/snap",
+    "title": "Supplemental Nutrition Assistance Program | Health and Human Services North Dakota",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://www.hhs.nd.gov/healthcare/medicaid/apply",
+    "title": "Ways to Apply | Health and Human Services North Dakota",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://www.hhs.nd.gov/applyforhelp/tanf",
+    "title": "Temporary Assistance for Needy Families (TANF) | Health and Human Services North Dakota",
+    "checked": "2026-11-25"
+   }
+  },
+  "NJ": {
+   "snap": {
+    "url": "https://www.nj.gov/humanservices/dfd/programs/njsnap/",
+    "title": "State of New Jersey",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://www.njhelps.gov/",
+    "title": "NJHelps",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://www.mynjhelps.gov",
+    "title": "MyNJHelps Customer",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://www.nj.gov/treasury/taxation/",
+    "title": "State of NJ - Department of the Treasury - Division of Taxation",
+    "checked": "2026-11-25"
+   }
+  },
+  "NM": {
+   "state_tax": {
+    "url": "https://www.tax.newmexico.gov/",
+    "title": "Home : Taxation and Revenue New Mexico",
+    "checked": "2026-11-25"
+   }
+  },
+  "NV": {
+   "snap": {
+    "url": "https://www.dss.nv.gov/programs/snap/",
+    "title": "SNAP",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://tax.nv.gov/",
+    "title": "State of Nevada – Department of Taxation",
+    "checked": "2026-11-25"
+   }
+  },
+  "NY": {
+   "snap": {
+    "url": "https://otda.ny.gov/programs/snap/",
+    "title": "",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://www.health.ny.gov/health_care/medicaid/",
+    "title": "New York State Medicaid",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://www.tax.ny.gov/",
+    "title": "Department of Taxation and Finance",
+    "checked": "2026-11-25"
+   }
+  },
+  "OH": {
+   "snap": {
+    "url": "https://ssp.benefits.ohio.gov/apspssp/ssp.portal",
+    "title": "Self Service Portal Home Page",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://medicaid.ohio.gov/families-and-individuals",
+    "title": "Families & Individuals",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://benefits.ohio.gov/",
+    "title": "Ohio Benefits",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://tax.ohio.gov/",
+    "title": "Ohio Department of Taxation",
+    "checked": "2026-11-25"
+   }
+  },
+  "OK": {
+   "snap": {
+    "url": "https://oklahoma.gov/okdhs/services/snap.html",
+    "title": "SNAP",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://oklahoma.gov/ohca/individuals/mysoonercare/apply-for-soonercare-online/where-to-apply.html",
+    "title": "Where to Apply",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://oklahoma.gov/okdhs/services/tanf/tanfhome.html",
+    "title": "Program Information",
+    "checked": "2026-11-25"
+   }
+  },
+  "OR": {
+   "snap": {
+    "url": "https://www.oregon.gov/odhs/food/Pages/snap.aspx",
+    "title": "Oregon Department of Human Services : SNAP Food Benefits : Food Benefits : State of Oregon",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://www.oregon.gov/odhs/cash/Pages/tanf.aspx",
+    "title": "Oregon Department of Human Services : TANF Cash Benefits : Cash Benefits : State of Oregon",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://www.oregon.gov/DOR/Pages/index.aspx",
+    "title": "Oregon Department of Revenue : Welcome Page : State of Oregon",
+    "checked": "2026-11-25"
+   }
+  },
+  "PA": {
+   "snap": {
+    "url": "https://www.pa.gov/agencies/dhs/resources/snap",
+    "title": "Supplemental Nutrition Assistance Program (SNAP) | Department of Human Services | Commonwealth of Pennsylvania",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://www.pa.gov/agencies/dhs/resources/medicaid",
+    "title": "Medicaid | Department of Human Services | Commonwealth of Pennsylvania",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://www.pa.gov/agencies/dhs/resources/cash-assistance",
+    "title": "Cash Assistance | Department of Human Services | Commonwealth of Pennsylvania",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://www.pa.gov/agencies/revenue",
+    "title": "Department of Revenue | Department of Revenue | Commonwealth of Pennsylvania",
+    "checked": "2026-11-25"
+   }
+  },
+  "SD": {
+   "snap": {
+    "url": "https://dss.sd.gov/economicassistance/snap.aspx",
+    "title": "Supplemental Nutrition Assistance Program",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://dss.sd.gov/medicaid/Eligibility/",
+    "title": "",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://dor.sd.gov/",
+    "title": "Home | South Dakota Department of Revenue",
+    "checked": "2026-11-25"
+   }
+  },
+  "TN": {
+   "snap": {
+    "url": "https://www.tn.gov/humanservices/for-families/supplemental-nutrition-assistance-program-snap.html",
+    "title": "Supplemental Nutrition Assistance Program (SNAP)",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://www.tn.gov/humanservices/for-families/families-first-tanf.html",
+    "title": "Families First",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://www.tn.gov/revenue/",
+    "title": "Revenue",
+    "checked": "2026-11-25"
+   }
+  },
+  "TX": {
+   "state_tax": {
+    "url": "https://comptroller.texas.gov/",
+    "title": "Texas Comptroller of Public Accounts",
+    "checked": "2026-11-25"
+   }
+  },
+  "UT": {
+   "medicaid": {
+    "url": "https://medicaid.utah.gov/apply-medicaid/",
+    "title": "Apply for Medicaid - Medicaid - Utah DHHS",
+    "checked": "2026-11-25"
+   }
+  },
+  "WA": {
+   "snap": {
+    "url": "https://www.dshs.wa.gov/family-food-and-housing-services/food-assistance/basic-food-benefits",
+    "title": "Basic Food Benefits | DSHS",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://www.hca.wa.gov/free-or-low-cost-health-care/i-need-medical-dental-or-vision-care",
+    "title": "I need medical, dental, or vision care | Washington State Health Care Authority",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://dor.wa.gov/",
+    "title": "Home | Washington Department of Revenue",
+    "checked": "2026-11-25"
+   }
+  },
+  "WV": {
+   "snap": {
+    "url": "https://bfa.wv.gov/snap",
+    "title": "SNAP | Bureau for Family Assistance",
+    "checked": "2026-11-25"
+   }
+  },
+  "WY": {
+   "snap": {
+    "url": "https://dfs.wyo.gov/assistance-programs/food-assistance/supplemental-nutrition-assistance-program-snap/snap-how-to-apply-and-frequently-used-forms/",
+    "title": "SNAP: How to Apply and Frequently Used Forms - Wyoming Department of Family Services",
+    "checked": "2026-11-25"
+   },
+   "medicaid": {
+    "url": "https://health.wyo.gov/healthcarefin/medicaid/programs-and-eligibility/",
+    "title": "Programs and Eligibility - Wyoming Department of Health",
+    "checked": "2026-11-25"
+   },
+   "tanf": {
+    "url": "https://dfs.wyo.gov/assistance-programs/cash-assistance/",
+    "title": "Cash Assistance - Wyoming Department of Family Services",
+    "checked": "2026-11-25"
+   },
+   "state_tax": {
+    "url": "https://revenue.wyo.gov/",
+    "title": "Wyo DOR",
+    "checked": "2026-11-25"
+   }
+  }
+ }
+}

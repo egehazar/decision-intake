@@ -1,0 +1,5 @@
+{
+ "_about": "Links read and excluded by hand, with the reason. experiments/apply_links.py sources drops any candidate containing a skip pattern for that state and programme.",
+ "IA": {"medicaid": {"skip": ["iowa-health-link"],
+                     "why": "HealthCare.gov's Iowa link is the page for Iowa Health Link, the managed-care plans people choose after they are enrolled, not how to apply"}}
+}

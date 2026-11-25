@@ -1,0 +1,970 @@
+{
+ "_about": "Candidate links, best first, read from the federal directories in SOURCES; experiments/apply_links.py check verifies them. Archive snapshot timestamps per source.",
+ "sources": {
+  "snap": {
+   "name": "USDA FNS, SNAP State Directory of Resources",
+   "url": "https://www.fns.usda.gov/snap/state-directory"
+  },
+  "medicaid": {
+   "name": "HealthCare.gov, Medicaid & CHIP: apply through your state Medicaid agency; then Medicaid.gov, Where can people get help with Medicaid & CHIP",
+   "url": "https://www.healthcare.gov/medicaid-chip/getting-medicaid-chip/",
+   "also": "https://www.medicaid.gov/about-us/where-can-people-get-help-medicaid-chip/index.html"
+  },
+  "tanf": {
+   "name": "HHS ACF Office of Family Assistance, Help for families (state TANF programs)",
+   "url": "https://www.acf.hhs.gov/ofa/map/about/help-families"
+  },
+  "state_tax": {
+   "name": "Federation of Tax Administrators, member agencies",
+   "url": "https://taxadmin.org/fta-members/"
+  }
+ },
+ "snapshots": {
+  "snap_index": "20260606114214",
+  "snap_alabama": "20260213033522",
+  "snap_alaska": "20260309183418",
+  "snap_arizona": "20260309051321",
+  "snap_arkansas": "20260415170717",
+  "snap_california": "20260213140128",
+  "snap_colorado": "20260414151015",
+  "snap_connecticut": "20260610063448",
+  "snap_delaware": "20260513035101",
+  "snap_district-columbia": "20260214160258",
+  "snap_florida": "20260415071441",
+  "snap_georgia": "20260422120148",
+  "snap_hawaii": "20260608020045",
+  "snap_idaho": "20260415034450",
+  "snap_illinois": "20260417024738",
+  "snap_indiana": "20260422104906",
+  "snap_iowa": "20260410191922",
+  "snap_kansas": "20260418101225",
+  "snap_kentucky": "20260608174107",
+  "snap_louisiana": "20260309054840",
+  "snap_maine": "20260418104642",
+  "snap_maryland": "20260308231222",
+  "snap_massachusetts": "20260417185333",
+  "snap_michigan": "20260309003854",
+  "snap_minnesota": "20260211215146",
+  "snap_mississippi": "20260214163332",
+  "snap_missouri": "20260207192806",
+  "snap_montana": "20260510234744",
+  "snap_nebraska": "20260415155722",
+  "snap_nevada": "20260422105813",
+  "snap_new-hampshire": "20260517063404",
+  "snap_new-jersey": "20260415034532",
+  "snap_new-mexico": "20260514221227",
+  "snap_new-york": "20260307060530",
+  "snap_north-carolina": "20260513043027",
+  "snap_north-dakota": "20260520231327",
+  "snap_ohio": "20260422113110",
+  "snap_oklahoma": "20260415155344",
+  "snap_oregon": "20260314084114",
+  "snap_pennsylvania": "20260518100552",
+  "snap_rhode-island": "20260410202940",
+  "snap_south-carolina": "20260418064539",
+  "snap_south-dakota": "20260309053952",
+  "snap_tennessee": "20260124141615",
+  "snap_texas": "20260514190654",
+  "snap_utah": "20260510232839",
+  "snap_vermont": "20260608025241",
+  "snap_virginia": "20260430133622",
+  "snap_washington": "20260411111717",
+  "snap_west-virginia": "20260520110538",
+  "snap_wisconsin": "20260122170331",
+  "snap_wyoming": "20260519060227",
+  "medicaid_healthcare_gov": "2026-11-25",
+  "medicaid": "20250319084724",
+  "tanf": "20250203222540",
+  "state_tax": "2026-11-25"
+ },
+ "states": {
+  "AL": {
+   "snap": [
+    "https://dhr.alabama.gov/food-assistance/",
+    "https://mydhr.alabama.gov/"
+   ],
+   "medicaid": [
+    "https://medicaid.alabama.gov/content/3.0_Apply/",
+    "https://medicaid.alabama.gov/content/11.0_Recipient/",
+    "https://medicaid.alabama.gov/"
+   ],
+   "state_tax": [
+    "https://revenue.alabama.gov/"
+   ]
+  },
+  "AK": {
+   "snap": [
+    "http://dhss.alaska.gov/dpa/Pages/SNAP/default.aspx",
+    "https://alaskaconnect.ilinx.com/engage/dpa"
+   ],
+   "medicaid": [
+    "https://health.alaska.gov/dpa/Pages/default.aspx",
+    "https://dhss.alaska.gov/dpa/Pages/medicaid/default.aspx",
+    "https://health.alaska.gov/dpa/Pages/medicaid/default.aspx"
+   ],
+   "state_tax": [
+    "https://dor.alaska.gov/"
+   ]
+  },
+  "AZ": {
+   "snap": [
+    "https://des.az.gov/na",
+    "https://www.healthearizonaplus.gov/Default/Default.aspx"
+   ],
+   "medicaid": [
+    "https://azahcccs.gov/Members/GetCovered/apply.html",
+    "https://azahcccs.gov/Resources/guidesmanualspolicies/eligibilitypolicy/eligibilitypolicymanual/index.html#t=Introduction%2FHome.htm",
+    "http://www.healthearizonaplus.gov",
+    "https://azahcccs.gov/"
+   ],
+   "state_tax": [
+    "https://www.azdor.gov/"
+   ]
+  },
+  "AR": {
+   "snap": [
+    "https://humanservices.arkansas.gov/divisions-shared-services/county-operations/supplemental-nutrition-assistance-snap/",
+    "https://access.arkansas.gov/Learn/Home"
+   ],
+   "medicaid": [
+    "https://humanservices.arkansas.gov/apply-for-services/",
+    "https://humanservices.arkansas.gov/learn-about-programs/",
+    "http://access.arkansas.gov",
+    "https://humanservices.arkansas.gov/"
+   ],
+   "state_tax": [
+    "https://www.dfa.arkansas.gov/"
+   ]
+  },
+  "CA": {
+   "snap": [
+    "http://www.cdss.ca.gov/food-nutrition/calfresh",
+    "https://benefitscal.com/"
+   ],
+   "medicaid": [
+    "http://www.dhcs.ca.gov/Pages/default.aspx",
+    "https://www.dhcs.ca.gov/services/medi-cal/eligibility/Pages/Beneficiaries.aspx",
+    "https://www.dhcs.ca.gov/"
+   ],
+   "tanf": [
+    "http://www.cdss.ca.gov/Benefits-Services/Cash-Assistance",
+    "http://www.benefitscal.org/"
+   ],
+   "state_tax": [
+    "https://www.ftb.ca.gov/"
+   ]
+  },
+  "CO": {
+   "snap": [
+    "https://www.colorado.gov/pacific/cdhs/supplemental-nutrition-assistance-program-snap",
+    "https://peak.my.site.com/peak/s/benefit-information/benefit-detail?language=en_US&category=food-assistance-programs"
+   ],
+   "medicaid": [
+    "https://www.healthfirstcolorado.com/apply-now/",
+    "http://www.colorado.gov/hcpf",
+    "https://www.colorado.gov/hcpf/program-snapshots",
+    "https://www.healthfirstcolorado.com/"
+   ],
+   "tanf": [
+    "https://www.colorado.gov/pacific/cdhs/colorado-works-tanf",
+    "https://coloradopeak.secure.force.com/?fs=y&lang=en"
+   ],
+   "state_tax": [
+    "https://www.colorado.gov/tax"
+   ]
+  },
+  "CT": {
+   "snap": [
+    "http://portal.ct.gov/DSS/SNAP/Supplemental-Nutrition-Assistance-Program---SNAP",
+    "https://www.connect.ct.gov/access/jsp/access/Home.jsp"
+   ],
+   "medicaid": [
+    "https://portal.ct.gov/DSS/Common-Elements/How-to-Apply-for-Services/How-to-Apply-for-Services",
+    "http://www.ct.gov/hh/site/default.asp",
+    "https://portal.ct.gov/HUSKY/How-to-Qualify",
+    "https://portal.ct.gov/Services/Health-and-Human-Services"
+   ],
+   "state_tax": [
+    "https://portal.ct.gov/DRS"
+   ]
+  },
+  "DE": {
+   "snap": [
+    "http://www.dhss.delaware.gov/dhss/dss/foodstamps.html",
+    "https://assist.dhss.delaware.gov/"
+   ],
+   "medicaid": [
+    "http://www.dhss.delaware.gov/dhss/dmma/",
+    "https://www.dhss.delaware.gov/dhss/dmma/",
+    "https://assist.dhss.delaware.gov/"
+   ],
+   "tanf": [
+    "https://www.dhss.delaware.gov/dss/tanf.html",
+    "https://assist.dhss.delaware.gov/"
+   ],
+   "state_tax": [
+    "https://revenue.delaware.gov/"
+   ]
+  },
+  "DC": {
+   "snap": [
+    "https://dhs.dc.gov/snapinfo",
+    "https://districtdirect.dc.gov/ua/"
+   ],
+   "medicaid": [
+    "http://dhcf.dc.gov/service/medicaid",
+    "https://www.dchealthlink.com/individuals/medicaid",
+    "https://districtdirect.dc.gov/ua/eligibility/",
+    "https://districtdirect.dc.gov/ua/"
+   ],
+   "tanf": [
+    "https://dhs.dc.gov/service/tanf-district-families",
+    "https://dhs.dc.gov/page/apply-recertify-benefits"
+   ],
+   "state_tax": [
+    "https://otr.cfo.dc.gov/",
+    "https://cfo.dc.gov/"
+   ]
+  },
+  "FL": {
+   "snap": [
+    "https://www.myflfamilies.com/services/public-assistance",
+    "https://www.myflfamilies.com/services/public-assistance/applying-for-assistance"
+   ],
+   "medicaid": [
+    "http://www.myflorida.com/accessflorida/",
+    "https://www.myflorida.com/accessflorida/",
+    "https://ahca.myflorida.com/"
+   ],
+   "tanf": [
+    "https://www.myflfamilies.com/services/public-assistance/temporary-cash-assistance",
+    "https://www.myflfamilies.com/services/public-assistance"
+   ],
+   "state_tax": [
+    "https://floridarevenue.com/"
+   ]
+  },
+  "GA": {
+   "snap": [
+    "https://dfcs.georgia.gov/snap-food-stamps",
+    "https://dfcs.georgia.gov/services/snap"
+   ],
+   "medicaid": [
+    "https://medicaid.georgia.gov/how-apply",
+    "https://medicaid.georgia.gov/how-apply/basic-eligibility",
+    "http://dfcs.dhs.georgia.gov/",
+    "https://dch.georgia.gov/"
+   ],
+   "tanf": [
+    "https://dfcs.georgia.gov/temporary-assistance-needy-families",
+    "https://gateway.ga.gov/access/"
+   ],
+   "state_tax": [
+    "https://dor.georgia.gov/"
+   ]
+  },
+  "HI": {
+   "snap": [
+    "http://humanservices.hawaii.gov/bessd/snap/",
+    "https://pais-benefits.dhs.hawaii.gov/"
+   ],
+   "medicaid": [
+    "https://medical.mybenefits.hawaii.gov/web/kolea/home-page",
+    "http://mybenefits.hawaii.gov",
+    "https://medquest.hawaii.gov/"
+   ],
+   "tanf": [
+    "http://humanservices.hawaii.gov/bessd/tanf/",
+    "http://humanservices.hawaii.gov/bessd/"
+   ],
+   "state_tax": [
+    "https://tax.hawaii.gov/"
+   ]
+  },
+  "ID": {
+   "snap": [
+    "https://healthandwelfare.idaho.gov/services-programs/food-assistance/about-snap",
+    "https://publicdocuments.dhw.idaho.gov/WebLink/Browse.aspx?id=3170&dbid=0&repo=PUBLIC-DOCUMENTS"
+   ],
+   "medicaid": [
+    "https://healthandwelfare.idaho.gov/services-programs/medicaid-health",
+    "https://healthandwelfare.idaho.gov/services-programs/medicaid-health/about-medicaid-adults",
+    "http://www.healthandwelfare.idaho.gov/",
+    "https://healthandwelfare.idaho.gov/"
+   ],
+   "state_tax": [
+    "https://tax.idaho.gov/"
+   ]
+  },
+  "IL": {
+   "snap": [
+    "https://www.dhs.state.il.us/page.aspx?item=30357",
+    "https://abe.illinois.gov/access/"
+   ],
+   "medicaid": [
+    "http://www.illinois.gov/hfs/medicalclients",
+    "https://abe.illinois.gov/access/",
+    "https://www2.illinois.gov/hfs/MedicalClients/Pages/AbeBenefits.aspx",
+    "https://hfs.illinois.gov/medicalclients.html"
+   ],
+   "tanf": [
+    "http://www.dhs.state.il.us/page.aspx?item=30358",
+    "https://www.dhs.state.il.us/page.aspx?item=33698"
+   ],
+   "state_tax": [
+    "https://www2.illinois.gov/rev/"
+   ]
+  },
+  "IN": {
+   "snap": [
+    "http://www.in.gov/fssa/dfr/2691.htm",
+    "https://fssabenefits.in.gov/CitizenPortal/application.do"
+   ],
+   "medicaid": [
+    "https://www.in.gov/fssa/",
+    "https://fssabenefits.in.gov/bp/#/",
+    "https://www.in.gov/fssa/dfr/ebt-hoosier-works-card/find-my-local-dfr-office/",
+    "https://www.in.gov/fssa/dfr/"
+   ],
+   "tanf": [
+    "https://www.in.gov/fssa/dfr/tanf-cash-assistance/about-tanf/",
+    "https://www.in.gov/fssa/dfr/dfr-programs-and-services/"
+   ],
+   "state_tax": [
+    "https://www.in.gov/dor/"
+   ]
+  },
+  "IA": {
+   "snap": [
+    "https://hhs.iowa.gov/food-assistance/snap",
+    "https://hhsservices.iowa.gov/apspssp/ssp.portal"
+   ],
+   "medicaid": [
+    "https://hhsservices.iowa.gov/apspssp/ssp.portal",
+    "https://hhs.iowa.gov/programs/welcome-iowa-medicaid",
+    "https://hhs.iowa.gov/"
+   ],
+   "tanf": [
+    "https://hhs.iowa.gov/programs/programs-and-services/cash-assistance/fip-tanf",
+    "https://hhs.iowa.gov/"
+   ],
+   "state_tax": [
+    "https://tax.iowa.gov/"
+   ]
+  },
+  "KS": {
+   "snap": [
+    "http://www.dcf.ks.gov/services/ees/Pages/Food/FoodAssistance.aspx",
+    "https://cssp.kees.ks.gov/apspssp/sspNonMed.portal"
+   ],
+   "medicaid": [
+    "https://www.kancare.ks.gov/apply-now",
+    "https://www.kancare.ks.gov/apply-now/eligibility",
+    "http://www.kancare.ks.gov/",
+    "https://kancare.ks.gov/"
+   ],
+   "tanf": [
+    "http://www.dcf.ks.gov/services/ees/Pages/Cash/TANF.aspx",
+    "https://cssp.kees.ks.gov/apspssp/sspNonMed.portal"
+   ],
+   "state_tax": [
+    "https://www.ksrevenue.org/"
+   ]
+  },
+  "KY": {
+   "snap": [
+    "https://benefind.ky.gov/General/SnapOverview",
+    "https://benefind.ky.gov/"
+   ],
+   "medicaid": [
+    "http://chfs.ky.gov/dms/",
+    "https://kynect.ky.gov/benefits/s/?language=en_US",
+    "https://kynect.ky.gov/benefits/s/prescreening?retPage=Home&language=en_US",
+    "https://chfs.ky.gov/"
+   ],
+   "tanf": [
+    "https://chfs.ky.gov/agencies/dcbs/dfs/fssb/Pages/ktap.aspx",
+    "https://kynect.ky.gov/benefits/s/?language=en_US"
+   ],
+   "state_tax": [
+    "https://revenue.ky.gov/"
+   ]
+  },
+  "LA": {
+   "snap": [
+    "https://dcfs.louisiana.gov/page/snap-how-to-apply",
+    "https://cafe-cp.dcfs.la.gov/selfservice/"
+   ],
+   "medicaid": [
+    "https://ldh.la.gov/subhome/48",
+    "https://ldh.la.gov/index.cfm/page/220",
+    "http://www.dhh.la.gov/"
+   ],
+   "tanf": [
+    "http://www.dcfs.louisiana.gov/page/fitap",
+    "http://www.dcfs.louisiana.gov/"
+   ],
+   "state_tax": [
+    "https://revenue.louisiana.gov/"
+   ]
+  },
+  "ME": {
+   "snap": [
+    "https://www.maine.gov/dhhs/ofi/programs-services/food-supplement",
+    "https://www.mymaineconnection.gov/benefits/s/?language=en_US"
+   ],
+   "medicaid": [
+    "http://www.maine.gov/dhhs/ofi/",
+    "https://apps1.web.maine.gov/benefits/account/login.html",
+    "https://www.maine.gov/dhhs/ofi/programs-services/health-care-assistance",
+    "https://www.maine.gov/dhhs/"
+   ],
+   "tanf": [
+    "https://www.maine.gov/dhhs/ofi/programs-services/tanf",
+    "https://apps1.web.maine.gov/benefits/account/login.html"
+   ],
+   "state_tax": [
+    "https://www.maine.gov/revenue/"
+   ]
+  },
+  "MD": {
+   "snap": [
+    "http://dhr.maryland.gov/food-supplement-program/",
+    "https://mydhrbenefits.dhr.state.md.us/dashboardClient/#/register"
+   ],
+   "medicaid": [
+    "https://health.maryland.gov/mmcp/eligibility/Pages/apply.aspx",
+    "https://mmcp.health.maryland.gov/Pages/home.aspx",
+    "https://health.maryland.gov/mmcp/eligibility/Pages/Home.aspx",
+    "https://health.maryland.gov/mmcp/Pages/MedicaidCheckIn-Participants.aspx"
+   ],
+   "tanf": [
+    "https://dhs.maryland.gov/weathering-tough-times/temporary-cash-assistance/",
+    "https://mydhrbenefits.dhr.state.md.us/dashboardClient/#/home"
+   ],
+   "state_tax": [
+    "https://www.marylandtaxes.gov/"
+   ]
+  },
+  "MA": {
+   "snap": [
+    "https://www.mass.gov/snap-benefits-food-stamps",
+    "https://dtaconnect.eohhs.mass.gov/apply"
+   ],
+   "medicaid": [
+    "https://www.mass.gov/topics/masshealth",
+    "https://www.mass.gov/information-for-masshealth-applicants"
+   ],
+   "tanf": [
+    "https://www.mass.gov/service-details/check-tafdc-eligibility-and-how-to-apply",
+    "https://www.mass.gov/economic-assistance-cash-benefits"
+   ],
+   "state_tax": [
+    "https://www.mass.gov/orgs/massachusetts-department-of-revenue"
+   ]
+  },
+  "MI": {
+   "snap": [
+    "http://www.michigan.gov/mdhhs/0,5885,7-339-71547_5527---,00.html",
+    "https://newmibridges.michigan.gov"
+   ],
+   "medicaid": [
+    "http://www.michigan.gov/mdhhs",
+    "https://newmibridges.michigan.gov/s/isd-landing-page?language=en_US",
+    "https://www.michigan.gov/mdhhs/assistance-programs/medicaid/health-care-programs-eligibility",
+    "https://www.michigan.gov/mdhhs/"
+   ],
+   "tanf": [
+    "https://www.michigan.gov/mdhhs/0,5885,7-339-71547_5526---,00.html",
+    "https://newmibridges.michigan.gov/"
+   ],
+   "state_tax": [
+    "https://www.michigan.gov/treasury"
+   ]
+  },
+  "MN": {
+   "snap": [
+    "https://mn.gov/dhs/people-we-serve/adults/economic-assistance/food-nutrition/programs-and-services/supplemental-nutrition-assistance-program.jsp",
+    "https://mnbenefits.mn.gov/"
+   ],
+   "medicaid": [
+    "http://mn.gov/dhs/",
+    "https://mn.gov/dhs/health-care-coverage/#healthcarecoverage",
+    "https://mn.gov/dhs/"
+   ],
+   "tanf": [
+    "https://mn.gov/dhs/people-we-serve/children-and-families/economic-assistance/income/programs-and-services/mfip.jsp",
+    "https://mnbenefits.mn.gov/"
+   ],
+   "state_tax": [
+    "https://www.revenue.state.mn.us/"
+   ]
+  },
+  "MS": {
+   "snap": [
+    "https://www.mdhs.ms.gov/economic-assistance/snap/",
+    "https://www.access.ms.gov/consumer/login"
+   ],
+   "medicaid": [
+    "https://medicaid.ms.gov/medicaid-coverage/how-to-apply/",
+    "https://medicaid.ms.gov/medicaid-coverage/who-qualifies-for-coverage/",
+    "https://www.medicaid.ms.gov/staycovered",
+    "http://www.medicaid.ms.gov"
+   ],
+   "tanf": [
+    "https://www.mdhs.ms.gov/help/tanf/",
+    "https://www.mdhs.ms.gov/applications/"
+   ],
+   "state_tax": [
+    "https://dor.ms.gov/"
+   ]
+  },
+  "MO": {
+   "snap": [
+    "https://mydss.mo.gov/food-assistance/apply-for-snap",
+    "https://formsportal.mo.gov/content/forms/af/moa/my-dss/family-support-division/FS-1/fs-1.html"
+   ],
+   "medicaid": [
+    "https://mydss.mo.gov/healthcare",
+    "http://www.mydss.mo.gov",
+    "https://dss.mo.gov/"
+   ],
+   "tanf": [
+    "https://mydss.mo.gov/temporary-assistance"
+   ],
+   "state_tax": [
+    "https://dor.mo.gov/"
+   ]
+  },
+  "MT": {
+   "snap": [
+    "https://dphhs.mt.gov/hcsd/SNAP",
+    "https://apply.mt.gov/"
+   ],
+   "medicaid": [
+    "https://apply.mt.gov/",
+    "http://www.dphhs.mt.gov/",
+    "https://dphhs.mt.gov/"
+   ],
+   "tanf": [
+    "https://dphhs.mt.gov/hcsd/TANF",
+    "https://apply.mt.gov/"
+   ],
+   "state_tax": [
+    "https://mtrevenue.gov/"
+   ]
+  },
+  "NE": {
+   "snap": [
+    "http://dhhs.ne.gov/Pages/SNAP.aspx",
+    "http://accessnebraska.ne.gov/"
+   ],
+   "medicaid": [
+    "https://dhhs.ne.gov/pages/accessnebraska.aspx",
+    "http://ACCESSNebraska.ne.gov",
+    "https://dhhs.ne.gov/"
+   ],
+   "state_tax": [
+    "https://revenue.nebraska.gov/"
+   ]
+  },
+  "NV": {
+   "snap": [
+    "https://www.dss.nv.gov/programs/snap/",
+    "https://accessnevada.nv.gov/public/landing-page"
+   ],
+   "medicaid": [
+    "https://accessnevada.dwss.nv.gov/public/landing-page",
+    "https://dwss.nv.gov/",
+    "http://dhhs.nv.gov/"
+   ],
+   "tanf": [
+    "http://dhhs.nv.gov/Find_Assistance/Financial_Assistance/",
+    "https://accessnevada.dwss.nv.gov/public/landing-page"
+   ],
+   "state_tax": [
+    "https://tax.nv.gov/"
+   ]
+  },
+  "NH": {
+   "snap": [
+    "https://www.dhhs.nh.gov/programs-services/food-meals-assistance/supplemental-nutrition-assistance-program-snap",
+    "https://nheasy.nh.gov/"
+   ],
+   "medicaid": [
+    "https://www.dhhs.nh.gov/dfa/apply.htm",
+    "https://nheasy.nh.gov/",
+    "https://www.dhhs.nh.gov/"
+   ],
+   "state_tax": [
+    "https://revenue.nh.gov/"
+   ]
+  },
+  "NJ": {
+   "snap": [
+    "http://www.nj.gov/humanservices/dfd/programs/njsnap/",
+    "https://mynjhelps.gov/home"
+   ],
+   "medicaid": [
+    "https://www.state.nj.us/humanservices/dmahs/clients/medicaid/",
+    "https://www.state.nj.us/humanservices/",
+    "http://www.njfamilycare.org",
+    "https://www.njhelps.gov/"
+   ],
+   "tanf": [
+    "https://www.state.nj.us/humanservices/dfd/programs/workfirstnj/",
+    "https://www.mynjhelps.gov"
+   ],
+   "state_tax": [
+    "https://www.state.nj.us/treasury/taxation/"
+   ]
+  },
+  "NM": {
+   "snap": [
+    "https://www.hsd.state.nm.us/lookingforassistance/supplemental_nutrition_assistance_program__snap/",
+    "https://www.yes.state.nm.us/"
+   ],
+   "medicaid": [
+    "https://www.yes.state.nm.us/yesnm/home/index",
+    "https://www.yes.state.nm.us/",
+    "https://www.hsd.state.nm.us/"
+   ],
+   "tanf": [
+    "https://www.hsd.state.nm.us/lookingforassistance/temporary_assistance_for_needy_families/",
+    "https://www.hsd.state.nm.us/LookingForAssistance/"
+   ],
+   "state_tax": [
+    "https://tax.newmexico.gov/"
+   ]
+  },
+  "NY": {
+   "snap": [
+    "http://otda.ny.gov/programs/snap/",
+    "https://mybenefits.ny.gov/"
+   ],
+   "medicaid": [
+    "http://www.health.ny.gov/health_care/medicaid/",
+    "https://www.health.ny.gov/health_care/medicaid/",
+    "https://www.health.ny.gov/health_care/medicaid/changes/"
+   ],
+   "state_tax": [
+    "https://tax.ny.gov/"
+   ]
+  },
+  "NC": {
+   "snap": [
+    "https://www.ncdhhs.gov/assistance/low-income-services/food-nutrition-services-food-stamps",
+    "https://epass.nc.gov/"
+   ],
+   "medicaid": [
+    "https://medicaid.ncdhhs.gov/"
+   ],
+   "tanf": [
+    "https://www.ncdhhs.gov/divisions/social-services/work-first-family-assistance",
+    "https://epass.nc.gov/"
+   ],
+   "state_tax": [
+    "https://www.ncdor.gov/"
+   ]
+  },
+  "ND": {
+   "snap": [
+    "https://www.hhs.nd.gov/applyforhelp/snap",
+    "https://www.applyforhelp.nd.gov/"
+   ],
+   "medicaid": [
+    "https://www.hhs.nd.gov/healthcare/medicaid/apply",
+    "https://www.hhs.nd.gov/human-service/zones",
+    "https://www.hhs.nd.gov/healthcare/medicaid/eligibility",
+    "https://www.applyforhelp.nd.gov/"
+   ],
+   "tanf": [
+    "http://www.nd.gov/dhs/services/financialhelp/tanfjobs.html",
+    "http://www.nd.gov/dhs/eligibility/index.html"
+   ],
+   "state_tax": [
+    "https://www.nd.gov/tax/"
+   ]
+  },
+  "OH": {
+   "snap": [
+    "https://jfs.ohio.gov/cash-food-and-refugee-assistance/food-assistance",
+    "https://ssp.benefits.ohio.gov/apspssp/ssp.portal"
+   ],
+   "medicaid": [
+    "https://medicaid.ohio.gov/families-and-individuals",
+    "http://medicaid.ohio.gov/",
+    "https://benefits.ohio.gov/",
+    "https://medicaid.ohio.gov/"
+   ],
+   "tanf": [
+    "https://jfs.ohio.gov/cash-food-and-refugee-assistance/cash-assistance",
+    "https://benefits.ohio.gov/"
+   ],
+   "state_tax": [
+    "https://tax.ohio.gov/"
+   ]
+  },
+  "OK": {
+   "snap": [
+    "https://oklahoma.gov/okdhs/services/snap.html",
+    "https://www.okdhslive.org/"
+   ],
+   "medicaid": [
+    "https://oklahoma.gov/ohca/individuals/mysoonercare/apply-for-soonercare-online/where-to-apply.html",
+    "https://oklahoma.gov/ohca/individuals/mysoonercare/apply-for-soonercare-online/eligibility.html",
+    "https://oklahoma.gov/ohca.html",
+    "http://www.okhca.org/"
+   ],
+   "tanf": [
+    "https://oklahoma.gov/okdhs/services/tanf/tanfhome.html",
+    "https://www.okdhslive.org/"
+   ],
+   "state_tax": [
+    "https://www.ok.gov/tax"
+   ]
+  },
+  "OR": {
+   "snap": [
+    "https://www.oregon.gov/odhs/food/Pages/snap.aspx",
+    "https://one.oregon.gov/"
+   ],
+   "medicaid": [
+    "https://one.oregon.gov/UserRegistration/SettingUpAccount",
+    "https://one.oregon.gov/",
+    "https://or23.checkbookhealth.org/#/"
+   ],
+   "tanf": [
+    "https://www.oregon.gov/odhs/cash/Pages/tanf.aspx",
+    "https://www.oregon.gov/odhs/benefits/pages/default.aspx"
+   ],
+   "state_tax": [
+    "https://www.oregon.gov/DOR/Pages/index.aspx"
+   ]
+  },
+  "PA": {
+   "snap": [
+    "https://www.dhs.pa.gov/Services/Assistance/Pages/SNAP.aspx",
+    "https://www.compass.dhs.pa.gov/home/#/"
+   ],
+   "medicaid": [
+    "https://www.dhs.pa.gov/Services/Assistance/Pages/Medical-Assistance.aspx",
+    "https://www.compass.state.pa.us",
+    "https://www.dhs.pa.gov/"
+   ],
+   "tanf": [
+    "https://www.dhs.pa.gov/Services/Assistance/Pages/Cash-Assistance.aspx",
+    "https://www.dhs.pa.gov/Services/Assistance/Pages/Apply-for-Benefits.aspx"
+   ],
+   "state_tax": [
+    "https://www.revenue.pa.gov/Pages/default.aspx"
+   ]
+  },
+  "RI": {
+   "snap": [
+    "http://www.dhs.ri.gov/Programs/SNAPApplyNow.php",
+    "https://healthyrhode.ri.gov/"
+   ],
+   "medicaid": [
+    "https://healthyrhode.ri.gov/HIXWebI3/DisplayRIServices",
+    "https://healthyrhode.ri.gov/HIXWebI3/CreateGenericUserAccount.action?accountFlow=true&request_locale=enUS",
+    "http://www.eohhs.ri.gov/Consumer/ConsumerInformation.aspx",
+    "http://www.eohhs.ri.gov/"
+   ],
+   "state_tax": [
+    "http://www.tax.ri.gov/"
+   ]
+  },
+  "SC": {
+   "snap": [
+    "https://dss.sc.gov/assistance-programs/snap/",
+    "https://benefitsportal.dss.sc.gov/#/login"
+   ],
+   "medicaid": [
+    "https://apply.scdhhs.gov/CitizenPortal/application.do",
+    "https://www.scdhhs.gov/Getting-Started",
+    "https://www.scdhhs.gov/"
+   ],
+   "tanf": [
+    "https://dss.sc.gov/assistance-programs/tanf/"
+   ],
+   "state_tax": [
+    "https://dor.sc.gov/"
+   ]
+  },
+  "SD": {
+   "snap": [
+    "https://dss.sd.gov/economicassistance/snap.aspx",
+    "https://eaportal.sd.gov/"
+   ],
+   "medicaid": [
+    "https://dss.sd.gov/applyonline/default.aspx",
+    "https://dss.sd.gov/medicaid/Eligibility/",
+    "http://dss.sd.gov",
+    "https://dss.sd.gov/"
+   ],
+   "tanf": [
+    "https://dss.sd.gov/economicassistance/tanf/"
+   ],
+   "state_tax": [
+    "https://dor.sd.gov/"
+   ]
+  },
+  "TN": {
+   "snap": [
+    "http://www.tennessee.gov/humanservices/topic/supplemental-nutrition-assistance-program-snap",
+    "https://onedhs.tn.gov/csp?id=start_snap_application"
+   ],
+   "medicaid": [
+    "https://www.tn.gov/tenncare/members-applicants/eligibility.html",
+    "https://www.tn.gov/health.html",
+    "https://tenncareconnect.tn.gov/",
+    "https://tenncareconnect.tn.gov"
+   ],
+   "tanf": [
+    "https://www.tn.gov/humanservices/for-families/families-first-tanf.html"
+   ],
+   "state_tax": [
+    "https://www.tn.gov/revenue/"
+   ]
+  },
+  "TX": {
+   "snap": [
+    "https://www.hhs.texas.gov/services/food/snap-food-benefits",
+    "https://www.yourtexasbenefits.com/Learn/Home#tab-apply"
+   ],
+   "medicaid": [
+    "https://yourtexasbenefits.com/Learn/Home#login",
+    "https://yourtexasbenefits.com/Screener/WhatToExpect",
+    "http://www.yourtexasbenefits.com",
+    "https://hhs.texas.gov/"
+   ],
+   "tanf": [
+    "https://hhs.texas.gov/services/financial/cash/tanf-cash-help",
+    "https://www.yourtexasbenefits.com/Learn/Home"
+   ],
+   "state_tax": [
+    "https://comptroller.texas.gov/"
+   ]
+  },
+  "UT": {
+   "snap": [
+    "https://jobs.utah.gov/customereducation/services/foodstamps/index.html",
+    "https://jobs.utah.gov/mycase-app/ui/home"
+   ],
+   "medicaid": [
+    "https://medicaid.utah.gov/apply-medicaid/",
+    "https://medicaid.utah.gov/medical-programs/",
+    "http://www.jobs.utah.gov",
+    "https://medicaid.utah.gov/"
+   ],
+   "tanf": [
+    "https://jobs.utah.gov/customereducation/services/financialhelp/index.html",
+    "https://jobs.utah.gov/assistance/index.html"
+   ],
+   "state_tax": [
+    "https://tax.utah.gov/"
+   ]
+  },
+  "VT": {
+   "snap": [
+    "http://dcf.vermont.gov/benefits/3SquaresVT",
+    "http://www.mybenefits.vt.gov/"
+   ],
+   "medicaid": [
+    "https://portal.healthconnect.vermont.gov/VTHBELand/welcome.action",
+    "http://www.greenmountaincare.org/"
+   ],
+   "tanf": [
+    "http://dcf.vermont.gov/benefits/reachup",
+    "https://dcf.vermont.gov/esd/applicants/mybenefits"
+   ],
+   "state_tax": [
+    "https://tax.vermont.gov/"
+   ]
+  },
+  "VA": {
+   "snap": [
+    "http://www.dss.virginia.gov/benefit/snap.cgi",
+    "https://commonhelp.virginia.gov/access/"
+   ],
+   "medicaid": [
+    "https://www.dmas.virginia.gov/for-applicants/applying-for-medicaid/",
+    "https://coverva.org/en/our-programs",
+    "http://www.coverva.org/",
+    "https://www.dmas.virginia.gov/"
+   ],
+   "state_tax": [
+    "https://tax.virginia.gov/"
+   ]
+  },
+  "WA": {
+   "snap": [
+    "https://www.dshs.wa.gov/esa/community-services-offices/basic-food",
+    "https://www.washingtonconnection.org"
+   ],
+   "medicaid": [
+    "http://www.hca.wa.gov/medicaid/Pages/index.aspx",
+    "https://www.hca.wa.gov/health-care-services-supports/apple-health-medicaid-coverage/eligibility",
+    "https://www.hca.wa.gov/"
+   ],
+   "state_tax": [
+    "https://dor.wa.gov/"
+   ]
+  },
+  "WV": {
+   "snap": [
+    "https://bfa.wv.gov/bfa-programs/snap",
+    "https://www.wvpath.wv.gov/"
+   ],
+   "medicaid": [
+    "https://dhhr.wv.gov/bms/Members/Apply/Pages/default.aspx",
+    "https://dhhr.wv.gov/bms/Pages/default.aspx",
+    "https://dhhr.wv.gov/"
+   ],
+   "tanf": [
+    "https://dhhr.wv.gov/bfa/programs/Pages/WV-WORKS.aspx"
+   ],
+   "state_tax": [
+    "https://tax.wv.gov/Pages/default.aspx"
+   ]
+  },
+  "WI": {
+   "snap": [
+    "https://www.dhs.wisconsin.gov/foodshare/index.htm",
+    "https://www.dhs.wisconsin.gov/forwardhealth/apply.htm"
+   ],
+   "medicaid": [
+    "https://www.dhs.wisconsin.gov/forwardhealth/apply.htm",
+    "https://www.dhs.wisconsin.gov/forwardhealth/imagency/index.htm",
+    "https://access.wisconsin.gov/access/",
+    "https://www.dhs.wisconsin.gov/"
+   ],
+   "tanf": [
+    "https://dcf.wisconsin.gov/w2/parents/w2",
+    "https://access.wisconsin.gov/"
+   ],
+   "state_tax": [
+    "https://www.revenue.wi.gov/"
+   ]
+  },
+  "WY": {
+   "snap": [
+    "http://dfsweb.wyo.gov/economic-assistance/snap",
+    "https://dfs.wyo.gov/assistance-programs/food-assistance/supplemental-nutrition-assistance-program-snap/snap-how-to-apply-and-frequently-used-forms/"
+   ],
+   "medicaid": [
+    "https://health.wyo.gov/healthcarefin/apply/",
+    "https://health.wyo.gov/healthcarefin/medicaid/programs-and-eligibility/",
+    "http://www.wesystem.wyo.gov",
+    "https://health.wyo.gov/"
+   ],
+   "tanf": [
+    "https://dfs.wyo.gov/assistance-programs/cash-assistance/"
+   ],
+   "state_tax": [
+    "http://revenue.wyo.gov/"
+   ]
+  }
+ }
+}
